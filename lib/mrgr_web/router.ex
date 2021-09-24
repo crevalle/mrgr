@@ -10,6 +10,10 @@ defmodule MrgrWeb.Router do
     plug :put_secure_browser_headers
   end
 
+  pipeline :auth do
+    # Ueberauth.plug "/auth"
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -19,6 +23,23 @@ defmodule MrgrWeb.Router do
 
     get "/", PageController, :index
   end
+
+  scope "/auth", MrgrWeb do
+    pipe_through [:browser, :auth]
+
+    # get "/sign-in", AuthController, :new
+    # post "/sign-in", AuthController, :create
+    # delete "/sign-out", AuthController, :delete
+
+    get "/github", AuthController, :request
+    get "/github/callback", AuthController, :callback
+  end
+
+  # scope "/webhooks", MrgrWeb do
+  # pipe_through :api
+
+  # get "/incoming/github", WebhookController, :github
+  # end
 
   # Other scopes may use custom stacks.
   # scope "/api", MrgrWeb do
