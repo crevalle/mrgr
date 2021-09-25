@@ -8,10 +8,7 @@ defmodule MrgrWeb.Router do
     plug :put_root_layout, {MrgrWeb.LayoutView, :root}
     plug :protect_from_forgery
     plug :put_secure_browser_headers
-  end
-
-  pipeline :auth do
-    # Ueberauth.plug "/auth"
+    plug :fetch_user
   end
 
   pipeline :api do
@@ -25,11 +22,11 @@ defmodule MrgrWeb.Router do
   end
 
   scope "/auth", MrgrWeb do
-    pipe_through [:browser, :auth]
+    pipe_through :browser
 
     # get "/sign-in", AuthController, :new
     # post "/sign-in", AuthController, :create
-    # delete "/sign-out", AuthController, :delete
+    delete "/sign-out", AuthController, :delete
 
     get "/github", AuthController, :request
     get "/github/callback", AuthController, :callback

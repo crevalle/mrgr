@@ -63,4 +63,10 @@ config :ueberauth, Ueberauth.Strategy.Github.OAuth,
   client_id: System.get_env("GITHUB_CLIENT_ID"),
   client_secret: System.get_env("GITHUB_CLIENT_SECRET")
 
+config :joken,
+  rs256: [
+    signer_alg: "RS256",
+    key_pem: System.get_env("GITHUB_PRIVATE_KEY")
+  ]
+
 import_config "#{config_env()}.exs"

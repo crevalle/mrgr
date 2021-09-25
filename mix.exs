@@ -38,6 +38,7 @@ defmodule Mrgr.MixProject do
       {:floki, ">= 0.30.0", only: :test},
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
+      {:joken, "~> 2.4"},
       {:phoenix, "~> 1.6.0-rc.0", override: true},
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_html, "~> 3.0"},
@@ -49,6 +50,7 @@ defmodule Mrgr.MixProject do
       {:swoosh, "~> 1.3"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
+      {:tentacat, "~> 2.0"},
       {:ueberauth_github, "~> 0.8"}
     ]
   end
