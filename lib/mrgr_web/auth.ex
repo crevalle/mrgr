@@ -1,7 +1,7 @@
 defmodule MrgrWeb.Auth do
   import Plug.Conn
 
-  @spec sign_in(Plug.Conn.t(), %{atom() => integer()}) :: Plug.Conn.t()
+  @spec sign_in(Plug.Conn.t(), Mrgr.Schema.User.t()) :: Plug.Conn.t()
   def sign_in(conn, %{id: id}) do
     put_session(conn, :user_id, id)
   end
@@ -26,7 +26,7 @@ defmodule MrgrWeb.Auth do
     end
   end
 
-  @spec fetch_user(Plug.Conn.t(), list()) :: Plug.Conn.t()
+  @spec require_user(Plug.Conn.t(), list()) :: Plug.Conn.t()
   def require_user(conn, _opts) do
     case conn.assigns[:current_user] do
       nil ->
