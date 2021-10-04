@@ -32,11 +32,11 @@ defmodule MrgrWeb.Router do
     get "/github/callback", AuthController, :callback
   end
 
-  # scope "/webhooks", MrgrWeb do
-  # pipe_through :api
+  scope "/webhooks", MrgrWeb do
+    pipe_through :api
 
-  # get "/incoming/github", WebhookController, :github
-  # end
+    post "/incoming/github", WebhookController, :github
+  end
 
   # Other scopes may use custom stacks.
   # scope "/api", MrgrWeb do

@@ -5,5 +5,8 @@
 
 <section class="row">
   <article class="column">
+    <%= if signed_in?(@conn) do %>
+      <a href="https://github.com/apps/get-mrgr/installations/new">Connect Github</a> 
+    <% end %>
   </article>
 </section>

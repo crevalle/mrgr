@@ -10,6 +10,8 @@ import Config
 config :mrgr,
   ecto_repos: [Mrgr.Repo]
 
+config :mrgr, Mrgr.Repo, migration_timestamps: [type: :utc_datetime]
+
 # Configures the endpoint
 config :mrgr, MrgrWeb.Endpoint,
   url: [host: "localhost"],

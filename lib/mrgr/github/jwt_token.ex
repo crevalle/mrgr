@@ -3,7 +3,6 @@ defmodule Mrgr.Github.JwtToken do
 
   def signed_jwt do
     current_timestamp = DateTime.utc_now() |> DateTime.to_unix()
-
     {github_app_id, _remainder} = System.get_env("GITHUB_APP_IDENTIFIER") |> Integer.parse()
 
     extra_claims = %{
