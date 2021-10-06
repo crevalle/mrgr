@@ -36,6 +36,9 @@ defmodule Mrgr.Github do
 
     # {:ok, installation, token}
 
+    # create memberships
+    # members = Mrgr.Installation.members(installation, token)
+    # Mrgr.Installation.add_team_members(installation, members)
     {:ok, installation}
   end
 

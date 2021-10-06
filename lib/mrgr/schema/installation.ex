@@ -20,6 +20,9 @@ defmodule Mrgr.Schema.Installation do
     has_one(:account, Mrgr.Schema.Account)
     has_many(:repositories, Mrgr.Schema.Repository)
 
+    has_many(:memberships, Mrgr.Schema.Membership)
+    has_many(:members, through: [:memberships, :member])
+
     timestamps()
   end
 
