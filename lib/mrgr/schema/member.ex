@@ -70,7 +70,7 @@ defmodule Mrgr.Schema.Member do
     user_id
   ]a
 
-  def changeset(%Mrgr.Github.User{} = user, params \\ %{}) do
+  def changeset(%Mrgr.Github.User{} = user) do
     user
     |> Map.from_struct()
     |> changeset()
