@@ -32,4 +32,4 @@ npm-debug.log
 .env
 
 # my scratch file
-requests
+requests.sh
