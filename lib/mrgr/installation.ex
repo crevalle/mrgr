@@ -1,4 +1,44 @@
 defmodule Mrgr.Installation do
+
+  def create_from_webhook(payload) do
+    repository_params = payload["repositories"]
+
+    sender = Mrgr.Github.User.new(payload["sender"])
+
+    creator = Mrgr.User.find(sender)
+
+    {:ok, installation} =
+      payload
+      |> Map.get("installation")
+      |> Map.merge(%{"creator_id" => creator.id, "repositories" => repository_params})
+      |> Mrgr.Schema.Installation.create_changeset()
+      |> Mrgr.Repo.insert()
+
+    # TODO: tokens
+    # {:ok, token} = Mrgr.Installation.create_access_token(installation)
+
+    # {:ok, installation, token}
+
+    # create memberships
+    # members = Mrgr.Installation.members(installation, token)
+    # Mrgr.Installation.add_team_members(installation, members)
+    {:ok, installation}
+  end
+
+  def delete_from_webhook(payload) do
+    external_id = payload["installation"]["id"]
+
+    Mrgr.Schema.Installation
+    |> Mrgr.Repo.get_by(external_id: external_id)
+    |> case do
+      nil ->
+        nil
+
+      installation ->
+        Mrgr.Repo.delete(installation)
+    end
+  end
+
   def find_or_create_access_token(installation) do
   end
 
@@ -58,9 +98,9 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.insert()
   end
 
-  def maybe_associate_with_user(attrs, nil), do: attrs
+  def maybe_associate_with_existing_user(attrs, nil), do: attrs
 
-  def maybe_associate_with_user(attrs, %{id: id}) do
+  def maybe_associate_with_existing_user(attrs, %{id: id}) do
     Map.put(attrs, :user_id, id)
   end
 end
