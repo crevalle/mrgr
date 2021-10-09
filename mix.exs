@@ -33,7 +33,7 @@ defmodule Mrgr.MixProject do
   # Type `mix help deps` for examples and options.
   defp deps do
     [
-      {:dialyxir, "~> 1.1"},
+      {:dialyxir, "~> 1.1", runtime: false},
       {:ecto_sql, "~> 3.6"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
       {:floki, ">= 0.30.0", only: :test},
