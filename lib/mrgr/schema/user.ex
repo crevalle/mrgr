@@ -16,6 +16,7 @@ defmodule Mrgr.Schema.User do
     field(:refresh_token, :string)
     field(:token, :string)
     field(:token_expires_at, :utc_datetime)
+    field(:token_updated_at, :utc_datetime)
 
     embeds_one :urls, Urls do
       field(:api_url, :string)
@@ -38,9 +39,6 @@ defmodule Mrgr.Schema.User do
 
   @create_params ~w[
     provider
-    token
-    refresh_token
-    token_expires_at
     birthday
     description
     email
@@ -51,6 +49,13 @@ defmodule Mrgr.Schema.User do
     name
     nickname
     phone
+  ]a
+
+  @tokens ~w[
+    token
+    refresh_token
+    token_expires_at
+    token_updated_at
   ]a
 
   @urls ~w[
@@ -72,12 +77,28 @@ defmodule Mrgr.Schema.User do
   def create_changeset(params \\ %{}) do
     %__MODULE__{}
     |> cast(params, @create_params)
+    |> tokens_changeset(params)
     |> cast_embed(:urls, with: &url_changeset/2)
   end
 
   def url_changeset(schema, params) do
     schema
     |> cast(params, @urls)
+  end
+
+  def tokens_changeset(schema, params) do
+    schema
+    |> cast(params, @tokens)
+    |> set_token_updated_at()
+    |> validate_required(@tokens)
+  end
+
+  defp set_token_updated_at(changeset) do
+    # cast/3 automatically removes microseconds.  need to explicity
+    # do this when calling put_change/3
+    # https://elixirforum.com/t/upgrading-to-ecto-3-anyway-to-easily-deal-with-usec-it-complains-with-or-without-usec/22137/7?u=desmond
+    now = DateTime.truncate(DateTime.utc_now(), :second)
+    put_change(changeset, :token_updated_at, now)
   end
 
   # provider: "github",
