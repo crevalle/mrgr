@@ -1,6 +1,6 @@
 %{
   "action" => "synchronize",
-  "after" => "55a4a07bfd6827d1d6f5d43702c93aa46e2c7872",
+  "after" => "55a4a07bfd6827d1d6f5d43702c93aa46e2c7872", # current HEAD
   "before" => "c2da236d38cfccdc004f8c0067660ece96fb1e81",
   "installation" => %{
     "id" => 19888521,

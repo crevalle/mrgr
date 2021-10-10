@@ -33,7 +33,7 @@ defmodule MrgrWeb.WebhookController do
 
     obj = fetch_object(conn.req_headers)
     action = params["action"]
-    IO.inspect("#{action} for #{obj}", label: "PROCESSING ***")
+    IO.inspect("#{obj} #{action}", label: "### WEBHOOK HANDLING ###")
 
     Mrgr.Github.Webhook.handle(obj, params)
 
