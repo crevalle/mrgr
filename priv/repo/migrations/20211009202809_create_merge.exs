@@ -5,7 +5,7 @@ defmodule Mrgr.Repo.Migrations.CreateMerge do
     create table(:merges) do
       add(:title, :text)
       add(:external_id, :integer)
-      add(:external_url, :text)
+      add(:url, :text)
 
       add(:number, :integer)
 

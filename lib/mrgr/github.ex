@@ -17,4 +17,8 @@ defmodule Mrgr.Github do
     result = parse(response)
     module.new(result)
   end
+
+  def find(schema, external_id) do
+    Mrgr.Repo.get_by(schema, external_id)
+  end
 end

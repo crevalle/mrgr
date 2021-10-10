@@ -16,7 +16,12 @@ defmodule Mrgr.Github.Webhook do
   end
 
   def handle("pull_request", %{"action" => "opened" } = payload) do
-    Mrgr.CheckRun.create(payload)
+    Mrgr.Merge.create(payload)
+    payload
+  end
+
+  def handle("pull_request", %{"action" => "reopened" } = payload) do
+    # Mrgr.Merge.reopen(payload)
     payload
   end
 
