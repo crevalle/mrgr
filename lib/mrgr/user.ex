@@ -21,7 +21,6 @@ defmodule Mrgr.User do
 
       nil ->
         {:ok, user} = create(params)
-        # user = Mrgr.User.Github.sync_organizations_and_repos(user)
         user
     end
     |> IO.inspect()
