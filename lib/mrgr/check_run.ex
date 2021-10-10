@@ -22,6 +22,7 @@ defmodule Mrgr.CheckRun do
       details_url: "https://socks.com"
     }
     Tentacat.post(path, client, data)
+    |> IO.inspect(label: "check run created response")
     # Mrgr.Github.parse_into(response, Mrgr.Github.User)
   end
 
