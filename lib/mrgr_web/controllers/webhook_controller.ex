@@ -2,9 +2,8 @@ defmodule MrgrWeb.WebhookController do
   use MrgrWeb, :controller
 
   def github(conn, params) do
-    IO.inspect(conn.req_headers, label: "REQUEST HEADERS:")
+    # IO.inspect(conn.req_headers, label: "REQUEST HEADERS:")
 
-    obj = fetch_object(conn.req_headers)
     # Request Headers
     # [
     # {"accept", "*/*"},
@@ -29,10 +28,12 @@ defmodule MrgrWeb.WebhookController do
     # {"x-request-id", "9964a276-55dc-4e56-b6db-bf0fc58cea59"},
     # {"x-request-start", "1633884050644"}
     # ]
+    #
+    # IO.inspect(params, label: "WEBHOOK ***")
 
+    obj = fetch_object(conn.req_headers)
     action = params["action"]
     IO.inspect("#{action} for #{obj}", label: "PROCESSING ***")
-    IO.inspect(params, label: "WEBHOOK ***")
 
     Mrgr.Github.Webhook.handle(obj, params)
 
