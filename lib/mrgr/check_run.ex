@@ -1,22 +1,31 @@
 defmodule Mrgr.CheckRun do
 
-  def process(%{"action" => requested, "check_suite" => data}) do
+  # def process(%{"action" => requested, "check_suite" => data}) do
 
+  # end
+  #
+  def create(payload) do
+    installation_id = payload["installation"]["id"]
+    at = Mrgr.Installation.create_access_token(%{external_id: installation_id})
+
+    head = payload["after"]
+
+    socks(at.token, head)
   end
 
-  def socks(token) do
+  def socks(token, head) do
     client = Tentacat.Client.new(%{access_token: token})
     path = "repos/crevalle/mrgr/check-runs"
     data = %{
       name: "Mrgr Checklist",
-      head_sha:  "7b59ed472bf633bb2137db1b8141b21b1448675c",
+      head_sha: head,
       details_url: "https://socks.com"
     }
     Tentacat.post(path, client, data)
     # Mrgr.Github.parse_into(response, Mrgr.Github.User)
   end
 
-  def complete(check_run_id, token) do
+  def complete(token, check_run_id) do
     client = Tentacat.Client.new(%{access_token: token})
     path = "repos/crevalle/mrgr/check-runs/#{check_run_id}"
     # Conclusion Required if you provide completed_at or a status of completed.
