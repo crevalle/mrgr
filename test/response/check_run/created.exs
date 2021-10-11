@@ -1,8 +1,6 @@
 %{
-  "action" => "requested",
-  "check_suite" => %{
-    # HEAD
-    "after" => "7b59ed472bf633bb2137db1b8141b21b1448675c",
+  "action" => "created",
+  "check_run" => %{
     "app" => %{
       "created_at" => "2021-09-23T02:24:58Z",
       "description" => "Flexible code merging tools.",
@@ -44,27 +42,104 @@
       "slug" => "mrgr-app",
       "updated_at" => "2021-10-07T15:13:55Z"
     },
-    "before" => "f52d18bc6e1445c0dd1a8aca1ab0faf18d3b032c",
-    "check_runs_url" =>
-      "https://api.github.com/repos/crevalle/mrgr/check-suites/3989526921/check-runs",
-    "conclusion" => nil,
-    "created_at" => "2021-10-07T15:34:42Z",
-    "head_branch" => "pr-bot",
-    "head_commit" => %{
-      "author" => %{"email" => "desmond@crevalle.io", "name" => "Desmond Bowe"},
-      "committer" => %{
-        "email" => "desmond@crevalle.io",
-        "name" => "Desmond Bowe"
+    "check_suite" => %{
+      "after" => "7b59ed472bf633bb2137db1b8141b21b1448675c",
+      "app" => %{
+        "created_at" => "2021-09-23T02:24:58Z",
+        "description" => "Flexible code merging tools.",
+        "events" => ["check_run", "check_suite", "create", "pull_request", "pull_request_review"],
+        "external_url" => "https://mrgr.io",
+        "html_url" => "https://github.com/apps/mrgr-app",
+        "id" => 139_973,
+        "name" => "Mrgr App",
+        "node_id" => "A_kwHOAHXuH84AAiLF",
+        "owner" => %{
+          "avatar_url" => "https://avatars.githubusercontent.com/u/7728671?v=4",
+          "events_url" => "https://api.github.com/users/crevalle/events{/privacy}",
+          "followers_url" => "https://api.github.com/users/crevalle/followers",
+          "following_url" => "https://api.github.com/users/crevalle/following{/other_user}",
+          "gists_url" => "https://api.github.com/users/crevalle/gists{/gist_id}",
+          "gravatar_id" => "",
+          "html_url" => "https://github.com/crevalle",
+          "id" => 7_728_671,
+          "login" => "crevalle",
+          "node_id" => "MDEyOk9yZ2FuaXphdGlvbjc3Mjg2NzE=",
+          "organizations_url" => "https://api.github.com/users/crevalle/orgs",
+          "received_events_url" => "https://api.github.com/users/crevalle/received_events",
+          "repos_url" => "https://api.github.com/users/crevalle/repos",
+          "site_admin" => false,
+          "starred_url" => "https://api.github.com/users/crevalle/starred{/owner}{/repo}",
+          "subscriptions_url" => "https://api.github.com/users/crevalle/subscriptions",
+          "type" => "Organization",
+          "url" => "https://api.github.com/users/crevalle"
+        },
+        "permissions" => %{
+          "administration" => "read",
+          "checks" => "write",
+          "contents" => "read",
+          "issues" => "write",
+          "members" => "read",
+          "metadata" => "read",
+          "pull_requests" => "write"
+        },
+        "slug" => "mrgr-app",
+        "updated_at" => "2021-10-07T15:13:55Z"
       },
-      "id" => "7b59ed472bf633bb2137db1b8141b21b1448675c",
-      "message" => "new sha",
-      "timestamp" => "2021-10-07T15:34:37Z",
-      "tree_id" => "fe615325998dca173972ae1574f6391f21b7769b"
+      "before" => "f52d18bc6e1445c0dd1a8aca1ab0faf18d3b032c",
+      "conclusion" => nil,
+      "created_at" => "2021-10-07T15:34:42Z",
+      "head_branch" => "pr-bot",
+      "head_sha" => "7b59ed472bf633bb2137db1b8141b21b1448675c",
+      # <----- **** SUITE ID
+      "id" => 3_989_526_921,
+      "node_id" => "CS_kwDOGGc3xc7ty1mJ",
+      "pull_requests" => [
+        %{
+          "base" => %{
+            "ref" => "master",
+            "repo" => %{
+              "id" => 409_417_669,
+              "name" => "mrgr",
+              "url" => "https://api.github.com/repos/crevalle/mrgr"
+            },
+            "sha" => "fc4c6ae9102261b8faf298ee45258e4b6c1b5676"
+          },
+          "head" => %{
+            "ref" => "pr-bot",
+            "repo" => %{
+              "id" => 409_417_669,
+              "name" => "mrgr",
+              "url" => "https://api.github.com/repos/crevalle/mrgr"
+            },
+            "sha" => "f52d18bc6e1445c0dd1a8aca1ab0faf18d3b032c"
+          },
+          "id" => 751_913_988,
+          "number" => 2,
+          "url" => "https://api.github.com/repos/crevalle/mrgr/pulls/2"
+        }
+      ],
+      "status" => "queued",
+      "updated_at" => "2021-10-07T15:34:42Z",
+      "url" => "https://api.github.com/repos/crevalle/mrgr/check-suites/3989526921"
     },
+    "completed_at" => nil,
+    "conclusion" => nil,
+    "details_url" => "https://socks.com",
+    "external_id" => "",
     "head_sha" => "7b59ed472bf633bb2137db1b8141b21b1448675c",
-    "id" => 3_989_526_921,
-    "latest_check_runs_count" => 0,
-    "node_id" => "CS_kwDOGGc3xc7ty1mJ",
+    "html_url" => "https://github.com/crevalle/mrgr/runs/3829325136",
+    # <----- **** RUN ID
+    "id" => 3_829_325_136,
+    "name" => "Mrgr Checklist",
+    "node_id" => "CR_kwDOGGc3xc7kPt1Q",
+    "output" => %{
+      "annotations_count" => 0,
+      "annotations_url" =>
+        "https://api.github.com/repos/crevalle/mrgr/check-runs/3829325136/annotations",
+      "summary" => nil,
+      "text" => nil,
+      "title" => nil
+    },
     "pull_requests" => [
       %{
         "base" => %{
@@ -90,9 +165,9 @@
         "url" => "https://api.github.com/repos/crevalle/mrgr/pulls/2"
       }
     ],
+    "started_at" => "2021-10-07T15:54:22Z",
     "status" => "queued",
-    "updated_at" => "2021-10-07T15:34:42Z",
-    "url" => "https://api.github.com/repos/crevalle/mrgr/check-suites/3989526921"
+    "url" => "https://api.github.com/repos/crevalle/mrgr/check-runs/3829325136"
   },
   "installation" => %{
     "id" => 19_888_521,

@@ -1,9 +1,10 @@
 %{
   "action" => "synchronize",
-  "after" => "55a4a07bfd6827d1d6f5d43702c93aa46e2c7872", # current HEAD
+  # current HEAD
+  "after" => "55a4a07bfd6827d1d6f5d43702c93aa46e2c7872",
   "before" => "c2da236d38cfccdc004f8c0067660ece96fb1e81",
   "installation" => %{
-    "id" => 19888521,
+    "id" => 19_888_521,
     "node_id" => "MDIzOkludGVncmF0aW9uSW5zdGFsbGF0aW9uMTk4ODg1MjE="
   },
   "number" => 2,
@@ -12,7 +13,7 @@
     "description" => "web & mobile products.  culture.  decent advice.",
     "events_url" => "https://api.github.com/orgs/crevalle/events",
     "hooks_url" => "https://api.github.com/orgs/crevalle/hooks",
-    "id" => 7728671,
+    "id" => 7_728_671,
     "issues_url" => "https://api.github.com/orgs/crevalle/issues",
     "login" => "crevalle",
     "members_url" => "https://api.github.com/orgs/crevalle/members{/member}",
@@ -25,7 +26,7 @@
     "additions" => 558,
     "title" => "provke a pr 2",
     "comments" => 1,
-    "id" => 751913988,
+    "id" => 751_913_988,
     "merged_by" => nil,
     "locked" => false,
     "number" => 2,
@@ -42,7 +43,7 @@
       "gists_url" => "https://api.github.com/users/desmondmonster/gists{/gist_id}",
       "gravatar_id" => "",
       "html_url" => "https://github.com/desmondmonster",
-      "id" => 572921,
+      "id" => 572_921,
       "login" => "desmondmonster",
       "node_id" => "MDQ6VXNlcjU3MjkyMQ==",
       "organizations_url" => "https://api.github.com/users/desmondmonster/orgs",
@@ -56,7 +57,8 @@
     },
     "body" => nil,
     "url" => "https://api.github.com/repos/crevalle/mrgr/pulls/2",
-    "statuses_url" => "https://api.github.com/repos/crevalle/mrgr/statuses/55a4a07bfd6827d1d6f5d43702c93aa46e2c7872",
+    "statuses_url" =>
+      "https://api.github.com/repos/crevalle/mrgr/statuses/55a4a07bfd6827d1d6f5d43702c93aa46e2c7872",
     "closed_at" => nil,
     "updated_at" => "2021-10-08T15:50:46Z",
     "created_at" => "2021-10-06T15:42:17Z",
@@ -107,7 +109,7 @@
       "gists_url" => "https://api.github.com/users/crevalle/gists{/gist_id}",
       "gravatar_id" => "",
       "html_url" => "https://github.com/crevalle",
-      "id" => 7728671,
+      "id" => 7_728_671,
       "login" => "crevalle",
       "node_id" => "MDEyOk9yZ2FuaXphdGlvbjc3Mjg2NzE=",
       "organizations_url" => "https://api.github.com/users/crevalle/orgs",
@@ -120,7 +122,7 @@
       "url" => "https://api.github.com/users/crevalle"
     },
     "hooks_url" => "https://api.github.com/repos/crevalle/mrgr/hooks",
-    "id" => 409417669,
+    "id" => 409_417_669,
     "teams_url" => "https://api.github.com/repos/crevalle/mrgr/teams",
     "full_name" => "crevalle/mrgr",
     "git_commits_url" => "https://api.github.com/repos/crevalle/mrgr/git/commits{/sha}",
@@ -128,10 +130,12 @@
     "downloads_url" => "https://api.github.com/repos/crevalle/mrgr/downloads",
     "stargazers_url" => "https://api.github.com/repos/crevalle/mrgr/stargazers",
     "blobs_url" => "https://api.github.com/repos/crevalle/mrgr/git/blobs{/sha}",
-    "collaborators_url" => "https://api.github.com/repos/crevalle/mrgr/collaborators{/collaborator}",
+    "collaborators_url" =>
+      "https://api.github.com/repos/crevalle/mrgr/collaborators{/collaborator}",
     "node_id" => "R_kgDOGGc3xQ",
     "watchers_count" => 0,
-    "notifications_url" => "https://api.github.com/repos/crevalle/mrgr/notifications{?since,all,participating}",
+    "notifications_url" =>
+      "https://api.github.com/repos/crevalle/mrgr/notifications{?since,all,participating}",
     "compare_url" => "https://api.github.com/repos/crevalle/mrgr/compare/{base}...{head}",
     "trees_url" => "https://api.github.com/repos/crevalle/mrgr/git/trees{/sha}",
     "clone_url" => "https://github.com/crevalle/mrgr.git",
@@ -167,7 +171,7 @@
     "gists_url" => "https://api.github.com/users/desmondmonster/gists{/gist_id}",
     "gravatar_id" => "",
     "html_url" => "https://github.com/desmondmonster",
-    "id" => 572921,
+    "id" => 572_921,
     "login" => "desmondmonster",
     "node_id" => "MDQ6VXNlcjU3MjkyMQ==",
     "organizations_url" => "https://api.github.com/users/desmondmonster/orgs",

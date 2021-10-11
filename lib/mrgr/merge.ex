@@ -6,13 +6,15 @@ defmodule Mrgr.Merge do
     user_id = payload["pull_request"]["user"]["id"]
     author = Mrgr.Github.find(Mrgr.Schema.Member, user_id)
 
+    IO.inspect(repo, label: "repo")
+    IO.inspect(author, label: "author")
+
     params =
       payload
       |> Map.get("pull_request")
       |> Map.put("repository_id", repo.id)
       |> Map.put("author_id", author.id)
       |> Map.put("opened_at", payload["pull_request"]["created_at"])
-
 
     params
     |> Mrgr.Schema.Merge.create_changeset()

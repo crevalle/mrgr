@@ -1,5 +1,4 @@
 defmodule Mrgr.Installation do
-
   def create_from_webhook(payload) do
     repository_params = payload["repositories"]
 

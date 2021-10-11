@@ -24,6 +24,5 @@ defmodule Mrgr.Repo.Migrations.CreateMerge do
     end
 
     create index(:merges, :repository_id)
-
   end
 end

@@ -2,7 +2,7 @@ defmodule MrgrWeb.WebhookController do
   use MrgrWeb, :controller
 
   def github(conn, params) do
-    # IO.inspect(conn.req_headers, label: "REQUEST HEADERS:")
+    IO.inspect(conn.req_headers, label: "REQUEST HEADERS:")
 
     # Request Headers
     # [

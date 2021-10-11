@@ -15,12 +15,12 @@ defmodule Mrgr.Github.Webhook do
     payload
   end
 
-  def handle("pull_request", %{"action" => "opened" } = payload) do
+  def handle("pull_request", %{"action" => "opened"} = payload) do
     Mrgr.Merge.create(payload)
     payload
   end
 
-  def handle("pull_request", %{"action" => "reopened" } = payload) do
+  def handle("pull_request", %{"action" => "reopened"} = payload) do
     # Mrgr.Merge.reopen(payload)
     payload
   end
@@ -48,5 +48,4 @@ defmodule Mrgr.Github.Webhook do
 
   # suspended?
   def handle(_obj, payload), do: payload
-
 end

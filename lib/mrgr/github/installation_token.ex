@@ -1,6 +1,5 @@
 # sample code taken from https://dev.to/etiennedepaulis/github-app-authentication-strategies-with-elixir-4e6
 
-
 # defmodule Github.InstallationToken do
 # import Ecto.Query, warn: false
 # alias MyApplication.Repo
