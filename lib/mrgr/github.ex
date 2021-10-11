@@ -19,6 +19,6 @@ defmodule Mrgr.Github do
   end
 
   def find(schema, external_id) do
-    Mrgr.Repo.get_by(schema, external_id)
+    Mrgr.Repo.get_by(schema, external_id: external_id)
   end
 end
