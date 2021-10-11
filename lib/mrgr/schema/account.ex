@@ -52,6 +52,7 @@ defmodule Mrgr.Schema.Account do
   def changeset(schema, params) do
     schema
     |> cast(params, @allowed)
+    |> foreign_key_constraint(:installation_id)
     |> put_external_id()
     |> put_data_map()
   end

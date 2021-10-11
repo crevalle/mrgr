@@ -46,7 +46,7 @@ defmodule MrgrWeb.WebhookController do
 
   defp write_test_file(obj, action, params) do
     path = "test/webhook/#{obj}/"
-    filename = "#{path}/#{action}.exs"
+    filename = "#{path}/#{action}.json"
 
     File.mkdir_p(path)
 

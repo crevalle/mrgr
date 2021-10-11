@@ -14,13 +14,16 @@ defmodule Mrgr.Installation do
       |> Mrgr.Repo.insert()
 
     # TODO: tokens
-    # {:ok, token} = Mrgr.Installation.create_access_token(installation)
+    %{token: token} = Mrgr.Installation.create_access_token(installation)
 
     # {:ok, installation, token}
 
     # create memberships
-    # members = Mrgr.Installation.members(installation, token)
-    # Mrgr.Installation.add_team_members(installation, members)
+    members = Mrgr.Installation.fetch_members(installation, token)
+    Mrgr.Installation.add_team_members(installation, members)
+
+    # TODO repos
+
     {:ok, installation}
   end
 

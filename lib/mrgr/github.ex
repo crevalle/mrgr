@@ -9,13 +9,20 @@ defmodule Mrgr.Github do
 
   def parse({_code, data, _response}), do: data
 
+  def parse_into({_code, data, _response}, module) when is_list(data) do
+    Enum.map(data, &parse_into(&1, module))
+  end
+
+  def parse_into({_code, data, _response}, module) do
+    parse_into(data, module)
+  end
+
   def parse_into(response, module) when is_list(response) do
     Enum.map(response, &parse_into(&1, module))
   end
 
-  def parse_into(response, module) do
-    result = parse(response)
-    module.new(result)
+  def parse_into(data, module) do
+    module.new(data)
   end
 
   def find(schema, external_id) do
