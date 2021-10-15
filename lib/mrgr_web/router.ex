@@ -11,6 +11,10 @@ defmodule MrgrWeb.Router do
     plug :fetch_user
   end
 
+  pipeline :authenticate do
+    plug :require_user
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -30,6 +34,12 @@ defmodule MrgrWeb.Router do
 
     get "/github", AuthController, :request
     get "/github/callback", AuthController, :callback
+  end
+
+  scope "/", MrgrWeb do
+    pipe_through [:browser, :authenticate]
+
+    resources "/repositories", RepositoryController, only: [:index]
   end
 
   scope "/webhooks", MrgrWeb do

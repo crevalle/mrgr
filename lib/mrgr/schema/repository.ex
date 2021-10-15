@@ -10,6 +10,8 @@ defmodule Mrgr.Schema.Repository do
     field(:private, :boolean)
 
     belongs_to(:installation, Mrgr.Schema.Installation)
+    has_many(:members, through: [:installation, :member])
+    has_many(:users, through: [:installation, :users])
 
     timestamps()
   end

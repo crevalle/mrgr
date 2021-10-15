@@ -1,5 +1,6 @@
 defmodule Mrgr.User do
   alias Mrgr.Schema.User, as: Schema
+  alias Mrgr.User.Query, as: Query
 
   @spec find(Ecto.Schema.t() | integer()) :: Schema.t() | nil
   def find(%Mrgr.Github.User{} = user) do
@@ -42,5 +43,22 @@ defmodule Mrgr.User do
     user
     |> Schema.tokens_changeset(params)
     |> Mrgr.Repo.update()
+  end
+
+  def repos(user) do
+    user
+    |> Query.repos()
+    |> Mrgr.Repo.all()
+  end
+
+  defmodule Query do
+    use Mrgr.Query
+
+    def repos(%{id: user_id}) do
+      from(q in Mrgr.Schema.Repository,
+        join: u in assoc(q, :users),
+        where: u.id == ^user_id
+      )
+    end
   end
 end
