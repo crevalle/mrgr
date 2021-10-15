@@ -1,4 +1,4 @@
-defmodule MrgrWeb.Auth do
+defmodule MrgrWeb.Plug.Auth do
   import Plug.Conn
 
   @spec sign_in(Plug.Conn.t(), Mrgr.Schema.User.t()) :: Plug.Conn.t()
