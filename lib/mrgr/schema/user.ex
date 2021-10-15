@@ -23,6 +23,8 @@ defmodule Mrgr.Schema.User do
     has_many(:installations, through: [:memberships, :installation])
     has_many(:repositories, through: [:installations, :repositories])
 
+    belongs_to(:current_installation, Mrgr.Schema.Installation)
+
     embeds_one :urls, Urls do
       field(:api_url, :string)
       field(:avatar_url, :string)
@@ -96,6 +98,12 @@ defmodule Mrgr.Schema.User do
     |> cast(params, @tokens)
     |> set_token_updated_at()
     |> validate_required(@tokens)
+  end
+
+  def current_installation_changeset(schema, params) do
+    schema
+    |> cast(params, [:current_installation_id])
+    |> foreign_key_constraint(:current_installation_id)
   end
 
   defp set_token_updated_at(changeset) do

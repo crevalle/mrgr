@@ -39,6 +39,27 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.insert()
   end
 
+  def set_current_installation(user, nil) do
+    # first one is "current".  assume we have only one
+    [current | _rest] = installations(user)
+
+    set_current_installation(user, current)
+  end
+
+  def set_current_installation(user, installation) do
+    params = %{installation_id: installation.id}
+
+    user
+    |> Schema.current_installation_changeset(params)
+    |> Mrgr.Repo.update()
+  end
+
+  def installations(user) do
+    user
+    |> Query.installations()
+    |> Mrgr.Repo.all()
+  end
+
   def refresh_tokens(user, params) do
     user
     |> Schema.tokens_changeset(params)
@@ -56,6 +77,15 @@ defmodule Mrgr.User do
 
     def repos(%{id: user_id}) do
       from(q in Mrgr.Schema.Repository,
+        join: m in assoc(q, :merges),
+        join: u in assoc(q, :users),
+        preload: [merges: m],
+        where: u.id == ^user_id
+      )
+    end
+
+    def installations(%{id: user_id}) do
+      from(q in Mrgr.Schema.Installation,
         join: u in assoc(q, :users),
         where: u.id == ^user_id
       )
