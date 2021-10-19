@@ -54,7 +54,7 @@ defmodule Mrgr.User do
   end
 
   def set_current_installation(user, installation) do
-    params = %{installation_id: installation.id}
+    params = %{current_installation_id: installation.id}
 
     user
     |> Schema.current_installation_changeset(params)
@@ -95,6 +95,14 @@ defmodule Mrgr.User do
       from(q in Mrgr.Schema.Installation,
         join: u in assoc(q, :users),
         where: u.id == ^user_id
+      )
+    end
+
+    def with_current_installation(query) do
+      from(q in query,
+        left_join: c in assoc(q, :current_installation),
+        join: a in assoc(c, :account),
+        preload: [current_installation: {c, account: a}]
       )
     end
   end

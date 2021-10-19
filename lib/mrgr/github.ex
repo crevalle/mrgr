@@ -28,4 +28,14 @@ defmodule Mrgr.Github do
   def find(schema, external_id) do
     Mrgr.Repo.get_by(schema, external_id: external_id)
   end
+
+  def write_json(data, location) do
+    File.write(location, Jason.encode!(data), [:binary])
+    data
+  end
+
+  def load_json(location) do
+    {:ok, data} = File.read(location)
+    Jason.decode!(data)
+  end
 end
