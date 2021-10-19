@@ -19,10 +19,11 @@ defmodule Mrgr.Installation do
     # {:ok, installation, token}
 
     # create memberships
-    members = Mrgr.Installation.fetch_members(installation, token)
-    Mrgr.Installation.add_team_members(installation, members)
+    members = fetch_members(installation, client)
+    add_team_members(installation, members)
 
     # TODO repos
+    Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories, client)
 
     {:ok, installation}
   end

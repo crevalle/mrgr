@@ -11,6 +11,13 @@ defmodule Mrgr.User do
     Mrgr.Repo.get(Schema, id)
   end
 
+  def find_with_current_installation(id) do
+    Schema
+    |> Query.by_id(id)
+    |> Query.with_current_installation()
+    |> Mrgr.Repo.one()
+  end
+
   @spec find_or_create_from_github(Ueberauth.Auth.t()) :: Schema.t()
   def find_or_create_from_github(auth) do
     params = Mrgr.User.Github.generate_params(auth)
@@ -77,7 +84,7 @@ defmodule Mrgr.User do
 
     def repos(%{id: user_id}) do
       from(q in Mrgr.Schema.Repository,
-        join: m in assoc(q, :merges),
+        left_join: m in assoc(q, :merges),
         join: u in assoc(q, :users),
         preload: [merges: m],
         where: u.id == ^user_id

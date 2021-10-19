@@ -22,15 +22,35 @@ defmodule Mrgr.Github.User do
     field(:url, :string)
   end
 
-  def new(params) do
-    keys =
-      %__MODULE__{}
-      |> Map.from_struct()
-      |> Map.keys()
+  @fields ~w[
+    avatar_url
+    events_url
+    followers_url
+    following_url
+    gists_url
+    gravatar_id
+    html_url
+    id
+    login
+    node_id
+    organizations_url
+    received_events_url
+    repos_url
+    site_admin
+    starred_url
+    subscriptions_url
+    type
+    url
+  ]a
 
+  def new(params) do
     %__MODULE__{}
-    |> cast(params, keys)
+    |> changeset(params)
     |> apply_changes()
+  end
+
+  def changeset(schema, params) do
+    cast(schema, params, @fields)
   end
 
   # %{

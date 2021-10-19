@@ -40,6 +40,7 @@ defmodule MrgrWeb.Router do
     pipe_through [:browser, :authenticate]
 
     resources "/repositories", RepositoryController, only: [:index]
+    resources "/pending-merges", PendingMergeController, only: [:index]
   end
 
   scope "/webhooks", MrgrWeb do

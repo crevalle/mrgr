@@ -9,6 +9,8 @@ defmodule Mrgr.Schema.Merge do
     field(:title, :string)
     field(:url, :string)
 
+    embeds_one(:user, Mrgr.Github.User)
+
     belongs_to(:repository, Mrgr.Schema.Repository)
     belongs_to(:author, Mrgr.Schema.Member)
 
@@ -25,11 +27,13 @@ defmodule Mrgr.Schema.Merge do
     url
   ]a
 
-  def create_changeset(params) do
-    %__MODULE__{}
+  def create_changeset(schema, params) do
+    schema
     |> cast(params, @create_fields)
+    |> cast_embed(:user)
     |> put_open_status()
     |> put_external_id()
+    |> put_opened_at()
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:author_id)
   end
@@ -40,6 +44,17 @@ defmodule Mrgr.Schema.Merge do
         put_change(changeset, :status, "open")
 
       _status ->
+        changeset
+    end
+  end
+
+  def put_opened_at(changeset) do
+    case get_change(changeset, :opened_at) do
+      nil ->
+        opened = changeset.params.created_at
+        put_change(changeset, :opened_at, opened)
+
+      _opened ->
         changeset
     end
   end
