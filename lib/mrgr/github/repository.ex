@@ -9,18 +9,18 @@ defmodule Mrgr.Github.Repository do
     field(:private, :boolean)
   end
 
-  def new(params) do
-    keys =
-      %__MODULE__{}
-      |> Map.from_struct()
-      |> Map.keys()
+  # def new(params) do
+  # keys =
+  # %__MODULE__{}
+  # |> Map.from_struct()
+  # |> Map.keys()
 
-    %__MODULE__{}
-    |> cast(params, keys)
-    |> apply_changes()
+  # %__MODULE__{}
+  # |> cast(params, keys)
+  # |> apply_changes()
 
-    params
-  end
+  # params
+  # end
 
   # field(:full_name" => "crevalle/mother_brain",
   # field(:id" => 66312740,

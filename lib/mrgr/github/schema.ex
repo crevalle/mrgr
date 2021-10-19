@@ -5,6 +5,7 @@ defmodule Mrgr.Github.Schema do
       import Ecto.Changeset
 
       @type t :: %__MODULE__{}
+      # @primary_key {:uuid, :binary_id, []}
       @primary_key false
     end
   end

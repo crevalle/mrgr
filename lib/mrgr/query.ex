@@ -13,6 +13,12 @@ defmodule Mrgr.Query do
           where: q.id == ^id
         )
       end
+
+      def by_external_id(queryable, id) do
+        from(q in queryable,
+          where: q.external_id == ^id
+        )
+      end
     end
   end
 end

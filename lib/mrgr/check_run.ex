@@ -4,16 +4,17 @@ defmodule Mrgr.CheckRun do
   # end
   #
   def create(payload) do
-    installation_id = payload["installation"]["id"]
-    at = Mrgr.Installation.create_access_token(%{external_id: installation_id})
+    external_id = payload["installation"]["id"]
+    installation = Mrgr.Installation.find_by_external_id(external_id)
+
+    client = Mrgr.Github.Client.new(installation)
 
     head = payload["after"]
 
-    socks(at.token, head)
+    socks(client, head)
   end
 
-  def socks(token, head) do
-    client = Tentacat.Client.new(%{access_token: token})
+  def socks(client, head) do
     path = "repos/crevalle/mrgr/check-runs"
 
     data = %{
@@ -30,8 +31,7 @@ defmodule Mrgr.CheckRun do
     # Mrgr.Github.parse_into(response, Mrgr.Github.User)
   end
 
-  def complete(token, check_run_id) do
-    client = Tentacat.Client.new(%{access_token: token})
+  def complete(client, check_run_id) do
     path = "repos/crevalle/mrgr/check-runs/#{check_run_id}"
     # Conclusion Required if you provide completed_at or a status of completed.
     # The final conclusion of the check.

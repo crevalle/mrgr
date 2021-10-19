@@ -15,6 +15,8 @@ defmodule Mrgr.Schema.Installation do
     field(:repository_selection, :string)
     field(:target_id, :integer)
     field(:target_type, :string)
+    field(:token, :string)
+    field(:token_expires_at, :utc_datetime)
 
     belongs_to(:creator, Mrgr.Schema.User)
     has_one(:account, Mrgr.Schema.Account)
@@ -52,6 +54,17 @@ defmodule Mrgr.Schema.Installation do
     |> foreign_key_constraint(:creator_id)
     |> put_external_id()
     |> put_data_map()
+  end
+
+  @tokens ~w[
+    token
+    token_expires_at
+  ]a
+
+  def tokens_changeset(schema, params) do
+    schema
+    |> cast(params, @tokens)
+    |> validate_required(@tokens)
   end
 
   # "access_tokens_url" => "https://api.github.com/app/installations/19872469/access_tokens",
