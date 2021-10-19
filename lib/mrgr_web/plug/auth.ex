@@ -34,6 +34,11 @@ defmodule MrgrWeb.Plug.Auth do
         |> redirect_unsigned_in_user()
         |> halt()
 
+      %{current_installation_id: nil} ->
+        conn
+        |> redirect_connect_github()
+        |> halt()
+
       _user ->
         conn
     end
@@ -41,7 +46,7 @@ defmodule MrgrWeb.Plug.Auth do
 
   @spec find_user(integer) :: Mrgr.Schema.User.t() | nil
   def find_user(id) do
-    Mrgr.User.find(id)
+    Mrgr.User.find_with_current_installation(id)
   end
 
   @spec redirect_to_original_url_or(Plug.Conn.t(), String.t()) :: Plug.Conn.t()
@@ -61,6 +66,13 @@ defmodule MrgrWeb.Plug.Auth do
     conn
     |> put_session(:headed_to, conn.request_path)
     |> Phoenix.Controller.put_flash(:info, "Please sign in to check that out!")
+    |> Phoenix.Controller.redirect(to: "/")
+  end
+
+  defp redirect_connect_github(conn) do
+    conn
+    |> put_session(:headed_to, conn.request_path)
+    |> Phoenix.Controller.put_flash(:info, "Please connect Github to continue")
     |> Phoenix.Controller.redirect(to: "/")
   end
 end

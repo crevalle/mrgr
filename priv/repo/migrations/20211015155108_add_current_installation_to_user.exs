@@ -5,6 +5,5 @@ defmodule Mrgr.Repo.Migrations.AddCurrentInstallationToUser do
     alter table(:users) do
       add(:current_installation_id, references(:installations))
     end
-
   end
 end

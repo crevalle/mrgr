@@ -14,7 +14,7 @@
       <section class="container">
         <nav>
             <%= if signed_in?(@conn) do %>
-              <%= "@#{@conn.assigns.current_user.nickname}" %>
+              <%= "@#{@conn.assigns.current_user.nickname}" %> <%= current_account(@conn.assigns.current_user) %>
               <%= link "Repos", to: Routes.repository_path(@conn, :index) %>
               <%= link "Sign Out", to: Routes.auth_path(@conn, :delete), method: :delete %>
             <% else %>
