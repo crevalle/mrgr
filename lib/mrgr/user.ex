@@ -24,8 +24,7 @@ defmodule Mrgr.User do
 
     case find_by_email(params.email) do
       %Schema{} = user ->
-        {:ok, user} = refresh_tokens(user, params)
-        user
+        set_tokens(user, params)
 
       nil ->
         {:ok, user} = create(params)
@@ -67,10 +66,10 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.all()
   end
 
-  def refresh_tokens(user, params) do
+  def set_tokens(user, params) do
     user
     |> Schema.tokens_changeset(params)
-    |> Mrgr.Repo.update()
+    |> Mrgr.Repo.update!()
   end
 
   def repos(user) do

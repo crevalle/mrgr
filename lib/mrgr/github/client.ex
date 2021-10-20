@@ -1,16 +1,16 @@
 defmodule Mrgr.Github.Client do
   alias Mrgr.Schema.{Installation, User}
 
-  @spec new(Installation.t()) :: Tentacat.Client.t()
-  def new(%Installation{} = install) do
-    case token_expired?(install) do
+  @spec new(Installation.t() | User.t()) :: Tentacat.Client.t()
+  def new(actor) do
+    case token_expired?(actor) do
       true ->
-        install
+        actor
         |> refresh_token!()
         |> clientize()
 
       false ->
-        clientize(install)
+        clientize(actor)
     end
   end
 
@@ -21,22 +21,42 @@ defmodule Mrgr.Github.Client do
     Mrgr.DateMath.in_the_past?(expires)
   end
 
-  def refresh_token!(%Installation{} = install) do
-    at = request_new_token(install)
+  def refresh_token!(%User{} = user) do
+    token = request_new_token(user)
 
-    Mrgr.Installation.set_tokens(install, at)
+    Mrgr.User.set_tokens(user, token)
+  end
+
+  def refresh_token!(%Installation{} = install) do
+    token = request_new_token(install)
+
+    Mrgr.Installation.set_tokens(install, token)
+  end
+
+  def request_new_token(%User{} = user) do
+    opts = [
+      params: %{"refresh_token" => user.refresh_token},
+      strategy: OAuth2.Strategy.Refresh
+    ]
+
+    {:ok, %{token: token}} =
+      opts
+      |> Ueberauth.Strategy.Github.OAuth.client()
+      |> OAuth2.Client.get_token()
+
+    Mrgr.User.Github.token_params(token)
   end
 
   def request_new_token(%{external_id: id} = _installation) do
-    token = Mrgr.Github.JwtToken.signed_jwt()
+    jwt = Mrgr.Github.JwtToken.signed_jwt()
 
-    client = Tentacat.Client.new(%{jwt: token})
+    client = Tentacat.Client.new(%{jwt: jwt})
     response = Tentacat.App.Installations.token(client, id)
     Mrgr.Github.parse_into(response, Mrgr.Github.AccessToken)
   end
 
   # assumes token is fresh!
-  def clientize(%Installation{token: token}) do
+  def clientize(%{token: token}) do
     Tentacat.Client.new(%{access_token: token})
   end
 end
