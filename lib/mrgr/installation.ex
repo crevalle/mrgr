@@ -5,9 +5,11 @@ defmodule Mrgr.Installation do
   def create_from_webhook(payload) do
     repository_params = payload["repositories"]
 
-    sender = Mrgr.Github.User.new(payload["sender"])
-
-    creator = Mrgr.User.find(sender)
+    creator =
+      payload
+      |> Map.get("sender")
+      |> Mrgr.Github.User.new()
+      |> Mrgr.User.find()
 
     {:ok, installation} =
       payload
@@ -15,6 +17,8 @@ defmodule Mrgr.Installation do
       |> Map.merge(%{"creator_id" => creator.id, "repositories" => repository_params})
       |> Mrgr.Schema.Installation.create_changeset()
       |> Mrgr.Repo.insert()
+
+    Mrgr.User.set_current_installation(creator, installation)
 
     client = Mrgr.Github.Client.new(installation)
 
@@ -41,6 +45,15 @@ defmodule Mrgr.Installation do
       installation ->
         Mrgr.Repo.delete(installation)
     end
+  end
+
+  def set_tokens(install, %Mrgr.Github.AccessToken{} = token) do
+    params = %{
+      token_expires_at: token.expires_at,
+      token: token.token
+    }
+
+    set_tokens(install, params)
   end
 
   def set_tokens(install, params) do
