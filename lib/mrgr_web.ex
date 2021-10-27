@@ -91,6 +91,8 @@ defmodule MrgrWeb do
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
 
+      import MrgrWeb.Formatter
+
       import MrgrWeb.ErrorHelpers
       import MrgrWeb.Gettext
       alias MrgrWeb.Router.Helpers, as: Routes
