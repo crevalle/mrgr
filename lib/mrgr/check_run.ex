@@ -24,7 +24,6 @@ defmodule Mrgr.CheckRun do
     }
 
     Tentacat.post(path, client, data)
-    |> IO.inspect(label: "check run created response")
 
     # associate check run with PM
 
