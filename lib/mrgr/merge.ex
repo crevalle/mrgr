@@ -1,7 +1,7 @@
 defmodule Mrgr.Merge do
   alias Mrgr.Merge.Query
 
-  def create(payload) do
+  def create_from_webhook(payload) do
     repository_id = payload["repository"]["id"]
     repo = Mrgr.Github.find(Mrgr.Schema.Repository, repository_id)
 
