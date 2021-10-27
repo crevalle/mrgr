@@ -7,4 +7,5 @@ defmodule MrgrWeb.LayoutView do
 
   def current_account(%{current_installation: %{account: %{login: login}}}), do: " - #{login}"
   def current_account(_), do: ""
+
 end

@@ -5,10 +5,8 @@ defmodule Mrgr.Repository do
   def fetch_and_store_open_merges!(repos, client) when is_list(repos) do
     repos
     |> Enum.map(fn r ->
-      IO.inspect(r, label: "REPO")
       prs = fetch_open_merges(r, client)
 
-      IO.inspect(prs, label: "PRS")
       create_merges_from_data(r, prs)
     end)
     |> Enum.reject(&is_nil/1)
