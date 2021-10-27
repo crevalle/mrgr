@@ -18,9 +18,26 @@ defmodule Mrgr.Merge do
       |> Map.put("author_id", author.id)
       |> Map.put("opened_at", payload["pull_request"]["created_at"])
 
+    {:ok, merge} = Mrgr.Schema.Merge
+                   |> Mrgr.Schema.Merge.create_changeset(params)
+                   |> Mrgr.Repo.insert()
+
+    # set_head(merge, params)
+  end
+
+  def synchronize(webhook) do
+    external_id = webhook["pull_request"]["id"]
+    merge = find_by_external_id(external_id)
+
+    merge
+    |> Mrgr.Schema.Merge.synchronize_changeset(webhook)
+    |> Mrgr.Repo.update()
+  end
+
+  def find_by_external_id(id) do
     Mrgr.Schema.Merge
-    |> Mrgr.Schema.Merge.create_changeset(params)
-    |> Mrgr.Repo.insert()
+    |> Query.by_external_id(id)
+    |> Mrgr.Repo.one()
   end
 
   def pending_merges(%{current_installation_id: id}) do
@@ -28,6 +45,7 @@ defmodule Mrgr.Merge do
     |> Query.for_installation(id)
     |> Query.with_author()
     |> Query.open()
+    |> Query.order_by_priority()
     |> Mrgr.Repo.all()
   end
 
@@ -53,6 +71,13 @@ defmodule Mrgr.Merge do
     def open(query) do
       from(q in query,
         where: q.status == "open"
+      )
+    end
+
+    # for now, opened_at
+    def order_by_priority(query) do
+      from(q in query,
+        order_by: [desc: q.opened_at]
       )
     end
   end
