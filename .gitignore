@@ -33,3 +33,6 @@ npm-debug.log
 
 # my scratch file
 requests.sh
+
+/test/response/
+/test/webhook/

@@ -28,9 +28,9 @@
   },
   "body":null,
   "url":"https://api.github.com/repos/crevalle/mrgr/pulls/8",
-  "statuses_url":"https://api.github.com/repos/crevalle/mrgr/statuses/e50caac1e0dfcc0e910d65f547fb2248d940d00d",
+  "statuses_url":"https://api.github.com/repos/crevalle/mrgr/statuses/10d7cb29f44cce41d12b3e9f0ecd6b0213de46b1",
   "closed_at":null,
-  "updated_at":"2021-10-15T16:10:46Z",
+  "updated_at":"2021-10-20T01:41:49Z",
   "created_at":"2021-10-10T18:18:18Z",
   "html_url":"https://github.com/crevalle/mrgr/pull/8",
   "requested_reviewers":[],
@@ -44,7 +44,7 @@
   "milestone":null,
   "draft":false,
   "auto_merge":null,
-  "merge_commit_sha":"91a04e71f5ee36ebd55a3830382cbaa48e077b9f",
+  "merge_commit_sha":"dcb17b0008e80201f138a9017abb82e3120747a0",
   "issue_url":"https://api.github.com/repos/crevalle/mrgr/issues/8",
   "base":{
     "label":"crevalle:master",
@@ -120,8 +120,8 @@
       "forks_url":"https://api.github.com/repos/crevalle/mrgr/forks",
       "tags_url":"https://api.github.com/repos/crevalle/mrgr/tags",
       "open_issues":2,
-      "size":127,
-      "pushed_at":"2021-10-15T16:10:47Z",
+      "size":153,
+      "pushed_at":"2021-10-20T01:41:49Z",
       "issues_url":"https://api.github.com/repos/crevalle/mrgr/issues{/number}",
       "homepage":null,
       "private":true,
@@ -246,8 +246,8 @@
     "forks_url":"https://api.github.com/repos/crevalle/mrgr/forks",
     "tags_url":"https://api.github.com/repos/crevalle/mrgr/tags",
     "open_issues":2,
-    "size":127,
-    "pushed_at":"2021-10-15T16:10:47Z",
+    "size":153,
+    "pushed_at":"2021-10-20T01:41:49Z",
     "issues_url":"https://api.github.com/repos/crevalle/mrgr/issues{/number}",
     "homepage":null,
     "private":true,
@@ -275,7 +275,7 @@
     "contents_url":"https://api.github.com/repos/crevalle/mrgr/contents/{+path}",
     "watchers":0
 },
-"sha":"e50caac1e0dfcc0e910d65f547fb2248d940d00d",
+"sha":"10d7cb29f44cce41d12b3e9f0ecd6b0213de46b1",
 "user":{
   "avatar_url":"https://avatars.githubusercontent.com/u/7728671?v=4",
   "events_url":"https://api.github.com/users/crevalle/events{/privacy}",
@@ -320,7 +320,7 @@
     "href":"https://api.github.com/repos/crevalle/mrgr/pulls/8"
   },
   "statuses":{
-    "href":"https://api.github.com/repos/crevalle/mrgr/statuses/e50caac1e0dfcc0e910d65f547fb2248d940d00d"}
+    "href":"https://api.github.com/repos/crevalle/mrgr/statuses/10d7cb29f44cce41d12b3e9f0ecd6b0213de46b1"}
 },
 "labels":[],
 "state":"open"}]
