@@ -1,0 +1,15 @@
+<h2>Your Repos</h2>
+
+
+<table>
+  <th>Name</th>
+  <th>Full Name</th>
+  <th>Private?</th>
+  <%= for repo <- @repos do %>
+    <tr>
+      <td><%= repo.name %></td>
+      <td><%= repo.full_name %></td>
+      <td><%= repo.private %></td>
+    </tr>
+  <% end %>
+</table>

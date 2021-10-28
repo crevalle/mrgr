@@ -3,8 +3,8 @@ defmodule Mrgr.Repo.Migrations.Membership do
 
   def change do
     create table(:memberships) do
-      add(:member_id, references(:members), on_delete: :delete_all)
-      add(:installation_id, references(:installations), on_delete: :delete_all)
+      add(:member_id, references(:members, on_delete: :delete_all))
+      add(:installation_id, references(:installations, on_delete: :delete_all))
       add(:active, :boolean, default: true)
 
       timestamps()

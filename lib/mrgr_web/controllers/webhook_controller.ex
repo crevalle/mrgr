@@ -2,7 +2,7 @@ defmodule MrgrWeb.WebhookController do
   use MrgrWeb, :controller
 
   def github(conn, params) do
-    # IO.inspect(conn.req_headers, label: "REQUEST HEADERS:")
+    IO.inspect(conn.req_headers, label: "REQUEST HEADERS:")
 
     # Request Headers
     # [
@@ -35,11 +35,22 @@ defmodule MrgrWeb.WebhookController do
     action = params["action"]
     IO.inspect("#{obj} #{action}", label: "### WEBHOOK HANDLING ###")
 
+    write_test_file(obj, action, params)
+
     Mrgr.Github.Webhook.handle(obj, params)
 
     conn
     |> put_status(200)
     |> json(%{yo: "momma"})
+  end
+
+  defp write_test_file(obj, action, params) do
+    path = "test/webhook/#{obj}/"
+    filename = "#{path}/#{action}.json"
+
+    File.mkdir_p(path)
+
+    File.write(filename, Jason.encode!(params), [:binary])
   end
 
   def fetch_object(headers) do

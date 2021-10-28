@@ -1,11 +1,15 @@
 defmodule Mrgr.Installation do
+  alias Mrgr.Schema.Installation, as: Schema
+  alias Mrgr.Installation.Query
 
   def create_from_webhook(payload) do
     repository_params = payload["repositories"]
 
-    sender = Mrgr.Github.User.new(payload["sender"])
-
-    creator = Mrgr.User.find(sender)
+    creator =
+      payload
+      |> Map.get("sender")
+      |> Mrgr.Github.User.new()
+      |> Mrgr.User.find()
 
     {:ok, installation} =
       payload
@@ -14,14 +18,18 @@ defmodule Mrgr.Installation do
       |> Mrgr.Schema.Installation.create_changeset()
       |> Mrgr.Repo.insert()
 
-    # TODO: tokens
-    # {:ok, token} = Mrgr.Installation.create_access_token(installation)
+    Mrgr.User.set_current_installation(creator, installation)
 
-    # {:ok, installation, token}
+    client = Mrgr.Github.Client.new(installation)
 
     # create memberships
-    # members = Mrgr.Installation.members(installation, token)
-    # Mrgr.Installation.add_team_members(installation, members)
+    members = fetch_members(installation, client)
+    add_team_members(installation, members)
+
+    IO.inspect(installation, label: " ***INSTALL")
+    # TODO repos
+    Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories, client)
+
     {:ok, installation}
   end
 
@@ -39,23 +47,26 @@ defmodule Mrgr.Installation do
     end
   end
 
-  def find_or_create_access_token(installation) do
+  def set_tokens(install, %Mrgr.Github.AccessToken{} = token) do
+    params = %{
+      token_expires_at: token.expires_at,
+      token: token.token
+    }
+
+    set_tokens(install, params)
   end
 
-  def create_access_token(%{external_id: id} = _installation) do
-    token = Mrgr.Github.JwtToken.signed_jwt()
-
-    client = Tentacat.Client.new(%{jwt: token})
-    response = Tentacat.App.Installations.token(client, id)
-    Mrgr.Github.parse_into(response, Mrgr.Github.AccessToken)
+  def set_tokens(install, params) do
+    install
+    |> Schema.tokens_changeset(params)
+    |> Mrgr.Repo.update!()
   end
 
   # assumes account has been preloaded
   # and install access token has been generated
   # later, find or create a token ..?
   # should we pass an account in, rather than an install?  what's the controlling entity?
-  def fetch_members(installation, token) do
-    client = Tentacat.Client.new(%{access_token: token})
+  def fetch_members(installation, client) do
     response = Tentacat.Organizations.Members.list(client, installation.account.login)
     Mrgr.Github.parse_into(response, Mrgr.Github.User)
   end
@@ -102,5 +113,24 @@ defmodule Mrgr.Installation do
 
   def maybe_associate_with_existing_user(attrs, %{id: id}) do
     Map.put(attrs, :user_id, id)
+  end
+
+  def find_by_external_id(external_id) do
+    Schema
+    |> Query.by_external_id(external_id)
+    |> Mrgr.Repo.one()
+  end
+
+  ### HELPERS
+  def i do
+    Mrgr.Repo.all(Mrgr.Schema.Installation) |> List.first()
+  end
+
+  def delete_all do
+    Mrgr.Repo.all(Mrgr.Schema.Installation) |> Enum.map(&Mrgr.Repo.delete/1)
+  end
+
+  defmodule Query do
+    use Mrgr.Query
   end
 end

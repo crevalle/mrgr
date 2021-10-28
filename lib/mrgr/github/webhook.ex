@@ -15,8 +15,13 @@ defmodule Mrgr.Github.Webhook do
     payload
   end
 
-  def handle("pull_request", %{"action" => "opened" } = payload) do
-    Mrgr.CheckRun.create(payload)
+  def handle("pull_request", %{"action" => "opened"} = payload) do
+    Mrgr.Merge.create_from_webhook(payload)
+    payload
+  end
+
+  def handle("pull_request", %{"action" => "reopened"} = payload) do
+    # Mrgr.Merge.reopen(payload)
     payload
   end
 
@@ -32,7 +37,8 @@ defmodule Mrgr.Github.Webhook do
 
   # HEAD OF PR IS UPDATED - create a new check suite/run, new checklist
   def handle("pull_request", %{"action" => "synchronize"} = payload) do
-    Mrgr.CheckRun.create(payload)
+    Mrgr.Merge.synchronize(payload)
+    # Mrgr.CheckRun.create(payload)
     payload
   end
 
@@ -43,5 +49,4 @@ defmodule Mrgr.Github.Webhook do
 
   # suspended?
   def handle(_obj, payload), do: payload
-
 end
