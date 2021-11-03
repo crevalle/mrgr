@@ -78,6 +78,10 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.all()
   end
 
+  def member(user) do
+    Mrgr.Repo.get_by(Mrgr.Schema.Member, user_id: user.id)
+  end
+
   def desmond do
     Mrgr.Repo.get_by(Mrgr.Schema.User, nickname: "desmondmonster")
   end

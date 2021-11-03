@@ -15,11 +15,9 @@ defmodule Mrgr.Merge do
       |> Map.put("author_id", author.id)
       |> Map.put("opened_at", payload["pull_request"]["created_at"])
 
-    {:ok, merge} = Mrgr.Schema.Merge
-                   |> Mrgr.Schema.Merge.create_changeset(params)
-                   |> Mrgr.Repo.insert()
-
-    # set_head(merge, params)
+    Mrgr.Schema.Merge
+    |> Mrgr.Schema.Merge.create_changeset(params)
+    |> Mrgr.Repo.insert()
   end
 
   def synchronize(webhook) do
@@ -29,6 +27,71 @@ defmodule Mrgr.Merge do
     merge
     |> Mrgr.Schema.Merge.synchronize_changeset(webhook)
     |> Mrgr.Repo.update()
+  end
+
+  @spec merge!(Mrgr.Schema.Merge.t(), Mrgr.Schema.User.t()) :: {:ok, Mrgr.Schema.Merge.t()} | {:error, String.t()}
+  def merge!(%Mrgr.Schema.Merge{} = merge, merger) do
+    args = generate_merge_args(merge, merger)
+
+    Tentacat.Pulls.merge(args.client, args.owner, args.repo, args.number, args.body)
+    |> handle_merge_response()
+    |> case do
+      {:ok, %{"sha" => sha}} ->
+        merge = mark_merged!(merge, merger)
+        # TODO: pubsub
+        {:ok, merge}
+
+      {:error, %{"message" => message}} ->
+
+        {:error, message}
+    end
+  end
+
+  def merge!(id, merger) do
+    case load_merge_for_merging(id) do
+      nil -> {:error, :not_found}
+      merge -> merge!(merge, merger)
+    end
+  end
+
+  def mark_merged!(merge, merger) do
+    member = Mrgr.User.member(merger)
+
+    merge
+    |> Mrgr.Schema.Merge.merge_changeset(%{merged_by_id: member.id})
+    |> Mrgr.Repo.update!()
+  end
+
+  def handle_merge_response({200, result, _response}) do
+    {:ok, result}
+  end
+
+  def handle_merge_response({code, result, _response}) do
+    {:error, %{code: code, result: result}}
+  end
+
+  def generate_merge_args(merge, merger) do
+    installation = merge.repository.installation
+
+    client = Mrgr.Github.Client.new(merger)
+    owner = installation.account.login
+    repo = merge.repository.name
+    number = merge.number
+
+    body = %{
+      "commit_title" => "Merge Dat Shit",
+      "commit_message" => "I have ants in my pants",
+      "sha" => merge.head.sha
+    }
+
+    %{client: client, owner: owner, repo: repo, number: number, body: body}
+  end
+
+  def load_merge_for_merging(id) do
+    Mrgr.Schema.Merge
+    |> Query.by_id(id)
+    |> Query.preload_for_merging()
+    |> Mrgr.Repo.one()
   end
 
   def find_by_external_id(id) do
@@ -44,6 +107,13 @@ defmodule Mrgr.Merge do
     |> Query.open()
     |> Query.order_by_priority()
     |> Mrgr.Repo.all()
+  end
+
+  def delete_installation_merges(installation) do
+    Mrgr.Schema.Merge
+    |> Query.for_installation(installation.id)
+    |> Mrgr.Repo.all()
+    |> Enum.map(&Mrgr.Repo.delete/1)
   end
 
   defmodule Query do
@@ -75,6 +145,16 @@ defmodule Mrgr.Merge do
     def order_by_priority(query) do
       from(q in query,
         order_by: [desc: q.opened_at]
+      )
+    end
+
+    def preload_for_merging(query) do
+      from(q in query,
+        join: r in assoc(q, :repository),
+        join: i in assoc(r, :installation),
+        join: a in assoc(i, :account),
+        preload: [repository: {r, [installation: {i, [account: a]}]}]
+        # preload: [current_installation: {c, account: a}]
       )
     end
   end

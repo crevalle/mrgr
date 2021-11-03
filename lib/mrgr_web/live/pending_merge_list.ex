@@ -15,6 +15,8 @@ defmodule MrgrWeb.Live.PendingMergeList do
 
   def render(assigns) do
     ~H"""
+    <button phx-click="refresh">Refresh PRs</button>
+
     <table>
       <th>id</th>
       <th>Repo</th>
@@ -42,9 +44,26 @@ defmodule MrgrWeb.Live.PendingMergeList do
     """
   end
 
+  def handle_event("refresh", _params, socket) do
+    user = socket.assigns.current_user
+    IO.inspect(user)
+
+    # dangerous!  anyone can do this right now.
+    installation = Mrgr.Repo.preload(user.current_installation, :repositories)
+    Mrgr.Installation.refresh_merges!(installation)
+
+    merges = Mrgr.Merge.pending_merges(user)
+
+    socket = assign(socket, :pending_merges, merges)
+
+    {:noreply, socket}
+  end
+
   def handle_event("merge", %{"id" => merge_id}, socket) do
-    IO.inspect(merge_id, label: "MERGE")
-    # TODO: merge that shit.
+
+    Mrgr.Merge.merge!(merge_id, socket.assigns.current_user)
+    |> IO.inspect()
+
     {:noreply, socket}
   end
 end
