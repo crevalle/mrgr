@@ -76,8 +76,8 @@ defmodule Mrgr.Schema.Member do
     |> changeset()
   end
 
-  def changeset(params) do
-    %__MODULE__{}
+  def changeset(schema, params) do
+    schema
     |> cast(params, @allowed)
     |> foreign_key_constraint(:user_id)
   end

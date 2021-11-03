@@ -1,7 +1,7 @@
 defmodule MrgrWeb.Formatter do
 
   def shorten_sha(sha) do
-    String.slice(sha, 1..6)
+    String.slice(sha, 0..6)
   end
 
   def ts(timestamp) do
