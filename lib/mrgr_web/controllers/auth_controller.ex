@@ -17,6 +17,7 @@ defmodule MrgrWeb.AuthController do
   end
 
   def callback(%{assigns: %{ueberauth_auth: auth}} = conn, _params) do
+    IO.inspect(auth, label: "*** OAUTH CALLBACK")
     user = Mrgr.User.find_or_create_from_github(auth)
 
     conn

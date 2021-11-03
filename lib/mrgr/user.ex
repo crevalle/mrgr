@@ -30,7 +30,6 @@ defmodule Mrgr.User do
         {:ok, user} = create(params)
         user
     end
-    |> IO.inspect()
   end
 
   @spec find_by_email(String.t()) :: Schema.t() | nil
