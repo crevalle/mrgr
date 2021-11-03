@@ -50,8 +50,8 @@ config :logger, :console,
 config :phoenix, :json_library, Jason
 
 config :mrgr, :oauth,
-  client_id: System.get_env("GITHUB_CLIENT_ID"),
-  client_secret: System.get_env("GITHUB_CLIENT_SECRET")
+  client_id: System.get_env("GITHUB_OAUTH_CLIENT_ID"),
+  client_secret: System.get_env("GITHUB_OAUTH_CLIENT_SECRET")
 
 config :joken,
   rs256: [
