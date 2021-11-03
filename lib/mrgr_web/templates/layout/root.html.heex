@@ -19,7 +19,7 @@
               <%= link "Pending Merges", to: Routes.pending_merge_path(@conn, :index) %>
               <%= link "Sign Out", to: Routes.auth_path(@conn, :delete), method: :delete %>
             <% else %>
-              <%= link "Sign In With Github", to: Routes.auth_path(@conn, :request) %>
+              <%= link "Sign In With Github", to: Routes.auth_path(@conn, :github) %>
             <% end %>
 
           <ul>

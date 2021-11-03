@@ -1,16 +1,14 @@
 defmodule Mrgr.User.Github do
-  @spec generate_params(Ueberauth.Auth.t()) :: map()
-  def generate_params(%{credentials: credentials, info: info} = _auth) do
-    tokens = token_params(credentials)
+  @spec generate_params(map()) :: map()
+  def generate_params(%{"token" => access_token, "data" => data} = _auth) do
+    token_data = token_params(access_token)
 
-    info
-    |> Map.from_struct()
-    |> Map.merge(tokens)
-    |> Map.put(:provider, "github")
+    data
+    |> Map.merge(token_data)
+    |> Map.put("provider", "github")
   end
 
-  def token_params(%OAuth2.AccessToken{} = params) do
-    # TODO: maybe pull refresh_token_expires_in
+  def token_params(%OAuth2.AccessToken{} = token) do
     # %OAuth2.AccessToken{
     #   access_token: "ghu_SDm4hpJMBX02vO6ujeGJNILKAkxaee0sunCV",
     #   expires_at: 1634722596,
@@ -20,18 +18,21 @@ defmodule Mrgr.User.Github do
     # }
 
     %{
-      token: params.access_token,
-      refresh_token: params.refresh_token,
-      token_expires_at: DateTime.from_unix!(params.expires_at)
+      "token" => token.access_token,
+      "refresh_token" => token.refresh_token,
+      "token_expires_at" => safe_datetime_parse(token.expires_at)
     }
   end
 
   def token_params(credentials) do
     %{
-      token: credentials.token,
-      refresh_token: credentials.refresh_token,
-      # utc
-      token_expires_at: DateTime.from_unix!(credentials.expires_at)
+      "token" => credentials.token,
+      "refresh_token" => credentials.refresh_token,
+      "token_expires_at" => safe_datetime_parse(credentials.expires_at)
     }
   end
+
+  # user oauth tokens don't expire
+  defp safe_datetime_parse(nil), do: nil
+  defp safe_datetime_parse(dt), do: DateTime.from_unix!(dt)
 end

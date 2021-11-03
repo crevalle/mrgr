@@ -6,9 +6,8 @@ defmodule Auth.GitHub do
   def client do
     OAuth2.Client.new(
       strategy: __MODULE__,
-      client_id: Application.get_env(:mrgr, :auth)[:github_client_id],
-      client_secret: Application.get_env(:hire, :auth)[:github_client_secret],
-      redirect_uri: Application.get_env(:hire, :auth)[:redirect_uri],
+      client_id: Application.get_env(:mrgr, :oauth)[:client_id],
+      client_secret: Application.get_env(:mrgr, :oauth)[:client_secret],
       site: "https://api.github.com",
       authorize_url: "https://github.com/login/oauth/authorize",
       token_url: "https://github.com/login/oauth/access_token"
@@ -17,7 +16,7 @@ defmodule Auth.GitHub do
   end
 
   def authorize_url! do
-    OAuth2.Client.authorize_url!(client(), scope: "user:email")
+    OAuth2.Client.authorize_url!(client(), scope: "user:email,repo,read:org")
   end
 
   # you can pass options to the underlying http library via `opts` parameter
