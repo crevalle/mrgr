@@ -23,6 +23,7 @@ defmodule MrgrWeb.Live.PendingMergeList do
       <th>Number</th>
       <th>Title</th>
       <th>Author</th>
+      <th>Branch</th>
       <th>Current SHA</th>
       <th>Updated</th>
       <th>Opened</th>
@@ -34,6 +35,7 @@ defmodule MrgrWeb.Live.PendingMergeList do
           <td><%= merge.number %></td>
           <td><%= merge.title %></td>
           <td><%= merge.user.login %></td>
+          <td><%= merge.head.ref %></td>
           <td><%= shorten_sha(merge.head.sha) %></td>
           <td><%= ts(merge.updated_at) %></td>
           <td><%= ts(merge.opened_at) %></td>

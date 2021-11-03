@@ -9,7 +9,7 @@ defmodule Mrgr.Schema.Merge do
     field(:title, :string)
     field(:url, :string)
 
-    embeds_one(:user, Mrgr.Github.User)
+    embeds_one(:user, Mrgr.Github.User, on_replace: :update)
 
     embeds_one(:head, Mrgr.Schema.Head, on_replace: :update)
 
@@ -27,6 +27,7 @@ defmodule Mrgr.Schema.Merge do
     opened_at
     title
     url
+    repository_id
   ]a
 
   @synchronize_fields ~w[
@@ -85,5 +86,4 @@ defmodule Mrgr.Schema.Merge do
   def set_opened_at(%{"created_at" => at} = params) do
     Map.put(params, "opened_at", at)
   end
-
 end

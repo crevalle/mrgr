@@ -2,34 +2,40 @@ defmodule Mrgr.Merge do
   alias Mrgr.Merge.Query
 
   def create_from_webhook(payload) do
-    repository_id = payload["repository"]["id"]
-    repo = Mrgr.Github.find(Mrgr.Schema.Repository, repository_id)
+    params = payload_to_params(payload)
 
-    user_id = payload["pull_request"]["user"]["id"]
-    author = Mrgr.Github.find(Mrgr.Schema.Member, user_id)
-
-    params =
-      payload
-      |> Map.get("pull_request")
-      |> Map.put("repository_id", repo.id)
-      |> Map.put("author_id", author.id)
-      |> Map.put("opened_at", payload["pull_request"]["created_at"])
-
-    Mrgr.Schema.Merge
+    %Mrgr.Schema.Merge{}
     |> Mrgr.Schema.Merge.create_changeset(params)
     |> Mrgr.Repo.insert()
   end
 
-  def synchronize(webhook) do
-    external_id = webhook["pull_request"]["id"]
+  def reopen(payload) do
+    external_id = payload["pull_request"]["id"]
+
+    case find_by_external_id(external_id) do
+      %Mrgr.Schema.Merge{} = merge ->
+        params = payload_to_params(payload)
+
+        merge
+        |> Mrgr.Schema.Merge.create_changeset(params)
+        |> Mrgr.Repo.update()
+
+      nil ->
+        create_from_webhook(payload)
+    end
+  end
+
+  def synchronize(payload) do
+    external_id = payload["pull_request"]["id"]
     merge = find_by_external_id(external_id)
 
     merge
-    |> Mrgr.Schema.Merge.synchronize_changeset(webhook)
+    |> Mrgr.Schema.Merge.synchronize_changeset(payload)
     |> Mrgr.Repo.update()
   end
 
-  @spec merge!(Mrgr.Schema.Merge.t(), Mrgr.Schema.User.t()) :: {:ok, Mrgr.Schema.Merge.t()} | {:error, String.t()}
+  @spec merge!(Mrgr.Schema.Merge.t(), Mrgr.Schema.User.t()) ::
+          {:ok, Mrgr.Schema.Merge.t()} | {:error, String.t()}
   def merge!(%Mrgr.Schema.Merge{} = merge, merger) do
     args = generate_merge_args(merge, merger)
 
@@ -42,7 +48,6 @@ defmodule Mrgr.Merge do
         {:ok, merge}
 
       {:error, %{"message" => message}} ->
-
         {:error, message}
     end
   end
@@ -114,6 +119,26 @@ defmodule Mrgr.Merge do
     |> Query.for_installation(installation.id)
     |> Mrgr.Repo.all()
     |> Enum.map(&Mrgr.Repo.delete/1)
+  end
+
+  defp payload_to_params(payload) do
+    repository_id = payload["repository"]["id"]
+    repo = Mrgr.Github.find(Mrgr.Schema.Repository, repository_id)
+
+    payload
+    |> Map.get("pull_request")
+    |> Map.put("repository_id", repo.id)
+    |> Map.put("author_id", author_id_from_payload(payload))
+    |> Map.put("opened_at", payload["pull_request"]["created_at"])
+  end
+
+  defp author_id_from_payload(payload) do
+    user_id = payload["pull_request"]["user"]["id"]
+
+    case Mrgr.Github.find(Mrgr.Schema.Member, user_id) do
+      %Mrgr.Schema.Member{id: id} -> id
+      nil -> nil
+    end
   end
 
   defmodule Query do
