@@ -47,6 +47,13 @@ defmodule Mrgr.Installation do
     end
   end
 
+  def refresh_merges!(installation) do
+    Mrgr.Merge.delete_installation_merges(installation)
+
+    client = Mrgr.Github.Client.new(installation)
+    Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories, client)
+  end
+
   def set_tokens(install, %Mrgr.Github.AccessToken{} = token) do
     params = %{
       token_expires_at: token.expires_at,

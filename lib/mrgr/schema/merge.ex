@@ -52,6 +52,22 @@ defmodule Mrgr.Schema.Merge do
     |> cast_embed(:head)
   end
 
+  def merge_changeset(schema, params) do
+    schema
+    |> cast(params, [:merged_by_id])
+    |> foreign_key_constraint(:merged_by_id)
+    |> put_merged_status()
+    |> put_merged_at()
+  end
+
+  def put_merged_status(changeset) do
+    put_change(changeset, :status, "merged")
+  end
+
+  def put_merged_at(changeset) do
+    put_change(changeset, :merged_at, DateTime.utc_now())
+  end
+
   def put_open_status(changeset) do
     case get_change(changeset, :status) do
       empty when empty in [nil, ""] ->
