@@ -18,11 +18,12 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.one()
   end
 
-  @spec find_or_create_from_github(Ueberauth.Auth.t()) :: Schema.t()
+  @spec find_or_create_from_github(%{token: map(), data: map()}) :: Schema.t()
   def find_or_create_from_github(auth) do
     params = Mrgr.User.Github.generate_params(auth)
+             |> IO.inspect()
 
-    case find_by_email(params.email) do
+    case find_by_email(params["email"]) do
       %Schema{} = user ->
         set_tokens(user, params)
 
@@ -30,7 +31,6 @@ defmodule Mrgr.User do
         {:ok, user} = create(params)
         user
     end
-    |> IO.inspect()
   end
 
   @spec find_by_email(String.t()) :: Schema.t() | nil
@@ -76,6 +76,10 @@ defmodule Mrgr.User do
     user
     |> Query.repos()
     |> Mrgr.Repo.all()
+  end
+
+  def desmond do
+    Mrgr.Repo.get_by(Mrgr.Schema.User, nickname: "desmondmonster")
   end
 
   defmodule Query do

@@ -32,7 +32,7 @@ defmodule MrgrWeb.Router do
     # post "/sign-in", AuthController, :create
     delete "/sign-out", AuthController, :delete
 
-    get "/github", AuthController, :request
+    get "/github", AuthController, :github
     get "/github/callback", AuthController, :callback
   end
 

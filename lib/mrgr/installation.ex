@@ -26,7 +26,7 @@ defmodule Mrgr.Installation do
     members = fetch_members(installation, client)
     add_team_members(installation, members)
 
-    IO.inspect(installation, label: " ***INSTALL")
+    # IO.inspect(installation, label: " ***INSTALL")
     # TODO repos
     Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories, client)
 

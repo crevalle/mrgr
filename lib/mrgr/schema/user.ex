@@ -97,7 +97,7 @@ defmodule Mrgr.Schema.User do
     schema
     |> cast(params, @tokens)
     |> set_token_updated_at()
-    |> validate_required(@tokens)
+    |> validate_required([:token])
   end
 
   def current_installation_changeset(schema, params) do

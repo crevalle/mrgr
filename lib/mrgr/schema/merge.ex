@@ -34,7 +34,6 @@ defmodule Mrgr.Schema.Merge do
   ]a
 
   def create_changeset(schema, params) do
-    IO.inspect(params, label: "MERGE CREATE")
     params = set_opened_at(params)
 
     schema

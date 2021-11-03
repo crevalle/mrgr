@@ -14,8 +14,9 @@ defmodule Mrgr.Github.Client do
     end
   end
 
-  def token_expired?(%{token: nil, token_expires_at: _e}), do: true
-  def token_expired?(%{token: _t, token_expires_at: nil}), do: true
+  # user tokens don't expire, ie, have a token_expires_at.  But we expect there to be a token.
+  def token_expired?(%{token_expires_at: nil}), do: false
+  def token_expired?(%{token: nil}), do: true
 
   def token_expired?(%{token_expires_at: expires}) do
     Mrgr.DateMath.in_the_past?(expires)

@@ -8,9 +8,6 @@ defmodule Mrgr.Merge do
     user_id = payload["pull_request"]["user"]["id"]
     author = Mrgr.Github.find(Mrgr.Schema.Member, user_id)
 
-    IO.inspect(repo, label: "repo")
-    IO.inspect(author, label: "author")
-
     params =
       payload
       |> Map.get("pull_request")

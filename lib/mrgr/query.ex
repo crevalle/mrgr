@@ -7,11 +7,15 @@ defmodule Mrgr.Query do
     quote do
       import Ecto.Query
 
-      @spec by_id(Ecto.Queryable.t(), integer()) :: Ecto.Query.t()
-      def by_id(queryable, id) do
+      @spec by_id(Ecto.Queryable.t(), integer() | String.t()) :: Ecto.Query.t()
+      def by_id(queryable, id) when is_integer(id) do
         from(q in queryable,
           where: q.id == ^id
         )
+      end
+
+      def by_id(queryable, id) when is_bitstring(id) do
+        by_id(queryable, String.to_integer(id))
       end
 
       def by_external_id(queryable, id) do
