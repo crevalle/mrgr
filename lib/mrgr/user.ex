@@ -77,6 +77,10 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.all()
   end
 
+  def desmond do
+    Mrgr.Repo.get_by(Mrgr.Schema.User, nickname: "desmondmonster")
+  end
+
   defmodule Query do
     use Mrgr.Query
 
