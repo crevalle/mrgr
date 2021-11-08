@@ -19,6 +19,7 @@ defmodule MrgrWeb.Live.PendingMergeList do
 
     <table>
       <th>id</th>
+      <th>Status</th>
       <th>Repo</th>
       <th>Number</th>
       <th>Title</th>
@@ -31,6 +32,7 @@ defmodule MrgrWeb.Live.PendingMergeList do
       <%= for merge <- assigns.pending_merges do %>
         <tr>
           <td><%= merge.id %></td>
+          <td><%= merge.status %></td>
           <td><%= merge.repository.name %></td>
           <td><%= merge.number %></td>
           <td><%= merge.title %></td>

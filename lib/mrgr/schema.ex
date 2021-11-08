@@ -16,4 +16,8 @@ defmodule Mrgr.Schema do
       end
     end
   end
+
+  def ts do
+    DateTime.truncate(DateTime.utc_now(), :second)
+  end
 end

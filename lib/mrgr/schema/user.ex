@@ -110,8 +110,7 @@ defmodule Mrgr.Schema.User do
     # cast/3 automatically removes microseconds.  need to explicity
     # do this when calling put_change/3
     # https://elixirforum.com/t/upgrading-to-ecto-3-anyway-to-easily-deal-with-usec-it-complains-with-or-without-usec/22137/7?u=desmond
-    now = DateTime.truncate(DateTime.utc_now(), :second)
-    put_change(changeset, :token_updated_at, now)
+    put_change(changeset, :token_updated_at, Mrgr.Schema.ts())
   end
 
   # provider: "github",

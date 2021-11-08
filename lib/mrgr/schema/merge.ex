@@ -66,7 +66,7 @@ defmodule Mrgr.Schema.Merge do
   end
 
   def put_merged_at(changeset) do
-    put_change(changeset, :merged_at, DateTime.utc_now())
+    put_change(changeset, :merged_at, Mrgr.Schema.ts())
   end
 
   def put_open_status(changeset) do

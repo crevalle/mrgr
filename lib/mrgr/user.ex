@@ -25,6 +25,7 @@ defmodule Mrgr.User do
 
     case find_by_email(params["email"]) do
       %Schema{} = user ->
+        associate_member(user)
         set_tokens(user, params)
 
       nil ->
@@ -70,6 +71,20 @@ defmodule Mrgr.User do
     user
     |> Schema.tokens_changeset(params)
     |> Mrgr.Repo.update!()
+  end
+
+  def associate_member(user) do
+    case Mrgr.Repo.get_by(Mrgr.Schema.Member, login: user.nickname) do
+      %Mrgr.Schema.Member{user_id: nil} = member ->
+
+        member
+        |> Mrgr.Schema.Member.changeset(%{user_id: user.id})
+        |> Mrgr.Repo.update!()
+      nil ->
+        # TODO: create_member!()
+        nil
+      _associated_member -> nil
+    end
   end
 
   def repos(user) do

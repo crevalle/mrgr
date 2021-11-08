@@ -32,7 +32,7 @@ defmodule MrgrWeb.WebhookController do
     # IO.inspect(params, label: "WEBHOOK ***")
 
     obj = fetch_object(conn.req_headers)
-    action = params["action"]
+    action = params["action"] |> IO.inspect(label: "*** ACTION")
     # IO.inspect("#{obj} #{action}", label: "### WEBHOOK HANDLING ###")
 
     write_test_file(obj, action, params)
