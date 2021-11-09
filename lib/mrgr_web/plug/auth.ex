@@ -44,6 +44,22 @@ defmodule MrgrWeb.Plug.Auth do
     end
   end
 
+  # assumes a current_user, ie, someone is signed in
+  def require_admin(conn, _opts) do
+    case admin?(conn.assigns.current_user) do
+      true ->
+        conn
+
+      _ ->
+        conn
+        |> redirect_non_admin_user()
+        |> halt()
+    end
+  end
+
+  def admin?(%{nickname: "desmondmonster"}), do: true
+  def admin?(_), do: false
+
   @spec find_user(integer) :: Mrgr.Schema.User.t() | nil
   def find_user(id) do
     Mrgr.User.find_with_current_installation(id)
@@ -60,6 +76,13 @@ defmodule MrgrWeb.Plug.Auth do
         |> put_session(:headed_to, nil)
         |> Phoenix.Controller.redirect(to: original_path)
     end
+  end
+
+  defp redirect_non_admin_user(conn) do
+    conn
+    |> put_session(:headed_to, conn.request_path)
+    |> Phoenix.Controller.put_flash(:info, "What do you think you're doing?")
+    |> Phoenix.Controller.redirect(to: "/")
   end
 
   defp redirect_unsigned_in_user(conn) do

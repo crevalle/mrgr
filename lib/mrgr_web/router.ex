@@ -15,6 +15,10 @@ defmodule MrgrWeb.Router do
     plug :require_user
   end
 
+  pipeline :admin do
+    plug :require_admin
+  end
+
   pipeline :api do
     plug :accepts, ["json"]
   end
@@ -47,6 +51,12 @@ defmodule MrgrWeb.Router do
     pipe_through :api
 
     post "/incoming/github", WebhookController, :github
+  end
+
+  scope "/admin", MrgrWeb.Admin, as: :admin do
+    pipe_through [:browser, :authenticate, :admin]
+
+    live "/incoming-webhooks", Live.IncomingWebhook, :index, as: :incoming_webhook
   end
 
   # Other scopes may use custom stacks.
