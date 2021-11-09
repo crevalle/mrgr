@@ -96,7 +96,7 @@ defmodule Mrgr.Schema.User do
   def tokens_changeset(schema, params) do
     schema
     |> cast(params, @tokens)
-    |> set_token_updated_at()
+    |> put_timestamp(:token_updated_at)
     |> validate_required([:token])
   end
 
@@ -104,13 +104,6 @@ defmodule Mrgr.Schema.User do
     schema
     |> cast(params, [:current_installation_id])
     |> foreign_key_constraint(:current_installation_id)
-  end
-
-  defp set_token_updated_at(changeset) do
-    # cast/3 automatically removes microseconds.  need to explicity
-    # do this when calling put_change/3
-    # https://elixirforum.com/t/upgrading-to-ecto-3-anyway-to-easily-deal-with-usec-it-complains-with-or-without-usec/22137/7?u=desmond
-    put_change(changeset, :token_updated_at, Mrgr.Schema.ts())
   end
 
   # provider: "github",

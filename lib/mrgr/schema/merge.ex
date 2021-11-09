@@ -58,15 +58,11 @@ defmodule Mrgr.Schema.Merge do
     |> cast(params, [:merged_by_id])
     |> foreign_key_constraint(:merged_by_id)
     |> put_merged_status()
-    |> put_merged_at()
+    |> put_timestamp(:merged_at)
   end
 
   def put_merged_status(changeset) do
     put_change(changeset, :status, "merged")
-  end
-
-  def put_merged_at(changeset) do
-    put_change(changeset, :merged_at, Mrgr.Schema.ts())
   end
 
   def put_open_status(changeset) do
