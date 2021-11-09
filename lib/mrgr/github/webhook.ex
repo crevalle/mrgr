@@ -11,9 +11,9 @@ defmodule Mrgr.Github.Webhook do
     Mrgr.Installation.delete_from_webhook(payload)
   end
 
-  def handle("installation", %{"action" => "requested"} = payload) do
-    payload
-  end
+  # def handle("installation", %{"action" => "requested"} = payload) do
+    # payload
+  # end
 
   def handle("pull_request", %{"action" => "opened"} = payload) do
     Mrgr.Merge.create_from_webhook(payload)
@@ -25,15 +25,15 @@ defmodule Mrgr.Github.Webhook do
     payload
   end
 
-  def handle("pull_request", %{"action" => "closed", "merged" => true} = payload) do
-    # merged
-    payload
-  end
+  # def handle("pull_request", %{"action" => "closed", "merged" => true} = payload) do
+    # # merged
+    # payload
+  # end
 
-  def handle("pull_request", %{"action" => "closed", "merged" => false} = payload) do
-    # closed, not merged
-    payload
-  end
+  # def handle("pull_request", %{"action" => "closed", "merged" => false} = payload) do
+    # # closed, not merged
+    # payload
+  # end
 
   # HEAD OF PR IS UPDATED - create a new check suite/run, new checklist
   def handle("pull_request", %{"action" => "synchronize"} = payload) do
@@ -42,11 +42,14 @@ defmodule Mrgr.Github.Webhook do
     payload
   end
 
-  def handle("check_suite", %{"action" => "requested"} = payload) do
-    # Mrgr.CheckRun.create(payload)
-    payload
-  end
+  # def handle("check_suite", %{"action" => "requested"} = payload) do
+    # # Mrgr.CheckRun.create(payload)
+    # payload
+  # end
 
   # suspended?
-  def handle(_obj, payload), do: payload
+  def handle(obj, payload) do
+    IO.inspect("*** NOT IMPLEMENTED #{obj}")
+    payload
+  end
 end

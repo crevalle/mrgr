@@ -23,7 +23,9 @@
             <% end %>
 
           <ul>
-            <li><a href="https://hexdocs.pm/phoenix/overview.html">Get Started</a></li>
+            <%= if signed_in?(@conn) and admin?(@conn.assigns.current_user) do %>
+              <li><%= link "Admin - Incoming Webhooks", to: Routes.admin_incoming_webhook_path(@conn, :index) %></li>
+            <% end %>
             <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
               <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
             <% end %>
