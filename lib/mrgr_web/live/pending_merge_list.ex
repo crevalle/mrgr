@@ -17,6 +17,8 @@ defmodule MrgrWeb.Live.PendingMergeList do
     ~H"""
     <button phx-click="refresh">Refresh PRs</button>
 
+    <p class="alert alert-danger"><%= live_flash(@flash, :error) %></p>
+
     <table>
       <th>id</th>
       <th>Status</th>
@@ -64,10 +66,16 @@ defmodule MrgrWeb.Live.PendingMergeList do
   end
 
   def handle_event("merge", %{"id" => merge_id}, socket) do
-
     Mrgr.Merge.merge!(merge_id, socket.assigns.current_user)
-    |> IO.inspect()
+    |> case do
+      {:ok, _merge} ->
+        # TODO: remove from list?
+        {:noreply, socket}
 
-    {:noreply, socket}
+      {:error, message} ->
+        socket
+        |> put_flash(:error, message)
+        |> noreply()
+    end
   end
 end

@@ -37,9 +37,10 @@ defmodule Mrgr.Merge do
   @spec merge!(Mrgr.Schema.Merge.t(), Mrgr.Schema.User.t()) ::
           {:ok, Mrgr.Schema.Merge.t()} | {:error, String.t()}
   def merge!(%Mrgr.Schema.Merge{} = merge, merger) do
-    args = generate_merge_args(merge, merger)
+    # args = generate_merge_args(merge, merger)
 
-    Tentacat.Pulls.merge(args.client, args.owner, args.repo, args.number, args.body)
+    # Tentacat.Pulls.merge(args.client, args.owner, args.repo, args.number, args.body)
+    {405, %{"documentation_url" => "https://docs.github.com/rest/reference/pulls#merge-a-pull-request", "message" => "Pull Request is not mergeable"}, "socks"}
     |> handle_merge_response()
     |> case do
       {:ok, %{"sha" => sha}} ->
@@ -47,7 +48,7 @@ defmodule Mrgr.Merge do
         # TODO: pubsub
         {:ok, merge}
 
-      {:error, %{"message" => message}} ->
+      {:error, %{result: %{"message" => message}}} ->
         {:error, message}
     end
   end
