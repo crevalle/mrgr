@@ -38,22 +38,11 @@ defmodule MrgrWeb.WebhookController do
     attrs = %{source: "github", object: obj, action: action, data: params}
     Mrgr.IncomingWebhook.create(attrs)
 
-    write_test_file(obj, action, params)
-
     Mrgr.Github.Webhook.handle(obj, params)
 
     conn
     |> put_status(200)
     |> json(%{yo: "momma"})
-  end
-
-  defp write_test_file(obj, action, params) do
-    path = "test/webhook/#{obj}/"
-    filename = "#{path}/#{action}.json"
-
-    File.mkdir_p(path)
-
-    File.write(filename, Jason.encode!(params), [:binary])
   end
 
   def fetch_object(headers) do
