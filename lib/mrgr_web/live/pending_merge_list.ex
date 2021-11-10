@@ -3,10 +3,11 @@ defmodule MrgrWeb.Live.PendingMergeList do
 
   def mount(_params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
+      subscribe()
+
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
       merges = Mrgr.Merge.pending_merges(current_user)
 
-      subscribe()
 
       socket
       |> assign(:current_user, current_user)

@@ -49,7 +49,7 @@ defmodule Mrgr.Merge do
     Tentacat.Pulls.merge(args.client, args.owner, args.repo, args.number, args.body)
     |> handle_merge_response()
     |> case do
-      {:ok, %{"sha" => sha}} ->
+      {:ok, %{"sha" => _sha}} ->
         merge = mark_merged!(merge, merger)
         # TODO: pubsub
         {:ok, merge}
