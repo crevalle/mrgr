@@ -68,7 +68,9 @@ defmodule MrgrWeb.Live.PendingMergeList do
     |> case do
       {:ok, _merge} ->
         # TODO: remove from list?
-        {:noreply, socket}
+        socket
+        |> put_flash(:info, "Merged! 🥳")
+        |> noreply()
 
       {:error, message} ->
         socket
