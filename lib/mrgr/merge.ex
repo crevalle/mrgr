@@ -1,12 +1,17 @@
 defmodule Mrgr.Merge do
   alias Mrgr.Merge.Query
 
+  @topic "merge"
+
+  def topic, do: topic()
+
   def create_from_webhook(payload) do
     params = payload_to_params(payload)
 
     %Mrgr.Schema.Merge{}
     |> Mrgr.Schema.Merge.create_changeset(params)
     |> Mrgr.Repo.insert()
+    |> maybe_broadcast("created")
   end
 
   def reopen(payload) do
@@ -19,6 +24,7 @@ defmodule Mrgr.Merge do
         merge
         |> Mrgr.Schema.Merge.create_changeset(params)
         |> Mrgr.Repo.update()
+        |> maybe_broadcast("reopened")
 
       nil ->
         create_from_webhook(payload)
@@ -32,6 +38,7 @@ defmodule Mrgr.Merge do
     merge
     |> Mrgr.Schema.Merge.synchronize_changeset(payload)
     |> Mrgr.Repo.update()
+    |> maybe_broadcast("synchronized")
   end
 
   @spec merge!(Mrgr.Schema.Merge.t(), Mrgr.Schema.User.t()) ::
@@ -66,6 +73,13 @@ defmodule Mrgr.Merge do
     |> Mrgr.Schema.Merge.merge_changeset(%{merged_by_id: member.id})
     |> Mrgr.Repo.update!()
   end
+
+  def maybe_broadcast({:ok, merge}, event) do
+    Mrgr.PubSub.broadcast(merge, topic(), event)
+    {:ok, merge}
+  end
+
+  def maybe_broadcast({:error, _cs} = error), do: error
 
   def handle_merge_response({200, result, _response}) do
     {:ok, result}
