@@ -64,10 +64,18 @@ defmodule MrgrWeb.Live.PendingMergeList do
   end
 
   def handle_event("merge", %{"id" => merge_id}, socket) do
-
     Mrgr.Merge.merge!(merge_id, socket.assigns.current_user)
-    |> IO.inspect()
+    |> case do
+      {:ok, _merge} ->
+        # TODO: remove from list?
+        socket
+        |> put_flash(:info, "Merged! 🥳")
+        |> noreply()
 
-    {:noreply, socket}
+      {:error, message} ->
+        socket
+        |> put_flash(:error, message)
+        |> noreply()
+    end
   end
 end

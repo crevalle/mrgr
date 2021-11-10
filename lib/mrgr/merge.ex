@@ -47,7 +47,7 @@ defmodule Mrgr.Merge do
         # TODO: pubsub
         {:ok, merge}
 
-      {:error, %{"message" => message}} ->
+      {:error, %{result: %{"message" => message}}} ->
         {:error, message}
     end
   end
