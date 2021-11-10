@@ -36,6 +36,10 @@ defmodule Mrgr.IncomingWebhook do
     Mrgr.PubSub.broadcast(hook, topic(), "created")
   end
 
+  def fire!(hook) do
+    Mrgr.Github.Webhook.handle(hook.object, hook.data)
+  end
+
   defmodule Query do
     use Mrgr.Query
   end
