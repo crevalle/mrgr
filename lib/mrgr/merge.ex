@@ -3,7 +3,7 @@ defmodule Mrgr.Merge do
 
   @topic "merge"
 
-  def topic, do: topic()
+  def topic, do: @topic
 
   def create_from_webhook(payload) do
     params = payload_to_params(payload)
