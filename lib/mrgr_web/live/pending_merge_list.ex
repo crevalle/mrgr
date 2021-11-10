@@ -110,7 +110,8 @@ defmodule MrgrWeb.Live.PendingMergeList do
   end
 
   def handle_info(%{event: "synchronized", payload: payload}, socket) do
-    merges = replace_updated(socket.assigns.pending_merges, payload)
+    hydrated = Mrgr.Merge.preload_for_pending_list(payload)
+    merges = replace_updated(socket.assigns.pending_merges, hydrated)
 
     socket
     |> assign(:pending_merges, merges)

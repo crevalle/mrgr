@@ -122,10 +122,13 @@ defmodule Mrgr.Merge do
   def pending_merges(%{current_installation_id: id}) do
     Mrgr.Schema.Merge
     |> Query.for_installation(id)
-    |> Query.with_author()
     |> Query.open()
     |> Query.order_by_priority()
     |> Mrgr.Repo.all()
+  end
+
+  def preload_for_pending_list(merge) do
+    Mrgr.Repo.preload(merge, [:repository])
   end
 
   def delete_installation_merges(installation) do
