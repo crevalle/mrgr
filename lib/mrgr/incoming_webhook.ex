@@ -16,7 +16,7 @@ defmodule Mrgr.IncomingWebhook do
     |> Repo.insert()
     |> case do
       {:ok, hook} ->
-        broadcast_hook_created!(hook)
+        broadcast_created!(hook)
         {:ok, hook}
 
       error ->
@@ -31,9 +31,13 @@ defmodule Mrgr.IncomingWebhook do
     |> Repo.all()
   end
 
-  @spec broadcast_hook_created!(Schema.t()) :: :ok
-  def broadcast_hook_created!(hook) do
+  @spec broadcast_created!(Schema.t()) :: :ok
+  def broadcast_created!(hook) do
     Mrgr.PubSub.broadcast(hook, topic(), "created")
+  end
+
+  def fire!(hook) do
+    Mrgr.Github.Webhook.handle(hook.object, hook.data)
   end
 
   defmodule Query do

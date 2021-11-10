@@ -11,6 +11,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
       <th>Action</th>
       <th>Data</th>
       <th>Received</th>
+      <th></th>
 
       <%= for hook <- @incoming_webhooks do %>
         <tr>
@@ -19,6 +20,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
           <td><%= hook.action %></td>
           <td></td>
           <td><%= ts(hook.inserted_at) %></td>
+          <td><button phx-click="fire" phx-value-id={hook.id}>Fire!</button></td>
         </tr>
       <% end %>
     </table>
@@ -34,6 +36,18 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
     else
       {:ok, assign(socket, :incoming_webhooks, [])}
     end
+  end
+
+  def handle_event("fire", %{"id" => id}, socket) do
+    id = String.to_integer(id)
+
+    hook = Enum.find(socket.assigns.incoming_webhooks, &( &1.id == id))
+
+    Mrgr.IncomingWebhook.fire!(hook)
+
+    socket
+    |> put_flash(:info, "fired! 🚀")
+    |> noreply()
   end
 
   def subscribe do

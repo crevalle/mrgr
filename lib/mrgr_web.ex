@@ -102,6 +102,10 @@ defmodule MrgrWeb do
 
   defp socket_helpers do
     quote do
+      def ok(socket) do
+        {:ok, socket}
+      end
+
       def noreply(socket) do
         {:noreply, socket}
       end

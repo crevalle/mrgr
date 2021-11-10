@@ -2,15 +2,23 @@ defmodule MrgrWeb.Live.PendingMergeList do
   use MrgrWeb, :live_view
 
   def mount(_params, %{"user_id" => user_id}, socket) do
-    current_user = MrgrWeb.Plug.Auth.find_user(user_id)
-    merges = Mrgr.Merge.pending_merges(current_user)
+    if connected?(socket) do
+      subscribe()
 
-    socket =
+      current_user = MrgrWeb.Plug.Auth.find_user(user_id)
+      merges = Mrgr.Merge.pending_merges(current_user)
+
+
       socket
       |> assign(:current_user, current_user)
       |> assign(:pending_merges, merges)
-
-    {:ok, socket}
+      |> ok()
+    else
+      socket
+      |> assign(:current_user, nil)
+      |> assign(:pending_merges, [])
+      |> ok()
+    end
   end
 
   def render(assigns) do
@@ -77,5 +85,51 @@ defmodule MrgrWeb.Live.PendingMergeList do
         |> put_flash(:error, message)
         |> noreply()
     end
+  end
+
+  # event bus
+  def subscribe do
+    Mrgr.PubSub.subscribe(Mrgr.Merge.topic())
+  end
+
+  # repoened will put it at the top, which may not be what we want
+  def handle_info(%{event: event, payload: payload}, socket)
+      when event in ["created", "reopened"] do
+    merges = socket.assigns.pending_merges
+
+    socket
+    |> assign(:pending_merges, [payload | merges])
+    |> noreply()
+  end
+
+  def handle_info(%{event: "closed", payload: payload}, socket) do
+    merges = Enum.reject(socket.assigns.pending_merges, &(&1.id == payload.id))
+
+    socket
+    |> assign(:pending_merges, merges)
+    |> noreply()
+  end
+
+  def handle_info(%{event: "synchronized", payload: payload}, socket) do
+    hydrated = Mrgr.Merge.preload_for_pending_list(payload)
+    merges = replace_updated(socket.assigns.pending_merges, hydrated)
+
+    socket
+    |> assign(:pending_merges, merges)
+    |> noreply()
+  end
+
+  def replace_updated(merges, updated) do
+    updated_id = updated.id
+
+    Enum.map(merges, fn merge ->
+      case merge do
+        %{id: ^updated_id} ->
+          updated
+
+        not_updated ->
+          not_updated
+      end
+    end)
   end
 end
