@@ -17,8 +17,6 @@ defmodule MrgrWeb.Live.PendingMergeList do
     ~H"""
     <button phx-click="refresh">Refresh PRs</button>
 
-    <p class="alert alert-danger"><%= live_flash(@flash, :error) %></p>
-
     <table>
       <th>id</th>
       <th>Status</th>
