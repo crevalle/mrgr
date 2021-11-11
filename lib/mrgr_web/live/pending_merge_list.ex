@@ -75,9 +75,8 @@ defmodule MrgrWeb.Live.PendingMergeList do
     Mrgr.Merge.merge!(merge_id, socket.assigns.current_user)
     |> case do
       {:ok, _merge} ->
-        # TODO: remove from list?
         socket
-        |> put_flash(:info, "Merged! 🥳")
+        |> put_flash(:info, "OK! 🥳")
         |> noreply()
 
       {:error, message} ->
@@ -106,15 +105,25 @@ defmodule MrgrWeb.Live.PendingMergeList do
     merges = Enum.reject(socket.assigns.pending_merges, &(&1.id == payload.id))
 
     socket
+    |> put_closed_flash_message(payload)
     |> assign(:pending_merges, merges)
     |> noreply()
   end
 
-  def handle_info(%{event: "synchronized", payload: payload}, socket) do
-    hydrated = Mrgr.Merge.preload_for_pending_list(payload)
+  defp put_closed_flash_message(socket, %{merged_at: nil} = merge) do
+    put_flash(socket, :warn, "#{merge.title} closed, but not merged")
+  end
+
+  defp put_closed_flash_message(socket, merge) do
+    put_flash(socket, :info, "#{merge.title} merged! 🍾")
+  end
+
+  def handle_info(%{event: "synchronized", payload: merge}, socket) do
+    hydrated = Mrgr.Merge.preload_for_pending_list(merge)
     merges = replace_updated(socket.assigns.pending_merges, hydrated)
 
     socket
+    |> put_flash(:info, "#{merge.title} updated")
     |> assign(:pending_merges, merges)
     |> noreply()
   end
