@@ -7,6 +7,5 @@ defmodule Mrgr.Repo.Migrations.AddMemberDeleteCascadeToUsers do
     alter table(:members) do
       modify(:user_id, references(:users, on_delete: :nilify_all))
     end
-
   end
 end

@@ -5,6 +5,5 @@ defmodule Mrgr.Repo.Migrations.AddHeadsToMerge do
     alter table(:merges) do
       add(:head, :map, default: "{}")
     end
-
   end
 end

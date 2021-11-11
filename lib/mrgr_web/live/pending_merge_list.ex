@@ -8,7 +8,6 @@ defmodule MrgrWeb.Live.PendingMergeList do
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
       merges = Mrgr.Merge.pending_merges(current_user)
 
-
       socket
       |> assign(:current_user, current_user)
       |> assign(:pending_merges, merges)

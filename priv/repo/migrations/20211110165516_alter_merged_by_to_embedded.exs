@@ -6,6 +6,5 @@ defmodule Mrgr.Repo.Migrations.AlterMergedByToEmbedded do
       remove(:merged_by)
       add(:merged_by, :map, default: "{}")
     end
-
   end
 end

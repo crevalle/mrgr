@@ -12,7 +12,7 @@ defmodule Mrgr.Github.Webhook do
   end
 
   # def handle("installation", %{"action" => "requested"} = payload) do
-    # payload
+  # payload
   # end
 
   def handle("pull_request", %{"action" => "opened"} = payload) do
@@ -38,8 +38,8 @@ defmodule Mrgr.Github.Webhook do
   end
 
   # def handle("check_suite", %{"action" => "requested"} = payload) do
-    # # Mrgr.CheckRun.create(payload)
-    # payload
+  # # Mrgr.CheckRun.create(payload)
+  # payload
   # end
 
   # suspended?

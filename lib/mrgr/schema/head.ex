@@ -21,5 +21,4 @@ defmodule Mrgr.Schema.Head do
     |> cast_embed(:user)
     |> put_external_id()
   end
-
 end

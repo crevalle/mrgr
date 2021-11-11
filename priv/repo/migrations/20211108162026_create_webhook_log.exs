@@ -10,6 +10,5 @@ defmodule Mrgr.Repo.Migrations.CreateWebhookLog do
 
       timestamps()
     end
-
   end
 end

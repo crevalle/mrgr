@@ -1,5 +1,4 @@
 defmodule MrgrWeb.Formatter do
-
   def shorten_sha(sha) do
     String.slice(sha, 0..6)
   end
@@ -7,5 +6,4 @@ defmodule MrgrWeb.Formatter do
   def ts(timestamp) do
     Calendar.strftime(timestamp, "%b %d, '%y %I:%M%p")
   end
-
 end

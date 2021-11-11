@@ -20,8 +20,9 @@ defmodule Mrgr.User do
 
   @spec find_or_create_from_github(%{token: map(), data: map()}) :: Schema.t()
   def find_or_create_from_github(auth) do
-    params = Mrgr.User.Github.generate_params(auth)
-             |> IO.inspect()
+    params =
+      Mrgr.User.Github.generate_params(auth)
+      |> IO.inspect()
 
     case find_by_email(params["email"]) do
       %Schema{} = user ->
@@ -76,14 +77,16 @@ defmodule Mrgr.User do
   def associate_member(user) do
     case Mrgr.Repo.get_by(Mrgr.Schema.Member, login: user.nickname) do
       %Mrgr.Schema.Member{user_id: nil} = member ->
-
         member
         |> Mrgr.Schema.Member.changeset(%{user_id: user.id})
         |> Mrgr.Repo.update!()
+
       nil ->
         # TODO: create_member!()
         nil
-      _associated_member -> nil
+
+      _associated_member ->
+        nil
     end
   end
 
