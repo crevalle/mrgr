@@ -111,14 +111,6 @@ defmodule MrgrWeb.Live.PendingMergeList do
     |> noreply()
   end
 
-  defp put_closed_flash_message(socket, %{merged_at: nil} = merge) do
-    put_flash(socket, :warn, "#{merge.title} closed, but not merged")
-  end
-
-  defp put_closed_flash_message(socket, merge) do
-    put_flash(socket, :info, "#{merge.title} merged! 🍾")
-  end
-
   def handle_info(%{event: "synchronized", payload: merge}, socket) do
     hydrated = Mrgr.Merge.preload_for_pending_list(merge)
     merges = replace_updated(socket.assigns.pending_merges, hydrated)
@@ -141,5 +133,13 @@ defmodule MrgrWeb.Live.PendingMergeList do
           not_updated
       end
     end)
+  end
+
+  defp put_closed_flash_message(socket, %{merged_at: nil} = merge) do
+    put_flash(socket, :warn, "#{merge.title} closed, but not merged")
+  end
+
+  defp put_closed_flash_message(socket, merge) do
+    put_flash(socket, :info, "#{merge.title} merged! 🍾")
   end
 end
