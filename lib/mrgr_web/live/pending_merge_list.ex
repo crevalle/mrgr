@@ -93,10 +93,12 @@ defmodule MrgrWeb.Live.PendingMergeList do
   # repoened will put it at the top, which may not be what we want
   def handle_info(%{event: event, payload: payload}, socket)
       when event in ["created", "reopened"] do
+    merge = Mrgr.Repo.preload(payload, :repository)
+
     merges = socket.assigns.pending_merges
 
     socket
-    |> assign(:pending_merges, [payload | merges])
+    |> assign(:pending_merges, [merge | merges])
     |> noreply()
   end
 
