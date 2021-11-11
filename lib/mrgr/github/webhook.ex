@@ -25,15 +25,10 @@ defmodule Mrgr.Github.Webhook do
     payload
   end
 
-  # def handle("pull_request", %{"action" => "closed", "merged" => true} = payload) do
-    # # merged
-    # payload
-  # end
-
-  # def handle("pull_request", %{"action" => "closed", "merged" => false} = payload) do
-    # # closed, not merged
-    # payload
-  # end
+  def handle("pull_request", %{"action" => "closed"} = payload) do
+    Mrgr.Merge.close(payload)
+    payload
+  end
 
   # HEAD OF PR IS UPDATED - create a new check suite/run, new checklist
   def handle("pull_request", %{"action" => "synchronize"} = payload) do

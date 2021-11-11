@@ -15,9 +15,9 @@ defmodule Mrgr.Merge do
   end
 
   def reopen(payload) do
-    external_id = payload["pull_request"]["id"]
+    merge = find_from_payload(payload)
 
-    case find_by_external_id(external_id) do
+    case merge do
       %Mrgr.Schema.Merge{} = merge ->
         params = payload_to_params(payload)
 
@@ -32,13 +32,25 @@ defmodule Mrgr.Merge do
   end
 
   def synchronize(payload) do
-    external_id = payload["pull_request"]["id"]
-    merge = find_by_external_id(external_id)
+    merge = find_from_payload(payload)
 
     merge
     |> Mrgr.Schema.Merge.synchronize_changeset(payload)
     |> Mrgr.Repo.update()
     |> maybe_broadcast("synchronized")
+  end
+
+  def close(%{"pull_request" => params} = payload) do
+    merge = find_from_payload(payload)
+
+    merge
+    |> Mrgr.Schema.Merge.close_changeset(params)
+    |> Mrgr.Repo.update()
+    |> maybe_broadcast("closed")
+  end
+
+  defp find_from_payload(%{"pull_request" => %{"id" => id}}) do
+    find_by_external_id(id)
   end
 
   @spec merge!(Mrgr.Schema.Merge.t(), Mrgr.Schema.User.t()) ::
@@ -50,8 +62,6 @@ defmodule Mrgr.Merge do
     |> handle_merge_response()
     |> case do
       {:ok, %{"sha" => _sha}} ->
-        merge = mark_merged!(merge, merger)
-        # TODO: pubsub
         {:ok, merge}
 
       {:error, %{result: %{"message" => message}}} ->
@@ -64,14 +74,6 @@ defmodule Mrgr.Merge do
       nil -> {:error, :not_found}
       merge -> merge!(merge, merger)
     end
-  end
-
-  def mark_merged!(merge, merger) do
-    member = Mrgr.User.member(merger)
-
-    merge
-    |> Mrgr.Schema.Merge.merge_changeset(%{merged_by_id: member.id})
-    |> Mrgr.Repo.update!()
   end
 
   def maybe_broadcast({:ok, merge}, event) do
@@ -138,15 +140,14 @@ defmodule Mrgr.Merge do
     |> Enum.map(&Mrgr.Repo.delete/1)
   end
 
-  defp payload_to_params(payload) do
+  defp payload_to_params(%{"pull_request" => params} = payload) do
     repository_id = payload["repository"]["id"]
     repo = Mrgr.Github.find(Mrgr.Schema.Repository, repository_id)
 
-    payload
-    |> Map.get("pull_request")
+    params
     |> Map.put("repository_id", repo.id)
     |> Map.put("author_id", author_id_from_payload(payload))
-    |> Map.put("opened_at", payload["pull_request"]["created_at"])
+    |> Map.put("opened_at", params["created_at"])
   end
 
   defp author_id_from_payload(payload) do
@@ -196,7 +197,6 @@ defmodule Mrgr.Merge do
         join: i in assoc(r, :installation),
         join: a in assoc(i, :account),
         preload: [repository: {r, [installation: {i, [account: a]}]}]
-        # preload: [current_installation: {c, account: a}]
       )
     end
   end
