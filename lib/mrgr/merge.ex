@@ -15,9 +15,9 @@ defmodule Mrgr.Merge do
   end
 
   def reopen(payload) do
-    external_id = payload["pull_request"]["id"]
+    merge = find_from_payload(payload)
 
-    case find_by_external_id(external_id) do
+    case merge do
       %Mrgr.Schema.Merge{} = merge ->
         params = payload_to_params(payload)
 
@@ -32,13 +32,16 @@ defmodule Mrgr.Merge do
   end
 
   def synchronize(payload) do
-    external_id = payload["pull_request"]["id"]
-    merge = find_by_external_id(external_id)
+    merge = find_from_payload(payload)
 
     merge
     |> Mrgr.Schema.Merge.synchronize_changeset(payload)
     |> Mrgr.Repo.update()
     |> maybe_broadcast("synchronized")
+  end
+
+  defp find_from_payload(%{"pull_request" => %{"id" => id}}) do
+    find_by_external_id(id)
   end
 
   @spec merge!(Mrgr.Schema.Merge.t(), Mrgr.Schema.User.t()) ::
