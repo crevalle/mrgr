@@ -44,7 +44,7 @@ defmodule Mrgr.Merge do
     merge = find_from_payload(payload)
 
     merge
-    |> Mrgr.Schema.Merge.merge_changeset(params)
+    |> Mrgr.Schema.Merge.close_changeset(params)
     |> Mrgr.Repo.update()
     |> maybe_broadcast("closed")
   end
