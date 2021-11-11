@@ -16,7 +16,7 @@ defmodule Mrgr.Schema.Merge do
     belongs_to(:repository, Mrgr.Schema.Repository)
     belongs_to(:author, Mrgr.Schema.Member)
 
-    embeds_one(:merged_by, Mrgr.Github.User)
+    embeds_one(:merged_by, Mrgr.Github.User, on_replace: :update)
     field(:merged_at, :utc_datetime)
 
     timestamps()
@@ -55,7 +55,8 @@ defmodule Mrgr.Schema.Merge do
 
   def close_changeset(schema, %{"merged" => true} = params) do
     schema
-    |> cast(params, [:merged_by])
+    |> cast(params, [])
+    |> cast_embed(:merged_by)
     |> put_closed_status()
     |> put_timestamp(:merged_at)
   end
