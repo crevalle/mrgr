@@ -1,12 +1,9 @@
-defmodule MrgrWeb.Live.PendingMergeList do
+defmodule MrgrWeb.PendingMergeLive do
   use MrgrWeb, :live_view
 
   on_mount MrgrWeb.Locale
 
   def mount(params, %{"user_id" => user_id} = session, socket) do
-    IO.inspect(params, label: "PARAMS in live view")
-    IO.inspect(session, label: "SESSION in live view")
-
     if connected?(socket) do
       subscribe()
 
@@ -51,8 +48,8 @@ defmodule MrgrWeb.Live.PendingMergeList do
           <td><%= merge.user.login %></td>
           <td><%= merge.head.ref %></td>
           <td><%= shorten_sha(merge.head.sha) %></td>
-          <td><%= ts(merge.updated_at) %></td>
-          <td><%= ts(merge.opened_at) %></td>
+          <td><%= ts(merge.updated_at, assigns.timezone) %></td>
+          <td><%= ts(merge.opened_at, assigns.timezone) %></td>
           <td><button phx-click="merge" phx-value-id={merge.id}>Merge</button></td>
         </tr>
       <% end %>
