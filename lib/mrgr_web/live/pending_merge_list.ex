@@ -1,7 +1,12 @@
 defmodule MrgrWeb.Live.PendingMergeList do
   use MrgrWeb, :live_view
 
-  def mount(_params, %{"user_id" => user_id}, socket) do
+  on_mount MrgrWeb.Locale
+
+  def mount(params, %{"user_id" => user_id} = session, socket) do
+    IO.inspect(params, label: "PARAMS in live view")
+    IO.inspect(session, label: "SESSION in live view")
+
     if connected?(socket) do
       subscribe()
 
