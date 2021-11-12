@@ -50,8 +50,9 @@ defmodule MrgrWeb do
       use Phoenix.LiveView,
         layout: {MrgrWeb.LayoutView, "live.html"}
 
+      import Mrgr.TupleHelpers
+
       unquote(view_helpers())
-      unquote(socket_helpers())
     end
   end
 
@@ -97,18 +98,6 @@ defmodule MrgrWeb do
       import MrgrWeb.ErrorHelpers
       import MrgrWeb.Gettext
       alias MrgrWeb.Router.Helpers, as: Routes
-    end
-  end
-
-  defp socket_helpers do
-    quote do
-      def ok(socket) do
-        {:ok, socket}
-      end
-
-      def noreply(socket) do
-        {:noreply, socket}
-      end
     end
   end
 
