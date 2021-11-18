@@ -1,8 +1,6 @@
 defmodule MrgrWeb.PendingMergeLive do
   use MrgrWeb, :live_view
 
-  on_mount MrgrWeb.Locale
-
   def mount(params, %{"user_id" => user_id} = session, socket) do
     if connected?(socket) do
       subscribe()

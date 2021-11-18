@@ -52,6 +52,8 @@ defmodule MrgrWeb do
 
       import Mrgr.TupleHelpers
 
+      on_mount MrgrWeb.Locale
+
       unquote(view_helpers())
     end
   end
