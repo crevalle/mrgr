@@ -87,3 +87,8 @@
   text-decoration: none;
   cursor: pointer;
 }
+
+.row {
+  flex-direction: row;
+  margin: 10px;
+}

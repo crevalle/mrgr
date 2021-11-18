@@ -38,22 +38,24 @@ defmodule MrgrWeb.PendingMergeLive do
       <th>Updated</th>
       <th>Opened</th>
       <th></th>
-      <%= for merge <- assigns.pending_merges do %>
-        <tr>
-          <td><%= merge.id %></td>
-          <td><%= merge.status %></td>
-          <td><%= merge.repository.name %></td>
-          <td><%= merge.number %></td>
-          <td><%= merge.title %></td>
-          <td><%= merge.user.login %></td>
-          <td><%= merge.head.ref %></td>
-          <td><%= shorten_sha(merge.head.sha) %></td>
-          <td><%= ts(merge.updated_at, assigns.timezone) %></td>
-          <td><%= ts(merge.opened_at, assigns.timezone) %></td>
-          <td><button phx-click="merge" phx-value-id={merge.id}>Merge</button></td>
-        </tr>
-      <% end %>
     </table>
+    <div>
+      <%= for merge <- assigns.pending_merges do %>
+        <div draggable="true" class="row">
+          <div><%= merge.id %></div>
+          <div><%= merge.status %></div>
+          <div><%= merge.repository.name %></div>
+          <div><%= merge.number %></div>
+          <div><%= merge.title %></div>
+          <div><%= merge.user.login %></div>
+          <div><%= merge.head.ref %></div>
+          <div><%= shorten_sha(merge.head.sha) %></div>
+          <div><%= ts(merge.updated_at, assigns.timezone) %></div>
+          <div><%= ts(merge.opened_at, assigns.timezone) %></div>
+          <div><button phx-click="merge" phx-value-id={merge.id}>Merge</button></div>
+        </div>
+      <% end %>
+    </div>
     """
   end
 
