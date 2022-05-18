@@ -1,4 +1,6 @@
 defmodule Mrgr.Merge do
+  require Logger
+
   alias Mrgr.Merge.Query
 
   @topic "merge"
@@ -45,7 +47,7 @@ defmodule Mrgr.Merge do
   def close(%{"pull_request" => params} = payload) do
     with {:ok, merge} <- find_from_payload(payload),
          cs <- Mrgr.Schema.Merge.close_changeset(merge, params),
-         {:ok, updated_merge} <- Mrgr.Repo.update() do
+         {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       broadcast(updated_merge, "closed")
     else
       {:error, :not_found} = error ->
