@@ -14,43 +14,54 @@ defmodule Mrgr.Merge do
     |> maybe_broadcast("created")
   end
 
+  @spec reopen(map()) ::
+          {:ok, Mrge.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def reopen(payload) do
-    merge = find_from_payload(payload)
-
-    case merge do
-      %Mrgr.Schema.Merge{} = merge ->
-        params = payload_to_params(payload)
-
-        merge
-        |> Mrgr.Schema.Merge.create_changeset(params)
-        |> Mrgr.Repo.update()
-        |> maybe_broadcast("reopened")
-
-      nil ->
+    with {:ok, merge} <- find_from_payload(payload),
+         cs <- Mrgr.Schema.Merge.create_changeset(payload_to_params(payload), merge),
+         {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
+      broadcast(updated_merge, "reopened")
+    else
+      {:error, :not_found} ->
         create_from_webhook(payload)
+
+      {:error, _cs} = error ->
+        error
     end
   end
 
+  @spec synchronize(map()) ::
+          {:ok, Mrge.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def synchronize(payload) do
-    merge = find_from_payload(payload)
-
-    merge
-    |> Mrgr.Schema.Merge.synchronize_changeset(payload)
-    |> Mrgr.Repo.update()
-    |> maybe_broadcast("synchronized")
+    with {:ok, merge} <- find_from_payload(payload),
+         cs <- Mrgr.Schema.Merge.synchronize_changeset(merge, payload),
+         {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
+      broadcast(updated_merge, "synchronized")
+    end
   end
 
+  @spec close(map()) ::
+          {:ok, Mrge.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def close(%{"pull_request" => params} = payload) do
-    merge = find_from_payload(payload)
+    with {:ok, merge} <- find_from_payload(payload),
+         cs <- Mrgr.Schema.Merge.close_changeset(merge, params),
+         {:ok, updated_merge} <- Mrgr.Repo.update() do
+      broadcast(updated_merge, "closed")
+    else
+      {:error, :not_found} = error ->
+        Logger.warn("found no local PR")
+        error
 
-    merge
-    |> Mrgr.Schema.Merge.close_changeset(params)
-    |> Mrgr.Repo.update()
-    |> maybe_broadcast("closed")
+      {:error, _cs} = error ->
+        error
+    end
   end
 
   defp find_from_payload(%{"pull_request" => %{"id" => id}}) do
-    find_by_external_id(id)
+    case find_by_external_id(id) do
+      nil -> {:error, :not_found}
+      merge -> {:ok, merge}
+    end
   end
 
   @spec merge!(Mrgr.Schema.Merge.t(), Mrgr.Schema.User.t()) ::
@@ -76,9 +87,13 @@ defmodule Mrgr.Merge do
     end
   end
 
-  def maybe_broadcast({:ok, merge}, event) do
+  def broadcast(merge, event) do
     Mrgr.PubSub.broadcast(merge, topic(), event)
     {:ok, merge}
+  end
+
+  def maybe_broadcast({:ok, merge}, event) do
+    broadcast(merge, event)
   end
 
   def maybe_broadcast({:error, _cs} = error), do: error
