@@ -8,6 +8,7 @@ defmodule Mrgr.Schema.Merge do
     field(:status, :string)
     field(:title, :string)
     field(:url, :string)
+    field(:cardinality, :integer, virtual: true)
 
     embeds_one(:user, Mrgr.Github.User, on_replace: :update)
 

@@ -6,7 +6,7 @@ defmodule MrgrWeb.PendingMergeLive do
       subscribe()
 
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
-      merges = Mrgr.Merge.pending_merges(current_user)
+      merges = Mrgr.Merge.pending_merges(current_user) |> assign_cardinality()
 
       socket
       |> assign(:current_user, current_user)
@@ -24,35 +24,35 @@ defmodule MrgrWeb.PendingMergeLive do
     ~H"""
     <button phx-click="refresh">Refresh PRs</button>
 
-    <table>
-      <th>id</th>
-      <th>Status</th>
-      <th>Repo</th>
-      <th>Number</th>
-      <th>Title</th>
-      <th>Author</th>
-      <th>Branch</th>
-      <th>Current SHA</th>
-      <th>Updated</th>
-      <th>Opened</th>
-      <th></th>
-    </table>
-    <div>
-      <%= for merge <- assigns.pending_merges do %>
-        <div draggable="true" class="row">
-          <div><%= merge.id %></div>
-          <div><%= merge.status %></div>
-          <div><%= merge.repository.name %></div>
-          <div><%= merge.number %></div>
-          <div><%= merge.title %></div>
-          <div><%= merge.user.login %></div>
-          <div><%= merge.head.ref %></div>
-          <div><%= shorten_sha(merge.head.sha) %></div>
-          <div><%= ts(merge.updated_at, assigns.timezone) %></div>
-          <div><%= ts(merge.opened_at, assigns.timezone) %></div>
-          <div><button phx-click="merge" phx-value-id={merge.id}>Merge</button></div>
-        </div>
-      <% end %>
+    <div phx-hook="Drag" id="drag">
+      <div class="table-header row">
+        <div>#</div>
+        <div>id</div>
+        <div>Status</div>
+        <div>Number</div>
+        <div>Title</div>
+        <div>Branch</div>
+        <div>Current SHA</div>
+        <div>Updated</div>
+        <div>Opened</div>
+        <div>Actions</div>
+      </div>
+      <div class="table-body dropzone" id="pending-merge-list">
+        <%= for merge <- assigns.pending_merges do %>
+          <div draggable="true" class="draggable row" id={"merge-#{merge.id}"}>
+            <div><%= merge.cardinality %></div>
+            <div><%= merge.id %></div>
+            <div><%= merge.status %></div>
+            <div><%= merge.number %></div>
+            <div><%= merge.title %></div>
+            <div><%= merge.head.ref %></div>
+            <div><%= shorten_sha(merge.head.sha) %></div>
+            <div><%= ts(merge.updated_at, assigns.timezone) %></div>
+            <div><%= ts(merge.opened_at, assigns.timezone) %></div>
+            <div><button phx-click="merge" phx-value-id={merge.id}>Merge</button></div>
+          </div>
+        <% end %>
+      </div>
     </div>
     """
   end
@@ -141,5 +141,17 @@ defmodule MrgrWeb.PendingMergeLive do
           not_updated
       end
     end)
+  end
+
+  defp assign_cardinality(merges) do
+    # gives us a random ordering
+    merges
+    |> Enum.shuffle()
+    |> Enum.reduce([], fn m, acc ->
+      idx = Enum.count(acc) + 1
+
+      [%{m | cardinality: idx} | acc]
+    end)
+    |> Enum.reverse()
   end
 end

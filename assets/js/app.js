@@ -26,6 +26,11 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
+// LiveView Hooks
+import Drag from "./dragHook";
+
+const Hooks = { Drag: Drag };
+
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
   params: {
@@ -34,6 +39,7 @@ let liveSocket = new LiveSocket("/live", Socket, {
     timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,
     timezone_offset: -(new Date().getTimezoneOffset() / 60),
   },
+  hooks: Hooks,
 });
 
 // Show progress bar on live navigation and form submits
