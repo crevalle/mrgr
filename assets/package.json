@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "assets": "^3.0.1",
+    "prefix": "^1.0.0",
+    "sortablejs": "^1.15.0"
+  }
+}
