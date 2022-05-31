@@ -6,7 +6,7 @@ defmodule MrgrWeb.PendingMergeLive do
       subscribe()
 
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
-      merges = Mrgr.Merge.pending_merges(current_user) |> assign_cardinality()
+      merges = Mrgr.Merge.pending_merges(current_user) |> assign_cardinality(:random)
 
       socket
       |> assign(:current_user, current_user)
@@ -55,6 +55,32 @@ defmodule MrgrWeb.PendingMergeLive do
       </div>
     </div>
     """
+  end
+
+  def handle_event("dropped", %{"draggedId" => id, "draggableIndex" => index}, socket) do
+
+    dragged = find_dragged(socket.assigns.pending_merges, get_id(id))
+
+    merges = socket.assigns.pending_merges
+             |> update_merge_order(dragged, index)
+             |> assign_cardinality()
+
+    socket
+    |> assign(:pending_merges, merges)
+    |> noreply()
+  end
+
+  # pulls the id off the div constructed above
+  defp get_id("merge-" <> id), do: String.to_integer(id)
+
+  defp find_dragged(merges, id) do
+    Enum.find(merges, fn m -> m.id == id end)
+  end
+
+  defp update_merge_order(merges, updated_item, index) do
+    merges
+    |> Enum.reject(fn m -> m.id == updated_item.id end)
+    |> List.insert_at(index, updated_item)
   end
 
   def handle_event("refresh", _params, socket) do
@@ -143,12 +169,17 @@ defmodule MrgrWeb.PendingMergeLive do
     end)
   end
 
-  defp assign_cardinality(merges) do
+  defp assign_cardinality(merges, :random) do
     # gives us a random ordering
     merges
     |> Enum.shuffle()
+    |> assign_cardinality()
+  end
+
+  defp assign_cardinality(merges) do
+    merges
     |> Enum.reduce([], fn m, acc ->
-      idx = Enum.count(acc) + 1
+      idx = Enum.count(acc)
 
       [%{m | cardinality: idx} | acc]
     end)
