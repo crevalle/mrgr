@@ -138,9 +138,17 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.one()
   end
 
-  def pending_merges(%{current_installation_id: id}) do
+  def pending_merges(%Mrgr.Schema.Installation{id: id}) do
+    pending_merges(id)
+  end
+
+  def pending_merges(%Mrgr.Schema.User{current_installation_id: id}) do
+    pending_merges(id)
+  end
+
+  def pending_merges(installation_id) do
     Mrgr.Schema.Merge
-    |> Query.for_installation(id)
+    |> Query.for_installation(installation_id)
     |> Query.open()
     |> Query.order_by_priority()
     |> Mrgr.Repo.all()

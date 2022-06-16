@@ -30,6 +30,8 @@ defmodule Mrgr.Installation do
     # TODO repos
     Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories, client)
 
+    Mrgr.MergeQueue.regenerate_merge_queue(installation)
+
     {:ok, installation}
   end
 
@@ -52,6 +54,8 @@ defmodule Mrgr.Installation do
 
     client = Mrgr.Github.Client.new(installation)
     Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories, client)
+
+    Mrgr.MergeQueue.regenerate_merge_queue(installation)
   end
 
   def set_tokens(install, %Mrgr.Github.AccessToken{} = token) do

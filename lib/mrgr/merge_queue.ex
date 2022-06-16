@@ -8,11 +8,12 @@ defmodule Mrgr.MergeQueue do
 
   """
 
-  # def regenerate_merge_queue(installation) do
-  # installation
-  # |> clear_current_queue()
-  # |> queue_up_open_merges()
-  # end
+  def regenerate_merge_queue(installation) do
+    installation
+    |> Mrgr.Merge.pending_merges()
+    |> Enum.sort_by(& &1.opened_at, DateTime)
+    |> regenerate_list_indices()
+  end
 
   def clear_current_queue(merges) do
     ids = Enum.map(merges, & &1.id)
@@ -100,5 +101,4 @@ defmodule Mrgr.MergeQueue do
     |> List.insert_at(index, merge)
     |> regenerate_list_indices()
   end
-
 end
