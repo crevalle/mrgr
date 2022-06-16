@@ -6,10 +6,7 @@ defmodule MrgrWeb.Locale do
   @default_timezone "UTC"
   @default_timezone_offset 0
 
-  def on_mount(:default, params, session, socket) do
-    IO.inspect(params, label: "params")
-    IO.inspect(session, label: "session")
-
+  def on_mount(:default, _params, _session, socket) do
     socket
     |> assign_locale()
     |> assign_timezone()
