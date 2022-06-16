@@ -166,11 +166,4 @@ defmodule MrgrWeb.PendingMergeLive do
     end)
   end
 
-  defp assign_random_cardinality(merges) do
-    # gives us a random ordering
-    merges
-    |> Enum.shuffle()
-    |> assign_cardinality()
-  end
-
 end
