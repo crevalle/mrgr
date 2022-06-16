@@ -36,6 +36,7 @@ defmodule Mrgr.MixProject do
       {:dialyxir, "~> 1.1", runtime: false},
       {:ecto_sql, "~> 3.6"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
+      {:faker, "~> 0.17.0"},
       {:floki, ">= 0.30.0", only: :test},
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
