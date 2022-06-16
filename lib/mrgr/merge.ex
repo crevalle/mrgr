@@ -201,10 +201,9 @@ defmodule Mrgr.Merge do
       )
     end
 
-    # for now, opened_at
     def order_by_priority(query) do
       from(q in query,
-        order_by: [desc: q.opened_at]
+        order_by: [asc: q.merge_queue_index]
       )
     end
 

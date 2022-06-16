@@ -6,7 +6,7 @@ defmodule MrgrWeb.PendingMergeLive do
       subscribe()
 
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
-      merges = Mrgr.Merge.pending_merges(current_user) |> assign_random_cardinality()
+      merges = Mrgr.Merge.pending_merges(current_user)
 
       socket
       |> assign(:current_user, current_user)
@@ -63,7 +63,6 @@ defmodule MrgrWeb.PendingMergeLive do
     merges =
       socket.assigns.pending_merges
       |> update_merge_order(dragged, index)
-      |> assign_cardinality()
 
     socket
     |> assign(:pending_merges, merges)
@@ -174,7 +173,4 @@ defmodule MrgrWeb.PendingMergeLive do
     |> assign_cardinality()
   end
 
-  defp assign_cardinality(merges) do
-    Mrgr.MergeQueue.regenerate_list_indices(merges)
-  end
 end
