@@ -147,7 +147,7 @@ defmodule MrgrWeb.PendingMergeLive do
     merges = replace_updated(socket.assigns.pending_merges, hydrated)
 
     socket
-    |> put_flash(:info, "#{merge.title} updated")
+    |> put_flash(:info, "Open PR \"#{merge.title}\" updated")
     |> assign(:pending_merges, merges)
     |> noreply()
   end
