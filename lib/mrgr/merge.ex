@@ -66,10 +66,10 @@ defmodule Mrgr.Merge do
     end
   end
 
-  @spec merge!(Mrgr.Schema.Merge.t(), Mrgr.Schema.User.t()) ::
+  @spec merge!(Mrgr.Schema.Merge.t() | integer(), String.t(), Mrgr.Schema.User.t()) ::
           {:ok, Mrgr.Schema.Merge.t()} | {:error, String.t()}
-  def merge!(%Mrgr.Schema.Merge{} = merge, merger) do
-    args = generate_merge_args(merge, merger)
+  def merge!(%Mrgr.Schema.Merge{} = merge, message, merger) do
+    args = generate_merge_args(merge, message, merger)
 
     Tentacat.Pulls.merge(args.client, args.owner, args.repo, args.number, args.body)
     |> handle_merge_response()
@@ -77,15 +77,15 @@ defmodule Mrgr.Merge do
       {:ok, %{"sha" => _sha}} ->
         {:ok, merge}
 
-      {:error, %{result: %{"message" => message}}} ->
-        {:error, message}
+      {:error, %{result: %{"message" => str}}} ->
+        {:error, str}
     end
   end
 
-  def merge!(id, merger) do
+  def merge!(id, message, merger) do
     case load_merge_for_merging(id) do
       nil -> {:error, :not_found}
-      merge -> merge!(merge, merger)
+      merge -> merge!(merge, message, merger)
     end
   end
 
@@ -108,7 +108,7 @@ defmodule Mrgr.Merge do
     {:error, %{code: code, result: result}}
   end
 
-  def generate_merge_args(merge, merger) do
+  def generate_merge_args(merge, message, merger) do
     installation = merge.repository.installation
 
     client = Mrgr.Github.Client.new(merger)
@@ -117,9 +117,10 @@ defmodule Mrgr.Merge do
     number = merge.number
 
     body = %{
-      "commit_title" => "Merge Dat Shit",
-      "commit_message" => "I have ants in my pants",
-      "sha" => merge.head.sha
+      "commit_title" => merge.title,
+      "commit_message" => message,
+      "sha" => merge.head.sha,
+      "merge_method" => "squash"
     }
 
     %{client: client, owner: owner, repo: repo, number: number, body: body}

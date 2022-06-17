@@ -102,3 +102,7 @@ body {
 .table-header {
   font-weight: 500;
 }
+
+.column {
+  flex-direction: column;
+}

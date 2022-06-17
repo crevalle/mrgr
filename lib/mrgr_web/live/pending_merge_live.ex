@@ -1,7 +1,7 @@
 defmodule MrgrWeb.PendingMergeLive do
   use MrgrWeb, :live_view
 
-  def mount(params, %{"user_id" => user_id} = session, socket) do
+  def mount(params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
       subscribe()
 
@@ -39,17 +39,27 @@ defmodule MrgrWeb.PendingMergeLive do
       </div>
       <div class="table-body dropzone" id="pending-merge-list">
         <%= for merge <- assigns.pending_merges do %>
-          <div draggable="true" class="draggable row" id={"merge-#{merge.id}"}>
-            <div><%= merge.merge_queue_index %></div>
-            <div><%= merge.id %></div>
-            <div><%= merge.status %></div>
-            <div><%= merge.number %></div>
-            <div><%= merge.title %></div>
-            <div><%= merge.head.ref %></div>
-            <div><%= shorten_sha(merge.head.sha) %></div>
-            <div><%= ts(merge.updated_at, assigns.timezone) %></div>
-            <div><%= ts(merge.opened_at, assigns.timezone) %></div>
-            <div><button phx-click="merge" phx-value-id={merge.id}>Merge</button></div>
+          <div draggable="true" class="draggable column" id={"merge-#{merge.id}"}>
+            <div class="row">
+              <div><%= merge.merge_queue_index %></div>
+              <div><%= merge.id %></div>
+              <div><%= merge.status %></div>
+              <div><%= merge.number %></div>
+              <div><%= merge.title %></div>
+              <div><%= merge.head.ref %></div>
+              <div><%= shorten_sha(merge.head.sha) %></div>
+              <div><%= ts(merge.updated_at, assigns.timezone) %></div>
+              <div><%= ts(merge.opened_at, assigns.timezone) %></div>
+              <div><button phx-click="add-merge-message" phx-value-id={merge.id}>Merge</button></div>
+            </div>
+            <div>
+              <.form let={f} for={:merge}, phx-submit="merge">
+                <%= textarea f, :message, placeholder: "Commit message defaults to PR title.  Enter additional info here." %>
+                <%= hidden_input f, :id, value: merge.id %>
+                <%= submit "Save", phx_disable_with: "Merging..." %>
+              </.form>
+            </div>
+
           </div>
         <% end %>
       </div>
@@ -83,8 +93,11 @@ defmodule MrgrWeb.PendingMergeLive do
     {:noreply, socket}
   end
 
-  def handle_event("merge", %{"id" => merge_id}, socket) do
-    Mrgr.Merge.merge!(merge_id, socket.assigns.current_user)
+  def handle_event("merge", %{"merge" => params}, socket) do
+    id = String.to_integer(params["id"])
+    message = params["message"]
+
+    Mrgr.Merge.merge!(id, message, socket.assigns.current_user)
     |> case do
       {:ok, _merge} ->
         socket
@@ -134,22 +147,22 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply()
   end
 
+  def handle_info(%{event: "synchronized", payload: merge}, socket) do
+    hydrated = Mrgr.Merge.preload_for_pending_list(merge)
+    merges = replace_updated(socket.assigns.pending_merges, hydrated)
+
+    socket
+    |> put_flash(:info, "Open PR \"#{merge.title}\" updated.  New head is #{shorten_sha(merge.head.sha)}.")
+    |> assign(:pending_merges, merges)
+    |> noreply()
+  end
+
   defp put_closed_flash_message(socket, %{merged_at: nil} = merge) do
     put_flash(socket, :warn, "#{merge.title} closed, but not merged")
   end
 
   defp put_closed_flash_message(socket, merge) do
     put_flash(socket, :info, "#{merge.title} merged! 🍾")
-  end
-
-  def handle_info(%{event: "synchronized", payload: merge}, socket) do
-    hydrated = Mrgr.Merge.preload_for_pending_list(merge)
-    merges = replace_updated(socket.assigns.pending_merges, hydrated)
-
-    socket
-    |> put_flash(:info, "Open PR \"#{merge.title}\" updated")
-    |> assign(:pending_merges, merges)
-    |> noreply()
   end
 
   def replace_updated(merges, updated) do
