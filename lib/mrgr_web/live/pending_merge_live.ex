@@ -69,17 +69,6 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply()
   end
 
-  # pulls the id off the div constructed above
-  defp get_id("merge-" <> id), do: String.to_integer(id)
-
-  defp find_dragged(merges, id) do
-    Mrgr.MergeQueue.find_merge_by_id(merges, id)
-  end
-
-  defp update_merge_order(merges, updated_item, new_index) do
-    Mrgr.MergeQueue.update(merges, updated_item, new_index)
-  end
-
   def handle_event("refresh", _params, socket) do
     user = socket.assigns.current_user
 
@@ -107,6 +96,18 @@ defmodule MrgrWeb.PendingMergeLive do
         |> put_flash(:error, message)
         |> noreply()
     end
+  end
+
+
+  # pulls the id off the div constructed above
+  defp get_id("merge-" <> id), do: String.to_integer(id)
+
+  defp find_dragged(merges, id) do
+    Mrgr.MergeQueue.find_merge_by_id(merges, id)
+  end
+
+  defp update_merge_order(merges, updated_item, new_index) do
+    Mrgr.MergeQueue.update(merges, updated_item, new_index)
   end
 
   # event bus
