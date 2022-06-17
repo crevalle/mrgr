@@ -19,7 +19,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
           <td><%= hook.object %></td>
           <td><%= hook.action %></td>
           <td></td>
-          <td><%= ts(hook.inserted_at) %></td>
+          <td><%= ts(hook.inserted_at, assigns.timezone) %></td>
           <td><button phx-click="fire" phx-value-id={hook.id}>Fire!</button></td>
         </tr>
       <% end %>

@@ -8,6 +8,7 @@ defmodule Mrgr.Schema.Merge do
     field(:status, :string)
     field(:title, :string)
     field(:url, :string)
+    field(:merge_queue_index, :integer)
 
     embeds_one(:user, Mrgr.Github.User, on_replace: :update)
 
@@ -28,6 +29,7 @@ defmodule Mrgr.Schema.Merge do
     title
     url
     repository_id
+    merge_queue_index
   ]a
 
   @synchronize_fields ~w[
@@ -45,6 +47,11 @@ defmodule Mrgr.Schema.Merge do
     |> put_external_id()
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:author_id)
+  end
+
+  def merge_queue_changeset(schema, attrs) do
+    schema
+    |> cast(attrs, [:merge_queue_index])
   end
 
   def synchronize_changeset(schema, %{"pull_request" => params}) do

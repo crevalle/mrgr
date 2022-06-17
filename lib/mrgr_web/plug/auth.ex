@@ -1,6 +1,16 @@
 defmodule MrgrWeb.Plug.Auth do
   import Plug.Conn
 
+  def on_mount(:default, session, params, socket) do
+    case MrgrWeb.Plug.Auth.find_user(params["user_id"]) do
+      %Mrgr.Schema.User{} = user ->
+        {:cont, Phoenix.LiveView.assign(socket, :current_user, user)}
+
+      _nope ->
+        {:halt, socket}
+    end
+  end
+
   @spec sign_in(Plug.Conn.t(), Mrgr.Schema.User.t()) :: Plug.Conn.t()
   def sign_in(conn, %{id: id}) do
     put_session(conn, :user_id, id)

@@ -6,6 +6,9 @@ defmodule Mrgr.Schema do
 
       @type t :: %__MODULE__{}
 
+      # this is the most obnoxious thing
+      @timestamps_opts [type: :utc_datetime]
+
       # expects string params!
       def put_external_id(changeset) do
         put_change(changeset, :external_id, changeset.params["id"])

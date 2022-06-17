@@ -1,7 +1,7 @@
-defmodule MrgrWeb.Live.PendingMergeList do
+defmodule MrgrWeb.PendingMergeLive do
   use MrgrWeb, :live_view
 
-  def mount(_params, %{"user_id" => user_id}, socket) do
+  def mount(params, %{"user_id" => user_id} = session, socket) do
     if connected?(socket) do
       subscribe()
 
@@ -24,40 +24,53 @@ defmodule MrgrWeb.Live.PendingMergeList do
     ~H"""
     <button phx-click="refresh">Refresh PRs</button>
 
-    <table>
-      <th>id</th>
-      <th>Status</th>
-      <th>Repo</th>
-      <th>Number</th>
-      <th>Title</th>
-      <th>Author</th>
-      <th>Branch</th>
-      <th>Current SHA</th>
-      <th>Updated</th>
-      <th>Opened</th>
-      <th></th>
-      <%= for merge <- assigns.pending_merges do %>
-        <tr>
-          <td><%= merge.id %></td>
-          <td><%= merge.status %></td>
-          <td><%= merge.repository.name %></td>
-          <td><%= merge.number %></td>
-          <td><%= merge.title %></td>
-          <td><%= merge.user.login %></td>
-          <td><%= merge.head.ref %></td>
-          <td><%= shorten_sha(merge.head.sha) %></td>
-          <td><%= ts(merge.updated_at) %></td>
-          <td><%= ts(merge.opened_at) %></td>
-          <td><button phx-click="merge" phx-value-id={merge.id}>Merge</button></td>
-        </tr>
-      <% end %>
-    </table>
+    <div phx-hook="Drag" id="drag">
+      <div class="table-header row">
+        <div>#</div>
+        <div>id</div>
+        <div>Status</div>
+        <div>Number</div>
+        <div>Title</div>
+        <div>Branch</div>
+        <div>Current SHA</div>
+        <div>Updated</div>
+        <div>Opened</div>
+        <div>Actions</div>
+      </div>
+      <div class="table-body dropzone" id="pending-merge-list">
+        <%= for merge <- assigns.pending_merges do %>
+          <div draggable="true" class="draggable row" id={"merge-#{merge.id}"}>
+            <div><%= merge.merge_queue_index %></div>
+            <div><%= merge.id %></div>
+            <div><%= merge.status %></div>
+            <div><%= merge.number %></div>
+            <div><%= merge.title %></div>
+            <div><%= merge.head.ref %></div>
+            <div><%= shorten_sha(merge.head.sha) %></div>
+            <div><%= ts(merge.updated_at, assigns.timezone) %></div>
+            <div><%= ts(merge.opened_at, assigns.timezone) %></div>
+            <div><button phx-click="merge" phx-value-id={merge.id}>Merge</button></div>
+          </div>
+        <% end %>
+      </div>
+    </div>
     """
+  end
+
+  def handle_event("dropped", %{"draggedId" => id, "draggableIndex" => index}, socket) do
+    dragged = find_dragged(socket.assigns.pending_merges, get_id(id))
+
+    merges =
+      socket.assigns.pending_merges
+      |> update_merge_order(dragged, index)
+
+    socket
+    |> assign(:pending_merges, merges)
+    |> noreply()
   end
 
   def handle_event("refresh", _params, socket) do
     user = socket.assigns.current_user
-    IO.inspect(user)
 
     # dangerous!  anyone can do this right now.
     installation = Mrgr.Repo.preload(user.current_installation, :repositories)
@@ -83,6 +96,18 @@ defmodule MrgrWeb.Live.PendingMergeList do
         |> put_flash(:error, message)
         |> noreply()
     end
+  end
+
+
+  # pulls the id off the div constructed above
+  defp get_id("merge-" <> id), do: String.to_integer(id)
+
+  defp find_dragged(merges, id) do
+    Mrgr.MergeQueue.find_merge_by_id(merges, id)
+  end
+
+  defp update_merge_order(merges, updated_item, new_index) do
+    Mrgr.MergeQueue.update(merges, updated_item, new_index)
   end
 
   # event bus
@@ -122,7 +147,7 @@ defmodule MrgrWeb.Live.PendingMergeList do
     merges = replace_updated(socket.assigns.pending_merges, hydrated)
 
     socket
-    |> put_flash(:info, "#{merge.title} updated")
+    |> put_flash(:info, "Open PR \"#{merge.title}\" updated")
     |> assign(:pending_merges, merges)
     |> noreply()
   end

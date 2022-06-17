@@ -20,9 +20,7 @@ defmodule Mrgr.User do
 
   @spec find_or_create_from_github(%{token: map(), data: map()}) :: Schema.t()
   def find_or_create_from_github(auth) do
-    params =
-      Mrgr.User.Github.generate_params(auth)
-      |> IO.inspect()
+    params = Mrgr.User.Github.generate_params(auth)
 
     case find_by_email(params["email"]) do
       %Schema{} = user ->
