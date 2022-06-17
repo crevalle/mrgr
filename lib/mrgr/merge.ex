@@ -66,7 +66,7 @@ defmodule Mrgr.Merge do
     end
   end
 
-  @spec merge!(Mrgr.Schema.Merge.t(), String.t(), Mrgr.Schema.User.t()) ::
+  @spec merge!(Mrgr.Schema.Merge.t() | integer(), String.t(), Mrgr.Schema.User.t()) ::
           {:ok, Mrgr.Schema.Merge.t()} | {:error, String.t()}
   def merge!(%Mrgr.Schema.Merge{} = merge, message, merger) do
     args = generate_merge_args(merge, message, merger)
@@ -82,10 +82,10 @@ defmodule Mrgr.Merge do
     end
   end
 
-  def merge!(id, merger) do
+  def merge!(id, message, merger) do
     case load_merge_for_merging(id) do
       nil -> {:error, :not_found}
-      merge -> merge!(merge, merger)
+      merge -> merge!(merge, message, merger)
     end
   end
 
