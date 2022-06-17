@@ -1,7 +1,7 @@
 defmodule MrgrWeb.PendingMergeLive do
   use MrgrWeb, :live_view
 
-  def mount(params, %{"user_id" => user_id} = session, socket) do
+  def mount(params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
       subscribe()
 
@@ -147,14 +147,6 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply()
   end
 
-  defp put_closed_flash_message(socket, %{merged_at: nil} = merge) do
-    put_flash(socket, :warn, "#{merge.title} closed, but not merged")
-  end
-
-  defp put_closed_flash_message(socket, merge) do
-    put_flash(socket, :info, "#{merge.title} merged! 🍾")
-  end
-
   def handle_info(%{event: "synchronized", payload: merge}, socket) do
     hydrated = Mrgr.Merge.preload_for_pending_list(merge)
     merges = replace_updated(socket.assigns.pending_merges, hydrated)
@@ -163,6 +155,14 @@ defmodule MrgrWeb.PendingMergeLive do
     |> put_flash(:info, "Open PR \"#{merge.title}\" updated")
     |> assign(:pending_merges, merges)
     |> noreply()
+  end
+
+  defp put_closed_flash_message(socket, %{merged_at: nil} = merge) do
+    put_flash(socket, :warn, "#{merge.title} closed, but not merged")
+  end
+
+  defp put_closed_flash_message(socket, merge) do
+    put_flash(socket, :info, "#{merge.title} merged! 🍾")
   end
 
   def replace_updated(merges, updated) do
