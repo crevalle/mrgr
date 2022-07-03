@@ -91,6 +91,7 @@ defmodule Mrgr.User do
   def repos(user) do
     user
     |> Query.repos()
+    |> Query.alphabetically()
     |> Mrgr.Repo.all()
   end
 
@@ -126,6 +127,12 @@ defmodule Mrgr.User do
         left_join: c in assoc(q, :current_installation),
         left_join: a in assoc(c, :account),
         preload: [current_installation: {c, account: a}]
+      )
+    end
+
+    def alphabetically(query) do
+      from(q in query,
+        order_by: [asc: :name]
       )
     end
   end
