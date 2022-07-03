@@ -9,6 +9,7 @@ defmodule Mrgr.Schema.Merge do
     field(:title, :string)
     field(:url, :string)
     field(:merge_queue_index, :integer)
+    field(:raw, :map)
 
     embeds_one(:user, Mrgr.Github.User, on_replace: :update)
 
@@ -30,10 +31,12 @@ defmodule Mrgr.Schema.Merge do
     url
     repository_id
     merge_queue_index
+    raw
   ]a
 
   @synchronize_fields ~w[
     title
+    raw
   ]a
 
   def create_changeset(schema, params) do

@@ -174,6 +174,7 @@ defmodule Mrgr.Merge do
     |> Map.put("repository_id", repo.id)
     |> Map.put("author_id", author_id_from_payload(payload))
     |> Map.put("opened_at", params["created_at"])
+    |> Map.put("raw", params)
   end
 
   defp author_id_from_payload(payload) do
