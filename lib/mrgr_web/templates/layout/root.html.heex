@@ -14,10 +14,12 @@
       <section class="container">
         <nav>
             <%= if signed_in?(@conn) do %>
-              <%= "@#{@conn.assigns.current_user.nickname}" %> <%= current_account(@conn.assigns.current_user) %>
-              <%= link "Repos", to: Routes.repository_path(@conn, :index) %>
-              <%= link "Pending Merges", to: Routes.pending_merge_path(@conn, :index) %>
-              <%= link "Sign Out", to: Routes.auth_path(@conn, :delete), method: :delete %>
+              <ul>
+                <li><%= "@#{@conn.assigns.current_user.nickname}" %> <%= current_account(@conn.assigns.current_user) %></li>
+                <li><%= link "Repos", to: Routes.repository_path(@conn, :index) %></li>
+                <li><%= link "Pending Merges", to: Routes.pending_merge_path(@conn, :index) %></li>
+                <li><%= link "Sign Out", to: Routes.auth_path(@conn, :delete), method: :delete %></li>
+              </ul>
             <% else %>
               <%= link "Sign In With Github", to: Routes.auth_path(@conn, :github) %>
             <% end %>
