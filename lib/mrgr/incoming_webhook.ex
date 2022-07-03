@@ -31,6 +31,11 @@ defmodule Mrgr.IncomingWebhook do
     |> Repo.all()
   end
 
+  @spec get(integer() | String.t()) :: Schema.t() | nil
+  def get(id) do
+    Repo.get(Schema, id)
+  end
+
   @spec broadcast_created!(Schema.t()) :: :ok
   def broadcast_created!(hook) do
     Mrgr.PubSub.broadcast(hook, topic(), "created")

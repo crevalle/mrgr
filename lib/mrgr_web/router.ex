@@ -61,6 +61,7 @@ defmodule MrgrWeb.Router do
     pipe_through [:browser, :authenticate, :admin]
 
     live "/incoming-webhooks", Live.IncomingWebhook, :index, as: :incoming_webhook
+    live "/incoming-webhooks/:id", Live.IncomingWebhookShow, :show, as: :incoming_webhook
   end
 
   # Other scopes may use custom stacks.
