@@ -36,7 +36,6 @@ defmodule Mrgr.Schema.Merge do
 
   @synchronize_fields ~w[
     title
-    raw
   ]a
 
   def create_changeset(schema, params) do
@@ -61,6 +60,7 @@ defmodule Mrgr.Schema.Merge do
     schema
     |> cast(params, @synchronize_fields)
     |> cast_embed(:head)
+    |> put_change(:raw, params)
   end
 
   def close_changeset(schema, %{"merged" => true} = params) do
