@@ -47,6 +47,7 @@ defmodule MrgrWeb.Router do
     # live "/pending-merges", PendingMergeLive, :index
     # end
     get "/pending-merges", PendingMergeController, :index
+    get "/pending-merges/:id", PendingMergeController, :show
 
     resources "/repositories", RepositoryController, only: [:index]
   end

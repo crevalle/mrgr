@@ -7,5 +7,9 @@
     phx-click="lv:clear-flash"
     phx-value-key="error"><%= live_flash(@flash, :error) %></p>
 
-  <%= @inner_content %>
+  <%= if Phoenix.LiveView.connected?(@socket) do %>
+    <%= @inner_content %>
+  <% else %>
+    <div class="loading">...</div>
+  <% end %>
 </main>

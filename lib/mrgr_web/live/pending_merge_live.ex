@@ -43,9 +43,8 @@ defmodule MrgrWeb.PendingMergeLive do
             <div class="row">
               <div><%= merge.merge_queue_index %></div>
               <div><%= merge.id %></div>
-              <div><%= merge.status %></div>
-              <div><%= merge.number %></div>
-              <div><%= merge.title %></div>
+              <div><%= merge.raw["commits_url"] %></div>
+              <div><%= link merge.title, to: Routes.pending_merge_path(@socket, :show, merge.id) %></div>
               <div><%= merge.head.ref %></div>
               <div><%= shorten_sha(merge.head.sha) %></div>
               <div><%= ts(merge.updated_at, assigns.timezone) %></div>
