@@ -9,6 +9,7 @@ defmodule Mrgr.Schema.Merge do
     field(:title, :string)
     field(:url, :string)
     field(:merge_queue_index, :integer)
+    field(:files_changed, {:array, :string})
     field(:raw, :map)
 
     embeds_one(:user, Mrgr.Github.User, on_replace: :update)

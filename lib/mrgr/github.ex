@@ -1,4 +1,18 @@
 defmodule Mrgr.Github do
+  def files_changed(merge, auth) do
+    # oi vey
+    owner = merge.repository.installation.account.login
+    repo = merge.repository.name
+    number = merge.number
+
+    # TODO vvv
+    client = Mrgr.Github.Client.new(auth)
+
+    response = Tentacat.files(client, owner, repo, number)
+
+    parse(response)
+  end
+
   # ********** ONLY TAKES HTE FIRST PAGE  *************
   # the first page is usually 30 results
   def parse(data) when is_list(data) do

@@ -5,6 +5,5 @@ defmodule Mrgr.Repo.Migrations.CreateMergeRawData do
     alter table(:merges) do
       add(:raw, :map, default: "{}")
     end
-
   end
 end

@@ -17,7 +17,7 @@ defmodule Mrgr.Merge do
   end
 
   @spec reopen(map()) ::
-          {:ok, Mrge.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
+          {:ok, Mrgr.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def reopen(payload) do
     with {:ok, merge} <- find_from_payload(payload),
          cs <- Mrgr.Schema.Merge.create_changeset(payload_to_params(payload), merge),
@@ -106,6 +106,31 @@ defmodule Mrgr.Merge do
 
   def handle_merge_response({code, result, _response}) do
     {:error, %{code: code, result: result}}
+  end
+
+  def store_files_changed(merge, auth) do
+    files_changed = fetch_files_changed(merge, auth)
+    update_files_changed(merge, files_changed)
+  end
+
+  def fetch_files_changed(merge, auth) do
+    response = Mrgr.Github.files_changed(merge, auth)
+
+    # ["lib/mrgr/incoming_webhook.ex", "lib/mrgr/merge.ex",
+    # "lib/mrgr/schema/merge.ex", "lib/mrgr/user.ex",
+    # "lib/mrgr_web/admin/live/incoming_webhook.ex",
+    # "lib/mrgr_web/admin/live/incoming_webhook_show.ex",
+    # "lib/mrgr_web/live/pending_merge_live.ex", "lib/mrgr_web/router.ex",
+    # "lib/mrgr_web/templates/layout/root.html.heex",
+    # "priv/repo/migrations/20220703202923_create_merge_raw_data.exs"]
+
+    Enum.map(response, fn c -> c["filename"] end)
+  end
+
+  def update_files_changed(merge, files) do
+    merge
+    |> Ecto.Changeset.change(%{files_changed: files})
+    |> Mrgr.Repo.update!()
   end
 
   def generate_merge_args(merge, message, merger) do
