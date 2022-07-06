@@ -185,7 +185,7 @@ defmodule MrgrWeb.PendingMergeLive do
 
   def has_migration?(%{files_changed: files}) do
     Enum.any?(files, fn f ->
-      String.starts_with?(f, "priv")
+      String.starts_with?(f, "priv/repo/migrations")
     end)
   end
 end
