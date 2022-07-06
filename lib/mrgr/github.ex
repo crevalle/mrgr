@@ -5,7 +5,7 @@ defmodule Mrgr.Github do
     {owner, name} = Mrgr.Schema.Repository.owner_name(merge.repository)
     number = merge.number
 
-    response = Tentacat.Pull.files(client, owner, name, number)
+    response = Tentacat.Pulls.files(client, owner, name, number)
 
     parse(response)
   end
