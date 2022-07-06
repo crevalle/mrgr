@@ -27,9 +27,8 @@ defmodule MrgrWeb.PendingMergeLive do
     <div phx-hook="Drag" id="drag">
       <div class="table-header row">
         <div>#</div>
-        <div>id</div>
-        <div>Status</div>
-        <div>Number</div>
+        <div>ID</div>
+        <div>Labels</div>
         <div>Title</div>
         <div>Branch</div>
         <div>Current SHA</div>
@@ -43,7 +42,11 @@ defmodule MrgrWeb.PendingMergeLive do
             <div class="row">
               <div><%= merge.merge_queue_index %></div>
               <div><%= merge.id %></div>
-              <div><%= merge.raw["commits_url"] %></div>
+              <div>
+                <%= if has_migration?(merge) do %>
+                  <span class="label-inline">migration</span>
+                <% end %>
+              </div>
               <div><%= link merge.title, to: Routes.pending_merge_path(@socket, :show, merge.id) %></div>
               <div><%= merge.head.ref %></div>
               <div><%= shorten_sha(merge.head.sha) %></div>
@@ -177,6 +180,12 @@ defmodule MrgrWeb.PendingMergeLive do
         not_updated ->
           not_updated
       end
+    end)
+  end
+
+  def has_migration?(%{files_changed: files}) do
+    Enum.any?(files, fn f ->
+      String.starts_with?(f, "priv")
     end)
   end
 end

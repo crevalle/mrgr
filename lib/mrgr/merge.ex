@@ -13,7 +13,15 @@ defmodule Mrgr.Merge do
     %Mrgr.Schema.Merge{}
     |> Mrgr.Schema.Merge.create_changeset(params)
     |> Mrgr.Repo.insert()
-    |> maybe_broadcast("created")
+    |> case do
+      {:ok, merge} ->
+        merge
+        |> store_files_changed()
+        |> broadcast("created")
+
+      {:error, cs} = err ->
+        err
+    end
   end
 
   @spec reopen(map()) ::
@@ -38,7 +46,9 @@ defmodule Mrgr.Merge do
     with {:ok, merge} <- find_from_payload(payload),
          cs <- Mrgr.Schema.Merge.synchronize_changeset(merge, payload),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
-      broadcast(updated_merge, "synchronized")
+      updated_merge
+      |> store_files_changed()
+      |> broadcast("synchronized")
     end
   end
 
@@ -94,12 +104,6 @@ defmodule Mrgr.Merge do
     {:ok, merge}
   end
 
-  def maybe_broadcast({:ok, merge}, event) do
-    broadcast(merge, event)
-  end
-
-  def maybe_broadcast({:error, _cs} = error), do: error
-
   def handle_merge_response({200, result, _response}) do
     {:ok, result}
   end
@@ -108,8 +112,10 @@ defmodule Mrgr.Merge do
     {:error, %{code: code, result: result}}
   end
 
-  def store_files_changed(merge, auth) do
-    files_changed = fetch_files_changed(merge, auth)
+  def store_files_changed(merge) do
+    merge = Mrgr.Repo.preload(merge, repository: :installation)
+    files_changed = fetch_files_changed(merge, merge.repository.installation)
+
     update_files_changed(merge, files_changed)
   end
 

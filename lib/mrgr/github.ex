@@ -1,14 +1,11 @@
 defmodule Mrgr.Github do
-  def files_changed(merge, auth) do
-    # oi vey
-    owner = merge.repository.installation.account.login
-    repo = merge.repository.name
+  def files_changed(merge, installation) do
+    client = Mrgr.Github.Client.new(installation)
+
+    {owner, name} = Mrgr.Schema.Repository.owner_name(merge.repository)
     number = merge.number
 
-    # TODO vvv
-    client = Mrgr.Github.Client.new(auth)
-
-    response = Tentacat.files(client, owner, repo, number)
+    response = Tentacat.Pull.files(client, owner, name, number)
 
     parse(response)
   end
