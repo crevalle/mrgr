@@ -52,7 +52,7 @@ defmodule Mrgr.MixProject do
       {:swoosh, "~> 1.3"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
-      {:tentacat, "~> 2.0"},
+      {:tentacat, github: "crevalle/tentacat"},
       {:tzdata, "~> 1.1"},
       {:ueberauth_github, "~> 0.8"}
     ]
