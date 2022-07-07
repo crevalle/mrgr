@@ -99,4 +99,7 @@ defmodule Mrgr.Schema.Merge do
   def set_opened_at(%{"created_at" => at} = params) do
     Map.put(params, "opened_at", at)
   end
+
+  def external_merge_url(%{raw: %{"_links" => %{"html" => %{"href" => url}}}}), do: url
+  def external_merge_url(_merge), do: ""
 end

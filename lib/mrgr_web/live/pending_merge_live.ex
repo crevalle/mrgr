@@ -47,7 +47,12 @@ defmodule MrgrWeb.PendingMergeLive do
                   <span class="label-inline">migration</span>
                 <% end %>
               </div>
-              <div><%= link merge.title, to: Routes.pending_merge_path(@socket, :show, merge.id) %></div>
+              <div>
+                <%= link merge.title, to: Routes.pending_merge_path(@socket, :show, merge.id) %>
+                <%= link to: external_merge_url(merge), target: "_blank" do %>
+                  <i class="fa fa-arrow-up-right-from-square"></i>
+                <% end %>
+              </div>
               <div><%= merge.head.ref %></div>
               <div><%= shorten_sha(merge.head.sha) %></div>
               <div><%= ts(merge.updated_at, assigns.timezone) %></div>
@@ -187,5 +192,9 @@ defmodule MrgrWeb.PendingMergeLive do
     Enum.any?(files, fn f ->
       String.starts_with?(f, "priv/repo/migrations")
     end)
+  end
+
+  def external_merge_url(merge) do
+    Mrgr.Schema.Merge.external_merge_url(merge)
   end
 end
