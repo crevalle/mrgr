@@ -33,10 +33,6 @@
   display: none;
 }
 
-body {
-  background-color: blanchedalmond;
-}
-
 .invalid-feedback {
   color: #a94442;
   display: block;

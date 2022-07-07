@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-gray-100">
   <head>
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -10,41 +10,16 @@
     <script src="https://kit.fontawesome.com/b61013b8f4.js" crossorigin="anonymous"></script>
     <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
   </head>
-  <body>
+  <body class="h-full">
     <header>
       <section class="container">
-        <nav>
-            <%= if signed_in?(@conn) do %>
-              <ul>
-                <li><%= "@#{@conn.assigns.current_user.nickname}" %> <%= current_account(@conn.assigns.current_user) %></li>
-                <li><%= link "Repos", to: Routes.repository_path(@conn, :index) %></li>
-                <li><%= link "Pending Merges", to: Routes.pending_merge_path(@conn, :index) %></li>
-                <li><%= link "Sign Out", to: Routes.auth_path(@conn, :delete), method: :delete %></li>
-              </ul>
-            <% else %>
-              <%= link "Sign In With Github", to: Routes.auth_path(@conn, :github) %>
-            <% end %>
-
-          <ul>
-            <%= if signed_in?(@conn) and admin?(@conn.assigns.current_user) do %>
-              <li><%= link "Admin - Incoming Webhooks", to: Routes.admin_incoming_webhook_path(@conn, :index) %></li>
-            <% end %>
-            <%= if function_exported?(Routes, :live_dashboard_path, 2) do %>
-              <li><%= link "LiveDashboard", to: Routes.live_dashboard_path(@conn, :home) %></li>
-            <% end %>
-          </ul>
-        </nav>
-        <a href="https://phoenixframework.org/" class="phx-logo">
-          <img src={Routes.static_path(@conn, "/images/phoenix.png")} alt="Phoenix Framework Logo"/>
-        </a>
+        <%= if !signed_in?(@conn) do %>
+          <%= link "Sign In With Github", to: Routes.auth_path(@conn, :github) %>
+        <% end %>
       </section>
     </header>
-    <%= @inner_content %>
-    <footer>
-      <div>
-        <div>©<%= Date.utc_today.year %> Crevalle, LLC</div>
-        <div>Made with ☀️  in Los Angeles, California 🏝</div>
-      </div>
-    </footer>
+    <%= if signed_in?(@conn) do %>
+      <%= render "signed_in.html", conn: @conn, inner_content: @inner_content %>
+    <% end %>
   </body>
 </html>
