@@ -26,45 +26,48 @@ defmodule MrgrWeb.PendingMergeLive do
 
     <div phx-hook="Drag" id="drag">
       <div class="table-header row">
-        <div>#</div>
-        <div>ID</div>
-        <div>Labels</div>
-        <div>Title</div>
-        <div>Branch</div>
-        <div>Current SHA</div>
-        <div>Updated</div>
-        <div>Opened</div>
-        <div>Actions</div>
+
       </div>
       <div class="table-body dropzone" id="pending-merge-list">
         <%= for merge <- assigns.pending_merges do %>
-          <div draggable="true" class="draggable column" id={"merge-#{merge.id}"}>
-            <div class="row">
-              <div><%= merge.merge_queue_index %></div>
-              <div><%= merge.id %></div>
-              <div>
-                <%= if has_migration?(merge) do %>
-                  <span class="label-inline">migration</span>
-                <% end %>
+          <div draggable="true" class="draggable column merge-list" id={"merge-#{merge.id}"}>
+            <div class="column merge-item">
+              <div class="row merge-info">
+                <div class="column">
+                  <div class="row">
+                    <%= link merge.title, to: Routes.pending_merge_path(@socket, :show, merge.id) %>
+                    <%= link to: external_merge_url(merge), target: "_blank" do %>
+                      <i class="fa fa-arrow-up-right-from-square"></i>
+                    <% end %>
+                  </div>
+                  <div class="row">
+                    <%= merge.repository.name %>
+
+                    <%= if has_migration?(merge) do %>
+                      <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">migration</span>
+                    <% end %>
+                    <%= merge.merge_queue_index %>
+                  </div>
+                </div>
+
+                <div class="column">
+                  <div><%= shorten_sha(merge.head.sha) %> by desmondmonster</div>
+                  <div><%= ts(merge.updated_at, assigns.timezone) %></div>
+                </div>
+
+                <div class="column">
+                  <div><button phx-click="add-merge-message" phx-value-id={merge.id}>Merge</button></div>
+                </div>
               </div>
-              <div>
-                <%= link merge.title, to: Routes.pending_merge_path(@socket, :show, merge.id) %>
-                <%= link to: external_merge_url(merge), target: "_blank" do %>
-                  <i class="fa fa-arrow-up-right-from-square"></i>
-                <% end %>
+
+              <div class="row">
+                <.form let={f} for={:merge}, phx-submit="merge">
+                  <%= textarea f, :message, placeholder: "Commit message defaults to PR title.  Enter additional info here." %>
+                  <%= hidden_input f, :id, value: merge.id %>
+                  <%= submit "Save", phx_disable_with: "Merging..." %>
+                </.form>
               </div>
-              <div><%= merge.head.ref %></div>
-              <div><%= shorten_sha(merge.head.sha) %></div>
-              <div><%= ts(merge.updated_at, assigns.timezone) %></div>
-              <div><%= ts(merge.opened_at, assigns.timezone) %></div>
-              <div><button phx-click="add-merge-message" phx-value-id={merge.id}>Merge</button></div>
-            </div>
-            <div>
-              <.form let={f} for={:merge}, phx-submit="merge">
-                <%= textarea f, :message, placeholder: "Commit message defaults to PR title.  Enter additional info here." %>
-                <%= hidden_input f, :id, value: merge.id %>
-                <%= submit "Save", phx_disable_with: "Merging..." %>
-              </.form>
+
             </div>
 
           </div>

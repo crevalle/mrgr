@@ -23,7 +23,7 @@ config :mrgr, MrgrWeb.Endpoint,
   code_reloader: true,
   check_origin: false,
   watchers: [
-    # Start the esbuild watcher by calling Esbuild.install_and_run(:default, args)
+    tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]},
     esbuild: {Esbuild, :install_and_run, [:default, ~w(--sourcemap=inline --watch)]}
   ]
 
