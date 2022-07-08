@@ -15,12 +15,12 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
 
       <%= for hook <- @incoming_webhooks do %>
         <tr>
-          <td><%= link hook.id, to: Routes.admin_incoming_webhook_path(@socket, :show, hook.id) %></td>
+          <td><%= link hook.id, to: Routes.admin_incoming_webhook_path(@socket, :show, hook.id), class: "text-teal-500" %></td>
           <td><%= hook.object %></td>
           <td><%= hook.action %></td>
           <td></td>
           <td><%= ts(hook.inserted_at, assigns.timezone) %></td>
-          <td><button phx-click="fire" phx-value-id={hook.id}>Fire!</button></td>
+          <td><button phx-click="fire" phx-value-id={hook.id} class="bg-teal-700 hover:bg-teal-900 text-white font-bold py-2 px-4 rounded-md">Fire!</button></td>
         </tr>
       <% end %>
     </table>
