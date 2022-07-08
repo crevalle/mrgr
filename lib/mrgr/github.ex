@@ -1,4 +1,15 @@
 defmodule Mrgr.Github do
+  def head_commit(merge, installation) do
+    client = Mrgr.Github.Client.new(installation)
+
+    {owner, name} = Mrgr.Schema.Repository.owner_name(merge.repository)
+    sha = merge.head.sha
+
+    response = Tentacat.Commits.find(client, sha, owner, name)
+
+    parse(response)
+  end
+
   def files_changed(merge, installation) do
     client = Mrgr.Github.Client.new(installation)
 

@@ -39,9 +39,14 @@ defmodule MrgrWeb.PendingMergeLive do
                     <% end %>
                   </p>
                   <div class="ml-2 flex-shrink-0 flex">
-                    <%= if has_migration?(merge) do %>
-                      <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">migration</p>
-                    <% end %>
+                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                      <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
+                      <p>
+                        "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
+                      </p>
+                    </div>
                   </div>
                 </div>
                 <div class="mt-2 sm:flex sm:justify-between">
@@ -60,23 +65,29 @@ defmodule MrgrWeb.PendingMergeLive do
                       </svg>
                       <%= merge.merge_queue_index %>
                     </p>
+                    <%= if has_migration?(merge) do %>
+                      <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                        <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">migration</p>
+                      </p>
+                    <% end %>
                   </div>
                   <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <!-- Heroicon name: solid/calendar -->
-                    <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                      <path fill-rule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clip-rule="evenodd" />
-                    </svg>
                     <p>
-                      <%= shorten_sha(merge.head.sha) %> by desmondmonster on <%= ts(merge.updated_at, assigns.timezone) %>
+                      <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
                     </p>
                   </div>
                 </div>
-                <div class="mt-2 sm:flex sm:justify-between">
-                  <.form let={f} for={:merge}, phx-submit="merge">
+                <div class="mt-2 sm:flex sm:justify-between items-start">
+                  <.form let={f} for={:merge}, phx-submit="merge" class="w-3/4">
                     <%= textarea f, :message, placeholder: "Commit message defaults to PR title.  Enter additional info here.", class: "w-1/2" %>
                     <%= hidden_input f, :id, value: merge.id %>
                     <%= submit "Save", phx_disable_with: "Merging...", class: "bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-md" %>
                   </.form>
+                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                    <p>
+                      <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

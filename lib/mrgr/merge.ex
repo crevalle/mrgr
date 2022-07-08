@@ -16,7 +16,7 @@ defmodule Mrgr.Merge do
     |> case do
       {:ok, merge} ->
         merge
-        |> store_files_changed()
+        |> synchronize_head()
         |> broadcast("created")
 
       {:error, cs} = err ->
@@ -47,7 +47,7 @@ defmodule Mrgr.Merge do
          cs <- Mrgr.Schema.Merge.synchronize_changeset(merge, payload),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
-      |> store_files_changed()
+      |> synchronize_head()
       |> broadcast("synchronized")
     end
   end
@@ -112,11 +112,19 @@ defmodule Mrgr.Merge do
     {:error, %{code: code, result: result}}
   end
 
-  def store_files_changed(merge) do
+  def synchronize_head(merge) do
     merge = Mrgr.Repo.preload(merge, repository: :installation)
-    files_changed = fetch_files_changed(merge, merge.repository.installation)
 
-    update_files_changed(merge, files_changed)
+    files_changed = fetch_files_changed(merge, merge.repository.installation)
+    head = fetch_head(merge, merge.repository.installation)
+
+    merge
+    |> Ecto.Changeset.change(%{files_changed: files_changed, head_commit: head})
+    |> Mrgr.Repo.update!()
+  end
+
+  def fetch_head(merge, auth) do
+    Mrgr.Github.head_commit(merge, auth)
   end
 
   def fetch_files_changed(merge, auth) do
@@ -131,12 +139,6 @@ defmodule Mrgr.Merge do
     # "priv/repo/migrations/20220703202923_create_merge_raw_data.exs"]
 
     Enum.map(response, fn c -> c["filename"] end)
-  end
-
-  def update_files_changed(merge, files) do
-    merge
-    |> Ecto.Changeset.change(%{files_changed: files})
-    |> Mrgr.Repo.update!()
   end
 
   def generate_merge_args(merge, message, merger) do
