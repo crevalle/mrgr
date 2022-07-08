@@ -104,9 +104,6 @@ defmodule Mrgr.Schema.Merge do
   def external_merge_url(%{raw: %{"_links" => %{"html" => %{"href" => url}}}}), do: url
   def external_merge_url(_merge), do: ""
 
-  def head_sha(%{head_commit: %{"commit" => %{"sha" => sha}}}), do: sha
-  def head_sha(_), do: ""
-
   def head_commit_message(%{head_commit: %{"commit" => %{"message" => message}}}), do: message
   def head_commit_message(_), do: "-"
 
