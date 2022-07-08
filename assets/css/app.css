@@ -1,5 +1,8 @@
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
+
 /* This file is for your main application CSS */
-@import "./phoenix.css";
 
 /* Alerts and form errors used by phx.new */
 .alert {
@@ -28,10 +31,6 @@
 }
 .alert:empty {
   display: none;
-}
-
-body {
-  background-color: blanchedalmond;
 }
 
 .invalid-feedback {
@@ -94,9 +93,8 @@ body {
 }
 
 .row {
+  display: flex;
   flex-direction: row;
-  justify-content: space-between;
-  margin: 10px;
 }
 
 .table-header {
@@ -104,5 +102,11 @@ body {
 }
 
 .column {
+  display: flex;
   flex-direction: column;
 }
+
+form {
+  width: 100%;
+}
+

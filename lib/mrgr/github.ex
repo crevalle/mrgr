@@ -1,4 +1,26 @@
 defmodule Mrgr.Github do
+  def head_commit(merge, installation) do
+    client = Mrgr.Github.Client.new(installation)
+
+    {owner, name} = Mrgr.Schema.Repository.owner_name(merge.repository)
+    sha = merge.head.sha
+
+    response = Tentacat.Commits.find(client, sha, owner, name)
+
+    parse(response)
+  end
+
+  def files_changed(merge, installation) do
+    client = Mrgr.Github.Client.new(installation)
+
+    {owner, name} = Mrgr.Schema.Repository.owner_name(merge.repository)
+    number = merge.number
+
+    response = Tentacat.Pulls.files(client, owner, name, number)
+
+    parse(response)
+  end
+
   # ********** ONLY TAKES HTE FIRST PAGE  *************
   # the first page is usually 30 results
   def parse(data) when is_list(data) do

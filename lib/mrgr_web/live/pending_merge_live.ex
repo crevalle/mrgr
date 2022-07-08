@@ -22,48 +22,82 @@ defmodule MrgrWeb.PendingMergeLive do
 
   def render(assigns) do
     ~H"""
-    <button phx-click="refresh">Refresh PRs</button>
 
-    <div phx-hook="Drag" id="drag">
-      <div class="table-header row">
-        <div>#</div>
-        <div>id</div>
-        <div>Status</div>
-        <div>Number</div>
-        <div>Title</div>
-        <div>Branch</div>
-        <div>Current SHA</div>
-        <div>Updated</div>
-        <div>Opened</div>
-        <div>Actions</div>
-      </div>
-      <div class="table-body dropzone" id="pending-merge-list">
+    <div class="bg-white shadow overflow-hidden sm:rounded-md" phx-hook="Drag" id="drag">
+      <ul role="list" class="divide-y divide-gray-200 dropzone" id="pending-merge-list">
         <%= for merge <- assigns.pending_merges do %>
-          <div draggable="true" class="draggable column" id={"merge-#{merge.id}"}>
-            <div class="row">
-              <div><%= merge.merge_queue_index %></div>
-              <div><%= merge.id %></div>
-              <div><%= merge.status %></div>
-              <div><%= merge.number %></div>
-              <div><%= merge.title %></div>
-              <div><%= merge.head.ref %></div>
-              <div><%= shorten_sha(merge.head.sha) %></div>
-              <div><%= ts(merge.updated_at, assigns.timezone) %></div>
-              <div><%= ts(merge.opened_at, assigns.timezone) %></div>
-              <div><button phx-click="add-merge-message" phx-value-id={merge.id}>Merge</button></div>
+          <li draggable="true" class="draggable merge-list" id={"merge-#{merge.id}"}>
+            <div class="block hover:bg-gray-50">
+              <div class="px-4 py-4 sm:px-6">
+                <div class="flex items-center justify-between">
+                  <p class="flex items-start">
+                    <%= link merge.title, to: Routes.pending_merge_path(@socket, :show, merge.id), class: "text-sm font-medium text-teal-500 truncate" %>
+                    <%= link to: external_merge_url(merge), target: "_blank" do %>
+                      <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                      </svg>
+                    <% end %>
+                  </p>
+                  <div class="ml-2 flex-shrink-0 flex">
+                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                      <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                      </svg>
+                      <p>
+                        "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
+                      </p>
+                    </div>
+                  </div>
+                </div>
+                <div class="mt-2 sm:flex sm:justify-between">
+                  <div class="sm:flex">
+                    <p class="flex items-center text-sm text-gray-500">
+                      <!-- Heroicon name: solid/users -->
+                      <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                      </svg>
+                      <%= merge.repository.name %>
+                    </p>
+                    <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                      <!-- Heroicon name: solid/location-marker -->
+                      <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                        <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                      </svg>
+                      <%= merge.merge_queue_index %>
+                    </p>
+                    <%= if has_migration?(merge) do %>
+                      <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                        <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">migration</p>
+                      </p>
+                    <% end %>
+                  </div>
+                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                    <p>
+                      <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-2 sm:flex sm:justify-between items-start">
+                  <.form let={f} for={:merge}, phx-submit="merge" class="w-3/4">
+                    <%= textarea f, :message, placeholder: "Commit message defaults to PR title.  Enter additional info here.", class: "w-1/2" %>
+                    <%= hidden_input f, :id, value: merge.id %>
+                    <%= submit "Save", phx_disable_with: "Merging...", class: "bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-md" %>
+                  </.form>
+                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                    <p>
+                      <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
+                    </p>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div>
-              <.form let={f} for={:merge}, phx-submit="merge">
-                <%= textarea f, :message, placeholder: "Commit message defaults to PR title.  Enter additional info here." %>
-                <%= hidden_input f, :id, value: merge.id %>
-                <%= submit "Save", phx_disable_with: "Merging..." %>
-              </.form>
-            </div>
-
-          </div>
+          </li>
         <% end %>
-      </div>
+      </ul>
     </div>
+
+    <button phx-click="refresh" class="bg-sky-700 hover:bg-sky-900 text-white font-bold py-2 px-4 rounded-md">Refresh PRs</button>
+
     """
   end
 
@@ -111,7 +145,6 @@ defmodule MrgrWeb.PendingMergeLive do
     end
   end
 
-
   # pulls the id off the div constructed above
   defp get_id("merge-" <> id), do: String.to_integer(id)
 
@@ -152,7 +185,10 @@ defmodule MrgrWeb.PendingMergeLive do
     merges = replace_updated(socket.assigns.pending_merges, hydrated)
 
     socket
-    |> put_flash(:info, "Open PR \"#{merge.title}\" updated.  New head is #{shorten_sha(merge.head.sha)}.")
+    |> put_flash(
+      :info,
+      "Open PR \"#{merge.title}\" updated.  New head is #{shorten_sha(merge.head.sha)}."
+    )
     |> assign(:pending_merges, merges)
     |> noreply()
   end
@@ -177,5 +213,15 @@ defmodule MrgrWeb.PendingMergeLive do
           not_updated
       end
     end)
+  end
+
+  def has_migration?(%{files_changed: files}) do
+    Enum.any?(files, fn f ->
+      String.starts_with?(f, "priv/repo/migrations")
+    end)
+  end
+
+  def external_merge_url(merge) do
+    Mrgr.Schema.Merge.external_merge_url(merge)
   end
 end

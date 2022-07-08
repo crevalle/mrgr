@@ -13,11 +13,19 @@ defmodule Mrgr.Merge do
     %Mrgr.Schema.Merge{}
     |> Mrgr.Schema.Merge.create_changeset(params)
     |> Mrgr.Repo.insert()
-    |> maybe_broadcast("created")
+    |> case do
+      {:ok, merge} ->
+        merge
+        |> synchronize_head()
+        |> broadcast("created")
+
+      {:error, cs} = err ->
+        err
+    end
   end
 
   @spec reopen(map()) ::
-          {:ok, Mrge.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
+          {:ok, Mrgr.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def reopen(payload) do
     with {:ok, merge} <- find_from_payload(payload),
          cs <- Mrgr.Schema.Merge.create_changeset(payload_to_params(payload), merge),
@@ -38,7 +46,9 @@ defmodule Mrgr.Merge do
     with {:ok, merge} <- find_from_payload(payload),
          cs <- Mrgr.Schema.Merge.synchronize_changeset(merge, payload),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
-      broadcast(updated_merge, "synchronized")
+      updated_merge
+      |> synchronize_head()
+      |> broadcast("synchronized")
     end
   end
 
@@ -94,18 +104,41 @@ defmodule Mrgr.Merge do
     {:ok, merge}
   end
 
-  def maybe_broadcast({:ok, merge}, event) do
-    broadcast(merge, event)
-  end
-
-  def maybe_broadcast({:error, _cs} = error), do: error
-
   def handle_merge_response({200, result, _response}) do
     {:ok, result}
   end
 
   def handle_merge_response({code, result, _response}) do
     {:error, %{code: code, result: result}}
+  end
+
+  def synchronize_head(merge) do
+    merge = Mrgr.Repo.preload(merge, repository: :installation)
+
+    files_changed = fetch_files_changed(merge, merge.repository.installation)
+    head = fetch_head(merge, merge.repository.installation)
+
+    merge
+    |> Ecto.Changeset.change(%{files_changed: files_changed, head_commit: head})
+    |> Mrgr.Repo.update!()
+  end
+
+  def fetch_head(merge, auth) do
+    Mrgr.Github.head_commit(merge, auth)
+  end
+
+  def fetch_files_changed(merge, auth) do
+    response = Mrgr.Github.files_changed(merge, auth)
+
+    # ["lib/mrgr/incoming_webhook.ex", "lib/mrgr/merge.ex",
+    # "lib/mrgr/schema/merge.ex", "lib/mrgr/user.ex",
+    # "lib/mrgr_web/admin/live/incoming_webhook.ex",
+    # "lib/mrgr_web/admin/live/incoming_webhook_show.ex",
+    # "lib/mrgr_web/live/pending_merge_live.ex", "lib/mrgr_web/router.ex",
+    # "lib/mrgr_web/templates/layout/root.html.heex",
+    # "priv/repo/migrations/20220703202923_create_merge_raw_data.exs"]
+
+    Enum.map(response, fn c -> c["filename"] end)
   end
 
   def generate_merge_args(merge, message, merger) do
@@ -174,6 +207,7 @@ defmodule Mrgr.Merge do
     |> Map.put("repository_id", repo.id)
     |> Map.put("author_id", author_id_from_payload(payload))
     |> Map.put("opened_at", params["created_at"])
+    |> Map.put("raw", params)
   end
 
   defp author_id_from_payload(payload) do

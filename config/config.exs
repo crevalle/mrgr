@@ -61,4 +61,15 @@ config :joken,
     key_pem: System.get_env("GITHUB_PRIVATE_KEY")
   ]
 
+config :tailwind,
+  version: "3.1.4",
+  default: [
+    args: ~w(
+    --config=tailwind.config.js
+    --input=css/app.css
+    --output=../priv/static/assets/app.css
+  ),
+    cd: Path.expand("../assets", __DIR__)
+  ]
+
 import_config "#{config_env()}.exs"

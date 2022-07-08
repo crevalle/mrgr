@@ -47,6 +47,7 @@ defmodule MrgrWeb.Router do
     # live "/pending-merges", PendingMergeLive, :index
     # end
     get "/pending-merges", PendingMergeController, :index
+    get "/pending-merges/:id", PendingMergeController, :show
 
     resources "/repositories", RepositoryController, only: [:index]
   end
@@ -61,6 +62,7 @@ defmodule MrgrWeb.Router do
     pipe_through [:browser, :authenticate, :admin]
 
     live "/incoming-webhooks", Live.IncomingWebhook, :index, as: :incoming_webhook
+    live "/incoming-webhooks/:id", Live.IncomingWebhookShow, :show, as: :incoming_webhook
   end
 
   # Other scopes may use custom stacks.
