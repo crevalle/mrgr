@@ -44,7 +44,7 @@ defmodule MrgrWeb.Component.PendingMerge do
 
   def dependencies_changed?(%{files_changed: files}) do
     Enum.any?(files, fn f ->
-      String.ends_with?(f, "mix.exs")
+      String.ends_with?(f, "mix.lock")
     end)
   end
 
