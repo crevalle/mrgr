@@ -1,7 +1,5 @@
 defmodule MrgrWeb.Component.PendingMerge do
-
   use Phoenix.Component
-
 
   def change_badges(assigns) do
     ~H"""
@@ -29,7 +27,6 @@ defmodule MrgrWeb.Component.PendingMerge do
     """
   end
 
-
   def has_migration?(%{files_changed: files}) do
     Enum.any?(files, fn f ->
       String.starts_with?(f, "priv/repo/migrations")
@@ -47,5 +44,4 @@ defmodule MrgrWeb.Component.PendingMerge do
       String.ends_with?(f, "mix.lock")
     end)
   end
-
 end

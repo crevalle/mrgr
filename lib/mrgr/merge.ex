@@ -37,10 +37,10 @@ defmodule Mrgr.Merge do
          cs <- Mrgr.Schema.Merge.create_changeset(payload_to_params(payload), merge),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
-        |> preload_installation()
-        |> synchronize_head()
-        |> append_to_merge_queue()
-        |> broadcast(@reopened)
+      |> preload_installation()
+      |> synchronize_head()
+      |> append_to_merge_queue()
+      |> broadcast(@reopened)
     else
       {:error, :not_found} ->
         create_from_webhook(payload)
