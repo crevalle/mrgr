@@ -1,12 +1,9 @@
 defmodule Mrgr.Merge do
+  use Mrgr.PubSub.Topic
+
   require Logger
 
   alias Mrgr.Merge.Query
-
-  @created "created"
-  @reopened "reopened"
-  @synchronized "synchronized"
-  @closed "closed"
 
   def create_from_webhook(payload) do
     params = payload_to_params(payload)
@@ -20,7 +17,7 @@ defmodule Mrgr.Merge do
         |> preload_installation()
         |> synchronize_head()
         |> append_to_merge_queue()
-        |> broadcast(@created)
+        |> broadcast(@merge_created)
 
       {:error, cs} = err ->
         err
@@ -37,7 +34,7 @@ defmodule Mrgr.Merge do
       |> preload_installation()
       |> synchronize_head()
       |> append_to_merge_queue()
-      |> broadcast(@reopened)
+      |> broadcast(@merge_reopened)
     else
       {:error, :not_found} ->
         create_from_webhook(payload)
@@ -56,7 +53,7 @@ defmodule Mrgr.Merge do
       updated_merge
       |> preload_installation()
       |> synchronize_head()
-      |> broadcast(@synchronized)
+      |> broadcast(@merge_synchronized)
     end
   end
 
@@ -66,7 +63,7 @@ defmodule Mrgr.Merge do
     with {:ok, merge} <- find_from_payload(payload),
          cs <- Mrgr.Schema.Merge.close_changeset(merge, params),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
-      broadcast(updated_merge, @closed)
+      broadcast(updated_merge, @merge_closed)
     else
       {:error, :not_found} = error ->
         Logger.warn("found no local PR")
@@ -110,7 +107,7 @@ defmodule Mrgr.Merge do
   def broadcast(merge, event) do
     topic = Mrgr.Installation.topic(merge.repository.installation)
 
-    Mrgr.PubSub.broadcast(merge, topic, "merge:#{event}")
+    Mrgr.PubSub.broadcast(merge, topic, event)
     {:ok, merge}
   end
 

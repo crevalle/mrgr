@@ -1,7 +1,9 @@
 defmodule Mrgr.Branch do
+  use Mrgr.PubSub.Topic
+
   def push(payload) do
     # ...
-    Mrgr.PubSub.broadcast(payload, topic(payload), "branch:pushed")
+    Mrgr.PubSub.broadcast(payload, topic(payload), @branch_pushed)
   end
 
   def topic(payload) do
