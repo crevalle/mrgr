@@ -16,6 +16,7 @@ defmodule Mrgr.Merge do
     |> case do
       {:ok, merge} ->
         merge
+        |> preload_installation()
         |> synchronize_head()
         |> broadcast("created")
 
@@ -47,7 +48,9 @@ defmodule Mrgr.Merge do
          cs <- Mrgr.Schema.Merge.synchronize_changeset(merge, payload),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
+      |> preload_installation()
       |> synchronize_head()
+      |> append_to_merge_queue()
       |> broadcast("synchronized")
     end
   end
@@ -113,8 +116,6 @@ defmodule Mrgr.Merge do
   end
 
   def synchronize_head(merge) do
-    merge = Mrgr.Repo.preload(merge, repository: :installation)
-
     files_changed = fetch_files_changed(merge, merge.repository.installation)
     head = fetch_head(merge, merge.repository.installation)
 
@@ -217,6 +218,17 @@ defmodule Mrgr.Merge do
       %Mrgr.Schema.Member{id: id} -> id
       nil -> nil
     end
+  end
+
+  defp append_to_merge_queue(merge) do
+    all_pending_merges = pending_merges(merge.repository.installation)
+    other_merges = Enum.reject(all_pending_merges, fn m -> m.id == merge.id end)
+
+    Mrgr.MergeQueue.set_next_merge_queue_index(merge, other_merges)
+  end
+
+  defp preload_installation(merge) do
+    Mrgr.Repo.preload(merge, repository: :installation)
   end
 
   defmodule Query do
