@@ -4,6 +4,10 @@ defmodule Mrgr.Merge do
   alias Mrgr.Merge.Query
 
   @topic "merge"
+  @created "created"
+  @reopened "reopened"
+  @synchronized "synchronized"
+  @closed "closed"
 
   def topic, do: @topic
 
@@ -18,7 +22,8 @@ defmodule Mrgr.Merge do
         merge
         |> preload_installation()
         |> synchronize_head()
-        |> broadcast("created")
+        |> append_to_merge_queue()
+        |> broadcast(@created)
 
       {:error, cs} = err ->
         err
@@ -31,7 +36,11 @@ defmodule Mrgr.Merge do
     with {:ok, merge} <- find_from_payload(payload),
          cs <- Mrgr.Schema.Merge.create_changeset(payload_to_params(payload), merge),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
-      broadcast(updated_merge, "reopened")
+      updated_merge
+        |> preload_installation()
+        |> synchronize_head()
+        |> append_to_merge_queue()
+        |> broadcast(@reopened)
     else
       {:error, :not_found} ->
         create_from_webhook(payload)
@@ -50,8 +59,7 @@ defmodule Mrgr.Merge do
       updated_merge
       |> preload_installation()
       |> synchronize_head()
-      |> append_to_merge_queue()
-      |> broadcast("synchronized")
+      |> broadcast(@synchronized)
     end
   end
 
@@ -61,7 +69,7 @@ defmodule Mrgr.Merge do
     with {:ok, merge} <- find_from_payload(payload),
          cs <- Mrgr.Schema.Merge.close_changeset(merge, params),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
-      broadcast(updated_merge, "closed")
+      broadcast(updated_merge, @closed)
     else
       {:error, :not_found} = error ->
         Logger.warn("found no local PR")
