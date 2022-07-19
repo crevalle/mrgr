@@ -65,11 +65,7 @@ defmodule MrgrWeb.PendingMergeLive do
                       </svg>
                       <%= merge.merge_queue_index %>
                     </p>
-                    <%= if has_migration?(merge) do %>
-                      <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                        <p class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 text-green-800">migration</p>
-                      </p>
-                    <% end %>
+                    <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: merge}) %>
                   </div>
                   <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                     <p>
@@ -81,7 +77,7 @@ defmodule MrgrWeb.PendingMergeLive do
                   <.form let={f} for={:merge}, phx-submit="merge" class="w-3/4">
                     <%= textarea f, :message, placeholder: "Commit message defaults to PR title.  Enter additional info here.", class: "w-1/2" %>
                     <%= hidden_input f, :id, value: merge.id %>
-                    <%= submit "Save", phx_disable_with: "Merging...", class: "bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-md" %>
+                    <%= submit "Merge!", phx_disable_with: "Merging...", class: "bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-md" %>
                   </.form>
                   <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                     <p>
@@ -212,12 +208,6 @@ defmodule MrgrWeb.PendingMergeLive do
         not_updated ->
           not_updated
       end
-    end)
-  end
-
-  def has_migration?(%{files_changed: files}) do
-    Enum.any?(files, fn f ->
-      String.starts_with?(f, "priv/repo/migrations")
     end)
   end
 
