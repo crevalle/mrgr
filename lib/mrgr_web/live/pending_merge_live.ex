@@ -3,10 +3,10 @@ defmodule MrgrWeb.PendingMergeLive do
 
   def mount(params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
-      subscribe()
 
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
       merges = Mrgr.Merge.pending_merges(current_user)
+      subscribe(current_user)
 
       socket
       |> assign(:current_user, current_user)
@@ -153,8 +153,9 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   # event bus
-  def subscribe do
-    Mrgr.PubSub.subscribe(Mrgr.Merge.topic())
+  def subscribe(user) do
+    topic = Mrgr.Installation.topic(user.current_installation)
+    Mrgr.PubSub.subscribe(topic)
   end
 
   # repoened will put it at the top, which may not be what we want
