@@ -6,9 +6,21 @@ defmodule MrgrWeb.Components.ActivityComponent do
   #
   # need to figure out how to store the activity stream - what will i use it for? just webhooks?
   # want to link to a relevant page
-  def render(%{event: event} = assigns) do
+  def render(%{event: "merge:synchronized", payload: _} = assigns) do
     ~H"""
-    <li><%= format_ref(@event["ref"]) %> updated to <%= shorten_sha(@event["after"]) %></li>
+    <li>PR <%= @payload.title %> updated </li>
+    """
+  end
+
+  def render(%{event: "merge:created", payload: _} = assigns) do
+    ~H"""
+    <li>PR <%= @payload.title %> opened </li>
+    """
+  end
+
+  def render(%{event: "branch:pushed", payload: _} = assigns) do
+    ~H"""
+    <li><%= format_ref(@payload["ref"]) %> updated to <%= shorten_sha(@payload["after"]) %></li>
     """
   end
 

@@ -3,13 +3,10 @@ defmodule Mrgr.Merge do
 
   alias Mrgr.Merge.Query
 
-  @topic "merge"
   @created "created"
   @reopened "reopened"
   @synchronized "synchronized"
   @closed "closed"
-
-  def topic, do: @topic
 
   def create_from_webhook(payload) do
     params = payload_to_params(payload)
@@ -111,7 +108,9 @@ defmodule Mrgr.Merge do
   end
 
   def broadcast(merge, event) do
-    Mrgr.PubSub.broadcast(merge, topic(), event)
+    topic = Mrgr.Installation.topic(merge.repository.installation)
+
+    Mrgr.PubSub.broadcast(merge, topic, "merge:#{event}")
     {:ok, merge}
   end
 
