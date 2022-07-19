@@ -66,6 +66,14 @@ defmodule MrgrWeb do
     end
   end
 
+  def component do
+    quote do
+      use Phoenix.Component
+
+      import MrgrWeb.Formatter
+    end
+  end
+
   def router do
     quote do
       use Phoenix.Router
