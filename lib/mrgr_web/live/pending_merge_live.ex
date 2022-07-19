@@ -183,7 +183,7 @@ defmodule MrgrWeb.PendingMergeLive do
     socket
     |> put_flash(
       :info,
-      "Open PR \"#{merge.title}\" updated.  New head is #{shorten_sha(merge.head.sha)}."
+      "Open PR \"#{merge.title}\" updated with commit #{Mrgr.Schema.Merge.head_commit_message(merge)}."
     )
     |> assign(:pending_merges, merges)
     |> noreply()
