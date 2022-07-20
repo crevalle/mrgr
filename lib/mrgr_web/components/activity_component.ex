@@ -2,30 +2,20 @@ defmodule MrgrWeb.Components.ActivityComponent do
   use MrgrWeb, :component
   use Mrgr.PubSub.Topic
 
+  @translated_merge_actions %{
+    "synchronized" => "updated"
+  }
+
   # i don't know what the other events will look like
   # for now this just handles the raw webhook payload, without the obj data
   #
   # need to figure out how to store the activity stream - what will i use it for? just webhooks?
   # want to link to a relevant page
-  def render(%{event: @merge_synchronized, payload: _} = assigns) do
+  def render(%{event: "merge:" <> action, payload: _} = assigns) do
     ~H"""
     <.event avatar_url={@payload.user.avatar_url}, name={@payload.user.login}, at={at(@payload, @tz)} >
       <:description>
-        updated <%= @payload.title %>
-      </:description>
-
-      <:detail>
-        <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: @payload}) %>
-      </:detail>
-    </.event>
-    """
-  end
-
-  def render(%{event: @merge_created, payload: _} = assigns) do
-    ~H"""
-    <.event avatar_url={@payload.user.avatar_url}, name={@payload.user.login}, at={at(@payload, @tz)} >
-      <:description>
-        opened <%= @payload.title %>
+        <%= translate_merge_action(action) %> <%= @payload.title %>
       </:description>
 
       <:detail>
@@ -73,5 +63,9 @@ defmodule MrgrWeb.Components.ActivityComponent do
 
   def at(branch_webhook, timezone) do
     ago(Mrgr.Branch.head_committed_at(branch_webhook), timezone)
+  end
+
+  defp translate_merge_action(action) do
+    Map.get(@translated_merge_actions, action, action)
   end
 end
