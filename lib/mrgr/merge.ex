@@ -28,7 +28,7 @@ defmodule Mrgr.Merge do
           {:ok, Mrgr.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def reopen(payload) do
     with {:ok, merge} <- find_from_payload(payload),
-         cs <- Mrgr.Schema.Merge.create_changeset(payload_to_params(payload), merge),
+         cs <- Mrgr.Schema.Merge.create_changeset(merge, payload_to_params(payload)),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
       |> preload_installation()
