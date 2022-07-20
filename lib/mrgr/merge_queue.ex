@@ -35,14 +35,17 @@ defmodule Mrgr.MergeQueue do
     # * merge is not already in list
     # * this list is the correct list, eg, they do not belong to another user
 
-    next = next_available_merge_queue_index(list)
-
-    updated =
-      merge
-      |> Mrgr.Schema.Merge.merge_queue_changeset(%{merge_queue_index: next})
-      |> Mrgr.Repo.update!()
+    updated = set_next_merge_queue_index(merge, list)
 
     List.insert_at(list, updated.merge_queue_index, updated)
+  end
+
+  def set_next_merge_queue_index(merge, list) do
+    next = next_available_merge_queue_index(list)
+
+    merge
+    |> Mrgr.Schema.Merge.merge_queue_changeset(%{merge_queue_index: next})
+    |> Mrgr.Repo.update!()
   end
 
   defp next_available_merge_queue_index(list) do
