@@ -81,17 +81,6 @@
                 <span class="bg-gray-100 group-hover:bg-gray-200 ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full"> 4 </span>
               <% end %>
             <% end %>
-
-            <%= link to: Routes.branch_path(@conn, :index), class: "text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md" do %>
-              <!-- Heroicon name: outline/users -->
-              <svg class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-              </svg>
-              <span class="flex-1"> Branches </span>
-
-              <!-- Current: "bg-white", Default: "bg-gray-100 group-hover:bg-gray-200" -->
-              <span class="bg-gray-100 group-hover:bg-gray-200 ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full"> 3 </span>
-            <% end %>
           </nav>
         </div>
       </div>
@@ -154,16 +143,6 @@
             <% end %>
           <% end %>
 
-          <%= link to: Routes.branch_path(@conn, :index), class: "text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md" do %>
-            <!-- Heroicon name: outline/users -->
-            <svg class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-            </svg>
-            <span class="flex-1"> Branches </span>
-
-            <!-- Current: "bg-white", Default: "bg-gray-100 group-hover:bg-gray-200" -->
-            <span class="bg-gray-100 group-hover:bg-gray-200 ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full"> 3 </span>
-          <% end %>
           <button type="button" class="bg-white p-1 rounded-full text-gray-400 hover:text-gray-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
             <span class="sr-only">View notifications</span>
             <!-- Heroicon name: outline/bell -->
