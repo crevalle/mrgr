@@ -9,21 +9,69 @@ defmodule MrgrWeb.Components.ActivityComponent do
   # want to link to a relevant page
   def render(%{event: @merge_synchronized, payload: _} = assigns) do
     ~H"""
-    <li>PR <%= @payload.title %> updated </li>
+    <.event avatar_url={@payload.user.avatar_url}, name={@payload.user.login}, at={at(@payload, @tz)} >
+      <:description>
+        updated <%= @payload.title %>
+      </:description>
+
+      <:detail>
+        <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: @payload}) %>
+      </:detail>
+    </.event>
     """
   end
 
   def render(%{event: @merge_created, payload: _} = assigns) do
     ~H"""
-    <li>PR <%= @payload.title %> opened </li>
+    <.event avatar_url={@payload.user.avatar_url}, name={@payload.user.login}, at={at(@payload, @tz)} >
+      <:description>
+        opened <%= @payload.title %>
+      </:description>
+
+      <:detail>
+        <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: @payload}) %>
+      </:detail>
+    </.event>
     """
   end
 
   def render(%{event: @branch_pushed, payload: _} = assigns) do
     ~H"""
-    <li><%= format_ref(@payload["ref"]) %> updated to <%= shorten_sha(@payload["after"]) %></li>
+    <.event avatar_url={@payload["sender"]["avatar_url"]}, name={@payload["sender"]["login"]}, at={at(@payload, @tz)}>
+      <:description>
+        pushed <%= shorten_sha(@payload["after"]) %> to <%= ref(@payload["ref"]) %>
+      </:description>
+
+      <:detail>
+        <%= @payload["head_commit"]["message"] %>
+      </:detail>
+    </.event>
     """
   end
 
-  def format_ref("refs/heads/" <> name), do: name
+  def event(assigns) do
+    ~H"""
+    <li class="py-4">
+      <div class="flex space-x-3">
+        <img class="h-6 w-6 rounded-full" src={"#{@avatar_url}"} alt="">
+        <div class="flex-1 space-y-1">
+          <div class="flex items-center justify-between">
+            <h3 class="text-sm font-medium"><%= @name %></h3>
+            <p class="text-sm text-gray-500"><%= @at %></p>
+          </div>
+          <p class="text-sm text-gray-500"><%= render_slot(@description) %></p>
+          <p class="text-sm text-gray-500"><%= render_slot(@detail) %></p>
+        </div>
+      </div>
+    </li>
+    """
+  end
+
+  def at(%Mrgr.Schema.Merge{} = merge, timezone) do
+    ago(Mrgr.Schema.Merge.head_committed_at(merge), timezone)
+  end
+
+  def at(branch_webhook, timezone) do
+    ago(Mrgr.Branch.head_committed_at(branch_webhook), timezone)
+  end
 end
