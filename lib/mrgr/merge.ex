@@ -63,7 +63,9 @@ defmodule Mrgr.Merge do
     with {:ok, merge} <- find_from_payload(payload),
          cs <- Mrgr.Schema.Merge.close_changeset(merge, params),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
-      broadcast(updated_merge, @merge_closed)
+      updated_merge
+      |> preload_installation()
+      |> broadcast(@merge_closed)
     else
       {:error, :not_found} = error ->
         Logger.warn("found no local PR")
