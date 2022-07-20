@@ -3,10 +3,9 @@ defmodule MrgrWeb.PendingMergeLive do
 
   def mount(params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
-      subscribe()
-
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
       merges = Mrgr.Merge.pending_merges(current_user)
+      subscribe(current_user)
 
       socket
       |> assign(:current_user, current_user)
@@ -153,13 +152,14 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   # event bus
-  def subscribe do
-    Mrgr.PubSub.subscribe(Mrgr.Merge.topic())
+  def subscribe(user) do
+    topic = Mrgr.Installation.topic(user.current_installation)
+    Mrgr.PubSub.subscribe(topic)
   end
 
   # repoened will put it at the top, which may not be what we want
   def handle_info(%{event: event, payload: payload}, socket)
-      when event in ["created", "reopened"] do
+      when event in ["merge:created", "merge:reopened"] do
     merges = socket.assigns.pending_merges
 
     socket
@@ -167,7 +167,7 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply()
   end
 
-  def handle_info(%{event: "closed", payload: payload}, socket) do
+  def handle_info(%{event: "merge:closed", payload: payload}, socket) do
     merges = Enum.reject(socket.assigns.pending_merges, &(&1.id == payload.id))
 
     socket
@@ -176,7 +176,7 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply()
   end
 
-  def handle_info(%{event: "synchronized", payload: merge}, socket) do
+  def handle_info(%{event: "merge:synchronized", payload: merge}, socket) do
     hydrated = Mrgr.Merge.preload_for_pending_list(merge)
     merges = replace_updated(socket.assigns.pending_merges, hydrated)
 

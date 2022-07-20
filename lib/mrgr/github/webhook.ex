@@ -37,6 +37,10 @@ defmodule Mrgr.Github.Webhook do
     payload
   end
 
+  def handle("push", payload) do
+    Mrgr.Branch.push(payload)
+  end
+
   # def handle("check_suite", %{"action" => "requested"} = payload) do
   # # Mrgr.CheckRun.create(payload)
   # payload
