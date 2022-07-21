@@ -57,7 +57,7 @@ defmodule Mrgr.IncomingWebhook do
     end
   end
 
-  def inject_installation_id(params), do: params
+  defp inject_installation_id(params), do: params
 
   defmodule Query do
     use Mrgr.Query
