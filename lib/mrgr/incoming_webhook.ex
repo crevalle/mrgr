@@ -53,7 +53,7 @@ defmodule Mrgr.IncomingWebhook do
   def inject_installation_id(%{data: %{"installation" => %{"id" => external_id}}} = params) do
     case Mrgr.Installation.find_by_external_id(external_id) do
       %Mrgr.Schema.Installation{id: id} ->
-        Map.put(params, "installation_id", id)
+        Map.put(params, :installation_id, id)
 
       nil ->
         params
