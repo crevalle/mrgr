@@ -11,6 +11,8 @@ defmodule Mrgr.IncomingWebhook do
 
   @spec create(map()) :: {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
   def create(params) do
+    params = inject_installation_id(params)
+
     %Schema{}
     |> Schema.changeset(params)
     |> Repo.insert()
@@ -44,6 +46,18 @@ defmodule Mrgr.IncomingWebhook do
   def fire!(hook) do
     Mrgr.Github.Webhook.handle(hook.object, hook.data)
   end
+
+  defp inject_installation_id(%{"installation" => %{"id" => external_id}} = params) do
+    case Mrgr.Installation.find_by_external_id(external_id) do
+      %Mrgr.Schema.Installation{id: id} ->
+        Map.put(params, :installation_id, id)
+
+      nil ->
+        params
+    end
+  end
+
+  def inject_installation_id(params), do: params
 
   defmodule Query do
     use Mrgr.Query

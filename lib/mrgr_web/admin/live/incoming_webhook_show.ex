@@ -16,6 +16,11 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
       </tr>
     </table>
 
+    <h3>Headers</h3>
+    <pre>
+      <%= Jason.encode!(@hook.headers, pretty: true) %>
+    </pre>
+
     <h3>Raw Data</h3>
       <pre>
       <%= Jason.encode!(@hook.data, pretty: true) %>

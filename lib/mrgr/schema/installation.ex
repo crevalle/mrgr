@@ -22,6 +22,8 @@ defmodule Mrgr.Schema.Installation do
     has_one(:account, Mrgr.Schema.Account)
     has_many(:repositories, Mrgr.Schema.Repository)
 
+    has_many(:incoming_webhooks, Mrgr.Schema.IncomingWebhook)
+
     has_many(:memberships, Mrgr.Schema.Membership)
     has_many(:members, through: [:memberships, :member])
     has_many(:users, through: [:members, :user])

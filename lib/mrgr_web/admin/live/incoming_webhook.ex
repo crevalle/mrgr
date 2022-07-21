@@ -7,6 +7,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
 
     <table>
       <th>id</th>
+      <th>Installation</th>
       <th>Object</th>
       <th>Action</th>
       <th>Data</th>
@@ -16,6 +17,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
       <%= for hook <- @incoming_webhooks do %>
         <tr>
           <td><%= link hook.id, to: Routes.admin_incoming_webhook_path(@socket, :show, hook.id), class: "text-teal-500" %></td>
+          <td><%= hook.installation_id %></td>
           <td><%= hook.object %></td>
           <td><%= hook.action %></td>
           <td></td>
