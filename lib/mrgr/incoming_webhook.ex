@@ -50,7 +50,7 @@ defmodule Mrgr.IncomingWebhook do
     Mrgr.Github.Webhook.handle(hook.object, hook.data)
   end
 
-  def inject_installation_id(%{"installation" => %{"id" => external_id}} = params) do
+  def inject_installation_id(%{data: %{"installation" => %{"id" => external_id}}} = params) do
     case Mrgr.Installation.find_by_external_id(external_id) do
       %Mrgr.Schema.Installation{id: id} ->
         Map.put(params, "installation_id", id)
