@@ -7,13 +7,13 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
     <table>
       <th>Object</th>
       <th>Action</th>
-      <th>Installation</th>
+      <th>Account</th>
       <th>Received</th>
 
       <tr>
         <td><%= @hook.object %></td>
         <td><%= @hook.action %></td>
-        <td><%= @hook.installation_id %></td>
+        <td><%= account(@hook) %></td>
         <td><%= ts(@hook.inserted_at, assigns.timezone) %></td>
       </tr>
     </table>
@@ -38,4 +38,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
     |> assign(hook: hook)
     |> ok
   end
+
+  defp account(%{installation: %{account: %{login: login}}}), do: login
+  defp account(_), do: "-"
 end

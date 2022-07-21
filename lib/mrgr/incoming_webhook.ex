@@ -68,7 +68,8 @@ defmodule Mrgr.IncomingWebhook do
     def with_installation(query) do
       from(q in query,
         left_join: i in assoc(q, :installation),
-        preload: [installation: i]
+        left_join: a in assoc(i, :account),
+        preload: [installation: {i, account: a}]
       )
     end
   end
