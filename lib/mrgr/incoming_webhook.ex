@@ -35,7 +35,10 @@ defmodule Mrgr.IncomingWebhook do
 
   @spec get(integer() | String.t()) :: Schema.t() | nil
   def get(id) do
-    Repo.get(Schema, id)
+    Schema
+    |> Query.by_id(id)
+    |> Query.with_installation()
+    |> Repo.one()
   end
 
   @spec broadcast_created!(Schema.t()) :: :ok
@@ -47,19 +50,26 @@ defmodule Mrgr.IncomingWebhook do
     Mrgr.Github.Webhook.handle(hook.object, hook.data)
   end
 
-  defp inject_installation_id(%{"installation" => %{"id" => external_id}} = params) do
+  def inject_installation_id(%{"installation" => %{"id" => external_id}} = params) do
     case Mrgr.Installation.find_by_external_id(external_id) do
       %Mrgr.Schema.Installation{id: id} ->
-        Map.put(params, :installation_id, id)
+        Map.put(params, "installation_id", id)
 
       nil ->
         params
     end
   end
 
-  defp inject_installation_id(params), do: params
+  def inject_installation_id(params), do: params
 
   defmodule Query do
     use Mrgr.Query
+
+    def with_installation(query) do
+      from(q in query,
+        left_join: i in assoc(q, :installation),
+        preload: [installation: i]
+      )
+    end
   end
 end
