@@ -1,5 +1,6 @@
 defmodule MrgrWeb.Admin.Live.IncomingWebhook do
   use MrgrWeb, :live_view
+  use Mrgr.PubSub.Event
 
   def render(assigns) do
     ~H"""
@@ -53,12 +54,15 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
   end
 
   def subscribe do
-    Mrgr.PubSub.subscribe(Mrgr.IncomingWebhook.topic())
+    Mrgr.PubSub.subscribe(Mrgr.PubSub.Topic.admin())
   end
 
-  def handle_info(%{event: "created", payload: payload}, socket) do
+  def handle_info(%{event: @incoming_webhook_created, payload: payload}, socket) do
     hooks = socket.assigns.incoming_webhooks
     socket = assign(socket, :incoming_webhooks, [payload | hooks])
     {:noreply, socket}
   end
+
+  # ignore other messages
+  def handle_info(%{event: _}, socket), do: {:noreply, socket}
 end

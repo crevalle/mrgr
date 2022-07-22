@@ -9,8 +9,20 @@ defmodule Mrgr.PubSub do
   end
 
   defmodule Topic do
+    def installation(%Mrgr.Schema.Installation{id: id}), do: installation(id)
+
+    def installation(id) do
+      "installation:#{id}"
+    end
+
+    def admin, do: "admin"
+  end
+
+  defmodule Event do
     defmacro __using__(_opts) do
       quote do
+        @incoming_webhook_created "incoming_webhook:created"
+
         @branch_pushed "branch:pushed"
 
         @merge_created "merge:created"

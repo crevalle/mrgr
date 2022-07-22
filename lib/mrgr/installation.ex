@@ -2,10 +2,6 @@ defmodule Mrgr.Installation do
   alias Mrgr.Schema.Installation, as: Schema
   alias Mrgr.Installation.Query
 
-  def topic(%Schema{external_id: id}) do
-    "installation:#{id}"
-  end
-
   def create_from_webhook(payload) do
     repository_params = payload["repositories"]
 

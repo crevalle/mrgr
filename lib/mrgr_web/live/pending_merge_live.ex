@@ -153,7 +153,7 @@ defmodule MrgrWeb.PendingMergeLive do
 
   # event bus
   def subscribe(user) do
-    topic = Mrgr.Installation.topic(user.current_installation)
+    topic = Mrgr.PubSub.Topic.installation(user.current_installation)
     Mrgr.PubSub.subscribe(topic)
   end
 

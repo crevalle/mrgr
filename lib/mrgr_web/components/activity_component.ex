@@ -1,6 +1,6 @@
 defmodule MrgrWeb.Components.ActivityComponent do
   use MrgrWeb, :component
-  use Mrgr.PubSub.Topic
+  use Mrgr.PubSub.Event
 
   @translated_merge_actions %{
     "synchronized" => "updated"

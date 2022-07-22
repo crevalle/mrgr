@@ -1,13 +1,10 @@
 defmodule Mrgr.IncomingWebhook do
+  use Mrgr.PubSub.Event
+
   alias Mrgr.Schema.IncomingWebhook, as: Schema
   alias Mrgr.Repo
 
   alias Mrgr.IncomingWebhook.Query
-
-  @topic "incoming_webhooks"
-
-  @spec topic :: String.t()
-  def topic, do: @topic
 
   @spec create(map()) :: {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
   def create(params) do
@@ -41,16 +38,30 @@ defmodule Mrgr.IncomingWebhook do
     |> Repo.one()
   end
 
+  def for_installation(id) do
+    Schema
+    |> Query.for_installation(id)
+    |> Query.rev_cron()
+    |> Query.limit(10)
+    |> Repo.all()
+  end
+
   @spec broadcast_created!(Schema.t()) :: :ok
   def broadcast_created!(hook) do
-    Mrgr.PubSub.broadcast(hook, topic(), "created")
+    Mrgr.PubSub.broadcast(
+      hook,
+      Mrgr.PubSub.Topic.installation(hook.installation_id),
+      @incoming_webhook_created
+    )
+
+    Mrgr.PubSub.broadcast(hook, Mrgr.PubSub.Topic.admin(), @incoming_webhook_created)
   end
 
   def fire!(hook) do
     Mrgr.Github.Webhook.handle(hook.object, hook.data)
   end
 
-  def inject_installation_id(%{data: %{"installation" => %{"id" => external_id}}} = params) do
+  defp inject_installation_id(%{data: %{"installation" => %{"id" => external_id}}} = params) do
     case Mrgr.Installation.find_by_external_id(external_id) do
       %Mrgr.Schema.Installation{id: id} ->
         Map.put(params, :installation_id, id)
@@ -60,7 +71,7 @@ defmodule Mrgr.IncomingWebhook do
     end
   end
 
-  def inject_installation_id(params), do: params
+  defp inject_installation_id(params), do: params
 
   defmodule Query do
     use Mrgr.Query
@@ -70,6 +81,12 @@ defmodule Mrgr.IncomingWebhook do
         left_join: i in assoc(q, :installation),
         left_join: a in assoc(i, :account),
         preload: [installation: {i, account: a}]
+      )
+    end
+
+    def for_installation(query, installation_id) do
+      from(q in query,
+        where: q.installation_id == ^installation_id
       )
     end
   end
