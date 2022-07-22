@@ -5,7 +5,7 @@ defmodule Mrgr.Query do
 
   defmacro __using__(_opts) do
     quote do
-      import Ecto.Query, only: [from: 2]
+      import Ecto.Query
 
       @spec by_id(Ecto.Queryable.t(), integer() | String.t()) :: Ecto.Query.t()
       def by_id(queryable, id) when is_integer(id) do
@@ -24,9 +24,9 @@ defmodule Mrgr.Query do
         )
       end
 
-      def order_by(queryable, order) do
+      def limit(queryable, limit) do
         from(q in queryable,
-          order_by: ^order
+          limit: ^limit
         )
       end
 

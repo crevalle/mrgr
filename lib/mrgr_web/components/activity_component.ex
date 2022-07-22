@@ -1,6 +1,6 @@
 defmodule MrgrWeb.Components.ActivityComponent do
   use MrgrWeb, :component
-  use Mrgr.PubSub.Topic
+  use Mrgr.PubSub.Event
 
   @translated_merge_actions %{
     "synchronized" => "updated"
@@ -13,7 +13,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
   # want to link to a relevant page
   def render(%{event: "merge:" <> action, payload: _} = assigns) do
     ~H"""
-    <.event avatar_url={@payload.user.avatar_url}, name={@payload.user.login}, at={at(@payload, @tz)} >
+    <.event avatar_url={@payload.user.avatar_url} name={@payload.user.login} at={at(@payload)} >
       <:description>
         <%= translate_merge_action(action) %> <%= @payload.title %>
       </:description>
@@ -27,7 +27,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
 
   def render(%{event: @branch_pushed, payload: _} = assigns) do
     ~H"""
-    <.event avatar_url={@payload["sender"]["avatar_url"]}, name={@payload["sender"]["login"]}, at={at(@payload, @tz)}>
+    <.event avatar_url={@payload["sender"]["avatar_url"]} name={@payload["sender"]["login"]} at={at(@payload)}>
       <:description>
         pushed <%= shorten_sha(@payload["after"]) %> to <%= ref(@payload["ref"]) %>
       </:description>
@@ -57,12 +57,12 @@ defmodule MrgrWeb.Components.ActivityComponent do
     """
   end
 
-  def at(%Mrgr.Schema.Merge{} = merge, timezone) do
-    ago(Mrgr.Schema.Merge.head_committed_at(merge), timezone)
+  def at(%Mrgr.Schema.Merge{} = merge) do
+    ago(Mrgr.Schema.Merge.head_committed_at(merge))
   end
 
-  def at(branch_webhook, timezone) do
-    ago(Mrgr.Branch.head_committed_at(branch_webhook), timezone)
+  def at(branch_webhook) do
+    ago(Mrgr.Branch.head_committed_at(branch_webhook))
   end
 
   defp translate_merge_action(action) do

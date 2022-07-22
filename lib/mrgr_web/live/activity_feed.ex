@@ -1,7 +1,8 @@
 defmodule MrgrWeb.Live.ActivityFeed do
   use MrgrWeb, :live_view
+  use Mrgr.PubSub.Event
 
-  def mount(params, %{"user_id" => user_id}, socket) do
+  def mount(_params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
       items = load_items(current_user)
@@ -10,7 +11,7 @@ defmodule MrgrWeb.Live.ActivityFeed do
 
       socket
       |> assign(:current_user, current_user)
-      |> assign(:items, [])
+      |> assign(:items, items)
       |> ok()
     else
       socket
@@ -21,11 +22,31 @@ defmodule MrgrWeb.Live.ActivityFeed do
   end
 
   def subscribe(user) do
-    topic = Mrgr.Installation.topic(user.current_installation)
+    topic = Mrgr.PubSub.Topic.installation(user.current_installation)
     Mrgr.PubSub.subscribe(topic)
   end
 
+  # until i figure out how to represent activity stream events, we translate
+  # %IncomingWebhook{} into either a %Merge{} (because we need `files_changed`) or
+  # the raw payload of a branch push event.  super ugly : (
   def load_items(user) do
+    user
+    |> Mrgr.ActivityFeed.load_for_user()
+    |> Enum.filter(fn %{object: obj} ->
+      obj == "pull_request" || obj == "push"
+    end)
+    |> Enum.map(fn item ->
+      create_event(item)
+    end)
+  end
+
+  defp create_event(%{object: "push"} = item) do
+    %{event: @branch_pushed, payload: item.data}
+  end
+
+  defp create_event(item) do
+    merge = Mrgr.Merge.find_by_external_id(item.data["pull_request"]["id"])
+    %{event: "merge:#{item.action}", payload: merge}
   end
 
   def render(assigns) do
@@ -41,7 +62,7 @@ defmodule MrgrWeb.Live.ActivityFeed do
     """
   end
 
-  def handle_info(%{event: event, payload: payload} = item, socket) do
+  def handle_info(%{event: _event, payload: _payload} = item, socket) do
     items = socket.assigns.items
 
     socket

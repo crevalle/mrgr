@@ -1,7 +1,7 @@
 defmodule MrgrWeb.PendingMergeLive do
   use MrgrWeb, :live_view
 
-  def mount(params, %{"user_id" => user_id}, socket) do
+  def mount(_params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
       merges = Mrgr.Merge.pending_merges(current_user)
@@ -153,7 +153,7 @@ defmodule MrgrWeb.PendingMergeLive do
 
   # event bus
   def subscribe(user) do
-    topic = Mrgr.Installation.topic(user.current_installation)
+    topic = Mrgr.PubSub.Topic.installation(user.current_installation)
     Mrgr.PubSub.subscribe(topic)
   end
 

@@ -1,5 +1,5 @@
 defmodule Mrgr.Merge do
-  use Mrgr.PubSub.Topic
+  use Mrgr.PubSub.Event
 
   require Logger
 
@@ -19,7 +19,7 @@ defmodule Mrgr.Merge do
         |> append_to_merge_queue()
         |> broadcast(@merge_created)
 
-      {:error, cs} = err ->
+      {:error, _cs} = err ->
         err
     end
   end
@@ -107,7 +107,7 @@ defmodule Mrgr.Merge do
   end
 
   def broadcast(merge, event) do
-    topic = Mrgr.Installation.topic(merge.repository.installation)
+    topic = Mrgr.PubSub.Topic.installation(merge.repository.installation)
 
     Mrgr.PubSub.broadcast(merge, topic, event)
     {:ok, merge}

@@ -6,6 +6,6 @@ defmodule Mrgr.PendingMerge do
     comment = %{body: "hi desmond!"}
 
     client = Tentacat.Client.new(%{access_token: token})
-    response = Tentacat.Issues.Comments.create(client, owner, repo_name, pr.number, comment)
+    Tentacat.Issues.Comments.create(client, owner, repo_name, pr.number, comment)
   end
 end

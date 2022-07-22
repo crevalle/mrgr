@@ -35,7 +35,14 @@ defmodule MrgrWeb.WebhookController do
     action = params["action"] |> IO.inspect(label: "*** ACTION")
     # IO.inspect("#{obj} #{action}", label: "### WEBHOOK HANDLING ###")
 
-    attrs = %{source: "github", object: obj, action: action, data: params}
+    attrs = %{
+      source: "github",
+      object: obj,
+      action: action,
+      data: params,
+      headers: Map.new(conn.req_headers)
+    }
+
     Mrgr.IncomingWebhook.create(attrs)
 
     Mrgr.Github.Webhook.handle(obj, params)
