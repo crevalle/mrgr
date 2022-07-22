@@ -2,7 +2,7 @@ defmodule MrgrWeb.Live.ActivityFeed do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  def mount(params, %{"user_id" => user_id}, socket) do
+  def mount(_params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
       items = load_items(current_user)
@@ -62,7 +62,7 @@ defmodule MrgrWeb.Live.ActivityFeed do
     """
   end
 
-  def handle_info(%{event: event, payload: payload} = item, socket) do
+  def handle_info(%{event: _event, payload: _payload} = item, socket) do
     items = socket.assigns.items
 
     socket

@@ -19,7 +19,7 @@ defmodule Mrgr.Merge do
         |> append_to_merge_queue()
         |> broadcast(@merge_created)
 
-      {:error, cs} = err ->
+      {:error, _cs} = err ->
         err
     end
   end

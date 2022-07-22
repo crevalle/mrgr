@@ -31,7 +31,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
     """
   end
 
-  def mount(%{"id" => id}, session, socket) do
+  def mount(%{"id" => id}, _session, socket) do
     hook = Mrgr.IncomingWebhook.get(id)
 
     socket

@@ -1,7 +1,7 @@
 defmodule MrgrWeb.PendingMergeShowLive do
   use MrgrWeb, :live_view
 
-  def mount(params, %{"merge_id" => id}, socket) do
+  def mount(_params, %{"merge_id" => id}, socket) do
     if connected?(socket) do
       merge = Mrgr.Repo.get(Mrgr.Schema.Merge, id)
 
@@ -35,7 +35,7 @@ defmodule MrgrWeb.PendingMergeShowLive do
 
     <h3>Raw Data</h3>
     <pre>
-    <%= Jason.encode!(@merge.raw, pretty: true) %>
+      <%= Jason.encode!(@merge.raw, pretty: true) %>
     </pre>
 
     """

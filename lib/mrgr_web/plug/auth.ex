@@ -1,7 +1,7 @@
 defmodule MrgrWeb.Plug.Auth do
   import Plug.Conn
 
-  def on_mount(:default, session, params, socket) do
+  def on_mount(:default, _session, params, socket) do
     case MrgrWeb.Plug.Auth.find_user(params["user_id"]) do
       %Mrgr.Schema.User{} = user ->
         {:cont, Phoenix.LiveView.assign(socket, :current_user, user)}
