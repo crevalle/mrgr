@@ -44,8 +44,8 @@ defmodule MrgrWeb.Live.ActivityFeed do
     %{event: @branch_pushed, payload: item.data}
   end
 
-  defp event_lookup(item) do
-    merge = Mrgr.Merge.find_by_external_id(item.raw["pull_request"]["id"])
+  defp create_event(item) do
+    merge = Mrgr.Merge.find_by_external_id(item.data["pull_request"]["id"])
     %{event: "merge:#{item.action}", payload: merge}
   end
 
