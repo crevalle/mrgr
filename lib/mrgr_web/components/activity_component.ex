@@ -3,7 +3,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
   use Mrgr.PubSub.Event
 
   @translated_merge_actions %{
-    "synchronized" => "updated"
+    "synchronize" => "updated"
   }
 
   # i don't know what the other events will look like
