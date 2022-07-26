@@ -1,4 +1,14 @@
 defmodule Mrgr.Repository do
+
+  alias Mrgr.Repository.Query
+
+  def find_by_name_for_user(user, name) do
+    Mrgr.Schema.Repository
+    |> Query.by_name(name)
+    |> Query.for_user(user)
+    |> Mrgr.Repo.one()
+  end
+
   # gets and stores all for repos - client must be appropriate for repos
   # TODO repos need merges preloaded
   # TODO: pass in installation and fetch client from ets or db or something
@@ -29,5 +39,22 @@ defmodule Mrgr.Repository do
     repo
     |> Mrgr.Schema.Repository.create_merges_changeset(%{merges: data})
     |> Mrgr.Repo.update()
+  end
+
+  defmodule Query do
+    use Mrgr.Query
+
+    def by_name(query, name) do
+      from(q in query,
+        where: q.name == ^name
+      )
+    end
+
+    def for_user(query, %{id: user_id}) do
+      from(q in query,
+        inner_join: u in assoc(q, :users),
+        where: u.id == ^user_id
+      )
+    end
   end
 end
