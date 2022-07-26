@@ -37,41 +37,44 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
         <div class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200">
           <div class="px-4 py-5 sm:px-6">
 
-            <div class="flex flex-col">
-              <h3 class="text-sm font-medium pb-5">Add New Alert</h3>
-              <!-- Content goes here -->
-              <!-- We use less vertical padding on card headers on desktop than on body sections -->
-              <div class="">
-                <.form let={f} for={@cs}  phx-submit="save_file_alert" class="flex justify-between items-start">
-
+            <!-- Content goes here -->
+            <!-- We use less vertical padding on card headers on desktop than on body sections -->
+            <.form let={f} for={@cs}  phx-submit="save_file_alert" class="space-y-8 divide-y divide-gray-200">
+              <div class="space-y-8 divide-y divide-gray-200 sm:space-y-5">
+                <div>
                   <div>
-                    <div class="relative border border-gray-300 rounded-md px-3 py-2 shadow-sm focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600">
-                      <label for="pattern" class="absolute -top-2 left-2 -mt-px inline-block px-1 bg-white text-xs font-medium text-gray-900">Pattern</label>
-                      <div class="mt-1">
-                        <%= text_input f, :pattern, placeholder: "example: 'foo/bar.ex' or 'foo/**/bar.ex'", class: "block w-full border-0 p-0 text-gray-900 placeholder-gray-500 focus:ring-0 sm:text-sm" %>
-                      </div>
-                    </div>
-                    <%= error_tag(f, :pattern, class: "mt-2 text-sm text-red-600") %>
-                    <p class="mt-2 text-sm text-gray-500" id="pattern-description">A file or folder name</p>
+                    <h3 class="text-lg leading-6 font-medium text-gray-900">Add New Alert</h3>
+                    <p class="mt-1 max-w-2xl text-sm text-gray-500">This information will be displayed publicly so be careful what you share.</p>
                   </div>
 
-                  <div>
-                    <div class="relative border border-gray-300 rounded-md px-3 py-2 shadow-sm focus-within:ring-1 focus-within:ring-indigo-600 focus-within:border-indigo-600">
-                      <label for="badge" class="absolute -top-2 left-2 -mt-px inline-block px-1 bg-white text-xs font-medium text-gray-900">Badge</label>
-                      <div class="mt-1">
-                        <%= text_input f, :badge_text, placeholder: "example: 'user model'", class: "block w-full border-0 p-0 text-gray-900 placeholder-gray-500 focus:ring-0 sm:text-sm" %>
-                      </div>
+                  <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                    <%= label(f, :pattern, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
+                    <div class="mt-1 sm:mt-0 sm:col-span-2">
+                      <%= text_input f, :pattern, placeholder: "example: 'foo/bar.ex' or 'foo/**/bar.ex'", class: "max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
+                      <%= error_tag(f, :pattern, class: "mt-2 text-sm text-red-600") %>
+                      <p class="mt-2 text-sm text-gray-500" id="pattern-description">A file or folder name</p>
                     </div>
-                    <%= error_tag(f, :badge_text, class: "mt-2 text-sm text-red-600") %>
-                    <p class="mt-2 text-sm text-gray-500" id="badge-description">The text of the alert label.</p>
                   </div>
 
+                  <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+                    <%= label(f, :badge_text, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
+                    <div class="mt-1 sm:mt-0 sm:col-span-2">
+                      <%= text_input f, :badge_text, placeholder: "example: 'user model'", class: "max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
+                      <%= error_tag(f, :badge_text, class: "mt-2 text-sm text-red-600") %>
+                      <p class="mt-2 text-sm text-gray-500" id="badge_text-description">The text of the alert label.</p>
+                    </div>
+                  </div>
 
-                  <%= submit "Save", class: "inline-flex items-center justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:w-auto" %>
-                </.form>
-
+                </div>
               </div>
-            </div>
+
+              <div class="pt-5">
+                <div class="flex justify-end">
+                  <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Save</button>
+                </div>
+              </div>
+            </.form>
+
           </div>
         </div>
         <div class="bg-white overflow-hidden shadow rounded-lg divide-y divide-gray-200">
