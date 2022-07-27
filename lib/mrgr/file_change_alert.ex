@@ -9,6 +9,18 @@ defmodule Mrgr.FileChangeAlert do
     |> Mrgr.Repo.all()
   end
 
+  def for_merge(%{repository: %{file_change_alerts: alerts}} = merge) do
+    Enum.filter(alerts, &applies_to_merge?(&1, merge))
+  end
+
+  def applies_to_merge?(alert, merge) do
+    pattern_matches_filenames?(alert.pattern, merge.files_changed)
+  end
+
+  def pattern_matches_filenames?(pattern, filenames) do
+    Enum.any?(filenames, fn name -> PathGlob.match?(name, pattern) end)
+  end
+
   defmodule Query do
     use Mrgr.Query
 

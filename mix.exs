@@ -41,6 +41,7 @@ defmodule Mrgr.MixProject do
       {:gettext, "~> 0.18"},
       {:jason, "~> 1.2"},
       {:joken, "~> 2.4"},
+      {:path_glob, "~> 0.1.1"},
       {:phoenix, "~> 1.6.0-rc.0", override: true},
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_html, "~> 3.0"},

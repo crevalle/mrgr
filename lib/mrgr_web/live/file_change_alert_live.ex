@@ -5,16 +5,16 @@ defmodule MrgrWeb.FileChangeAlertLive do
   def mount(_params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
-      repos = Mrgr.User.repos(current_user)
+      repos = Mrgr.Repository.for_user_with_rules(current_user)
 
       socket
       |> assign(:current_user, current_user)
-      |> assign(:repos_with_rules, repos)
+      |> assign(:repos, repos)
       |> ok()
     else
       socket
       |> assign(:current_user, nil)
-      |> assign(:repos_with_rules, [])
+      |> assign(:repos, [])
       |> ok()
     end
   end
@@ -45,7 +45,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
                   </tr>
                 </thead>
                 <tbody class="bg-white">
-                  <%= for repo <- @repos_with_rules do %>
+                  <%= for repo <- @repos do %>
                     <tr class="border-t border-gray-200">
                       <th colspan="2" scope="colgroup" class="bg-gray-50 px-4 py-2 text-left text-sm font-semibold text-gray-900 sm:px-6">
                         <%= repo.name %>
@@ -55,17 +55,19 @@ defmodule MrgrWeb.FileChangeAlertLive do
                       </th>
                     </tr>
 
-                   <tr class="border-t border-gray-300">
-                      <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"><pre>'foo/bar.ex'</pre></td>
-                      <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                        <MrgrWeb.Component.PendingMerge.badge bg="bg-gray-100" text="text-gray-800">
-                          bar.ex
-                        </MrgrWeb.Component.PendingMerge.badge>
-                      </td>
-                      <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
-                      </td>
-                    </tr>
+                    <%= for alert <- repo.file_change_alerts do %>
+                      <tr class="border-t border-gray-300">
+                        <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"><pre>'<%= alert.pattern %>'</pre></td>
+                        <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                          <MrgrWeb.Component.PendingMerge.badge bg="bg-gray-100" text="text-gray-800">
+                            <%= alert.badge_text %>
+                          </MrgrWeb.Component.PendingMerge.badge>
+                        </td>
+                        <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
+                        </td>
+                      </tr>
 
+                    <% end %>
                   <% end %>
 
                   <!-- More people... -->
@@ -78,15 +80,4 @@ defmodule MrgrWeb.FileChangeAlertLive do
     </div>
     """
   end
-
-  def handle_event("add-new", %{"id" => repo_id}, socket) do
-    id = String.to_integer(repo_id)
-
-
-    socket
-    |> put_flash(:info, "fired! 🚀")
-    |> noreply()
-  end
-
 end
-

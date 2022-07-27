@@ -15,6 +15,10 @@ defmodule MrgrWeb.Component.PendingMerge do
         <%= if dependencies_changed?(@merge) do %>
           <.badge bg="bg-yellow-100" text="text-yellow-800">dependencies</.badge>
         <% end %>
+
+        <%= for alert <- Mrgr.FileChangeAlert.for_merge(@merge) do %>
+          <.badge bg="bg-gray-100" text="text-gray-800"><%= alert.badge_text %></.badge>
+        <% end %>
       </div>
     """
   end

@@ -45,7 +45,7 @@ defmodule MrgrWeb.Live.ActivityFeed do
   end
 
   defp create_event(item) do
-    merge = Mrgr.Merge.find_by_external_id(item.data["pull_request"]["id"])
+    merge = Mrgr.Merge.find_for_activity_feed(item.data["pull_request"]["id"])
     %{event: "merge:#{item.action}", payload: merge}
   end
 
