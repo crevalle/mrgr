@@ -9,4 +9,3 @@ defmodule MrgrWeb.FileChangeAlertController do
     render(conn, repo_name: name)
   end
 end
-

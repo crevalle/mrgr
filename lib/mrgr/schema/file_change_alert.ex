@@ -1,7 +1,6 @@
 defmodule Mrgr.Schema.FileChangeAlert do
   use Mrgr.Schema
 
-
   schema "file_change_alerts" do
     field(:pattern, :string)
     field(:badge_text, :string)

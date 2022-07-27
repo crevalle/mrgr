@@ -12,6 +12,5 @@ defmodule Mrgr.Repo.Migrations.CreateFileChangeAlerts do
     end
 
     create index(:file_change_alerts, :repository_id)
-
   end
 end

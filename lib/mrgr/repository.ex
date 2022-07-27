@@ -1,5 +1,4 @@
 defmodule Mrgr.Repository do
-
   alias Mrgr.Repository.Query
 
   def find_by_name_for_user(user, name) do
