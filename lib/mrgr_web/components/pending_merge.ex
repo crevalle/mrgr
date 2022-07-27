@@ -3,7 +3,7 @@ defmodule MrgrWeb.Component.PendingMerge do
 
   def change_badges(assigns) do
     ~H"""
-      <div class="mt-2 flex items-center space-x-2 text-sm text-gray-500 sm:mt-0">
+      <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
         <%= if has_migration?(@merge) do %>
           <.badge bg="bg-green-100" text="text-green-800">migration</.badge>
         <% end %>
