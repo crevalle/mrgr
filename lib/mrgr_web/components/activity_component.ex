@@ -52,7 +52,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
 
   def event(assigns) do
     ~H"""
-    <li class="py-4">
+    <li class="p-2">
       <div class="flex space-x-3">
         <div class="flex flex-col space-y-1">
           <img class="h-6 w-6 rounded-full" src={"#{@avatar_url}"} alt="">
