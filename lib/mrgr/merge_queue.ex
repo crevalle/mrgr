@@ -49,7 +49,7 @@ defmodule Mrgr.MergeQueue do
   end
 
   defp next_available_merge_queue_index(list) do
-    Enum.count(list)
+    Enum.max_by(list, & &1.merge_queue_index) + 1
   end
 
   def remove(list, merge) do
