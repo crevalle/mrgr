@@ -45,7 +45,7 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
             <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
               <%= label(f, :pattern, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
               <div class="mt-1 sm:mt-0 sm:col-span-2">
-                <%= text_input f, :pattern, placeholder: "example: 'foo/bar.ex' or 'foo/**/bar.ex'", class: "max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
+                <%= text_input f, :pattern, placeholder: "example: 'foo/bar.ex' or 'foo/**/bar.ex'", class: "max-w-lg block w-full shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
                 <%= error_tag(f, :pattern, class: "mt-2 text-sm text-red-600") %>
                 <p class="mt-2 text-sm text-gray-500" id="pattern-description">A file or folder name.</p>
               </div>
@@ -54,7 +54,7 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
             <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
               <%= label(f, :badge_text, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
               <div class="mt-1 sm:mt-0 sm:col-span-2">
-                <%= text_input f, :badge_text, placeholder: "example: 'user model'", class: "max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
+                <%= text_input f, :badge_text, placeholder: "example: 'user model'", class: "max-w-lg block w-full shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
                 <%= error_tag(f, :badge_text, class: "mt-2 text-sm text-red-600") %>
                 <p class="mt-2 text-sm text-gray-500" id="badge_text-description">The text of the alert badge.</p>
               </div>
@@ -62,7 +62,7 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
 
             <div class="pt-5">
               <div class="flex justify-end">
-                <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">Save</button>
+                <button type="submit" class="ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500">Save</button>
               </div>
             </div>
           </.form>
@@ -83,31 +83,30 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
           <div class="flex flex-col min-w-full">
             <!-- table header row -->
               <div class="flex">
-                <div class="py-3.5 text-left text-sm font-semibold text-gray-900 sm:pl-6">Pattern</div>
+                <div class="py-3.5 text-left text-sm font-semibold text-gray-900">Pattern</div>
                 <div class="px-3 py-3.5 text-left text-sm font-semibold text-gray-900">Label</div>
               </div>
             <!-- table body -->
-              <div>
-                <%= for alert <- @alerts do %>
-                  <.form let={f} for={build_changeset(alert)} phx-submit="update-alert" class="space-y-8 divide-y divide-gray-200">
+              <div class="divide-y divide-gray-200">
+                <%= for {alert, cs} <- @alerts do %>
+                  <.form let={f} for={cs} phx-submit="update-alert" class="space-y-8">
                     <!-- table row -->
-                    <div class="flex p-4">
+                    <div class="flex py-4">
                       <!-- tds -->
                       <div class="flex flex-col">
                         <%= hidden_input f, :id %>
-                        <%= text_input f, :pattern, placeholder: "example: 'foo/bar.ex' or 'foo/**/bar.ex'", class: "max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
+                        <%= text_input f, :pattern, placeholder: "example: 'foo/bar.ex' or 'foo/**/bar.ex'", class: "max-w-lg block w-full shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
                         <%= error_tag(f, :pattern, class: "mt-2 text-sm text-red-600") %>
                       </div>
                       <div class="flex flex-col">
-                        <%= hidden_input f, :id %>
-                        <%= text_input f, :badge_text, placeholder: "example: 'foo/bar.ex' or 'foo/**/bar.ex'", class: "max-w-lg block w-full shadow-sm focus:ring-indigo-500 focus:border-indigo-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
+                        <%= text_input f, :badge_text, placeholder: "example: 'foo/bar.ex' or 'foo/**/bar.ex'", class: "max-w-lg block w-full shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
                         <%= error_tag(f, :badge_text, class: "mt-2 text-sm text-red-600") %>
                       </div>
                       <div>
-                        <%= submit "Save", class: "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                        <%= submit "Save", class: "ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-emerald-600 hover:bg-emerald-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" %>
                       </div>
                       <div>
-                        <%= link "Delete", to: "#", data: [confirm: "Sure about that?"], phx_click: "delete", phx_value_alert_id: alert.id, class: "btn ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" %>
+                        <%= link "Delete", to: "#", data: [confirm: "Sure about that?"], phx_click: "delete", phx_value_alert_id: alert.id, class: "btn ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" %>
                       </div>
                       <div class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6">
                       </div>
