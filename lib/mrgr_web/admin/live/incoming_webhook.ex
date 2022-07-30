@@ -4,7 +4,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
 
   def render(assigns) do
     ~H"""
-    <h1>Webhooks We've Received</h1>
+    <.h1>Webhooks We've Received</.h1>
 
     <table>
       <th>id</th>

@@ -51,7 +51,10 @@ defmodule MrgrWeb do
         layout: {MrgrWeb.LayoutView, "live.html"}
 
       import Mrgr.TupleHelpers
+      import MrgrWeb.Components.UI
+
       alias Phoenix.LiveView.JS
+      alias MrgrWeb.Components.Form
 
       on_mount MrgrWeb.Locale
 
