@@ -3,31 +3,60 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
 
   def render(assigns) do
     ~H"""
-    <h1>Incoming Webhook<%= @hook.id %></h1>
-    <table>
-      <th>Object</th>
-      <th>Action</th>
-      <th>Account</th>
-      <th>Received</th>
+    <div class="px-4 sm:px-6 lg:px-8">
+      <.heading title={"Incoming Webhook #{@hook.id}"} />
 
-      <tr>
-        <td><%= @hook.object %></td>
-        <td><%= @hook.action %></td>
-        <td><%= account(@hook) %></td>
-        <td><%= ts(@hook.inserted_at, assigns.timezone) %></td>
-      </tr>
-    </table>
+      <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
 
-    <h3>Headers</h3>
-    <pre>
-      <%= Jason.encode!(@hook.headers, pretty: true) %>
-    </pre>
+          <div class="mt-1">
 
-    <h3>Raw Data</h3>
-      <pre>
-      <%= Jason.encode!(@hook.data, pretty: true) %>
-    </pre>
+            <table class="min-w-full">
+              <thead class="bg-white">
+                <tr>
+                  <.th uppercase={true}>Object</.th>
+                  <.th uppercase={true}>Action</.th>
+                  <.th uppercase={true}>Account</.th>
+                  <.th uppercase={true}>Received</.th>
+                </tr>
+              </thead>
 
+              <.tr>
+                <.td><%= @hook.object %></.td>
+                <.td><%= @hook.action %></.td>
+                <.td><%= account(@hook) %></.td>
+                <.td><%= ts(@hook.inserted_at, assigns.timezone) %></.td>
+              </.tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+          <div class="my-1">
+            <.h3>Headers</.h3>
+          </div>
+
+          <pre>
+            <%= Jason.encode!(@hook.headers, pretty: true) %>
+          </pre>
+        </div>
+      </div>
+
+      <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+          <div class="my-1">
+            <.h3>Raw Data</.h3>
+          </div>
+
+          <pre>
+            <%= Jason.encode!(@hook.data, pretty: true) %>
+          </pre>
+        </div>
+      </div>
+
+    </div>
     """
   end
 

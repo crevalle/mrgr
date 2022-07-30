@@ -25,6 +25,10 @@ defmodule Mrgr.PubSub do
 
         @branch_pushed "branch:pushed"
 
+        @file_change_alert_created "file_change_alert:created"
+        @file_change_alert_updated "file_change_alert:updated"
+        @file_change_alert_deleted "file_change_alert:deleted"
+
         @merge_created "merge:created"
         @merge_reopened "merge:reopened"
         @merge_synchronized "merge:synchronized"

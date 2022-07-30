@@ -43,13 +43,16 @@ defmodule MrgrWeb.Router do
   scope "/", MrgrWeb do
     pipe_through [:browser, :authenticate]
 
-    # live_session :default, on_mount: [MrgrWeb.Plug.Auth, MrgrWeb.Locale] do
-    # live "/pending-merges", PendingMergeLive, :index
-    # end
     get "/pending-merges", PendingMergeController, :index
     get "/pending-merges/:id", PendingMergeController, :show
+    resources "/file-change-alerts", FileChangeAlertController, only: [:index, :edit]
 
     resources "/repositories", RepositoryController, only: [:index]
+  end
+
+  scope "/", MrgrWeb.Live do
+    live_session :default, on_mount: [MrgrWeb.Plug.Auth, MrgrWeb.Locale] do
+    end
   end
 
   scope "/webhooks", MrgrWeb do

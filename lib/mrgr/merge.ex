@@ -179,6 +179,13 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.one()
   end
 
+  def find_for_activity_feed(external_id) do
+    Mrgr.Schema.Merge
+    |> Query.by_external_id(external_id)
+    |> Query.with_file_alert_rules()
+    |> Mrgr.Repo.one()
+  end
+
   def pending_merges(%Mrgr.Schema.Installation{id: id}) do
     pending_merges(id)
   end
@@ -192,11 +199,12 @@ defmodule Mrgr.Merge do
     |> Query.for_installation(installation_id)
     |> Query.open()
     |> Query.order_by_priority()
+    |> Query.with_file_alert_rules()
     |> Mrgr.Repo.all()
   end
 
   def preload_for_pending_list(merge) do
-    Mrgr.Repo.preload(merge, [:repository])
+    Mrgr.Repo.preload(merge, repository: :file_change_alerts)
   end
 
   def delete_installation_merges(installation) do
@@ -234,18 +242,16 @@ defmodule Mrgr.Merge do
   end
 
   defp preload_installation(merge) do
-    Mrgr.Repo.preload(merge, repository: :installation)
+    Mrgr.Repo.preload(merge, repository: [:installation, :file_change_alerts])
   end
 
   defmodule Query do
     use Mrgr.Query
 
     def for_installation(query, installation_id) do
-      from(q in query,
-        join: r in assoc(q, :repository),
+      from([q, repository: r] in with_repository(query),
         join: i in assoc(r, :installation),
-        where: i.id == ^installation_id,
-        preload: [repository: r]
+        where: i.id == ^installation_id
       )
     end
 
@@ -269,11 +275,31 @@ defmodule Mrgr.Merge do
     end
 
     def preload_for_merging(query) do
-      from(q in query,
-        join: r in assoc(q, :repository),
+      from([q, repository: r] in with_repository(query),
         join: i in assoc(r, :installation),
         join: a in assoc(i, :account),
         preload: [repository: {r, [installation: {i, [account: a]}]}]
+      )
+    end
+
+    def with_repository(query) do
+      case has_named_binding?(query, :repository) do
+        true ->
+          query
+
+        false ->
+          from(q in query,
+            join: r in assoc(q, :repository),
+            as: :repository,
+            preload: [repository: r]
+          )
+      end
+    end
+
+    def with_file_alert_rules(query) do
+      from([q, repository: r] in with_repository(query),
+        left_join: a in assoc(r, :file_change_alerts),
+        preload: [repository: {r, [file_change_alerts: a]}]
       )
     end
   end

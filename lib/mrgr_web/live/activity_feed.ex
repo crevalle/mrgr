@@ -45,14 +45,14 @@ defmodule MrgrWeb.Live.ActivityFeed do
   end
 
   defp create_event(item) do
-    merge = Mrgr.Merge.find_by_external_id(item.data["pull_request"]["id"])
+    merge = Mrgr.Merge.find_for_activity_feed(item.data["pull_request"]["id"])
     %{event: "merge:#{item.action}", payload: merge}
   end
 
   def render(assigns) do
     ~H"""
     <div>
-      <h3>Latest Activity</h3>
+      <.h3>Latest Activity</.h3>
       <ul role="list" class="divide-y divide-gray-200">
         <%= for %{event: e, payload: p} <- @items do %>
           <MrgrWeb.Components.ActivityComponent.render event={e} payload={p} tz={@timezone}) />
@@ -60,6 +60,14 @@ defmodule MrgrWeb.Live.ActivityFeed do
       </ul>
     </div>
     """
+  end
+
+  def handle_info(%{event: "file_change_alert:" <> _event_type}, socket) do
+    items = load_items(socket.assigns.current_user)
+
+    socket
+    |> assign(:items, items)
+    |> noreply()
   end
 
   def handle_info(%{event: _event, payload: _payload} = item, socket) do

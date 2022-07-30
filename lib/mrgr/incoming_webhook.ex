@@ -48,12 +48,6 @@ defmodule Mrgr.IncomingWebhook do
 
   @spec broadcast_created!(Schema.t()) :: :ok
   def broadcast_created!(hook) do
-    Mrgr.PubSub.broadcast(
-      hook,
-      Mrgr.PubSub.Topic.installation(hook.installation_id),
-      @incoming_webhook_created
-    )
-
     Mrgr.PubSub.broadcast(hook, Mrgr.PubSub.Topic.admin(), @incoming_webhook_created)
   end
 

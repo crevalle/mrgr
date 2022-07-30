@@ -4,29 +4,47 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
 
   def render(assigns) do
     ~H"""
-    <h1>Webhooks We've Received</h1>
+    <div class="px-4 sm:px-6 lg:px-8">
+      <.heading title="Webhooks we've Received" />
 
-    <table>
-      <th>id</th>
-      <th>Installation</th>
-      <th>Object</th>
-      <th>Action</th>
-      <th>Data</th>
-      <th>Received</th>
-      <th></th>
+      <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
 
-      <%= for hook <- @incoming_webhooks do %>
-        <tr>
-          <td><%= link hook.id, to: Routes.admin_incoming_webhook_path(@socket, :show, hook.id), class: "text-teal-500" %></td>
-          <td><%= hook.installation_id %></td>
-          <td><%= hook.object %></td>
-          <td><%= hook.action %></td>
-          <td></td>
-          <td><%= ts(hook.inserted_at, assigns.timezone) %></td>
-          <td><button phx-click="fire" phx-value-id={hook.id} class="bg-teal-700 hover:bg-teal-900 text-white font-bold py-2 px-4 rounded-md">Fire!</button></td>
-        </tr>
-      <% end %>
-    </table>
+          <div class="mt-1">
+
+            <table class="min-w-full">
+              <thead class="bg-white">
+                <tr>
+                  <.th uppercase={true}>ID</.th>
+                  <.th uppercase={true}>Installation</.th>
+                  <.th uppercase={true}>object</.th>
+                  <.th uppercase={true}>action</.th>
+                  <.th uppercase={true}>received</.th>
+                  <.th uppercase={true}></.th>
+                </tr>
+              </thead>
+
+              <%= for hook <- @incoming_webhooks do %>
+                <.tr striped={true}>
+                  <.td><%= link hook.id, to: Routes.admin_incoming_webhook_path(@socket, :show, hook.id), class: "text-teal-500" %></.td>
+                  <.td><%= hook.installation_id %></.td>
+                  <.td><%= hook.object %></.td>
+                  <.td><%= hook.action %></.td>
+                  <.td><%= ts(hook.inserted_at, assigns.timezone) %></.td>
+                  <.td>
+                    <.button phx-click="fire" phx-value-id={hook.id} phx_disable_with="Firing 🚀...">Fire!</.button>
+                  </.td>
+                </.tr>
+              <% end %>
+            </table>
+
+
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     """
   end
 

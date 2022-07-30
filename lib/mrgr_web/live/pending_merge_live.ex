@@ -76,7 +76,7 @@ defmodule MrgrWeb.PendingMergeLive do
                   <.form let={f} for={:merge}, phx-submit="merge" class="w-3/4">
                     <%= textarea f, :message, placeholder: "Commit message defaults to PR title.  Enter additional info here.", class: "w-1/2" %>
                     <%= hidden_input f, :id, value: merge.id %>
-                    <%= submit "Merge!", phx_disable_with: "Merging...", class: "bg-teal-500 hover:bg-teal-700 text-white font-bold py-2 px-4 rounded-md" %>
+                    <.button submit={true} phx_disable_with="Merging...">Merge!</.button>
                   </.form>
                   <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                     <p>
@@ -91,7 +91,7 @@ defmodule MrgrWeb.PendingMergeLive do
       </ul>
     </div>
 
-    <button phx-click="refresh" class="bg-sky-700 hover:bg-sky-900 text-white font-bold py-2 px-4 rounded-md">Refresh PRs</button>
+    <.button phx-click="refresh"> Refresh PRs</.button>
 
     """
   end

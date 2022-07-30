@@ -15,6 +15,8 @@ defmodule Mrgr.Schema.Repository do
 
     has_many(:merges, Mrgr.Schema.Merge)
 
+    has_many(:file_change_alerts, Mrgr.Schema.FileChangeAlert)
+
     timestamps()
   end
 
