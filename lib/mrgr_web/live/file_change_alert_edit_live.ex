@@ -197,8 +197,7 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
     params = Map.put(params, "repository_id", socket.assigns.repo.id)
 
     params
-    |> empty_changeset()
-    |> Mrgr.Repo.insert()
+    |> Mrgr.FileChangeAlert.create()
     |> case do
       {:ok, alert} ->
         alerts = [alert | socket.assigns.alerts] |> Enum.sort_by(& &1.pattern)

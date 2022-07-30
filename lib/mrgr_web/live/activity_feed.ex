@@ -62,6 +62,14 @@ defmodule MrgrWeb.Live.ActivityFeed do
     """
   end
 
+  def handle_info(%{event: "file_change_alert:" <> _event_type}, socket) do
+    items = load_items(socket.assigns.current_user)
+
+    socket
+    |> assign(:items, items)
+    |> noreply()
+  end
+
   def handle_info(%{event: _event, payload: _payload} = item, socket) do
     items = socket.assigns.items
 
