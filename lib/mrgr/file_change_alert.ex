@@ -25,6 +25,12 @@ defmodule Mrgr.FileChangeAlert do
     Mrgr.Repo.delete(alert)
   end
 
+  def update(alert, params) do
+    alert
+    |> Schema.update_changeset(params)
+    |> Mrgr.Repo.update()
+  end
+
   defmodule Query do
     use Mrgr.Query
 

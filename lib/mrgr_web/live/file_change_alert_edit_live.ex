@@ -141,10 +141,13 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
 
   def load_repo_alerts(repo) do
     Mrgr.FileChangeAlert.for_repository(repo)
+    |> Enum.map(fn a ->
+      {a, build_changeset(a)}
+    end)
   end
 
   def handle_event("delete", %{"alert-id" => id}, socket) do
-    alert = fetch_alert(socket, id)
+    {alert, _cs} = fetch_alert(socket, id)
 
     case Mrgr.FileChangeAlert.delete(alert) do
       {:ok, _struct} ->
@@ -163,24 +166,50 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
   end
 
   # protects against random id injection
-  defp fetch_alert(socket, id) when is_bitstring(id), do: fetch_alert(socket, String.to_integer(id))
+  defp fetch_alert(socket, id) when is_bitstring(id),
+    do: fetch_alert(socket, String.to_integer(id))
 
   defp fetch_alert(%{assigns: %{alerts: alerts}}, alert_id) do
-    Enum.find(alerts, fn alert -> alert.id == alert_id end)
+    Enum.find(alerts, fn {alert, _cs} -> alert.id == alert_id end)
   end
 
-  defp remove_alert_from_list(socket, id) when is_bitstring(id), do: remove_alert_from_list(socket, String.to_integer(id))
+  defp remove_alert_from_list(socket, id) when is_bitstring(id),
+    do: remove_alert_from_list(socket, String.to_integer(id))
 
   defp remove_alert_from_list(%{assigns: %{alerts: alerts}}, alert_id) do
-    Enum.reject(alerts, fn a -> a.id == alert_id end)
+    Enum.reject(alerts, fn {a, _cs} -> a.id == alert_id end)
   end
 
-  def handle_event("update-alert", params, socket) do
-    IO.inspect(params, label: "update-alert")
+  def handle_event("update-alert", %{"file_change_alert" => params}, socket) do
+    {alert, _cs} = fetch_alert(socket, params["id"])
 
-    socket
-    |> put_flash(:info, "Alert Updated!")
-    |> noreply()
+    case Mrgr.FileChangeAlert.update(alert, params) do
+      {:ok, updated} ->
+        alerts = update_alert_in_list(socket, updated)
+
+        socket
+        |> put_flash(:info, "Alert updated.")
+        |> assign(:alerts, alerts)
+        |> noreply()
+
+      {:error, cs} ->
+        alerts = update_changeset_in_list(socket, alert, cs)
+
+        socket
+        |> put_flash(:error, "Couldn't update alert : (")
+        |> assign(:alerts, alerts)
+        |> noreply()
+    end
+  end
+
+  defp update_alert_in_list(%{assigns: %{alerts: alerts}}, alert) do
+    idx = Enum.find_index(alerts, fn {a, _cs} -> a.id == alert.id end)
+    List.replace_at(alerts, idx, {alert, build_changeset(alert)})
+  end
+
+  defp update_changeset_in_list(%{assigns: %{alerts: alerts}}, alert, cs) do
+    idx = Enum.find_index(alerts, fn {a, _cs} -> a.id == alert.id end)
+    List.replace_at(alerts, idx, {alert, cs})
   end
 
   def handle_event("save_file_alert", %{"file_change_alert" => params}, socket) do
