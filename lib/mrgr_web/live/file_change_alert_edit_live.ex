@@ -26,12 +26,7 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
   def render(assigns) do
     ~H"""
     <div class="px-4 sm:px-6 lg:px-8">
-      <div class="mt-8 sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-          <.h1>Editing Alerts for <%= @repo.full_name %></.h1>
-          <p class="mt-2 text-sm text-gray-700">Add alerts based on custom file or folder names.</p>
-        </div>
-      </div>
+      <.heading title={"Editing alerts for #{@repo.full_name}"} description="Add alerts based on custom file or folder names." />
 
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
         <div class="px-4 py-5 sm:px-6">

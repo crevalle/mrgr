@@ -23,12 +23,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
     ~H"""
     <!-- This example requires Tailwind CSS v2.0+ -->
     <div class="px-4 sm:px-6 lg:px-8">
-      <div class="sm:flex sm:items-center">
-        <div class="sm:flex-auto">
-          <h1 class="text-xl font-semibold text-gray-900">File Change Alerts</h1>
-          <p class="mt-2 text-sm text-gray-700">Add alerts based on custom file or folder names.</p>
-        </div>
-      </div>
+      <.heading title="File Change Alerts" description="Add alerts based on custom file or folder names." />
       <div class="mt-8 flex flex-col">
         <div class="-my-2 -mx-4 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div class="inline-block min-w-full py-2 align-middle md:px-6 lg:px-8">
