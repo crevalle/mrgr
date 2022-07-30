@@ -21,6 +21,10 @@ defmodule Mrgr.FileChangeAlert do
     Enum.any?(filenames, fn name -> PathGlob.match?(name, pattern) end)
   end
 
+  def delete(alert) do
+    Mrgr.Repo.delete(alert)
+  end
+
   defmodule Query do
     use Mrgr.Query
 
