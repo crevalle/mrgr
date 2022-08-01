@@ -92,21 +92,3 @@
   cursor: pointer;
 }
 
-.row {
-  display: flex;
-  flex-direction: row;
-}
-
-.table-header {
-  font-weight: 500;
-}
-
-.column {
-  display: flex;
-  flex-direction: column;
-}
-
-form {
-  width: 100%;
-}
-
