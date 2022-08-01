@@ -96,10 +96,12 @@ defmodule MrgrWeb.PendingMergeLive do
           <div class="basis-1/3 bg-white shadow overflow-hidden sm:rounded-md">
             <% m = List.first(@pending_merges) %>
             <.h3><%= m.title %></.h3>
-            <.form let={f} for={:merge}, phx-submit="merge" class="flex flex-col">
+            <.form let={f} for={:merge}, phx-submit="merge" class="flex flex-col space-y-4">
               <%= textarea f, :message, placeholder: "Commit message defaults to PR title.  Enter additional info here."  %>
               <%= hidden_input f, :id, value: m.id %>
-              <.button submit={true} phx_disable_with="Merging...">Merge!</.button>
+              <div class="flex items-end">
+                <.button submit={true} phx_disable_with="Merging...">Merge!</.button>
+              </div>
             </.form>
             <p>
               <pre><%= Enum.join(m.files_changed, ", ") %></pre>
