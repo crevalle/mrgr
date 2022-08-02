@@ -66,6 +66,8 @@ defmodule MrgrWeb do
     quote do
       use Phoenix.LiveComponent
 
+      import Mrgr.TupleHelpers
+
       unquote(components())
 
       unquote(view_helpers())
