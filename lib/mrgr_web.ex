@@ -51,12 +51,12 @@ defmodule MrgrWeb do
         layout: {MrgrWeb.LayoutView, "live.html"}
 
       import Mrgr.TupleHelpers
-      import MrgrWeb.Components.UI
 
       alias Phoenix.LiveView.JS
-      alias MrgrWeb.Components.Form
 
       on_mount MrgrWeb.Locale
+
+      unquote(components())
 
       unquote(view_helpers())
     end
@@ -66,6 +66,8 @@ defmodule MrgrWeb do
     quote do
       use Phoenix.LiveComponent
 
+      unquote(components())
+
       unquote(view_helpers())
     end
   end
@@ -74,7 +76,7 @@ defmodule MrgrWeb do
     quote do
       use Phoenix.Component
 
-      import MrgrWeb.Formatter
+      unquote(view_helpers())
     end
   end
 
@@ -93,6 +95,15 @@ defmodule MrgrWeb do
     quote do
       use Phoenix.Channel
       import MrgrWeb.Gettext
+    end
+  end
+
+  defp components do
+    quote do
+      # function component helpers
+      import MrgrWeb.Components.UI
+
+      alias MrgrWeb.Components.Form
     end
   end
 
