@@ -49,8 +49,16 @@ defmodule Mrgr.MergeQueue do
   end
 
   defp next_available_merge_queue_index([]), do: 1
+
   defp next_available_merge_queue_index(list) do
-    Enum.max_by(list, & &1.merge_queue_index) + 1
+    max =
+      list
+      |> Enum.map(& &1.merge_queue_index)
+      # wish we didn't need this vvv
+      |> Enum.reject(&is_nil/1)
+      |> Enum.max()
+
+    max + 1
   end
 
   def remove(list, merge) do
