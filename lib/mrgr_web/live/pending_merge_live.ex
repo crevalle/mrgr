@@ -27,67 +27,65 @@ defmodule MrgrWeb.PendingMergeLive do
       <.heading title="Pending Merges" />
 
       <div class="flex mt-8 space-x-4">
-        <div class="basis-1/2 bg-white overflow-hidden shadow rounded-lg">
-          <div class="flex px-4 py-5 sm:px-6">
+        <div class="basis-1/2 px-2 py-5 sm:px-6 overflow-hidden shadow rounded-lg">
 
-            <div class="bg-white shadow overflow-hidden sm:rounded-md" phx-hook="Drag" id="drag">
+          <div class="shadow overflow-hidden sm:rounded-md" phx-hook="Drag" id="drag">
 
-              <ul role="list" class="divide-y divide-gray-200 dropzone" id="pending-merge-list">
-                <%= for merge <- assigns.pending_merges do %>
-                  <li draggable="true" class="draggable merge-list" id={"merge-#{merge.id}"}>
-                    <div class="block hover:bg-gray-50">
-                      <div class="px-4 py-4 sm:px-6">
-                        <div class="flex items-center justify-between">
-                          <%= link merge.title, to: "#", phx_click: "show_preview", phx_value_merge_id: merge.id, class: "text-sm font-medium text-teal-499 truncate" %>
-                          <div class="ml-2 flex-shrink-0 flex">
-                            <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                              <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                              </svg>
-                              <p>
-                                "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        <div class="mt-2 sm:flex sm:justify-between">
-                          <div class="sm:flex">
-                            <p class="flex items-center text-sm text-gray-500">
-                              <!-- Heroicon name: solid/users -->
-                              <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                              </svg>
-                              <%= merge.repository.name %>
-                            </p>
-                            <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                              <!-- Heroicon name: solid/location-marker -->
-                              <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                                <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                              </svg>
-                              <%= merge.merge_queue_index %>
-                            </p>
-                            <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: merge}) %>
-                          </div>
+            <ul role="list" class="divide-y divide-gray-200 dropzone" id="pending-merge-list">
+              <%= for merge <- assigns.pending_merges do %>
+                <li draggable="true" class="draggable merge-list" id={"merge-#{merge.id}"}>
+                  <div class="block hover:bg-gray-50">
+                    <div class="px-4 py-4 sm:px-6">
+                      <div class="flex items-center justify-between">
+                        <%= link merge.title, to: "#", phx_click: "show_preview", phx_value_merge_id: merge.id, class: "text-sm font-medium text-teal-500 truncate" %>
+                        <div class="ml-2 flex-shrink-0 flex">
                           <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                              <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
                             <p>
-                              <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
-                            </p>
-                          </div>
-                        </div>
-                        <div class="mt-2 sm:flex sm:justify-between items-start">
-                          <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                            <p>
-                              <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
+                              "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
                             </p>
                           </div>
                         </div>
                       </div>
+                      <div class="mt-2 sm:flex sm:justify-between">
+                        <div class="sm:flex">
+                          <p class="flex items-center text-sm text-gray-500">
+                            <!-- Heroicon name: solid/users -->
+                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                            </svg>
+                            <%= merge.repository.name %>
+                          </p>
+                          <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                            <!-- Heroicon name: solid/location-marker -->
+                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
+                            </svg>
+                            <%= merge.merge_queue_index %>
+                          </p>
+                          <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: merge}) %>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                          <p>
+                            <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
+                          </p>
+                        </div>
+                      </div>
+                      <div class="mt-2 sm:flex sm:justify-between items-start">
+                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                          <p>
+                            <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
+                          </p>
+                        </div>
+                      </div>
                     </div>
-                  </li>
-                <% end %>
-              </ul>
+                  </div>
+                </li>
+              <% end %>
+            </ul>
 
-            </div>
           </div>
         </div>
 
