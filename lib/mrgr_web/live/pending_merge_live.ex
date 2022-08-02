@@ -27,7 +27,7 @@ defmodule MrgrWeb.PendingMergeLive do
       <.heading title="Pending Merges" />
 
       <div class="flex mt-8 space-x-4">
-        <div class="basis-1/2 px-2 py-5 sm:px-6 overflow-hidden shadow rounded-lg">
+        <div class="basis-1/2 bg-white px-2 py-5 sm:px-6 overflow-hidden shadow rounded-lg">
 
           <div class="shadow overflow-hidden sm:rounded-md" phx-hook="Drag" id="drag">
 
