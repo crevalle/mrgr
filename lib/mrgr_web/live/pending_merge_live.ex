@@ -185,6 +185,10 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply()
   end
 
+  def handle_info(_uninteresting_event, socket) do
+    noreply(socket)
+  end
+
   defp put_closed_flash_message(socket, %{merged_at: nil} = merge) do
     put_flash(socket, :warn, "#{merge.title} closed, but not merged")
   end
