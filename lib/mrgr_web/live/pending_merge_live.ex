@@ -110,7 +110,6 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def handle_event("show_preview", %{"merge-id" => id}, socket) do
-
     id = String.to_integer(id)
 
     selected = Enum.find(socket.assigns.pending_merges, fn m -> m.id == id end)
@@ -204,5 +203,4 @@ defmodule MrgrWeb.PendingMergeLive do
       end
     end)
   end
-
 end
