@@ -135,7 +135,11 @@ defmodule Mrgr.Merge do
   end
 
   def synchronize_commits(merge) do
-    commits = fetch_commits(merge, merge.repository.installation)
+    commits =
+      merge
+      |> fetch_commits(merge.repository.installation)
+      # they come in with first commit first, i want most recent first (head)
+      |> Enum.reverse()
 
     merge
     |> Mrgr.Schema.Merge.commits_changeset(%{commits: commits})
