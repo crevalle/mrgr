@@ -21,6 +21,17 @@ defmodule Mrgr.Github do
     parse(response)
   end
 
+  def commits(merge, installation) do
+    client = Mrgr.Github.Client.new(installation)
+
+    {owner, name} = Mrgr.Schema.Repository.owner_name(merge.repository)
+    number = merge.number
+
+    response = Tentacat.Pulls.commits(client, owner, name, number)
+
+    parse(response)
+  end
+
   # ********** ONLY TAKES HTE FIRST PAGE  *************
   # the first page is usually 30 results
   def parse(data) when is_list(data) do

@@ -40,10 +40,7 @@ defmodule MrgrWeb.PendingMergeLive do
                         <%= link merge.title, to: "#", phx_click: "show_preview", phx_value_merge_id: merge.id, class: "text-sm font-medium text-teal-500 truncate" %>
                         <div class="ml-2 flex-shrink-0 flex">
                           <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                            </svg>
-                            <p>
+                            <p class="truncate max-w-xs">
                               "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
                             </p>
                           </div>

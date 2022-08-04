@@ -13,7 +13,7 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
     <div class="basis-1/2 p-4 bg-white overflow-hidden shadow rounded-lg">
       <div class="flex flex-col space-y-4">
         <div class="flex items-start items-center">
-          <.h3><%= @merge.title %></.h3>
+          <.h1><%= @merge.title %></.h1>
           <%= link to: external_merge_url(@merge), target: "_blank" do %>
             <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
@@ -21,8 +21,9 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
           <% end %>
         </div>
 
+        <%= @merge.id %>
+        <.h3>Merge This Pull Request</.h3>
         <.form let={f} for={:merge}, phx-submit="merge", phx-target={@myself}, class="flex flex-col space-y-4">
-          <%= label f, :message, "Commit Message", class: "block text-sm font-medium text-gray-700" %>
           <div class="mt-1">
             <%= textarea f, :message, placeholder: "Commit message defaults to PR title.  Enter additional info here.", rows: "4", class: "shadow-sm focus:ring-emerald-500 focus:border-emerald-500 block w-full sm:text-sm border-gray-300 rounded-md"  %>
           </div>
@@ -31,6 +32,15 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
             <.button submit={true} phx_disable_with="Merging...">Merge!</.button>
           </div>
         </.form>
+
+        <div>
+          <.h3>Commits</.h3>
+          <ul>
+            <%= for c <- @merge.commits do %>
+              <MrgrWeb.Component.PendingMerge.preview_commit commit={c} ./>
+            <% end %>
+          </ul>
+        </div>
 
         <div>
           <.h3>Files Changed</.h3>

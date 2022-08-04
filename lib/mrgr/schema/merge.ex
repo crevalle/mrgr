@@ -13,6 +13,8 @@ defmodule Mrgr.Schema.Merge do
     field(:head_commit, :map)
     field(:raw, :map)
 
+    embeds_many(:commits, Mrgr.Github.Commit, on_replace: :delete)
+
     embeds_one(:user, Mrgr.Github.User, on_replace: :update)
 
     embeds_one(:head, Mrgr.Schema.Head, on_replace: :update)
@@ -51,6 +53,12 @@ defmodule Mrgr.Schema.Merge do
     |> put_external_id()
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:author_id)
+  end
+
+  def commits_changeset(schema, attrs) do
+    schema
+    |> cast(attrs, [])
+    |> cast_embed(:commits)
   end
 
   def merge_queue_changeset(schema, attrs) do
@@ -116,6 +124,22 @@ defmodule Mrgr.Schema.Merge do
   end
 
   def head_committed_at(_), do: nil
+
+  def commit_message(%Mrgr.Github.Commit{commit: commit}) do
+    commit.message
+  end
+
+  def author_name(%Mrgr.Github.Commit{commit: commit}) do
+    commit.author.name
+  end
+
+  def committed_at(%Mrgr.Github.Commit{commit: commit}) do
+    commit.author.date
+  end
+
+  def commit_sha(%Mrgr.Github.Commit{} = commit) do
+    commit.sha
+  end
 
   ### HEAD_COMMIT
   #  %{
