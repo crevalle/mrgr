@@ -72,6 +72,11 @@ defmodule MrgrWeb.PendingMergeLive do
                       </div>
                       <div class="mt-2 sm:flex sm:justify-between items-start">
                         <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                          <p>Opened
+                            <%= ts(merge.opened_at, assigns.timezone) %>
+                          </p>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                           <p>
                             <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
                           </p>
