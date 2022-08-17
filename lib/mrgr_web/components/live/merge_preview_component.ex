@@ -36,7 +36,7 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
         <.h3>Merge This Pull Request</.h3>
         <.form let={f} for={:merge}, phx-submit="merge", phx-target={@myself}, class="flex flex-col space-y-4">
           <div class="mt-1">
-            <%= textarea f, :message, placeholder: "Commit message defaults to PR title.  Enter additional info here.", rows: "4", class: "shadow-sm focus:ring-emerald-500 focus:border-emerald-500 block w-full sm:text-sm border-gray-300 rounded-md"  %>
+            <.textarea form={f} field={:message} opts={[placeholder: "Commit message defaults to PR title.  Enter additional info here."]} />
           </div>
           <%= hidden_input f, :id, value: @merge.id %>
           <div class="flex items-end">
