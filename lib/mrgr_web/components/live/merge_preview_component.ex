@@ -21,12 +21,17 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
               </svg>
             <% end %>
           </div>
-          <p>
-            Opened by <%= @merge.user.login %>
-          </p>
-          <p>
-            <%= ts(@merge.opened_at) %>
-          </p>
+          <div class="pt-1">
+            <p>
+              Opened by <%= @merge.user.login %>
+            </p>
+            <p>
+              <%= ts(@merge.opened_at) %>
+            </p>
+            <p>
+              <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: @merge}) %>
+            </p>
+          </div>
         </div>
 
         <div>
