@@ -91,7 +91,7 @@ defmodule MrgrWeb.PendingMergeLive do
           </div>
         </div>
 
-        <.live_component module={MrgrWeb.Components.Live.MergePreviewComponent} id="merge_preview" merge={@selected_merge} />
+        <.live_component module={MrgrWeb.Components.Live.MergePreviewComponent} id="merge_preview" merge={@selected_merge} current_user={@current_user} />
       </div>
     </div>
     <.button phx-click="refresh"> Refresh PRs</.button>
