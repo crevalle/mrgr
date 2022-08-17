@@ -104,8 +104,7 @@ defmodule MrgrWeb do
     quote do
       # function component helpers
       import MrgrWeb.Components.UI
-
-      alias MrgrWeb.Components.Form
+      import MrgrWeb.Components.Form
     end
   end
 

@@ -41,7 +41,7 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
               <%= label(f, :pattern, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
               <div class="mt-1 sm:mt-0 sm:col-span-2">
                 <%= text_input f, :pattern, placeholder: "example: 'foo/bar.ex' or 'foo/**/bar.ex'", class: "max-w-lg block w-full shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
-                <Form.error form={f} attr={:pattern}/>
+                <.error form={f} attr={:pattern}/>
                 <p class="mt-2 text-sm text-gray-500" id="pattern-description">A file or folder name.</p>
               </div>
             </div>
@@ -50,7 +50,7 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
               <%= label(f, :badge_text, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
               <div class="mt-1 sm:mt-0 sm:col-span-2">
                 <%= text_input f, :badge_text, placeholder: "example: 'user model'", class: "max-w-lg block w-full shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
-                <Form.error form={f} attr={:badge_text}/>
+                <.error form={f} attr={:badge_text}/>
                 <p class="mt-2 text-sm text-gray-500" id="badge_text-description">The text of the alert badge.</p>
               </div>
             </div>
@@ -90,11 +90,11 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
                       <div class="flex flex-col flex-1">
                         <%= hidden_input f, :id %>
                         <%= text_input f, :pattern, placeholder: "example: 'foo/bar.ex' or 'foo/**/bar.ex'", class: "max-w-lg block w-full shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
-                        <Form.error form={f} attr={:pattern} />
+                        <.error form={f} attr={:pattern} />
                       </div>
                       <div class="flex flex-col flex-1">
                         <%= text_input f, :badge_text, placeholder: "example: 'foo/bar.ex' or 'foo/**/bar.ex'", class: "max-w-lg block w-full shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
-                        <Form.error form={f} attr={:badge_text} />
+                        <.error form={f} attr={:badge_text} />
                       </div>
                       <div class="flex">
                         <div>
