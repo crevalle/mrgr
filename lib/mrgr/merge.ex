@@ -16,6 +16,7 @@ defmodule Mrgr.Merge do
         merge
         |> preload_installation()
         |> synchronize_head()
+        |> synchronize_commits()
         |> append_to_merge_queue()
         |> broadcast(@merge_created)
 
@@ -33,6 +34,7 @@ defmodule Mrgr.Merge do
       updated_merge
       |> preload_installation()
       |> synchronize_head()
+      |> synchronize_commits()
       |> append_to_merge_queue()
       |> broadcast(@merge_reopened)
     else
@@ -53,6 +55,7 @@ defmodule Mrgr.Merge do
       updated_merge
       |> preload_installation()
       |> synchronize_head()
+      |> synchronize_commits()
       |> broadcast(@merge_synchronized)
     end
   end
@@ -65,6 +68,7 @@ defmodule Mrgr.Merge do
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
       |> preload_installation()
+      |> synchronize_commits()
       |> broadcast(@merge_closed)
     else
       {:error, :not_found} = error ->
@@ -128,6 +132,22 @@ defmodule Mrgr.Merge do
     merge
     |> Ecto.Changeset.change(%{files_changed: files_changed, head_commit: head})
     |> Mrgr.Repo.update!()
+  end
+
+  def synchronize_commits(merge) do
+    commits =
+      merge
+      |> fetch_commits(merge.repository.installation)
+      # they come in with first commit first, i want most recent first (head)
+      |> Enum.reverse()
+
+    merge
+    |> Mrgr.Schema.Merge.commits_changeset(%{commits: commits})
+    |> Mrgr.Repo.update!()
+  end
+
+  def fetch_commits(merge, auth) do
+    Mrgr.Github.commits(merge, auth)
   end
 
   def fetch_head(merge, auth) do

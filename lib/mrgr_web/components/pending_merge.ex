@@ -1,5 +1,24 @@
 defmodule MrgrWeb.Component.PendingMerge do
-  use Phoenix.Component
+  use MrgrWeb, :component
+
+  alias Mrgr.Schema.Merge
+
+  def preview_commit(assigns) do
+    ~H"""
+    <li class="p-2">
+      <div class="flex flex-col space-y-1">
+        <div class="flex space-between items-center">
+          <p class="flex-1 truncate"><%= Merge.commit_message(@commit) %></p>
+          <p class="text-sm text-gray-500"><%= ts(Merge.committed_at(@commit)) %></p>
+        </div>
+        <div class="flex space-between space-x-2 divide-x divide-gray-500">
+          <p class="text-sm text-gray-500"><%= Merge.author_name(@commit) %></p>
+          <p class="pl-2 text-sm text-gray-500"><%= shorten_sha(Merge.commit_sha(@commit)) %></p>
+        </div>
+      </div>
+    </li>
+    """
+  end
 
   def change_badges(assigns) do
     ~H"""

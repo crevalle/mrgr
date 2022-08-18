@@ -10,11 +10,13 @@ defmodule MrgrWeb.PendingMergeLive do
       socket
       |> assign(:current_user, current_user)
       |> assign(:pending_merges, merges)
+      |> assign(:selected_merge, nil)
       |> ok()
     else
       socket
       |> assign(:current_user, nil)
       |> assign(:pending_merges, [])
+      |> assign(:selected_merge, nil)
       |> ok()
     end
   end
@@ -24,10 +26,10 @@ defmodule MrgrWeb.PendingMergeLive do
     <div class="px-4 sm:px-6 lg:px-8">
       <.heading title="Pending Merges" />
 
-      <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
-        <div class="flex px-4 py-5 sm:px-6">
+      <div class="flex mt-8 space-x-4">
+        <div class="basis-1/2 bg-white px-2 py-5 sm:px-6 overflow-hidden shadow rounded-lg">
 
-          <div class="basis-2/3 bg-white shadow overflow-hidden sm:rounded-md" phx-hook="Drag" id="drag">
+          <div class="shadow overflow-hidden sm:rounded-md" phx-hook="Drag" id="drag">
 
             <ul role="list" class="divide-y divide-gray-200 dropzone" id="pending-merge-list">
               <%= for merge <- assigns.pending_merges do %>
@@ -35,20 +37,10 @@ defmodule MrgrWeb.PendingMergeLive do
                   <div class="block hover:bg-gray-50">
                     <div class="px-4 py-4 sm:px-6">
                       <div class="flex items-center justify-between">
-                        <p class="flex items-start">
-                          <%= link merge.title, to: Routes.pending_merge_path(@socket, :show, merge.id), class: "text-sm font-medium text-teal-500 truncate" %>
-                          <%= link to: external_merge_url(merge), target: "_blank" do %>
-                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                            </svg>
-                          <% end %>
-                        </p>
+                        <%= link merge.title, to: "#", phx_click: "show_preview", phx_value_merge_id: merge.id, class: "text-sm font-medium text-teal-500 truncate" %>
                         <div class="ml-2 flex-shrink-0 flex">
                           <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                              <path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
-                            </svg>
-                            <p>
+                            <p class="truncate max-w-xs">
                               "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
                             </p>
                           </div>
@@ -80,6 +72,11 @@ defmodule MrgrWeb.PendingMergeLive do
                       </div>
                       <div class="mt-2 sm:flex sm:justify-between items-start">
                         <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                          <p>Opened
+                            <%= ts(merge.opened_at, assigns.timezone) %>
+                          </p>
+                        </div>
+                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                           <p>
                             <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
                           </p>
@@ -92,26 +89,9 @@ defmodule MrgrWeb.PendingMergeLive do
             </ul>
 
           </div>
-
-          <div class="basis-1/3 bg-white shadow overflow-hidden sm:rounded-md">
-            <% m = List.first(@pending_merges) %>
-            <.h3><%= m.title %></.h3>
-            <.form let={f} for={:merge}, phx-submit="merge" class="flex flex-col">
-              <%= textarea f, :message, placeholder: "Commit message defaults to PR title.  Enter additional info here."  %>
-              <%= hidden_input f, :id, value: m.id %>
-              <.button submit={true} phx_disable_with="Merging...">Merge!</.button>
-            </.form>
-            <p>
-              <pre><%= Enum.join(m.files_changed, ", ") %></pre>
-            </p>
-
-            <h3>Raw Data</h3>
-            <pre>
-              <%= Jason.encode!(m.raw, pretty: true) %>
-            </pre>
-          </div>
-
         </div>
+
+        <.live_component module={MrgrWeb.Components.Live.MergePreviewComponent} id="merge_preview" merge={@selected_merge} current_user={@current_user} />
       </div>
     </div>
     <.button phx-click="refresh"> Refresh PRs</.button>
@@ -131,6 +111,16 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply()
   end
 
+  def handle_event("show_preview", %{"merge-id" => id}, socket) do
+    id = String.to_integer(id)
+
+    selected = find_from_merges(socket.assigns.pending_merges, id)
+
+    socket
+    |> assign(:selected_merge, selected)
+    |> noreply()
+  end
+
   def handle_event("refresh", _params, socket) do
     user = socket.assigns.current_user
 
@@ -143,24 +133,6 @@ defmodule MrgrWeb.PendingMergeLive do
     socket = assign(socket, :pending_merges, merges)
 
     {:noreply, socket}
-  end
-
-  def handle_event("merge", %{"merge" => params}, socket) do
-    id = String.to_integer(params["id"])
-    message = params["message"]
-
-    Mrgr.Merge.merge!(id, message, socket.assigns.current_user)
-    |> case do
-      {:ok, _merge} ->
-        socket
-        |> put_flash(:info, "OK! 🥳")
-        |> noreply()
-
-      {:error, message} ->
-        socket
-        |> put_flash(:error, message)
-        |> noreply()
-    end
   end
 
   # pulls the id off the div constructed above
@@ -203,13 +175,20 @@ defmodule MrgrWeb.PendingMergeLive do
     hydrated = Mrgr.Merge.preload_for_pending_list(merge)
     merges = replace_updated(socket.assigns.pending_merges, hydrated)
 
+    previously_selected = find_previously_selected(merges, socket.assigns.selected_merge)
+
     socket
     |> put_flash(
       :info,
       "Open PR \"#{merge.title}\" updated with commit \"#{Mrgr.Schema.Merge.head_commit_message(merge)}\"."
     )
     |> assign(:pending_merges, merges)
+    |> assign(:selected_merge, previously_selected)
     |> noreply()
+  end
+
+  def handle_info(_uninteresting_event, socket) do
+    noreply(socket)
   end
 
   defp put_closed_flash_message(socket, %{merged_at: nil} = merge) do
@@ -234,7 +213,10 @@ defmodule MrgrWeb.PendingMergeLive do
     end)
   end
 
-  def external_merge_url(merge) do
-    Mrgr.Schema.Merge.external_merge_url(merge)
+  def find_previously_selected(_merges, nil), do: nil
+  def find_previously_selected(merges, %{id: id}), do: find_from_merges(merges, id)
+
+  defp find_from_merges(merges, id) do
+    Enum.find(merges, fn m -> m.id == id end)
   end
 end
