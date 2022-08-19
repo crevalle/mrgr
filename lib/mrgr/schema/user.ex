@@ -12,7 +12,6 @@ defmodule Mrgr.Schema.User do
     field(:name, :string)
     field(:nickname, :string)
     field(:phone, :string)
-    field(:provider, :string)
     field(:refresh_token, :string)
     field(:token, :string)
     field(:token_expires_at, :utc_datetime)
@@ -45,7 +44,6 @@ defmodule Mrgr.Schema.User do
   end
 
   @create_params ~w[
-    provider
     birthday
     description
     email
@@ -106,7 +104,6 @@ defmodule Mrgr.Schema.User do
     |> foreign_key_constraint(:current_installation_id)
   end
 
-  # provider: "github",
   # token: "token",
   # refresh_token: "anothr toekn",
   # token_expires_at: integer()
