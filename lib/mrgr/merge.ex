@@ -92,8 +92,7 @@ defmodule Mrgr.Merge do
   def merge!(%Mrgr.Schema.Merge{} = merge, message, merger) do
     args = generate_merge_args(merge, message, merger)
 
-    Tentacat.Pulls.merge(args.client, args.owner, args.repo, args.number, args.body)
-    |> handle_merge_response()
+    Mrgr.Github.API.merge_pull_request(args.client, args.owner, args.repo, args.number, args.body)
     |> case do
       {:ok, %{"sha" => _sha}} ->
         {:ok, merge}
@@ -115,14 +114,6 @@ defmodule Mrgr.Merge do
 
     Mrgr.PubSub.broadcast(merge, topic, event)
     {:ok, merge}
-  end
-
-  def handle_merge_response({200, result, _response}) do
-    {:ok, result}
-  end
-
-  def handle_merge_response({code, result, _response}) do
-    {:error, %{code: code, result: result}}
   end
 
   def synchronize_head(merge) do
@@ -147,15 +138,15 @@ defmodule Mrgr.Merge do
   end
 
   def fetch_commits(merge, auth) do
-    Mrgr.Github.commits(merge, auth)
+    Mrgr.Github.API.commits(merge, auth)
   end
 
   def fetch_head(merge, auth) do
-    Mrgr.Github.head_commit(merge, auth)
+    Mrgr.Github.API.head_commit(merge, auth)
   end
 
   def fetch_files_changed(merge, auth) do
-    response = Mrgr.Github.files_changed(merge, auth)
+    response = Mrgr.Github.API.files_changed(merge, auth)
 
     # ["lib/mrgr/incoming_webhook.ex", "lib/mrgr/merge.ex",
     # "lib/mrgr/schema/merge.ex", "lib/mrgr/user.ex",

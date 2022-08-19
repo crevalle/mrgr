@@ -22,6 +22,8 @@ config :mrgr, MrgrWeb.Endpoint,
 # In test we don't send emails.
 config :mrgr, Mrgr.Mailer, adapter: Swoosh.Adapters.Test
 
+config :mrgr, :github, implementation: Mrgr.Github.API.Fake
+
 # Print only warnings and errors during test
 config :logger, level: :warn
 

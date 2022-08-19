@@ -23,7 +23,9 @@ defmodule Mrgr.Installation do
     client = Mrgr.Github.Client.new(installation)
 
     # create memberships
-    members = fetch_members(installation, client)
+    # assumes account has been preloaded
+    # and install access token has been generated
+    members = Mrgr.Github.API.fetch_members(client, installation.account.login)
     add_team_members(installation, members)
 
     # IO.inspect(installation, label: " ***INSTALL")
@@ -71,15 +73,6 @@ defmodule Mrgr.Installation do
     install
     |> Schema.tokens_changeset(params)
     |> Mrgr.Repo.update!()
-  end
-
-  # assumes account has been preloaded
-  # and install access token has been generated
-  # later, find or create a token ..?
-  # should we pass an account in, rather than an install?  what's the controlling entity?
-  def fetch_members(installation, client) do
-    response = Tentacat.Organizations.Members.list(client, installation.account.login)
-    Mrgr.Github.parse_into(response, Mrgr.Github.User)
   end
 
   def add_team_members(installation, github_members) do

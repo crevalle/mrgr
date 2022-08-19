@@ -30,14 +30,11 @@ defmodule Mrgr.Repository do
   end
 
   defp fetch_open_merges(repo, client) do
-    open = %{state: "open"}
+    opts = %{state: "open"}
 
     {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
 
-    client
-    |> Tentacat.Pulls.filter(owner, name, open)
-    |> Mrgr.Github.parse()
-    |> Mrgr.Github.write_json("test/response/repo/#{name}-prs.json")
+    Mrgr.Github.API.fetch_filtered_pulls(client, owner, name, opts)
   end
 
   defp create_merges_from_data(_repo, []), do: nil

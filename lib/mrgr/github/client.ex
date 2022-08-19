@@ -52,8 +52,7 @@ defmodule Mrgr.Github.Client do
     jwt = Mrgr.Github.JwtToken.signed_jwt()
 
     client = Tentacat.Client.new(%{jwt: jwt})
-    response = Tentacat.App.Installations.token(client, id)
-    Mrgr.Github.parse_into(response, Mrgr.Github.AccessToken)
+    Mrgr.Github.API.get_new_installation_token(client, id)
   end
 
   # assumes token is fresh!
