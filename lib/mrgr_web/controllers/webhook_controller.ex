@@ -31,34 +31,10 @@ defmodule MrgrWeb.WebhookController do
     #
     # IO.inspect(params, label: "WEBHOOK ***")
 
-    obj = fetch_object(conn.req_headers)
-    action = params["action"] |> IO.inspect(label: "*** ACTION")
-    # IO.inspect("#{obj} #{action}", label: "### WEBHOOK HANDLING ###")
-
-    attrs = %{
-      source: "github",
-      object: obj,
-      action: action,
-      data: params,
-      headers: Map.new(conn.req_headers)
-    }
-
-    Mrgr.IncomingWebhook.create(attrs)
-
-    Mrgr.Github.Webhook.handle(obj, params)
+    Mrgr.Github.Webhook.handle_webhook(Map.new(conn.req_headers), params)
 
     conn
     |> put_status(200)
     |> json(%{yo: "momma"})
-  end
-
-  def fetch_object(headers) do
-    key = "x-github-event"
-    fetch_header_value(headers, key)
-  end
-
-  def fetch_header_value(headers, key) do
-    {_match, obj} = Enum.find(headers, fn {header, _value} -> header == key end)
-    obj
   end
 end

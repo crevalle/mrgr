@@ -3,6 +3,15 @@ defmodule Mrgr.Github.Webhook do
     Dispatcher that receives webhooks and figures out what to do with them.
   """
 
+  def handle_webhook(headers, params) do
+    obj = headers["x-github-event"]
+    action = params["action"]
+
+    _hook = create_incoming_webhook_record(obj, action, headers, params)
+
+    Mrgr.Github.Webhook.handle(obj, params)
+  end
+
   def handle("installation", %{"action" => "created"} = payload) do
     Mrgr.Installation.create_from_webhook(payload)
   end
@@ -46,5 +55,17 @@ defmodule Mrgr.Github.Webhook do
   def handle(obj, payload) do
     IO.inspect("*** NOT IMPLEMENTED #{obj}")
     {:ok, payload}
+  end
+
+  def create_incoming_webhook_record(obj, action, headers, data) do
+    attrs = %{
+      source: "github",
+      object: obj,
+      action: action,
+      data: data,
+      headers: headers
+    }
+
+    Mrgr.IncomingWebhook.create(attrs)
   end
 end
