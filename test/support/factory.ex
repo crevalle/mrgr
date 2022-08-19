@@ -3,6 +3,38 @@ defmodule Mrgr.Factory do
 
   # Factories
 
+  def build(:desmond) do
+    %Mrgr.Schema.User{
+      first_name: "Desmond",
+      last_name: "Bowe",
+      name: "Desmond Bowe",
+      email: "desmond@crevalle.io",
+      nickname: "desmondmonster",
+      refresh_token: Ecto.UUID.generate(),
+      token: Ecto.UUID.generate(),
+      token_expires_at:
+        DateTime.utc_now() |> DateTime.add(14, :day) |> DateTime.truncate(:second),
+      token_updated_at:
+        DateTime.utc_now() |> DateTime.add(-1, :day) |> DateTime.truncate(:second),
+      urls: %{}
+    }
+  end
+
+  def build(:user) do
+    %Mrgr.Schema.User{
+      first_name: Faker.Person.first_name(),
+      last_name: Faker.Person.last_name(),
+      name: Faker.StarWars.character(),
+      email: Faker.Internet.email(),
+      nickname: Faker.Internet.user_name(),
+      refresh_token: Ecto.UUID.generate(),
+      token: Ecto.UUID.generate(),
+      token_expires_at:
+        DateTime.utc_now() |> DateTime.add(14, :day) |> DateTime.truncate(:second),
+      token_updated_at: DateTime.utc_now() |> DateTime.add(-1, :day) |> DateTime.truncate(:second)
+    }
+  end
+
   def build(:installation) do
     %Mrgr.Schema.Installation{app_slug: "Socks"}
   end
