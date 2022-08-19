@@ -214,6 +214,14 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.all()
   end
 
+  def merges(%Mrgr.Schema.Installation{id: installation_id}) do
+    Mrgr.Schema.Merge
+    |> Query.for_installation(installation_id)
+    |> Query.order_by_priority()
+    |> Query.with_file_alert_rules()
+    |> Mrgr.Repo.all()
+  end
+
   def preload_for_pending_list(merge) do
     Mrgr.Repo.preload(merge, repository: :file_change_alerts)
   end
