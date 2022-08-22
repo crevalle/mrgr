@@ -122,25 +122,6 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
     end)
   end
 
-  def handle_event("delete", %{"alert-id" => id}, socket) do
-    {alert, _cs} = fetch_alert(socket, id)
-
-    case Mrgr.FileChangeAlert.delete(alert) do
-      {:ok, _struct} ->
-        alerts = remove_alert_from_list(socket, id)
-
-        socket
-        |> put_flash(:info, "Alert Deleted.")
-        |> assign(:alerts, alerts)
-        |> noreply()
-
-      {:error, _cs} ->
-        socket
-        |> put_flash(:error, "Couldn't delete alert : (")
-        |> noreply()
-    end
-  end
-
   # protects against random id injection
   defp fetch_alert(socket, id) when is_bitstring(id),
     do: fetch_alert(socket, String.to_integer(id))
@@ -154,6 +135,16 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
 
   defp remove_alert_from_list(%{assigns: %{alerts: alerts}}, alert_id) do
     Enum.reject(alerts, fn {a, _cs} -> a.id == alert_id end)
+  end
+
+  defp update_alert_in_list(%{assigns: %{alerts: alerts}}, alert) do
+    idx = Enum.find_index(alerts, fn {a, _cs} -> a.id == alert.id end)
+    List.replace_at(alerts, idx, {alert, build_changeset(alert)})
+  end
+
+  defp update_changeset_in_list(%{assigns: %{alerts: alerts}}, alert, cs) do
+    idx = Enum.find_index(alerts, fn {a, _cs} -> a.id == alert.id end)
+    List.replace_at(alerts, idx, {alert, cs})
   end
 
   def handle_event("update-alert", %{"file_change_alert" => params}, socket) do
@@ -178,16 +169,6 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
     end
   end
 
-  defp update_alert_in_list(%{assigns: %{alerts: alerts}}, alert) do
-    idx = Enum.find_index(alerts, fn {a, _cs} -> a.id == alert.id end)
-    List.replace_at(alerts, idx, {alert, build_changeset(alert)})
-  end
-
-  defp update_changeset_in_list(%{assigns: %{alerts: alerts}}, alert, cs) do
-    idx = Enum.find_index(alerts, fn {a, _cs} -> a.id == alert.id end)
-    List.replace_at(alerts, idx, {alert, cs})
-  end
-
   def handle_event("save_file_alert", %{"file_change_alert" => params}, socket) do
     params = Map.put(params, "repository_id", socket.assigns.repo.id)
 
@@ -205,6 +186,25 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
       {:error, cs} ->
         socket
         |> assign(:cs, cs)
+        |> noreply()
+    end
+  end
+
+  def handle_event("delete", %{"alert-id" => id}, socket) do
+    {alert, _cs} = fetch_alert(socket, id)
+
+    case Mrgr.FileChangeAlert.delete(alert) do
+      {:ok, _struct} ->
+        alerts = remove_alert_from_list(socket, id)
+
+        socket
+        |> put_flash(:info, "Alert Deleted.")
+        |> assign(:alerts, alerts)
+        |> noreply()
+
+      {:error, _cs} ->
+        socket
+        |> put_flash(:error, "Couldn't delete alert : (")
         |> noreply()
     end
   end
