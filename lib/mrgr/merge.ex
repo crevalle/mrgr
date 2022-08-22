@@ -69,6 +69,7 @@ defmodule Mrgr.Merge do
       updated_merge
       |> preload_installation()
       |> synchronize_commits()
+      |> remove_from_merge_queue()
       |> broadcast(@merge_closed)
     else
       {:error, :not_found} = error ->
@@ -90,10 +91,10 @@ defmodule Mrgr.Merge do
   @spec merge!(Mrgr.Schema.Merge.t() | integer(), String.t(), Mrgr.Schema.User.t()) ::
           {:ok, Mrgr.Schema.Merge.t()} | {:error, String.t()}
   def merge!(%Mrgr.Schema.Merge{} = merge, message, merger) do
+    # this only makes the API call.  side effects to the %Merge{} are handled in the close callback
     args = generate_merge_args(merge, message, merger)
 
-    Tentacat.Pulls.merge(args.client, args.owner, args.repo, args.number, args.body)
-    |> handle_merge_response()
+    Mrgr.Github.API.merge_pull_request(args.client, args.owner, args.repo, args.number, args.body)
     |> case do
       {:ok, %{"sha" => _sha}} ->
         {:ok, merge}
@@ -115,14 +116,6 @@ defmodule Mrgr.Merge do
 
     Mrgr.PubSub.broadcast(merge, topic, event)
     {:ok, merge}
-  end
-
-  def handle_merge_response({200, result, _response}) do
-    {:ok, result}
-  end
-
-  def handle_merge_response({code, result, _response}) do
-    {:error, %{code: code, result: result}}
   end
 
   def synchronize_head(merge) do
@@ -147,15 +140,15 @@ defmodule Mrgr.Merge do
   end
 
   def fetch_commits(merge, auth) do
-    Mrgr.Github.commits(merge, auth)
+    Mrgr.Github.API.commits(merge, auth)
   end
 
   def fetch_head(merge, auth) do
-    Mrgr.Github.head_commit(merge, auth)
+    Mrgr.Github.API.head_commit(merge, auth)
   end
 
   def fetch_files_changed(merge, auth) do
-    response = Mrgr.Github.files_changed(merge, auth)
+    response = Mrgr.Github.API.files_changed(merge, auth)
 
     # ["lib/mrgr/incoming_webhook.ex", "lib/mrgr/merge.ex",
     # "lib/mrgr/schema/merge.ex", "lib/mrgr/user.ex",
@@ -223,6 +216,14 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.all()
   end
 
+  def merges(%Mrgr.Schema.Installation{id: installation_id}) do
+    Mrgr.Schema.Merge
+    |> Query.for_installation(installation_id)
+    |> Query.order_by_priority()
+    |> Query.with_file_alert_rules()
+    |> Mrgr.Repo.all()
+  end
+
   def preload_for_pending_list(merge) do
     Mrgr.Repo.preload(merge, repository: :file_change_alerts)
   end
@@ -259,6 +260,13 @@ defmodule Mrgr.Merge do
     other_merges = Enum.reject(all_pending_merges, fn m -> m.id == merge.id end)
 
     Mrgr.MergeQueue.set_next_merge_queue_index(merge, other_merges)
+  end
+
+  defp remove_from_merge_queue(merge) do
+    all_pending_merges = pending_merges(merge.repository.installation)
+
+    {_updated_list, updated_merge} = Mrgr.MergeQueue.remove(all_pending_merges, merge)
+    updated_merge
   end
 
   defp preload_installation(merge) do

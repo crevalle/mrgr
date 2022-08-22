@@ -26,14 +26,15 @@ defmodule Mrgr.MergeQueue do
   @spec enqueue([Mrgr.Schema.Merge.t()], Mrgr.Schema.Merge.t()) :: [Mrgr.Schema.Merge.t()]
   def enqueue(list, merge) do
     # !!! avoids prepending and reversing the list because that adds too much mental
-    # overhead, even though it is faster.  instead we use the simpler List.insert_at/2
-    # and just keep the ordering intuitive by :merge_queue_order
+    # overhead, even though it is faster.  instead we use the simpler List.insert_at/2 and just keep the ordering intuitive by :merge_queue_order
     #
     # some assumptions this makes about the list:
     #
     # * queue has no gaps in :merge_queue_index attrs
     # * merge is not already in list
     # * this list is the correct list, eg, they do not belong to another user
+    #
+    # *** updates the items in place, ie, sets their indices
 
     updated = set_next_merge_queue_index(merge, list)
 
@@ -48,7 +49,7 @@ defmodule Mrgr.MergeQueue do
     |> Mrgr.Repo.update!()
   end
 
-  defp next_available_merge_queue_index([]), do: 1
+  defp next_available_merge_queue_index([]), do: 0
 
   defp next_available_merge_queue_index(list) do
     max =
@@ -61,26 +62,27 @@ defmodule Mrgr.MergeQueue do
     max + 1
   end
 
+  # returns the new list and the removed merge
   def remove(list, merge) do
     case find_merge_by_id(list, merge.id) do
       %Mrgr.Schema.Merge{} = target ->
         # expects merge to still have its index, don't remove that until after
         # this operation
-        updated =
+        updated_list =
           list
           |> remove_merge_from_list(target)
           |> regenerate_list_indices()
 
-        unset_merge_index(target)
+        updated_merge = unset_merge_index(merge)
 
-        updated
+        {updated_list, updated_merge}
 
       nil ->
-        list
+        {list, nil}
     end
   end
 
-  defp unset_merge_index(merge) do
+  def unset_merge_index(merge) do
     merge
     |> Mrgr.Schema.Merge.merge_queue_changeset(%{merge_queue_index: nil})
     |> Mrgr.Repo.update!()

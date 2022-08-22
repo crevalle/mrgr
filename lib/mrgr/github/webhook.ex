@@ -3,6 +3,15 @@ defmodule Mrgr.Github.Webhook do
     Dispatcher that receives webhooks and figures out what to do with them.
   """
 
+  def handle_webhook(headers, params) do
+    obj = headers["x-github-event"]
+    action = params["action"]
+
+    _hook = create_incoming_webhook_record(obj, action, headers, params)
+
+    Mrgr.Github.Webhook.handle(obj, params)
+  end
+
   def handle("installation", %{"action" => "created"} = payload) do
     Mrgr.Installation.create_from_webhook(payload)
   end
@@ -17,24 +26,20 @@ defmodule Mrgr.Github.Webhook do
 
   def handle("pull_request", %{"action" => "opened"} = payload) do
     Mrgr.Merge.create_from_webhook(payload)
-    payload
   end
 
   def handle("pull_request", %{"action" => "reopened"} = payload) do
     Mrgr.Merge.reopen(payload)
-    payload
   end
 
   def handle("pull_request", %{"action" => "closed"} = payload) do
     Mrgr.Merge.close(payload)
-    payload
   end
 
   # HEAD OF PR IS UPDATED - create a new check suite/run, new checklist
   def handle("pull_request", %{"action" => "synchronize"} = payload) do
     Mrgr.Merge.synchronize(payload)
     # Mrgr.CheckRun.create(payload)
-    payload
   end
 
   def handle("push", payload) do
@@ -49,6 +54,18 @@ defmodule Mrgr.Github.Webhook do
   # suspended?
   def handle(obj, payload) do
     IO.inspect("*** NOT IMPLEMENTED #{obj}")
-    payload
+    {:ok, payload}
+  end
+
+  def create_incoming_webhook_record(obj, action, headers, data) do
+    attrs = %{
+      source: "github",
+      object: obj,
+      action: action,
+      data: data,
+      headers: headers
+    }
+
+    Mrgr.IncomingWebhook.create(attrs)
   end
 end

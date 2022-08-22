@@ -3,9 +3,7 @@ defmodule Mrgr.User.Github do
   def generate_params(%{"token" => access_token, "data" => data} = _auth) do
     token_data = token_params(access_token)
 
-    data
-    |> Map.merge(token_data)
-    |> Map.put("provider", "github")
+    Map.merge(data, token_data)
   end
 
   def token_params(%OAuth2.AccessToken{} = token) do

@@ -55,6 +55,8 @@ config :mrgr, :oauth,
   client_id: System.get_env("GITHUB_OAUTH_CLIENT_ID"),
   client_secret: System.get_env("GITHUB_OAUTH_CLIENT_SECRET")
 
+config :mrgr, :github, implementation: Mrgr.Github.API.Live
+
 config :joken,
   rs256: [
     signer_alg: "RS256",
