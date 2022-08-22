@@ -43,7 +43,7 @@ defmodule Mrgr.MrgrQueueTest do
       # otherwise the changeset to nilify it won't work
       # enqueuing updates the items
       [merge_1, _second] = list
-      {removed, [%{id: id}]} = Mrgr.MergeQueue.remove(list, merge_1)
+      {[%{id: id}], removed} = Mrgr.MergeQueue.remove(list, merge_1)
 
       assert id == merge_2.id
 
@@ -59,7 +59,7 @@ defmodule Mrgr.MrgrQueueTest do
         |> Mrgr.MergeQueue.enqueue(insert!(:merge))
         |> Mrgr.MergeQueue.enqueue(insert!(:merge))
 
-      {nil, updated} = Mrgr.MergeQueue.remove(list, insert!(:merge))
+      {updated, _m} = Mrgr.MergeQueue.remove(list, insert!(:merge))
 
       assert updated == list
     end
@@ -76,7 +76,7 @@ defmodule Mrgr.MrgrQueueTest do
       # expects the passed-in merge to be current, ie, have the merge_queue_index set
       # otherwise the changeset to nilify it won't work
       [m1, _rest] = list
-      {updated_merge, [updated]} = Mrgr.MergeQueue.remove(list, m1)
+      {[updated], updated_merge} = Mrgr.MergeQueue.remove(list, m1)
 
       assert updated_merge.id == m1.id
       assert updated.id == m2.id
