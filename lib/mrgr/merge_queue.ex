@@ -64,6 +64,12 @@ defmodule Mrgr.MergeQueue do
 
   # returns the new list and the removed merge
   def remove(list, merge) do
+    # unset this always.
+    # a merge is marked "closed" before the list of pending merges is assembled, so it
+    # is duly not included in the list.  we tolerate that here to give callers flexibility and assume
+    # they know what they are doing
+    updated_merge = unset_merge_index(merge)
+
     case find_merge_by_id(list, merge.id) do
       %Mrgr.Schema.Merge{} = target ->
         # expects merge to still have its index, don't remove that until after
@@ -73,12 +79,10 @@ defmodule Mrgr.MergeQueue do
           |> remove_merge_from_list(target)
           |> regenerate_list_indices()
 
-        updated_merge = unset_merge_index(merge)
-
         {updated_list, updated_merge}
 
       nil ->
-        {list, nil}
+        {list, updated_merge}
     end
   end
 

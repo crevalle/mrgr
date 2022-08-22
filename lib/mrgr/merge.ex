@@ -257,6 +257,7 @@ defmodule Mrgr.Merge do
 
   defp append_to_merge_queue(merge) do
     all_pending_merges = pending_merges(merge.repository.installation)
+
     other_merges = Enum.reject(all_pending_merges, fn m -> m.id == merge.id end)
 
     Mrgr.MergeQueue.set_next_merge_queue_index(merge, other_merges)
@@ -266,6 +267,7 @@ defmodule Mrgr.Merge do
     all_pending_merges = pending_merges(merge.repository.installation)
 
     {_updated_list, updated_merge} = Mrgr.MergeQueue.remove(all_pending_merges, merge)
+
     updated_merge
   end
 
