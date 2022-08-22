@@ -69,6 +69,7 @@ defmodule Mrgr.Merge do
       updated_merge
       |> preload_installation()
       |> synchronize_commits()
+      |> remove_from_merge_queue()
       |> broadcast(@merge_closed)
     else
       {:error, :not_found} = error ->
@@ -90,6 +91,7 @@ defmodule Mrgr.Merge do
   @spec merge!(Mrgr.Schema.Merge.t() | integer(), String.t(), Mrgr.Schema.User.t()) ::
           {:ok, Mrgr.Schema.Merge.t()} | {:error, String.t()}
   def merge!(%Mrgr.Schema.Merge{} = merge, message, merger) do
+    # this only makes the API call.  side effects to the %Merge{} are handled in the close callback
     args = generate_merge_args(merge, message, merger)
 
     Mrgr.Github.API.merge_pull_request(args.client, args.owner, args.repo, args.number, args.body)
@@ -258,6 +260,13 @@ defmodule Mrgr.Merge do
     other_merges = Enum.reject(all_pending_merges, fn m -> m.id == merge.id end)
 
     Mrgr.MergeQueue.set_next_merge_queue_index(merge, other_merges)
+  end
+
+  defp remove_from_merge_queue(merge) do
+    all_pending_merges = pending_merges(merge.repository.installation)
+
+    {_updated_list, updated_merge} = Mrgr.MergeQueue.remove(all_pending_merges, merge)
+    updated_merge
   end
 
   defp preload_installation(merge) do
