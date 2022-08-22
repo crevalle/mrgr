@@ -124,7 +124,7 @@ defmodule Mrgr.MrgrQueueTest do
   defp with_repositories(%{installation: installation}, num \\ 3) do
     repos =
       Enum.reduce(0..num, [], fn _i, acc ->
-        [insert!(:repository, installation_id: installation.id) | acc]
+        [insert!(:repository, installation: installation) | acc]
       end)
 
     %{repositories: repos}
@@ -135,7 +135,7 @@ defmodule Mrgr.MrgrQueueTest do
       repositories
       |> Enum.reduce([], fn r, acc ->
         idx = Enum.count(acc)
-        merge = insert!(:merge, repository_id: r.id, merge_queue_index: idx)
+        merge = insert!(:merge, repository: r, merge_queue_index: idx)
         [merge | acc]
       end)
 
