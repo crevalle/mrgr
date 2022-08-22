@@ -2,15 +2,7 @@ defmodule Mrgr.MrgrQueueTest do
   # may not be async since we share db.
   # unless you use allowances, which i haven't figured out
   # how to use
-  use ExUnit.Case, async: false
-
-  setup do
-    # Explicitly get a connection before each test
-    :ok = Ecto.Adapters.SQL.Sandbox.checkout(Mrgr.Repo)
-    Ecto.Adapters.SQL.Sandbox.mode(Mrgr.Repo, {:shared, self()})
-  end
-
-  import Mrgr.Factory
+  use Mrgr.DataCase
 
   describe "clear_current_queue/1" do
     setup [:with_installation, :with_repositories, :with_open_merges]
@@ -38,19 +30,26 @@ defmodule Mrgr.MrgrQueueTest do
   end
 
   describe "remove/2" do
-    test "removes a merge from the list" do
+    test "removes a merge from the list and unsets the queue index of the removed merge" do
+      merge_1 = insert!(:merge)
+      merge_2 = insert!(:merge)
+
       list =
         []
-        |> Mrgr.MergeQueue.enqueue(insert!(:merge))
-        |> Mrgr.MergeQueue.enqueue(insert!(:merge))
+        |> Mrgr.MergeQueue.enqueue(merge_1)
+        |> Mrgr.MergeQueue.enqueue(merge_2)
 
-      [m1, m2] = list
+      # expects the passed-in merge to be current, ie, have the merge_queue_index set
+      # otherwise the changeset to nilify it won't work
+      # enqueuing updates the items
+      [merge_1, _second] = list
+      {removed, [%{id: id}]} = Mrgr.MergeQueue.remove(list, merge_1)
 
-      updated = Mrgr.MergeQueue.remove(list, m1)
+      assert id == merge_2.id
 
-      assert Enum.map(updated, & &1.id) == [m2.id]
-
-      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.Merge, m1.id)
+      assert removed.id == merge_1.id
+      assert removed.merge_queue_index == nil
+      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.Merge, merge_1.id)
       assert idx == nil
     end
 
@@ -60,24 +59,32 @@ defmodule Mrgr.MrgrQueueTest do
         |> Mrgr.MergeQueue.enqueue(insert!(:merge))
         |> Mrgr.MergeQueue.enqueue(insert!(:merge))
 
-      updated = Mrgr.MergeQueue.remove(list, insert!(:merge))
+      {nil, updated} = Mrgr.MergeQueue.remove(list, insert!(:merge))
 
       assert updated == list
     end
 
     test "updates subsequent merge indices" do
+      m1 = insert!(:merge)
+      m2 = insert!(:merge)
+
       list =
         []
-        |> Mrgr.MergeQueue.enqueue(insert!(:merge))
-        |> Mrgr.MergeQueue.enqueue(insert!(:merge))
+        |> Mrgr.MergeQueue.enqueue(m1)
+        |> Mrgr.MergeQueue.enqueue(m2)
 
-      [m1, m2] = list
+      # expects the passed-in merge to be current, ie, have the merge_queue_index set
+      # otherwise the changeset to nilify it won't work
+      [m1, _rest] = list
+      {updated_merge, [updated]} = Mrgr.MergeQueue.remove(list, m1)
 
-      updated = Mrgr.MergeQueue.remove(list, m1)
+      assert updated_merge.id == m1.id
+      assert updated.id == m2.id
 
-      assert Enum.map(updated, & &1.id) == [m2.id]
+      assert updated_merge.merge_queue_index == nil
 
       %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.Merge, m1.id)
+
       assert idx == nil
 
       %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.Merge, m2.id)

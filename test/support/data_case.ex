@@ -24,6 +24,7 @@ defmodule Mrgr.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import Mrgr.DataCase
+      import Mrgr.Factory
     end
   end
 

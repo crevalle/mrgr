@@ -4,7 +4,7 @@ defmodule Mrgr.Github.API.Fake do
   end
 
   def merge_pull_request(client, owner, repo, number, message) do
-    {:ok, "socks"}
+    {:ok, %{"sha" => "0xdeadbeef"}}
   end
 
   def fetch_filtered_pulls(client, owner, repo, opts) do

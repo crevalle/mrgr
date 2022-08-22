@@ -35,19 +35,42 @@ defmodule Mrgr.Factory do
     }
   end
 
+  def build(:account) do
+    %Mrgr.Schema.Account{
+      login: Faker.Superhero.name()
+    }
+  end
+
   def build(:installation) do
-    %Mrgr.Schema.Installation{app_slug: "Socks"}
+    %Mrgr.Schema.Installation{
+      app_slug: "Socks",
+      account: build(:account)
+    }
   end
 
   def build(:repository) do
-    %Mrgr.Schema.Repository{name: Faker.Company.bullshit()}
+    %Mrgr.Schema.Repository{
+      name: Faker.Company.bullshit(),
+      installation: build(:installation)
+    }
   end
 
   def build(:merge) do
     %Mrgr.Schema.Merge{
       title: Faker.Company.bs(),
       number: System.unique_integer([:positive, :monotonic]),
-      status: "open"
+      status: "open",
+      head: build(:head),
+      repository: build(:repository)
+    }
+  end
+
+  def build(:head) do
+    %Mrgr.Schema.Head{
+      external_id: 123,
+      ref: "Where are the ants?",
+      # not really a sha, should be fine :)
+      sha: Faker.UUID.v4()
     }
   end
 
