@@ -46,7 +46,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
                         <%= repo.name %>
                       </th>
                       <th colspan="1" scope="colgroup" class="bg-gray-50 px-4 py-2 text-right text-sm font-semibold text-gray-900 sm:px-6">
-                        <%= link "Edit Alerts", to: Routes.file_change_alert_path(MrgrWeb.Endpoint, :edit, repo.name), class: "text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md" %>
+                        <%= link "Edit Alerts", to: Routes.file_change_alert_path(MrgrWeb.Endpoint, :edit, repo.name), class: "text-emerald-600 hover:text-emerald-900 hover:bg-emerald-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md" %>
                       </th>
                     </tr>
 
