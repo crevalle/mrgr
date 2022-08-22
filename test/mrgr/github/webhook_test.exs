@@ -37,7 +37,7 @@ defmodule Mrgr.Github.WebhookTest do
       payload = read_webhook_data("pull_request", "opened")
 
       {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
-      assert merge.merge_queue_index == 1
+      assert merge.merge_queue_index == 0
     end
 
     test "enqueues in the merge queue", ctx do
@@ -54,8 +54,8 @@ defmodule Mrgr.Github.WebhookTest do
                second_merge.id
              ]
 
-      assert first_merge.merge_queue_index == 1
-      assert second_merge.merge_queue_index == 2
+      assert first_merge.merge_queue_index == 0
+      assert second_merge.merge_queue_index == 1
 
       # need to pull this out for matches to work
       id_1 = first_merge.id
