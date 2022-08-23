@@ -102,18 +102,12 @@ defmodule MrgrWeb.PendingMergeLive do
                       </div>
                       <div class="mt-2 sm:flex sm:justify-between">
                         <div class="sm:flex">
-                          <p class="flex items-center text-sm text-gray-500">
-                            <!-- Heroicon name: solid/users -->
-                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                            </svg>
+                          <p class={"flex items-center text-sm #{repo_text_color(@repos, merge.repository)}"}>
+                            <.icon name="users" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5" />
                             <%= merge.repository.name %>
                           </p>
                           <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                            <!-- Heroicon name: solid/location-marker -->
-                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                            </svg>
+                            <.icon name="location-marker" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
                             <%= merge.merge_queue_index %>
                           </p>
                           <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: merge}) %>
@@ -282,5 +276,14 @@ defmodule MrgrWeb.PendingMergeLive do
 
   def frozen_repos(repos) do
     Enum.filter(repos, & &1.merge_freeze_enabled)
+  end
+
+  # look up the repo in hte socket assigns cause those are the ones who have their
+  # merge_freeze_enabled attribute updated
+  def repo_text_color(repos, r) do
+    case Mrgr.Utils.find_item_in_list(repos, r) do
+      %{merge_freeze_enabled: true} -> "text-blue-600"
+      %{merge_freeze_enabled: false} -> "text-gray-500"
+    end
   end
 end
