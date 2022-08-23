@@ -5,26 +5,80 @@ defmodule MrgrWeb.PendingMergeLive do
     if connected?(socket) do
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
       merges = Mrgr.Merge.pending_merges(current_user)
+      repos = Mrgr.Repository.for_user_with_rules(current_user)
       subscribe(current_user)
 
       socket
       |> assign(:current_user, current_user)
       |> assign(:pending_merges, merges)
       |> assign(:selected_merge, nil)
+      |> assign(:repos, repos)
       |> ok()
     else
       socket
       |> assign(:current_user, nil)
       |> assign(:pending_merges, [])
       |> assign(:selected_merge, nil)
+      |> assign(:repos, [])
       |> ok()
     end
   end
 
   def render(assigns) do
     ~H"""
-    <div class="px-4 sm:px-6 lg:px-8">
-      <.heading title="Pending Merges" />
+    <div class="px-4 pt-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between">
+        <.heading title="Pending Merges" />
+
+        <div class="relative inline-block text-left">
+          <div>
+            <.button phx-click={JS.toggle(
+                to: "#merge-freeze-menu",
+                in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
+                out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
+              )}
+              color="blue" id="menu-button" aria-expanded="true" aria-haspopup="true">
+              Freeze Merging
+              <.icon name="chevron-down" type="outline" class="-mr-1 ml-2 h-5 w-5" />
+            </.button>
+          </div>
+
+          <div style="display: none;" id="merge-freeze-menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+            <div class="py-1" role="none">
+              <%= for r <- @repos do %>
+                <%= link to: "#", phx_click: "toggle_merge_freeze", phx_value_repo_id: r.id, class: "text-gray-700 block my-2 text-sm outline-none", role: "menuitem", tabindex: "-1", id: "repo-menu-item-#{r.id}" do %>
+                  <div class="flex items-center hover:bg-gray-50">
+                    <div class="basis-8 text-blue-400 ml-2">
+                      <%= if r.merge_freeze_enabled do %>
+                        <.icon name="check" type="outline" class="h-6 w-6" />
+                      <% end %>
+                    </div>
+                    <%= r.name %>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <%= if Enum.count(frozen_repos(@repos)) > 0 do %>
+        <div class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50">
+
+          <.h3>There is a Merge Freeze on the following repos:</.h3>
+          <ul class="text-blue-900 list-disc my-4 mx-6">
+            <%= for r <- frozen_repos(@repos) do %>
+              <li>
+                <%= r.name %>
+              </li>
+            <% end %>
+          </ul>
+
+          <p>To resume merging, disable the Merge Freeze.</p>
+
+        </div>
+      <% end %>
 
       <div class="flex mt-8 space-x-4">
         <div class="basis-1/2 bg-white px-2 py-5 sm:px-6 overflow-hidden shadow rounded-lg">
@@ -97,6 +151,18 @@ defmodule MrgrWeb.PendingMergeLive do
     <.button phx-click="refresh"> Refresh PRs</.button>
 
     """
+  end
+
+  def handle_event("toggle_merge_freeze", %{"repo-id" => id}, socket) do
+    repo = Mrgr.Utils.find_item_in_list(socket.assigns.repos, id)
+
+    updated = Mrgr.Repository.toggle_merge_freeze(repo)
+
+    updated_list = Mrgr.Utils.replace_item_in_list(socket.assigns.repos, updated)
+
+    socket
+    |> assign(:repos, updated_list)
+    |> noreply()
   end
 
   def handle_event("dropped", %{"draggedId" => id, "draggableIndex" => index}, socket) do
