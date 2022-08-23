@@ -70,7 +70,7 @@ defmodule Mrgr.MergeQueue do
     # they know what they are doing
     updated_merge = unset_merge_index(merge)
 
-    case find_merge_by_id(list, merge.id) do
+    case Mrgr.Utils.find_item_in_list(list, merge) do
       %Mrgr.Schema.Merge{} = target ->
         # expects merge to still have its index, don't remove that until after
         # this operation
@@ -107,10 +107,6 @@ defmodule Mrgr.MergeQueue do
     |> Enum.reduce([], fn m, acc ->
       enqueue(acc, m)
     end)
-  end
-
-  def find_merge_by_id(merges, id) when is_integer(id) do
-    Enum.find(merges, fn m -> m.id == id end)
   end
 
   def update(list, merge, index) do

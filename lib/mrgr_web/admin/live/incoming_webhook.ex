@@ -60,9 +60,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
   end
 
   def handle_event("fire", %{"id" => id}, socket) do
-    id = String.to_integer(id)
-
-    hook = Enum.find(socket.assigns.incoming_webhooks, &(&1.id == id))
+    hook = Mrgr.Utils.find_item_in_list(socket.assigns.incoming_webhooks, id)
 
     Mrgr.IncomingWebhook.fire!(hook)
 

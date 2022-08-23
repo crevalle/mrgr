@@ -112,9 +112,7 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def handle_event("show_preview", %{"merge-id" => id}, socket) do
-    id = String.to_integer(id)
-
-    selected = find_from_merges(socket.assigns.pending_merges, id)
+    selected = Mrgr.Utils.find_item_in_list(socket.assigns.pending_merges, id)
 
     socket
     |> assign(:selected_merge, selected)
@@ -214,9 +212,9 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def find_previously_selected(_merges, nil), do: nil
-  def find_previously_selected(merges, %{id: id}), do: find_from_merges(merges, id)
+  def find_previously_selected(merges, merge), do: Mrgr.Utils.find_item_in_list(merges, merge)
 
-  defp find_from_merges(merges, id) do
-    Enum.find(merges, fn m -> m.id == id end)
+  def frozen_repos(repos) do
+    Enum.filter(repos, & &1.merge_freeze_enabled)
   end
 end
