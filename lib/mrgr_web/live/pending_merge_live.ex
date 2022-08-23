@@ -203,7 +203,7 @@ defmodule MrgrWeb.PendingMergeLive do
   defp get_id("merge-" <> id), do: String.to_integer(id)
 
   defp find_dragged(merges, id) do
-    Mrgr.MergeQueue.find_merge_by_id(merges, id)
+    Mrgr.Utils.find_item_in_list(merges, id)
   end
 
   defp update_merge_order(merges, updated_item, new_index) do
