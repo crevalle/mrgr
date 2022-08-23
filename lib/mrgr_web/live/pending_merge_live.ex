@@ -46,7 +46,7 @@ defmodule MrgrWeb.PendingMergeLive do
           <div style="display: none;" id="merge-freeze-menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
             <div class="py-1" role="none">
               <%= for r <- @repos do %>
-                <%= link to: "#", phx_click: "toggle_merge_freeze", phx_value_repo_id: r.id, class: "text-gray-700 block my-2 text-sm outline-none", role: "menuitem", tabindex: "-1", id: "repo-menu-item-#{r.id}" do %>
+                <%= link to: "#", phx_click: "toggle_merge_freeze", phx_value_repo_id: r.id, data_confirm: "Sure about that?", class: "text-gray-700 block my-2 text-sm outline-none", role: "menuitem", tabindex: "-1", id: "repo-menu-item-#{r.id}" do %>
                   <div class="flex items-center hover:bg-gray-50">
                     <div class="basis-8 text-blue-400 ml-2">
                       <%= if r.merge_freeze_enabled do %>
