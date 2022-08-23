@@ -8,7 +8,7 @@ defmodule Mrgr.Schema.Repository do
     field(:name, :string)
     field(:node_id, :string)
     field(:private, :boolean)
-    field(:merge_freeze_enabled, :boolean, default: false, virtual: true)
+    field(:merge_freeze_enabled, :boolean, default: false)
 
     belongs_to(:installation, Mrgr.Schema.Installation)
     has_many(:members, through: [:installation, :member])
