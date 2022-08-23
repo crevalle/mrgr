@@ -32,7 +32,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
                   <.td><%= hook.action %></.td>
                   <.td><%= ts(hook.inserted_at, assigns.timezone) %></.td>
                   <.td>
-                    <.button phx-click="fire" phx-value-id={hook.id} phx_disable_with="Firing 🚀...">Fire!</.button>
+                    <.button phx-click="fire" phx-value-id={hook.id} phx_disable_with="Firing 🚀..." colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500">Fire!</.button>
                   </.td>
                 </.tr>
               <% end %>

@@ -37,7 +37,10 @@ defmodule MrgrWeb.PendingMergeLive do
                 in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
                 out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
               )}
-              color="blue" id="menu-button" aria-expanded="true" aria-haspopup="true">
+              colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+              id="menu-button"
+              aria-expanded="true"
+              aria-haspopup="true">
               Freeze Merging
               <.icon name="chevron-down" type="outline" class="-mr-1 ml-2 h-5 w-5" />
             </.button>
@@ -144,7 +147,7 @@ defmodule MrgrWeb.PendingMergeLive do
         <.live_component module={MrgrWeb.Components.Live.MergePreviewComponent} id="merge_preview" merge={@selected_merge} current_user={@current_user} />
       </div>
     </div>
-    <.button phx-click="refresh"> Refresh PRs</.button>
+    <.button phx-click="refresh" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500"> Refresh PRs</.button>
 
     """
   end

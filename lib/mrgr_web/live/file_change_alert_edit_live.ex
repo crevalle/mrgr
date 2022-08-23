@@ -57,7 +57,7 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
 
             <div class="pt-5">
               <div class="flex justify-end">
-                <.button type="submit">Save</.button>
+                <.button type="submit" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500">Save</.button>
               </div>
             </div>
           </.form>
@@ -98,7 +98,7 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
                       </div>
                       <div class="flex">
                         <div>
-                          <.button type="submit">Save</.button>
+                          <.button type="submit" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500">Save</.button>
                         </div>
                         <div>
                           <%= link "Delete", to: "#", data: [confirm: "Sure about that?"], phx_click: "delete", phx_value_alert_id: alert.id, class: "btn ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" %>

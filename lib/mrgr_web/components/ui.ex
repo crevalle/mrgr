@@ -18,14 +18,12 @@ defmodule MrgrWeb.Components.UI do
   end
 
   def button(assigns) do
-    color = assigns[:color] || "emerald"
-
     class =
-      "inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-#{color}-600 hover:bg-#{color}-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-#{color}-500"
+      "inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 #{assigns.colors}"
 
     type = if assigns[:submit], do: "submit", else: false
 
-    extra = assigns_to_attributes(assigns, [:submit, :color])
+    extra = assigns_to_attributes(assigns, [:submit])
 
     assigns =
       assigns

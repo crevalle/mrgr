@@ -39,13 +39,18 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
         </div>
 
         <.h3>Merge This Pull Request</.h3>
+
+        <%= if merge_frozen?(@repos, @merge.repository) do %>
+          <p class="text-blue-600 italic">A Merge Freeze is in effect for this repository. This PR cannot be merged.</p>
+        <% end %>
+
         <.form let={f} for={:merge} phx-submit="merge" phx-target={@myself} class="flex flex-col space-y-4">
           <div class="mt-1">
             <.textarea form={f} field={:message} opts={[placeholder: "Commit message defaults to PR title.  Enter additional info here."]} />
           </div>
           <%= hidden_input f, :id, value: @merge.id %>
           <div class="flex items-end">
-            <.button submit={true} phx_disable_with="Merging...">Merge!</.button>
+            <.button submit={true} phx_disable_with="Merging..." colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500">Merge!</.button>
           </div>
         </.form>
 
