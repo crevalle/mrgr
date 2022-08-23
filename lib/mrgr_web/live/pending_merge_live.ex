@@ -87,52 +87,54 @@ defmodule MrgrWeb.PendingMergeLive do
 
             <ul role="list" class="divide-y divide-gray-200 dropzone" id="pending-merge-list">
               <%= for merge <- assigns.pending_merges do %>
-                <li draggable="true" class="draggable merge-list" id={"merge-#{merge.id}"}>
-                  <div class="block hover:bg-gray-50">
-                    <div class="px-4 py-4 sm:px-6">
-                      <div class="flex items-center justify-between">
-                        <%= link merge.title, to: "#", phx_click: "show_preview", phx_value_merge_id: merge.id, class: "text-sm font-medium text-teal-500 truncate" %>
-                        <div class="ml-2 flex-shrink-0 flex">
+                <%= link to: "#", phx_click: "show_preview", phx_value_merge_id: merge.id, class: "text-sm font-medium text-teal-500 truncate" do %>
+                  <li draggable="true" class="draggable merge-list" id={"merge-#{merge.id}"}>
+                    <div class="block hover:bg-gray-50">
+                      <div class="px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                          <.h3><%= merge.title %></.h3>
+                          <div class="ml-2 flex-shrink-0 flex">
+                            <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                              <p class="truncate max-w-xs">
+                                "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="mt-2 sm:flex sm:justify-between">
+                          <div class="sm:flex">
+                            <p class={"flex items-center text-sm #{repo_text_color(@repos, merge.repository)}"}>
+                              <.icon name="users" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5" />
+                              <%= merge.repository.name %>
+                            </p>
+                            <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                              <.icon name="location-marker" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                              <%= merge.merge_queue_index %>
+                            </p>
+                            <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: merge}) %>
+                          </div>
                           <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                            <p class="truncate max-w-xs">
-                              "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
+                            <p>
+                              <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="mt-2 sm:flex sm:justify-between items-start">
+                          <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <p>Opened
+                              <%= ts(merge.opened_at, assigns.timezone) %>
+                            </p>
+                          </div>
+                          <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <p>
+                              <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
                             </p>
                           </div>
                         </div>
                       </div>
-                      <div class="mt-2 sm:flex sm:justify-between">
-                        <div class="sm:flex">
-                          <p class={"flex items-center text-sm #{repo_text_color(@repos, merge.repository)}"}>
-                            <.icon name="users" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5" />
-                            <%= merge.repository.name %>
-                          </p>
-                          <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                            <.icon name="location-marker" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-                            <%= merge.merge_queue_index %>
-                          </p>
-                          <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: merge}) %>
-                        </div>
-                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                          <p>
-                            <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
-                          </p>
-                        </div>
-                      </div>
-                      <div class="mt-2 sm:flex sm:justify-between items-start">
-                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                          <p>Opened
-                            <%= ts(merge.opened_at, assigns.timezone) %>
-                          </p>
-                        </div>
-                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                          <p>
-                            <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
-                          </p>
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                </li>
+                  </li>
+                <% end %>
               <% end %>
             </ul>
 
