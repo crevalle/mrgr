@@ -38,7 +38,7 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
 
         <.h3>Merge This Pull Request</.h3>
 
-        <%= if merge_frozen?(@repos, @merge.repository) do %>
+        <%= if merge_frozen?(@frozen_repos, @merge.repository) do %>
           <p class="text-blue-600 italic">A Merge Freeze is in effect for this repository. This PR cannot be merged.</p>
         <% end %>
 
@@ -48,7 +48,7 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
           </div>
           <%= hidden_input f, :id, value: @merge.id %>
           <div class="flex items-end">
-            <.button submit={true} phx_disable_with="Merging..." colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500">Merge!</.button>
+            <.button disabled={merge_frozen?(@frozen_repos, @merge.repository)} submit={true} phx_disable_with="Merging..." colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500">Merge!</.button>
           </div>
         </.form>
 
@@ -102,5 +102,9 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
 
   def external_merge_url(merge) do
     Mrgr.Schema.Merge.external_merge_url(merge)
+  end
+
+  def merge_frozen?(repos, repo) do
+    Mrgr.Utils.item_in_list?(repos, repo)
   end
 end

@@ -10,16 +10,27 @@ defmodule MrgrWeb.Components.UI do
   end
 
   def h3(assigns) do
+    color = assigns[:color] || "text-gray-900"
+
+    assigns = Phoenix.LiveView.assign(assigns, :color, color)
+
     ~H"""
-    <h3 class="text-lg leading-6 font-medium text-gray-900">
+    <h3 class={"text-lg leading-6 font-medium #{@color}"}>
       <%= render_slot(@inner_block) %>
     </h3>
     """
   end
 
   def button(assigns) do
+    colors =
+      if assigns[:disabled] do
+        "bg-gray-600 hover:bg-gray-700 focus:ring-gray-500"
+      else
+        assigns[:colors]
+      end
+
     class =
-      "inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 #{assigns.colors}"
+      "inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 #{colors}"
 
     type = if assigns[:submit], do: "submit", else: false
 

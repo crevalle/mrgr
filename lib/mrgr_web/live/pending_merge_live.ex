@@ -6,6 +6,7 @@ defmodule MrgrWeb.PendingMergeLive do
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
       merges = Mrgr.Merge.pending_merges(current_user)
       repos = Mrgr.Repository.for_user_with_rules(current_user)
+      frozen_repos = frozen_repos(repos)
       subscribe(current_user)
 
       socket
@@ -13,6 +14,7 @@ defmodule MrgrWeb.PendingMergeLive do
       |> assign(:pending_merges, merges)
       |> assign(:selected_merge, nil)
       |> assign(:repos, repos)
+      |> assign(:frozen_repos, frozen_repos)
       |> ok()
     else
       socket
@@ -20,6 +22,7 @@ defmodule MrgrWeb.PendingMergeLive do
       |> assign(:pending_merges, [])
       |> assign(:selected_merge, nil)
       |> assign(:repos, [])
+      |> assign(:frozen_repos, [])
       |> ok()
     end
   end
@@ -53,7 +56,7 @@ defmodule MrgrWeb.PendingMergeLive do
                   <div class="flex items-center hover:bg-gray-50">
                     <div class="basis-8 text-blue-400 ml-2">
                       <%= if r.merge_freeze_enabled do %>
-                        <.icon name="check" type="outline" class="h-6 w-6" />
+                      ❄️
                       <% end %>
                     </div>
                     <%= r.name %>
@@ -66,19 +69,20 @@ defmodule MrgrWeb.PendingMergeLive do
       </div>
 
 
-      <%= if Enum.count(frozen_repos(@repos)) > 0 do %>
+      <%= if Enum.count(@frozen_repos) > 0 do %>
         <div class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50">
 
-          <.h3>There is a Merge Freeze on the following repos:</.h3>
-          <ul class="text-blue-900 list-disc my-4 mx-6">
-            <%= for r <- frozen_repos(@repos) do %>
+          <.h3 color="text-blue-600">❄️ There is a Merge Freeze in effect❄️</.h3>
+          <p class="my-3">PR merging is disabled for the following repos:</p>
+          <ul class="list-disc my-3 mx-6">
+            <%= for r <- @frozen_repos do %>
               <li>
                 <%= r.name %>
               </li>
             <% end %>
           </ul>
 
-          <p>To resume merging, disable the Merge Freeze.</p>
+          <p class="my-3">To resume merging for these repos, disable the Merge Freeze.</p>
 
         </div>
       <% end %>
@@ -144,7 +148,7 @@ defmodule MrgrWeb.PendingMergeLive do
           </div>
         </div>
 
-        <.live_component module={MrgrWeb.Components.Live.MergePreviewComponent} id="merge_preview" merge={@selected_merge} current_user={@current_user} />
+        <.live_component module={MrgrWeb.Components.Live.MergePreviewComponent} id="merge_preview" merge={@selected_merge} current_user={@current_user} frozen_repos={@frozen_repos}/>
       </div>
     </div>
     <.button phx-click="refresh" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500"> Refresh PRs</.button>
@@ -158,9 +162,11 @@ defmodule MrgrWeb.PendingMergeLive do
     updated = Mrgr.Repository.toggle_merge_freeze(repo)
 
     updated_list = Mrgr.Utils.replace_item_in_list(socket.assigns.repos, updated)
+    frozen_repos = frozen_repos(updated_list)
 
     socket
     |> assign(:repos, updated_list)
+    |> assign(:frozen_repos, frozen_repos)
     |> noreply()
   end
 
