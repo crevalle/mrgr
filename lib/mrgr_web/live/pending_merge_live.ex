@@ -232,11 +232,20 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def handle_info(%{event: "merge:closed", payload: payload}, socket) do
+    IO.inspect("** GOT EVENT merge:closed")
+
     merges = Enum.reject(socket.assigns.pending_merges, &(&1.id == payload.id))
+
+    selected =
+      case previewing_closed_merge?(socket.assigns.selected_merge, payload) do
+        true -> nil
+        false -> socket.assigns.selected_merge
+      end
 
     socket
     |> put_closed_flash_message(payload)
     |> assign(:pending_merges, merges)
+    |> assign(:selected_merge, selected)
     |> noreply()
   end
 
@@ -284,6 +293,9 @@ defmodule MrgrWeb.PendingMergeLive do
 
   def find_previously_selected(_merges, nil), do: nil
   def find_previously_selected(merges, merge), do: Mrgr.Utils.find_item_in_list(merges, merge)
+
+  defp previewing_closed_merge?(%{id: id}, %{id: id}), do: true
+  defp previewing_closed_merge?(_previewing, _closed), do: false
 
   def frozen_repos(repos) do
     Enum.filter(repos, & &1.merge_freeze_enabled)
