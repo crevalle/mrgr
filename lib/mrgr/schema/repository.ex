@@ -8,6 +8,7 @@ defmodule Mrgr.Schema.Repository do
     field(:name, :string)
     field(:node_id, :string)
     field(:private, :boolean)
+    field(:merge_freeze_enabled, :boolean, default: false)
 
     belongs_to(:installation, Mrgr.Schema.Installation)
     has_many(:members, through: [:installation, :member])
@@ -41,6 +42,11 @@ defmodule Mrgr.Schema.Repository do
     |> Mrgr.Repo.preload(:merges)
     |> cast(params, [])
     |> cast_assoc(:merges, with: &Mrgr.Schema.Merge.create_changeset/2)
+  end
+
+  def merge_freeze_changeset(schema, attrs) do
+    schema
+    |> cast(attrs, [:merge_freeze_enabled])
   end
 
   def owner_name(%{full_name: full_name}) do

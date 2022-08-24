@@ -123,6 +123,9 @@ defmodule MrgrWeb do
 
       import MrgrWeb.ErrorHelpers
       import MrgrWeb.Gettext
+
+      import Heroicons.LiveView, only: [icon: 1]
+
       alias MrgrWeb.Router.Helpers, as: Routes
     end
   end

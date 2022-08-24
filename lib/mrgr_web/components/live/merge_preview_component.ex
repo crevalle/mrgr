@@ -16,9 +16,7 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
           <div class="flex items-start items-center">
             <.h1><%= @merge.title %></.h1>
             <%= link to: external_merge_url(@merge), target: "_blank" do %>
-              <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg"  fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-              </svg>
+              <.icon name="external-link" type="outline" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
             <% end %>
           </div>
           <div class="pt-1">
@@ -39,13 +37,18 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
         </div>
 
         <.h3>Merge This Pull Request</.h3>
+
+        <%= if merge_frozen?(@frozen_repos, @merge.repository) do %>
+          <p class="text-blue-600 italic">A Merge Freeze is in effect for this repository. This PR cannot be merged.</p>
+        <% end %>
+
         <.form let={f} for={:merge} phx-submit="merge" phx-target={@myself} class="flex flex-col space-y-4">
           <div class="mt-1">
             <.textarea form={f} field={:message} opts={[placeholder: "Commit message defaults to PR title.  Enter additional info here."]} />
           </div>
           <%= hidden_input f, :id, value: @merge.id %>
           <div class="flex items-end">
-            <.button submit={true} phx_disable_with="Merging...">Merge!</.button>
+            <.button disabled={merge_frozen?(@frozen_repos, @merge.repository)} submit={true} phx_disable_with="Merging..." colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500">Merge!</.button>
           </div>
         </.form>
 
@@ -99,5 +102,9 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
 
   def external_merge_url(merge) do
     Mrgr.Schema.Merge.external_merge_url(merge)
+  end
+
+  def merge_frozen?(repos, repo) do
+    Mrgr.Utils.item_in_list?(repos, repo)
   end
 end

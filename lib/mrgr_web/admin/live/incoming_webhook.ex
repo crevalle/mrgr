@@ -32,7 +32,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
                   <.td><%= hook.action %></.td>
                   <.td><%= ts(hook.inserted_at, assigns.timezone) %></.td>
                   <.td>
-                    <.button phx-click="fire" phx-value-id={hook.id} phx_disable_with="Firing 🚀...">Fire!</.button>
+                    <.button phx-click="fire" phx-value-id={hook.id} phx_disable_with="Firing 🚀..." colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500">Fire!</.button>
                   </.td>
                 </.tr>
               <% end %>
@@ -60,9 +60,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
   end
 
   def handle_event("fire", %{"id" => id}, socket) do
-    id = String.to_integer(id)
-
-    hook = Enum.find(socket.assigns.incoming_webhooks, &(&1.id == id))
+    hook = Mrgr.Utils.find_item_in_list(socket.assigns.incoming_webhooks, id)
 
     Mrgr.IncomingWebhook.fire!(hook)
 

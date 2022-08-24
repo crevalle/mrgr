@@ -16,6 +16,17 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.all()
   end
 
+  def toggle_merge_freeze(repo) do
+    new_value = toggle(repo.merge_freeze_enabled)
+
+    repo
+    |> Mrgr.Schema.Repository.merge_freeze_changeset(%{merge_freeze_enabled: new_value})
+    |> Mrgr.Repo.update!()
+  end
+
+  defp toggle(true), do: false
+  defp toggle(false), do: true
+
   # gets and stores all for repos - client must be appropriate for repos
   # TODO repos need merges preloaded
   # TODO: pass in installation and fetch client from ets or db or something

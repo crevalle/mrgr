@@ -5,26 +5,87 @@ defmodule MrgrWeb.PendingMergeLive do
     if connected?(socket) do
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
       merges = Mrgr.Merge.pending_merges(current_user)
+      repos = Mrgr.Repository.for_user_with_rules(current_user)
+      frozen_repos = frozen_repos(repos)
       subscribe(current_user)
 
       socket
       |> assign(:current_user, current_user)
       |> assign(:pending_merges, merges)
       |> assign(:selected_merge, nil)
+      |> assign(:repos, repos)
+      |> assign(:frozen_repos, frozen_repos)
       |> ok()
     else
       socket
       |> assign(:current_user, nil)
       |> assign(:pending_merges, [])
       |> assign(:selected_merge, nil)
+      |> assign(:repos, [])
+      |> assign(:frozen_repos, [])
       |> ok()
     end
   end
 
   def render(assigns) do
     ~H"""
-    <div class="px-4 sm:px-6 lg:px-8">
-      <.heading title="Pending Merges" />
+    <div class="px-4 pt-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between">
+        <.heading title="Pending Merges" />
+
+        <div class="relative inline-block text-left">
+          <div>
+            <.button phx-click={JS.toggle(
+                to: "#merge-freeze-menu",
+                in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
+                out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
+              )}
+              colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+              id="menu-button"
+              aria-expanded="true"
+              aria-haspopup="true">
+              Freeze Merging
+              <.icon name="chevron-down" type="outline" class="-mr-1 ml-2 h-5 w-5" />
+            </.button>
+          </div>
+
+          <div style="display: none;" id="merge-freeze-menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+            <div class="py-1" role="none">
+              <%= for r <- @repos do %>
+                <%= link to: "#", phx_click: "toggle_merge_freeze", phx_value_repo_id: r.id, data_confirm: "Sure about that?", class: "text-gray-700 block my-2 text-sm outline-none", role: "menuitem", tabindex: "-1", id: "repo-menu-item-#{r.id}" do %>
+                  <div class="flex items-center hover:bg-gray-50">
+                    <div class="basis-8 text-blue-400 ml-2">
+                      <%= if r.merge_freeze_enabled do %>
+                      ❄️
+                      <% end %>
+                    </div>
+                    <%= r.name %>
+                  </div>
+                <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
+      <%= if Enum.count(@frozen_repos) > 0 do %>
+        <div class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50">
+
+          <.h3 color="text-blue-600">❄️ There is a Merge Freeze in effect❄️</.h3>
+          <p class="my-3">PR merging is disabled for the following repos:</p>
+          <ul class="list-disc my-3 mx-6">
+            <%= for r <- @frozen_repos do %>
+              <li>
+                <%= r.name %>
+              </li>
+            <% end %>
+          </ul>
+
+          <p class="my-3">To resume merging for these repos, disable the Merge Freeze.</p>
+
+        </div>
+      <% end %>
 
       <div class="flex mt-8 space-x-4">
         <div class="basis-1/2 bg-white px-2 py-5 sm:px-6 overflow-hidden shadow rounded-lg">
@@ -33,70 +94,80 @@ defmodule MrgrWeb.PendingMergeLive do
 
             <ul role="list" class="divide-y divide-gray-200 dropzone" id="pending-merge-list">
               <%= for merge <- assigns.pending_merges do %>
-                <li draggable="true" class="draggable merge-list" id={"merge-#{merge.id}"}>
-                  <div class="block hover:bg-gray-50">
-                    <div class="px-4 py-4 sm:px-6">
-                      <div class="flex items-center justify-between">
-                        <%= link merge.title, to: "#", phx_click: "show_preview", phx_value_merge_id: merge.id, class: "text-sm font-medium text-teal-500 truncate" %>
-                        <div class="ml-2 flex-shrink-0 flex">
+                <%= link to: "#", phx_click: "show_preview", phx_value_merge_id: merge.id, class: "text-sm font-medium text-teal-500 truncate" do %>
+                  <li draggable="true" class="draggable merge-list" id={"merge-#{merge.id}"}>
+                    <div class="block hover:bg-gray-50">
+                      <div class="px-4 py-4 sm:px-6">
+                        <div class="flex items-center justify-between">
+                          <.h3><%= merge.title %></.h3>
+                          <div class="ml-2 flex-shrink-0 flex">
+                            <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                              <p class="truncate max-w-xs">
+                                "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div class="mt-2 sm:flex sm:justify-between">
+                          <div class="sm:flex">
+                            <p class={"flex items-center text-sm #{repo_text_color(@repos, merge.repository)}"}>
+                              <.icon name="users" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5" />
+                              <%= merge.repository.name %>
+                            </p>
+                            <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                              <.icon name="location-marker" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                              <%= merge.merge_queue_index %>
+                            </p>
+                            <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: merge}) %>
+                          </div>
                           <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                            <p class="truncate max-w-xs">
-                              "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
+                            <p>
+                              <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
+                            </p>
+                          </div>
+                        </div>
+                        <div class="mt-2 sm:flex sm:justify-between items-start">
+                          <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <p>Opened
+                              <%= ts(merge.opened_at, assigns.timezone) %>
+                            </p>
+                          </div>
+                          <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                            <p>
+                              <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
                             </p>
                           </div>
                         </div>
                       </div>
-                      <div class="mt-2 sm:flex sm:justify-between">
-                        <div class="sm:flex">
-                          <p class="flex items-center text-sm text-gray-500">
-                            <!-- Heroicon name: solid/users -->
-                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                            </svg>
-                            <%= merge.repository.name %>
-                          </p>
-                          <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                            <!-- Heroicon name: solid/location-marker -->
-                            <svg class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-                              <path fill-rule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd" />
-                            </svg>
-                            <%= merge.merge_queue_index %>
-                          </p>
-                          <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: merge}) %>
-                        </div>
-                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                          <p>
-                            <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
-                          </p>
-                        </div>
-                      </div>
-                      <div class="mt-2 sm:flex sm:justify-between items-start">
-                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                          <p>Opened
-                            <%= ts(merge.opened_at, assigns.timezone) %>
-                          </p>
-                        </div>
-                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                          <p>
-                            <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
-                          </p>
-                        </div>
-                      </div>
                     </div>
-                  </div>
-                </li>
+                  </li>
+                <% end %>
               <% end %>
             </ul>
 
           </div>
         </div>
 
-        <.live_component module={MrgrWeb.Components.Live.MergePreviewComponent} id="merge_preview" merge={@selected_merge} current_user={@current_user} />
+        <.live_component module={MrgrWeb.Components.Live.MergePreviewComponent} id="merge_preview" merge={@selected_merge} current_user={@current_user} frozen_repos={@frozen_repos}/>
       </div>
     </div>
-    <.button phx-click="refresh"> Refresh PRs</.button>
+    <.button phx-click="refresh" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500"> Refresh PRs</.button>
 
     """
+  end
+
+  def handle_event("toggle_merge_freeze", %{"repo-id" => id}, socket) do
+    repo = Mrgr.Utils.find_item_in_list(socket.assigns.repos, id)
+
+    updated = Mrgr.Repository.toggle_merge_freeze(repo)
+
+    updated_list = Mrgr.Utils.replace_item_in_list(socket.assigns.repos, updated)
+    frozen_repos = frozen_repos(updated_list)
+
+    socket
+    |> assign(:repos, updated_list)
+    |> assign(:frozen_repos, frozen_repos)
+    |> noreply()
   end
 
   def handle_event("dropped", %{"draggedId" => id, "draggableIndex" => index}, socket) do
@@ -112,9 +183,7 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def handle_event("show_preview", %{"merge-id" => id}, socket) do
-    id = String.to_integer(id)
-
-    selected = find_from_merges(socket.assigns.pending_merges, id)
+    selected = Mrgr.Utils.find_item_in_list(socket.assigns.pending_merges, id)
 
     socket
     |> assign(:selected_merge, selected)
@@ -139,7 +208,7 @@ defmodule MrgrWeb.PendingMergeLive do
   defp get_id("merge-" <> id), do: String.to_integer(id)
 
   defp find_dragged(merges, id) do
-    Mrgr.MergeQueue.find_merge_by_id(merges, id)
+    Mrgr.Utils.find_item_in_list(merges, id)
   end
 
   defp update_merge_order(merges, updated_item, new_index) do
@@ -163,11 +232,20 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def handle_info(%{event: "merge:closed", payload: payload}, socket) do
+    IO.inspect("** GOT EVENT merge:closed")
+
     merges = Enum.reject(socket.assigns.pending_merges, &(&1.id == payload.id))
+
+    selected =
+      case previewing_closed_merge?(socket.assigns.selected_merge, payload) do
+        true -> nil
+        false -> socket.assigns.selected_merge
+      end
 
     socket
     |> put_closed_flash_message(payload)
     |> assign(:pending_merges, merges)
+    |> assign(:selected_merge, selected)
     |> noreply()
   end
 
@@ -214,9 +292,21 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def find_previously_selected(_merges, nil), do: nil
-  def find_previously_selected(merges, %{id: id}), do: find_from_merges(merges, id)
+  def find_previously_selected(merges, merge), do: Mrgr.Utils.find_item_in_list(merges, merge)
 
-  defp find_from_merges(merges, id) do
-    Enum.find(merges, fn m -> m.id == id end)
+  defp previewing_closed_merge?(%{id: id}, %{id: id}), do: true
+  defp previewing_closed_merge?(_previewing, _closed), do: false
+
+  def frozen_repos(repos) do
+    Enum.filter(repos, & &1.merge_freeze_enabled)
+  end
+
+  # look up the repo in hte socket assigns cause those are the ones who have their
+  # merge_freeze_enabled attribute updated
+  def repo_text_color(repos, r) do
+    case Mrgr.Utils.find_item_in_list(repos, r) do
+      %{merge_freeze_enabled: true} -> "text-blue-600"
+      %{merge_freeze_enabled: false} -> "text-gray-500"
+    end
   end
 end
