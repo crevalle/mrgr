@@ -25,4 +25,11 @@ defmodule Mrgr.Utils do
     idx = find_item_index_in_list(list, item)
     List.replace_at(list, idx, item)
   end
+
+  def item_in_list?(list, item) do
+    case find_item_in_list(list, item) do
+      nil -> false
+      _i -> true
+    end
+  end
 end
