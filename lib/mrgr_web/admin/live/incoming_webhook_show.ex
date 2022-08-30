@@ -39,7 +39,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
           </div>
 
           <pre>
-            <%= Jason.encode!(@hook.headers, pretty: true) %>
+            <%= render_map(@hook.headers) %>
           </pre>
         </div>
       </div>
@@ -51,7 +51,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
           </div>
 
           <pre>
-            <%= Jason.encode!(@hook.data, pretty: true) %>
+            <%= render_map(@hook.data) %>
           </pre>
         </div>
       </div>

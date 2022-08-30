@@ -66,6 +66,9 @@ defmodule MrgrWeb.Router do
 
     live "/incoming-webhooks", Live.IncomingWebhook, :index, as: :incoming_webhook
     live "/incoming-webhooks/:id", Live.IncomingWebhookShow, :show, as: :incoming_webhook
+
+    live "/users", Live.User, :index, as: :user
+    live "/users/:id", Live.UserShow, :show, as: :user
   end
 
   # Other scopes may use custom stacks.

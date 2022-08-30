@@ -34,6 +34,11 @@ defmodule Mrgr.Query do
         queryable
         |> order_by(desc: :inserted_at)
       end
+
+      def cron(queryable) do
+        queryable
+        |> order_by(asc: :inserted_at)
+      end
     end
   end
 end

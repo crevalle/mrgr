@@ -94,9 +94,7 @@ defmodule MrgrWeb.Components.UI do
   end
 
   def td(assigns) do
-    # striped = if assigns[:striped], do: "even:bg-white odd:bg-gray-50", else: nil
-
-    class = "whitespace-nowrap px-3 py-4 text-gray-700"
+    class = "whitespace-nowrap px-3 py-4 text-gray-700 #{assigns[:class]}"
 
     assigns = Phoenix.LiveView.assign(assigns, :class, class)
 
@@ -104,6 +102,66 @@ defmodule MrgrWeb.Components.UI do
     <td class={@class}>
       <%= render_slot(@inner_block) %>
     </td>
+    """
+  end
+
+  def table_attr(assigns) do
+    label =
+      assigns.key
+      |> to_string()
+      |> String.split("_")
+      |> Enum.map(&String.capitalize/1)
+      |> Enum.join(" ")
+
+    value =
+      case Map.get(assigns.obj, assigns.key) do
+        %DateTime{} = dt ->
+          ts(dt, assigns.tz)
+
+        map when is_map(map) ->
+          Jason.encode!(map, pretty: true)
+
+        list when is_list(list) ->
+          Enum.join(list, ", ")
+
+        simple ->
+          simple
+      end
+
+    assigns =
+      assigns
+      |> Phoenix.LiveView.assign(:label, label)
+      |> Phoenix.LiveView.assign(:value, value)
+
+    ~H"""
+    <.tr striped={true}>
+      <.td class="font-bold"><%= @label %></.td>
+      <.td><%= @value %></.td>
+    </.tr>
+
+    """
+  end
+
+  def installation_table(assigns) do
+    ~H"""
+      <table class="min-w-full">
+        <.table_attr obj={@installation} key={:access_tokens_url} ./>
+        <.table_attr obj={@installation} key={:app_id} ./>
+        <.table_attr obj={@installation} key={:app_slug} ./>
+        <.table_attr obj={@installation} key={:events} ./>
+        <.table_attr obj={@installation} key={:external_id} ./>
+        <.table_attr obj={@installation} key={:html_url} ./>
+        <.table_attr obj={@installation} key={:installation_created_at} tz={@tz} ./>
+        <.table_attr obj={@installation} key={:permissions} ./>
+        <.table_attr obj={@installation} key={:repositories_url} ./>
+        <.table_attr obj={@installation} key={:repository_selection} ./>
+        <.table_attr obj={@installation} key={:target_id} ./>
+        <.table_attr obj={@installation} key={:target_type} ./>
+        <.table_attr obj={@installation} key={:token} tz={@tz} ./>
+        <.table_attr obj={@installation} key={:token_expires_at} tz={@tz} ./>
+        <.table_attr obj={@installation} key={:updated_at} tz={@tz} ./>
+        <.table_attr obj={@installation} key={:inserted_at} tz={@tz} ./>
+      </table>
     """
   end
 end

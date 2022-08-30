@@ -54,4 +54,15 @@ defmodule MrgrWeb.Formatter do
   end
 
   def ref("refs/heads/" <> name), do: name
+
+  def render_struct(struct) when is_struct(struct) do
+    struct
+    |> Map.from_struct()
+    |> Map.delete(:__meta__)
+    |> render_map()
+  end
+
+  def render_map(map) when is_map(map) do
+    Jason.encode!(map, pretty: true)
+  end
 end

@@ -2,6 +2,13 @@ defmodule Mrgr.User do
   alias Mrgr.Schema.User, as: Schema
   alias Mrgr.User.Query, as: Query
 
+  def all do
+    Schema
+    |> Query.with_current_installation()
+    |> Query.cron()
+    |> Mrgr.Repo.all()
+  end
+
   @spec find(Ecto.Schema.t() | integer()) :: Schema.t() | nil
   def find(%Mrgr.Github.User{} = user) do
     Mrgr.Repo.get_by(Schema, nickname: user.login)
@@ -9,6 +16,15 @@ defmodule Mrgr.User do
 
   def find(id) do
     Mrgr.Repo.get(Schema, id)
+  end
+
+  def find_full(id) do
+    Schema
+    |> Query.by_id(id)
+    |> Query.with_current_installation()
+    |> Query.with_installations()
+    |> Query.with_member()
+    |> Mrgr.Repo.one()
   end
 
   def find_with_current_installation(id) do
@@ -130,9 +146,23 @@ defmodule Mrgr.User do
       )
     end
 
+    def with_installations(query) do
+      from(q in query,
+        join: i in assoc(q, :installations),
+        preload: [installations: i]
+      )
+    end
+
     def alphabetically(query) do
       from(q in query,
         order_by: [asc: :name]
+      )
+    end
+
+    def with_member(query) do
+      from(q in query,
+        join: m in assoc(q, :member),
+        preload: [member: m]
       )
     end
   end
