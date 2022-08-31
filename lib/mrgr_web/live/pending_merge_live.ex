@@ -29,7 +29,7 @@ defmodule MrgrWeb.PendingMergeLive do
 
   def render(assigns) do
     ~H"""
-    <div class="px-4 pt-4 sm:px-6 lg:px-8">
+    <div class="pt-4">
       <div class="flex justify-between">
         <.heading title="Pending Merges" />
 

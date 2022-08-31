@@ -1,7 +1,7 @@
 defmodule MrgrWeb.Components.UI do
   use MrgrWeb, :component
 
-  def h1(assigns) do
+  def my_h1(assigns) do
     ~H"""
     <h1 class="text-xl font-semibold text-gray-900">
       <%= render_slot(@inner_block) %>
@@ -9,7 +9,7 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def h3(assigns) do
+  def my_h3(assigns) do
     color = assigns[:color] || "text-gray-900"
 
     assigns = Phoenix.LiveView.assign(assigns, :color, color)
@@ -21,7 +21,7 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def button(assigns) do
+  def my_button(assigns) do
     colors =
       if assigns[:disabled] do
         "bg-gray-600 hover:bg-gray-700 focus:ring-gray-500"
@@ -64,7 +64,7 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def th(assigns) do
+  def my_th(assigns) do
     uppercase = if assigns[:uppercase], do: "uppercase", else: nil
 
     class = "px-3 py-3.5 text-left text-sm font-semibold text-gray-900 #{uppercase}"
@@ -79,7 +79,7 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def tr(assigns) do
+  def my_tr(assigns) do
     striped = if assigns[:striped], do: "even:bg-white odd:bg-gray-50", else: nil
 
     class = "border-t border-gray-300 py-4 #{striped}"
@@ -93,7 +93,7 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def td(assigns) do
+  def my_td(assigns) do
     class = "whitespace-nowrap px-3 py-4 text-gray-700 #{assigns[:class]}"
 
     assigns = Phoenix.LiveView.assign(assigns, :class, class)

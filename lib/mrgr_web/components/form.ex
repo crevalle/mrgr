@@ -9,7 +9,7 @@ defmodule MrgrWeb.Components.Form do
     """
   end
 
-  def textarea(assigns) do
+  def my_textarea(assigns) do
     defaults = [
       rows: 4,
       class:

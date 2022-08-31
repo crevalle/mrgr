@@ -4,10 +4,16 @@ module.exports = {
   content: [
     './js/**/*.js',
     '../lib/*_web.ex',
-    '../lib/*_web/**/*.*ex'
+    '../lib/*_web/**/*.*ex',
+    "../deps/petal_components/**/*.*ex",
   ],
   theme: {
-    extend: {},
+    extend: {
+      colors: {
+        primary: colors.teal,
+        secondar: colors.blue,
+      }
+    },
   },
   plugins: [
     require('@tailwindcss/forms')
