@@ -27,12 +27,12 @@ defmodule MrgrWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+    get "/sign-in", AuthController, :new
   end
 
   scope "/auth", MrgrWeb do
     pipe_through :browser
 
-    # get "/sign-in", AuthController, :new
     # post "/sign-in", AuthController, :create
     delete "/sign-out", AuthController, :delete
 
@@ -69,6 +69,8 @@ defmodule MrgrWeb.Router do
 
     live "/users", Live.User, :index, as: :user
     live "/users/:id", Live.UserShow, :show, as: :user
+
+    live "/waiting-list-signups", Live.WaitingListSignup, :index, as: :waiting_list_signup
   end
 
   # Other scopes may use custom stacks.

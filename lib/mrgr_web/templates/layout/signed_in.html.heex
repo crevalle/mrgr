@@ -1,4 +1,4 @@
-<div>
+<div class="bg-stone-50">
   <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
   <div class="relative z-40 md:hidden" role="dialog" aria-modal="true">
     <!--
@@ -80,9 +80,13 @@
               <% end %>
 
               <%= link to: Routes.admin_user_path(@conn, :index), class: "text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md" do %>
-
                 <.icon name="users" type="outline" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
                 <span class="flex-1"> Admin - Users </span>
+              <% end %>
+
+              <%= link to: Routes.admin_waiting_list_signup_path(@conn, :index), class: "text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md" do %>
+                <.icon name="sparkles" type="outline" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
+                <span class="flex-1"> Admin - Waiting List Signups </span>
               <% end %>
             <% end %>
           </nav>
@@ -100,7 +104,7 @@
     <!-- Sidebar component, swap this element with another sidebar if you like -->
     <div class="flex flex-col flex-grow border-r border-gray-200 pt-5 bg-white overflow-y-auto">
       <div class="flex justify-center">
-        <%= img_tag "/images/logo/Mrgr-B2.png", class: "w-3/5" %>
+        <%= img_tag "/images/logo/Mrgr-B3.png", class: "w-3/5" %>
       </div>
       <div class="mt-5 flex-grow flex flex-col">
         <%= live_render @conn, MrgrWeb.Live.ActivityFeed, session: %{"user_id" => @conn.assigns.current_user.id} %>
@@ -108,7 +112,7 @@
     </div>
   </div>
 
-  <div class="md:pl-72 flex flex-col flex-1">
+  <div class="md:pl-72 flex flex-col flex-1 min-h-screen">
     <%= live_render @conn, MrgrWeb.Live.NavBar, session: %{"user_id" => @conn.assigns.current_user.id} %>
 
     <main class="flex-1">
@@ -116,7 +120,7 @@
         <%= @inner_content %>
       </div>
     </main>
-    <footer>
+    <footer class="mt-auto">
       <div>
         <div>©<%= Date.utc_today.year %> Crevalle, LLC</div>
         <div>Made with ☀️  in Los Angeles, California 🏝</div>

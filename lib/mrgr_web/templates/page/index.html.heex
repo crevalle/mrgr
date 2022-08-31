@@ -1,12 +1,32 @@
-<section class="phx-hero">
-  <h1>MRGR</h1>
-  <p>and acquisition..?</p>
-</section>
+<div class="">
+  <div class="relative overflow-hidden">
+    <main>
+      <div class="bg-gray-900 pt-10 sm:pt-16 lg:overflow-hidden lg:pt-8 lg:pb-14">
+        <div class="mx-auto max-w-7xl lg:px-8">
+          <div class="lg:grid lg:grid-cols-2 lg:gap-8">
+            <div class="mx-auto max-w-md px-4 sm:max-w-2xl sm:px-6 sm:text-center lg:flex lg:items-center lg:px-0 lg:text-left">
+              <div class="lg:py-24">
+                <h1 class="mt-4 text-4xl font-bold tracking-tight text-white sm:mt-5 sm:text-6xl lg:mt-6 xl:text-6xl">
+                  <span class="block">A better way to</span>
+                  <span class="block bg-gradient-to-r from-teal-200 to-cyan-400 bg-clip-text pb-3 text-transparent sm:pb-5">merge code</span>
+                </h1>
+                <p class="text-base text-gray-300 sm:text-xl lg:text-lg xl:text-xl">Technical managers need tools to know what's being merged and when.  Take control over your code merging and gain visibility into what's going live.</p>
+                <div class="mt-10 sm:mt-12">
+                  <%= live_render @conn, MrgrWeb.Live.WaitingListSignupForm %>
+                </div>
+              </div>
+            </div>
+            <div class="mt-12 -mb-16 sm:-mb-48 lg:relative lg:m-0">
+              <div class="mx-auto max-w-md px-4 sm:max-w-2xl sm:px-6 lg:max-w-none lg:px-0">
+                <!-- Illustration taken from Lucid Illustrations: https://lucid.pixsellz.io/ -->
+                <img class="w-full lg:absolute lg:inset-y-0 lg:left-0 lg:h-full lg:w-auto lg:max-w-none" src="https://tailwindui.com/img/component-images/cloud-illustration-teal-cyan.svg" alt="">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
 
-<section class="row">
-  <article class="column">
-    <%= if signed_in?(@conn) do %>
-      <a href="https://github.com/apps/mrgr-app/installations/new">Connect Github</a> 
-    <% end %>
-  </article>
-</section>
+  </div>
+</div>
+

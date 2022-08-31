@@ -1,6 +1,10 @@
 defmodule MrgrWeb.AuthController do
   use MrgrWeb, :controller
 
+  def new(conn, _params) do
+    render(conn)
+  end
+
   def delete(conn, _params) do
     conn
     |> sign_out()
@@ -32,7 +36,7 @@ defmodule MrgrWeb.AuthController do
         conn
         |> sign_in(user)
         |> put_flash(:info, "it worked!")
-        |> redirect(to: "/")
+        |> redirect(to: Routes.pending_merge_path(conn, :index))
 
       {:error, %OAuth2.Response{body: body}} ->
         IO.inspect("OAuth Error: code #{code} #{inspect(body)}")

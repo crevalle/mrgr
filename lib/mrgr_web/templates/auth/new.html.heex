@@ -1,0 +1,7 @@
+<div class="flex items-center">
+  <%= if signed_in?(@conn) do %>
+    <a href="https://github.com/apps/mrgr-app/installations/new">Connect Github</a> 
+  <% else %>
+    <%= link "Sign In With Github", to: Routes.auth_path(@conn, :github), class: "m-10 bg-gradient-to-r from-teal-200 to-cyan-400 bg-clip-text pb-3 text-transparent sm:pb-5" %>
+  <% end %>
+</div>

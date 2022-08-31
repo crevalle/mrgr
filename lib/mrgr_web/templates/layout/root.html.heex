@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" class="h-full bg-stone-50">
+<html lang="en" class="h-full">
   <head>
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
@@ -11,15 +11,10 @@
     <script defer phx-track-static type="text/javascript" src={Routes.static_path(@conn, "/assets/app.js")}></script>
   </head>
   <body class="h-full">
-    <header>
-      <section class="container">
-        <%= if !signed_in?(@conn) do %>
-          <%= link "Sign In With Github", to: Routes.auth_path(@conn, :github) %>
-        <% end %>
-      </section>
-    </header>
     <%= if signed_in?(@conn) do %>
       <%= render "signed_in.html", conn: @conn, inner_content: @inner_content %>
+    <% else %>
+      <%= @inner_content %>
     <% end %>
   </body>
 </html>
