@@ -36,3 +36,5 @@ requests.sh
 
 /test/response/
 /test/webhook/
+
+*DS_Store
