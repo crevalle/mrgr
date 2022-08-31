@@ -42,7 +42,7 @@ defmodule MrgrWeb.PendingMergeLive do
               )}
               colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
               id="menu-button"
-              aria-expanded="true"
+              aria-expanded="false"
               aria-haspopup="true">
               Freeze Merging
               <.icon name="chevron-down" type="outline" class="-mr-1 ml-2 h-5 w-5" />

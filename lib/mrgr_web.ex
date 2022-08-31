@@ -40,7 +40,8 @@ defmodule MrgrWeb do
 
       import MrgrWeb.Plug.Auth
 
-      # Include shared imports and aliases for views
+      unquote(components())
+
       unquote(view_helpers())
     end
   end
@@ -125,6 +126,8 @@ defmodule MrgrWeb do
       import MrgrWeb.Gettext
 
       import Heroicons.LiveView, only: [icon: 1]
+
+      import MrgrWeb.Plug.Auth, only: [admin?: 1, signed_in?: 1]
 
       alias MrgrWeb.Router.Helpers, as: Routes
     end
