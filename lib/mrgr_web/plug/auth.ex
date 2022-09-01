@@ -4,6 +4,7 @@ defmodule MrgrWeb.Plug.Auth do
   def on_mount(:default, _session, params, socket) do
     case MrgrWeb.Plug.Auth.find_user(params["user_id"]) do
       %Mrgr.Schema.User{} = user ->
+        user = record_seen!(user)
         {:cont, Phoenix.LiveView.assign(socket, :current_user, user)}
 
       _nope ->
@@ -25,10 +26,11 @@ defmodule MrgrWeb.Plug.Auth do
     configure_session(conn, drop: true)
   end
 
-  @spec fetch_user(Plug.Conn.t(), list()) :: Plug.Conn.t()
-  def fetch_user(conn, _opts) do
+  @spec authenticate_user(Plug.Conn.t(), list()) :: Plug.Conn.t()
+  def authenticate_user(conn, _opts) do
     with user_id when not is_nil(user_id) <- get_session(conn, :user_id),
          %Mrgr.Schema.User{} = user <- find_user(user_id) do
+      user = record_seen!(user)
       assign(conn, :current_user, user)
     else
       _bogus ->
@@ -73,6 +75,12 @@ defmodule MrgrWeb.Plug.Auth do
   @spec find_user(integer) :: Mrgr.Schema.User.t() | nil
   def find_user(id) do
     Mrgr.User.find_with_current_installation(id)
+  end
+
+  def record_seen!(user) do
+    user
+    |> Mrgr.Schema.User.seen_changeset()
+    |> Mrgr.Repo.update!()
   end
 
   @spec redirect_to_original_url_or(Plug.Conn.t(), String.t()) :: Plug.Conn.t()

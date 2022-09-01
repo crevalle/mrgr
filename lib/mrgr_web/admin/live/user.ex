@@ -18,6 +18,7 @@ defmodule MrgrWeb.Admin.Live.User do
                   <.th uppercase={true}>Current Installation</.th>
                   <.th uppercase={true}>nickname</.th>
                   <.th uppercase={true}>Full Name</.th>
+                  <.th uppercase={true}>last Seen</.th>
                   <.th uppercase={true}>created</.th>
                   <.th uppercase={true}>updated</.th>
                 </tr>
@@ -29,6 +30,7 @@ defmodule MrgrWeb.Admin.Live.User do
                   <.td><%= current_account(user) %></.td>
                   <.td><%= user.nickname %></.td>
                   <.td><%= user.name %></.td>
+                  <.td><%= ts(user.last_seen_at, assigns.timezone) %></.td>
                   <.td><%= ts(user.inserted_at, assigns.timezone) %></.td>
                   <.td><%= ts(user.updated_at, assigns.timezone) %></.td>
                 </.tr>

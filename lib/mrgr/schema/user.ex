@@ -8,6 +8,7 @@ defmodule Mrgr.Schema.User do
     field(:first_name, :string)
     field(:image, :string)
     field(:last_name, :string)
+    field(:last_seen_at, :utc_datetime)
     field(:location, :string)
     field(:name, :string)
     field(:nickname, :string)
@@ -102,6 +103,12 @@ defmodule Mrgr.Schema.User do
     schema
     |> cast(params, [:current_installation_id])
     |> foreign_key_constraint(:current_installation_id)
+  end
+
+  def seen_changeset(schema) do
+    schema
+    |> change()
+    |> put_timestamp(:last_seen_at)
   end
 
   # token: "token",
