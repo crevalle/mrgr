@@ -119,13 +119,8 @@
     <main class="flex-1">
       <div class="">
         <%= if Map.get(@conn.assigns, :live_module) do %>
-          <p class="alert alert-info" role="alert"
-            phx-click="lv:clear-flash"
-            phx-value-key="info"><%= live_flash(@flash, :info) %></p>
-
-          <p class="alert alert-danger" role="alert"
-            phx-click="lv:clear-flash"
-            phx-value-key="error"><%= live_flash(@flash, :error) %></p>
+          <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
+          <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
         <% else %>
           <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
           <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
