@@ -12,7 +12,7 @@ defmodule MrgrWeb.Components.UI do
   def h3(assigns) do
     color = assigns[:color] || "text-gray-900"
 
-    assigns = Phoenix.LiveView.assign(assigns, :color, color)
+    assigns = assign(assigns, :color, color)
 
     ~H"""
     <h3 class={"text-lg leading-6 font-medium #{@color}"}>
@@ -38,9 +38,9 @@ defmodule MrgrWeb.Components.UI do
 
     assigns =
       assigns
-      |> Phoenix.LiveView.assign(:type, type)
-      |> Phoenix.LiveView.assign(:class, class)
-      |> Phoenix.LiveView.assign(:extra, extra)
+      |> assign(:type, type)
+      |> assign(:class, class)
+      |> assign(:extra, extra)
 
     ~H"""
       <button type={@type} class={@class} {@extra} >
@@ -70,7 +70,7 @@ defmodule MrgrWeb.Components.UI do
     class = "px-3 py-3.5 text-left text-sm font-semibold text-gray-900 #{uppercase}"
 
     # <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Pattern</th>
-    assigns = Phoenix.LiveView.assign(assigns, :class, class)
+    assigns = assign(assigns, :class, class)
 
     ~H"""
     <th scope="col" class={@class}>
@@ -84,7 +84,7 @@ defmodule MrgrWeb.Components.UI do
 
     class = "border-t border-gray-300 py-4 #{striped}"
 
-    assigns = Phoenix.LiveView.assign(assigns, :class, class)
+    assigns = assign(assigns, :class, class)
 
     ~H"""
     <tr class={@class}>
@@ -96,7 +96,7 @@ defmodule MrgrWeb.Components.UI do
   def td(assigns) do
     class = "whitespace-nowrap px-3 py-4 text-gray-700 #{assigns[:class]}"
 
-    assigns = Phoenix.LiveView.assign(assigns, :class, class)
+    assigns = assign(assigns, :class, class)
 
     ~H"""
     <td class={@class}>
@@ -130,8 +130,8 @@ defmodule MrgrWeb.Components.UI do
 
     assigns =
       assigns
-      |> Phoenix.LiveView.assign(:label, label)
-      |> Phoenix.LiveView.assign(:value, value)
+      |> assign(:label, label)
+      |> assign(:value, value)
 
     ~H"""
     <.tr striped={true}>
@@ -162,6 +162,31 @@ defmodule MrgrWeb.Components.UI do
         <.table_attr obj={@installation} key={:updated_at} tz={@tz} ./>
         <.table_attr obj={@installation} key={:inserted_at} tz={@tz} ./>
       </table>
+    """
+  end
+
+  def nav_item(assigns) do
+    link_defaults = [
+      to: assigns.route,
+      class:
+        "text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md"
+    ]
+
+    link_opts = assigns[:link_opts] || []
+    link_opts = Keyword.merge(link_defaults, link_opts)
+
+    assigns =
+      assigns
+      |> assign(:link_opts, link_opts)
+      |> assign_new(:inner_block, fn -> [] end)
+
+    ~H"""
+    <%= link @link_opts do %>
+      <.icon name={@icon} type="outline" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
+      <span class="flex-1"><%= @label %></span>
+
+      <%= render_slot(@inner_block) %>
+    <% end %>
     """
   end
 end
