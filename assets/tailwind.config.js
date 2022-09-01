@@ -9,8 +9,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        teal: colors.teal,
-        cyan: colors.cyan,
+        'mrgr': '#5b963d',
       },
     },
   },

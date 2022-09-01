@@ -14,7 +14,7 @@
     <%= if signed_in?(@conn) do %>
       <%= render "signed_in.html", conn: @conn, inner_content: @inner_content %>
     <% else %>
-      <%= @inner_content %>
+      <%= render "signed_out.html", conn: @conn, inner_content: @inner_content %>
     <% end %>
   </body>
 </html>

@@ -1,7 +1,5 @@
-<main class="container">
-  <%= if Phoenix.LiveView.connected?(@socket) do %>
-    <%= @inner_content %>
-  <% else %>
-    <div class="loading">...</div>
-  <% end %>
-</main>
+<%= if Phoenix.LiveView.connected?(@socket) do %>
+  <%= @inner_content %>
+<% else %>
+  <div class="loading">...</div>
+<% end %>

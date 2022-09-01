@@ -1,4 +1,4 @@
-<div class="bg-stone-50">
+<div class="h-full bg-stone-50">
   <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
   <div class="relative z-40 md:hidden" role="dialog" aria-modal="true">
     <!--
@@ -112,6 +112,7 @@
     </div>
   </div>
 
+  <!-- nav bar -->
   <div class="md:pl-72 flex flex-col flex-1 min-h-screen">
     <%= live_render @conn, MrgrWeb.Live.NavBar, session: %{"user_id" => @conn.assigns.current_user.id} %>
 
@@ -121,7 +122,7 @@
       </div>
     </main>
     <footer class="mt-auto">
-      <div>
+      <div class="bg-white px-4 py-2 flex flex-col">
         <div>©<%= Date.utc_today.year %> Crevalle, LLC</div>
         <div>Made with ☀️  in Los Angeles, California 🏝</div>
       </div>
