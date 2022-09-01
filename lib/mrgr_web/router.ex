@@ -73,6 +73,7 @@ defmodule MrgrWeb.Router do
     pipe_through :api
 
     post "/incoming/github", WebhookController, :github
+    get "/socks", WebhookController, :github
   end
 
   scope "/admin", MrgrWeb.Admin, as: :admin do

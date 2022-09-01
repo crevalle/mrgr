@@ -382,6 +382,7 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+<<<<<<< HEAD
   def language_icon(%{language: nil} = assigns) do
     ~H()
   end
@@ -411,5 +412,9 @@ defmodule MrgrWeb.Components.UI do
 
   defp language_icon_url(name) do
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{name}/#{name}-original.svg"
+  end
+
+  def foo do
+    "socks"
   end
 end
