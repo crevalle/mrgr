@@ -20,11 +20,11 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
             <% end %>
           </div>
           <div class="pt-1">
-            <p>
-              Opened by <%= @merge.user.login %>
-            </p>
-            <p>
-              <%= ts(@merge.opened_at) %>
+            <p class="text-gray-500">
+              Opened by <%= @merge.user.login %> at
+              <span class={uhoh_color(@merge.opened_at)}>
+                <%= ts(@merge.opened_at) %>
+              </span>
             </p>
             <p>
               <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: @merge}) %>
@@ -65,7 +65,7 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
           <.h3>Files Changed</.h3>
           <ul>
             <%= for f <- @merge.files_changed do %>
-              <li><pre><%= f %></pre></li>
+              <li class="pl-2"><pre><%= f %></pre></li>
             <% end %>
           </ul>
         </div>

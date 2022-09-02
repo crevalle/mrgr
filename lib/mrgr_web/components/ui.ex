@@ -189,4 +189,23 @@ defmodule MrgrWeb.Components.UI do
     <% end %>
     """
   end
+
+  def timeago(assigns) do
+    color =
+      case assigns[:uhoh] do
+        true ->
+          uhoh_color(assigns.datetime)
+
+        false ->
+          "text-gray-500"
+      end
+
+    assigns = assign(assigns, :color, color)
+
+    ~H"""
+      <span class={@color}>
+        <time datetime={@datetime}><%= ago(@datetime) %></time> ago
+      </span>
+    """
+  end
 end
