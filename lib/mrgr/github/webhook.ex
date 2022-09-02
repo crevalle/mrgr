@@ -32,6 +32,10 @@ defmodule Mrgr.Github.Webhook do
     Mrgr.Merge.reopen(payload)
   end
 
+  def handle("pull_request", %{"action" => "edited"} = payload) do
+    Mrgr.Merge.edit(payload)
+  end
+
   def handle("pull_request", %{"action" => "closed"} = payload) do
     Mrgr.Merge.close(payload)
   end
@@ -53,7 +57,7 @@ defmodule Mrgr.Github.Webhook do
 
   # suspended?
   def handle(obj, payload) do
-    IO.inspect("*** NOT IMPLEMENTED #{obj}")
+    IO.inspect("*** NOT IMPLEMENTED #{obj} ACTION #{payload["action"]}")
     {:ok, payload}
   end
 

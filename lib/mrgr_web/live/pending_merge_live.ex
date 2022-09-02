@@ -1,5 +1,6 @@
 defmodule MrgrWeb.PendingMergeLive do
   use MrgrWeb, :live_view
+  use Mrgr.PubSub.Event
 
   def mount(_params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
@@ -94,7 +95,7 @@ defmodule MrgrWeb.PendingMergeLive do
 
   # repoened will put it at the top, which may not be what we want
   def handle_info(%{event: event, payload: payload}, socket)
-      when event in ["merge:created", "merge:reopened"] do
+      when event in [@merge_created, @merge_reopened] do
     merges = socket.assigns.pending_merges
 
     socket
@@ -102,9 +103,7 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply()
   end
 
-  def handle_info(%{event: "merge:closed", payload: payload}, socket) do
-    IO.inspect("** GOT EVENT merge:closed")
-
+  def handle_info(%{event: @merge_closed, payload: payload}, socket) do
     merges = Enum.reject(socket.assigns.pending_merges, &(&1.id == payload.id))
 
     selected =
@@ -120,7 +119,8 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply()
   end
 
-  def handle_info(%{event: "merge:synchronized", payload: merge}, socket) do
+  def handle_info(%{event: event, payload: merge}, socket)
+      when event in [@merge_edited, @merge_synchronized] do
     hydrated = Mrgr.Merge.preload_for_pending_list(merge)
     merges = replace_updated(socket.assigns.pending_merges, hydrated)
 

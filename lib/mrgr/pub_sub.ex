@@ -5,6 +5,7 @@ defmodule Mrgr.PubSub do
 
   def broadcast(payload, topic, event) do
     data = %{payload: payload, topic: topic, event: event}
+    IO.inspect(event, label: "PUBLISHING")
     Phoenix.PubSub.broadcast(__MODULE__, topic, data)
   end
 
@@ -30,6 +31,7 @@ defmodule Mrgr.PubSub do
         @file_change_alert_deleted "file_change_alert:deleted"
 
         @merge_created "merge:created"
+        @merge_edited "merge:edited"
         @merge_reopened "merge:reopened"
         @merge_synchronized "merge:synchronized"
         @merge_closed "merge:closed"

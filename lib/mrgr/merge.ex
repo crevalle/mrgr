@@ -46,8 +46,23 @@ defmodule Mrgr.Merge do
     end
   end
 
+  @spec edit(map()) ::
+          {:ok, Mrgr.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
+  def edit(payload) do
+    with {:ok, merge} <- find_from_payload(payload),
+         cs <- Mrgr.Schema.Merge.synchronize_changeset(merge, payload),
+         {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
+      updated_merge
+      |> preload_installation()
+      |> broadcast(@merge_edited)
+    else
+      {:error, :not_found} -> create_from_webhook(payload)
+      error -> error
+    end
+  end
+
   @spec synchronize(map()) ::
-          {:ok, Mrge.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
+          {:ok, Mrgr.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def synchronize(payload) do
     with {:ok, merge} <- find_from_payload(payload),
          cs <- Mrgr.Schema.Merge.synchronize_changeset(merge, payload),
@@ -57,11 +72,14 @@ defmodule Mrgr.Merge do
       |> synchronize_head()
       |> synchronize_commits()
       |> broadcast(@merge_synchronized)
+    else
+      {:error, :not_found} -> create_from_webhook(payload)
+      error -> error
     end
   end
 
   @spec close(map()) ::
-          {:ok, Mrge.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
+          {:ok, Mrgr.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def close(%{"pull_request" => params} = payload) do
     with {:ok, merge} <- find_from_payload(payload),
          cs <- Mrgr.Schema.Merge.close_changeset(merge, params),
