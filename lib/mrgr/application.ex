@@ -7,17 +7,13 @@ defmodule Mrgr.Application do
 
   @impl true
   def start(_type, _args) do
+    Appsignal.Phoenix.LiveView.attach()
+
     children = [
-      # Start the Ecto repository
       Mrgr.Repo,
-      # Start the Telemetry supervisor
       MrgrWeb.Telemetry,
-      # Start the PubSub system
       {Phoenix.PubSub, name: Mrgr.PubSub},
-      # Start the Endpoint (http/https)
       MrgrWeb.Endpoint
-      # Start a worker by calling: Mrgr.Worker.start_link(arg)
-      # {Mrgr.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

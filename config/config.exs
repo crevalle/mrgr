@@ -75,3 +75,5 @@ config :tailwind,
   ]
 
 import_config "#{config_env()}.exs"
+
+import_config "appsignal.exs"
