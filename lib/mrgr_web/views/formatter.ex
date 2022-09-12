@@ -1,12 +1,8 @@
 defmodule MrgrWeb.Formatter do
   @thirty_days 2_592_000
   @fourteen_days 1_209_600
-  @twelve_days 1_036_800
-  @eleven_days 950_400
-  @nine_days 777_600
   @seven_days 604_800
   @five_days 432_000
-  @four_days 345_600
   @three_days 259_200
   @one_day 86_400
 
@@ -77,7 +73,7 @@ defmodule MrgrWeb.Formatter do
   def uhoh_color(seconds) when seconds >= @five_days, do: "text-red-500"
   def uhoh_color(seconds) when seconds >= @seven_days, do: "text-red-600"
   def uhoh_color(seconds) when seconds >= @three_days, do: "text-red-700"
-  def uhoh_color(seconds), do: "text-gray-500"
+  def uhoh_color(_seconds), do: "text-gray-500"
 
   def ref("refs/heads/" <> name), do: name
 

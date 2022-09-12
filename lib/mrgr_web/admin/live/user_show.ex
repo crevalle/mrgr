@@ -83,7 +83,7 @@ defmodule MrgrWeb.Admin.Live.UserShow do
             <.h3>All Installations</.h3>
           </div>
 
-          <%= for install <- @user.installations do %>
+          <%= for _install <- @user.installations do %>
             <.installation_table installation={@user.current_installation} tz={@timezone} ./>
           <% end %>
         </div>
@@ -113,6 +113,4 @@ defmodule MrgrWeb.Admin.Live.UserShow do
     |> ok
   end
 
-  defp account(%{installation: %{account: %{login: login}}}), do: login
-  defp account(_), do: "-"
 end
