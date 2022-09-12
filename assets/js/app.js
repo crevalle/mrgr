@@ -23,8 +23,15 @@ import "phoenix_html"
 // Establish Phoenix Socket and LiveView configuration.
 import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
+import TimeAgo from "javascript-time-ago"
+import en from "javascript-time-ago/locale/en"
 import topbar from "../vendor/topbar"
 
+// TimeAgo setup
+TimeAgo.addDefaultLocale(en);
+const timeAgo = new TimeAgo('en-US')
+
+console.log("SOCKS")
 // LiveView Hooks
 import Drag from "./dragHook";
 
@@ -45,6 +52,7 @@ let liveSocket = new LiveSocket("/live", Socket, {
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", info => topbar.show())
 window.addEventListener("phx:page-loading-stop", info => topbar.hide())
+window.addEventListener("phx:page-loading-stop", info => topbar.hide())
 
 // connect if there are any LiveViews on the page
 liveSocket.connect()
@@ -54,3 +62,14 @@ liveSocket.connect()
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket
+
+// const tags = document.getElementsByTagName("time")
+// console.log("TAGS");
+// console.log(tags);
+// console.log(Array.from(tags)[0]);
+// Array.from(tags).forEach(tag => {
+  // // let text = timeAgo.format(tag.datetime);
+  // console.log(text);
+  // // tag.innerHTML = text;
+// });
+
