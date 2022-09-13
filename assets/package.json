@@ -3,5 +3,8 @@
     "assets": "^3.0.1",
     "prefix": "^1.0.0",
     "sortablejs": "^1.15.0"
+  },
+  "scripts": {
+    "deploy": "cd .. && mix assets.deploy && rm -f _build/esbuild"
   }
 }
