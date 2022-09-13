@@ -6,6 +6,7 @@ defmodule Auth.GitHub do
   def client do
     OAuth2.Client.new(
       strategy: __MODULE__,
+      # warning - read at compile time.  probably should change this
       client_id: Application.get_env(:mrgr, :oauth)[:client_id],
       client_secret: Application.get_env(:mrgr, :oauth)[:client_secret],
       site: "https://api.github.com",
