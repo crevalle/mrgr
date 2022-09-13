@@ -29,13 +29,11 @@ defmodule MrgrWeb.AuthController do
       {:ok, %OAuth2.Response{body: data}} ->
         IO.inspect(data, label: "*** GITHUB DATA")
 
-        github_data = %{"data" => data, "token" => token}
-
-        user = Mrgr.User.find_or_create_from_github(github_data)
+        user = Mrgr.User.find_or_create_from_github(data, token)
 
         conn
         |> sign_in(user)
-        |> put_flash(:info, "it worked!")
+        |> put_flash(:info, "Hi there! 👋")
         |> redirect(to: Routes.pending_merge_path(conn, :index))
 
       {:error, %OAuth2.Response{body: body}} ->

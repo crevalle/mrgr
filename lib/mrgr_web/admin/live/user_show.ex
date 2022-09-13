@@ -112,5 +112,4 @@ defmodule MrgrWeb.Admin.Live.UserShow do
     |> assign(user: user)
     |> ok
   end
-
 end

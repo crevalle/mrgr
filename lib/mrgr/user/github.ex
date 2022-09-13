@@ -1,9 +1,9 @@
 defmodule Mrgr.User.Github do
-  @spec generate_params(map()) :: map()
-  def generate_params(%{"token" => access_token, "data" => data} = _auth) do
+  @spec generate_params(%{required(String.t()) => any()}, OAuth2.AccessToken.t()) :: map()
+  def generate_params(user_data, access_token) do
     token_data = token_params(access_token)
 
-    Map.merge(data, token_data)
+    Map.merge(user_data, token_data)
   end
 
   def token_params(%OAuth2.AccessToken{} = token) do

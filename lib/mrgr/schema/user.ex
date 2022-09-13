@@ -83,6 +83,7 @@ defmodule Mrgr.Schema.User do
   def create_changeset(params \\ %{}) do
     %__MODULE__{}
     |> cast(params, @create_params)
+    |> accept_login_param()
     |> tokens_changeset(params)
     |> cast_embed(:urls, with: &url_changeset/2)
   end
@@ -109,6 +110,17 @@ defmodule Mrgr.Schema.User do
     schema
     |> change()
     |> put_timestamp(:last_seen_at)
+  end
+
+  defp accept_login_param(changeset) do
+    # the initial oauth params uses a "login" attribute instead of "nickname" like everywhere else
+    with nil <- get_change(changeset, :nickname),
+         nickname when is_bitstring(nickname) <- changeset.params["login"] do
+      put_change(changeset, :nickname, changeset.params["login"])
+    else
+      _got_nickname ->
+        changeset
+    end
   end
 
   # token: "token",
