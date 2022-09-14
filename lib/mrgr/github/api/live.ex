@@ -20,8 +20,11 @@ defmodule Mrgr.Github.API.Live do
     result
   end
 
-  def fetch_members(client, login) do
-    response = Tentacat.Organizations.Members.list(client, login)
+  def fetch_members(installation) do
+    # expects installation to have account preloaded
+    client = Mrgr.Github.Client.new(installation)
+
+    response = Tentacat.Organizations.Members.list(client, installation.account.login)
     parse_into(response, Mrgr.Github.User)
   end
 

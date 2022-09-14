@@ -76,6 +76,10 @@ defmodule Mrgr.Schema.Member do
     |> changeset()
   end
 
+  def changeset(params) when is_map(params) do
+    changeset(%__MODULE__{}, params)
+  end
+
   def changeset(schema, params) do
     schema
     |> cast(params, @allowed)

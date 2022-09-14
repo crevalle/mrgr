@@ -11,7 +11,7 @@ defmodule Mrgr.Github.API.Fake do
     %{}
   end
 
-  def fetch_members(_client, _login) do
+  def fetch_members(_installation) do
     []
   end
 

@@ -3,13 +3,23 @@ defmodule Mrgr.Installation do
   alias Mrgr.Installation.Query
 
   def create_from_webhook(payload) do
-    repository_params = payload["repositories"]
+    installation = create_installation_from_webhook(payload)
 
-    creator =
-      payload
-      |> Map.get("sender")
-      |> Mrgr.Github.User.new()
-      |> Mrgr.User.find()
+    hydrate_new_installation_data_from_github(installation)
+
+    {:ok, installation}
+  end
+
+  defp find_user_from_webhook_sender(payload) do
+    payload
+    |> Map.get("sender")
+    |> Mrgr.Github.User.new()
+    |> Mrgr.User.find()
+  end
+
+  defp create_installation_from_webhook(payload) do
+    repository_params = payload["repositories"]
+    creator = find_user_from_webhook_sender(payload)
 
     {:ok, installation} =
       payload
@@ -20,21 +30,17 @@ defmodule Mrgr.Installation do
 
     Mrgr.User.set_current_installation(creator, installation)
 
-    client = Mrgr.Github.Client.new(installation)
+    installation
+  end
+
+  def hydrate_new_installation_data_from_github(installation) do
+    # assumes account and repositories have been preloaded
 
     # create memberships
-    # assumes account has been preloaded
-    # and install access token has been generated
-    members = Mrgr.Github.API.fetch_members(client, installation.account.login)
+    members = Mrgr.Github.API.fetch_members(installation)
     add_team_members(installation, members)
 
-    # IO.inspect(installation, label: " ***INSTALL")
-    # TODO repos
-    Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories, client)
-
-    Mrgr.MergeQueue.regenerate_merge_queue(installation)
-
-    {:ok, installation}
+    hydrate_github_merge_data(installation)
   end
 
   def delete_from_webhook(payload) do
@@ -54,6 +60,10 @@ defmodule Mrgr.Installation do
   def refresh_merges!(installation) do
     Mrgr.Merge.delete_installation_merges(installation)
 
+    hydrate_github_merge_data(installation)
+  end
+
+  def hydrate_github_merge_data(installation) do
     client = Mrgr.Github.Client.new(installation)
     Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories, client)
 

@@ -3,7 +3,7 @@ defmodule Mrgr.Github.API do
 
   defdelegate commits(merge, installation), to: @mod
   defdelegate fetch_filtered_pulls(client, owner, name, opts), to: @mod
-  defdelegate fetch_members(client, login), to: @mod
+  defdelegate fetch_members(installation), to: @mod
   defdelegate files_changed(merge, installation), to: @mod
   defdelegate get_new_installation_token(client, external_id), to: @mod
   defdelegate head_commit(merge, installation), to: @mod
