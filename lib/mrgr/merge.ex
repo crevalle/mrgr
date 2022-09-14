@@ -15,8 +15,7 @@ defmodule Mrgr.Merge do
       {:ok, merge} ->
         merge
         |> preload_installation()
-        |> synchronize_head()
-        |> synchronize_commits()
+        |> hydrate_github_data()
         |> append_to_merge_queue()
         |> broadcast(@merge_created)
 
@@ -33,8 +32,7 @@ defmodule Mrgr.Merge do
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
       |> preload_installation()
-      |> synchronize_head()
-      |> synchronize_commits()
+      |> hydrate_github_data()
       |> append_to_merge_queue()
       |> broadcast(@merge_reopened)
     else
@@ -69,8 +67,7 @@ defmodule Mrgr.Merge do
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
       |> preload_installation()
-      |> synchronize_head()
-      |> synchronize_commits()
+      |> hydrate_github_data()
       |> broadcast(@merge_synchronized)
     else
       {:error, :not_found} -> create_from_webhook(payload)
@@ -86,7 +83,6 @@ defmodule Mrgr.Merge do
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
       |> preload_installation()
-      |> synchronize_commits()
       |> remove_from_merge_queue()
       |> broadcast(@merge_closed)
     else
@@ -136,19 +132,31 @@ defmodule Mrgr.Merge do
     {:ok, merge}
   end
 
-  def synchronize_head(merge) do
-    files_changed = fetch_files_changed(merge, merge.repository.installation)
-    head = fetch_head(merge, merge.repository.installation)
+  def hydrate_github_data(merge) do
+    installation = merge.repository.installation
+
+    hydrate_github_data(merge, installation)
+  end
+
+  def hydrate_github_data(merge, installation) do
+    merge
+    |> synchronize_head(installation)
+    |> synchronize_commits(installation)
+  end
+
+  def synchronize_head(merge, installation) do
+    files_changed = fetch_files_changed(merge, installation)
+    head = fetch_head(merge, installation)
 
     merge
     |> Ecto.Changeset.change(%{files_changed: files_changed, head_commit: head})
     |> Mrgr.Repo.update!()
   end
 
-  def synchronize_commits(merge) do
+  def synchronize_commits(merge, installation) do
     commits =
       merge
-      |> fetch_commits(merge.repository.installation)
+      |> fetch_commits(installation)
       # they come in with first commit first, i want most recent first (head)
       |> Enum.reverse()
 
@@ -157,16 +165,16 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.update!()
   end
 
-  def fetch_commits(merge, auth) do
-    Mrgr.Github.API.commits(merge, auth)
+  def fetch_commits(merge, installation) do
+    Mrgr.Github.API.commits(merge, installation)
   end
 
-  def fetch_head(merge, auth) do
-    Mrgr.Github.API.head_commit(merge, auth)
+  def fetch_head(merge, installation) do
+    Mrgr.Github.API.head_commit(merge, installation)
   end
 
-  def fetch_files_changed(merge, auth) do
-    response = Mrgr.Github.API.files_changed(merge, auth)
+  def fetch_files_changed(merge, installation) do
+    response = Mrgr.Github.API.files_changed(merge, installation)
 
     # ["lib/mrgr/incoming_webhook.ex", "lib/mrgr/merge.ex",
     # "lib/mrgr/schema/merge.ex", "lib/mrgr/user.ex",

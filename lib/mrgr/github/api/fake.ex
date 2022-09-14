@@ -1,5 +1,5 @@
 defmodule Mrgr.Github.API.Fake do
-  def get_new_installation_token(_client, _id) do
+  def get_new_installation_token(_installation) do
     []
   end
 
@@ -7,7 +7,7 @@ defmodule Mrgr.Github.API.Fake do
     {:ok, %{"sha" => "0xdeadbeef"}}
   end
 
-  def fetch_filtered_pulls(_client, _owner, _repo, _opts) do
+  def fetch_filtered_pulls(_installation, _repo, _opts) do
     %{}
   end
 

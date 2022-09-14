@@ -64,8 +64,7 @@ defmodule Mrgr.Installation do
   end
 
   def hydrate_github_merge_data(installation) do
-    client = Mrgr.Github.Client.new(installation)
-    Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories, client)
+    Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories, installation)
 
     Mrgr.MergeQueue.regenerate_merge_queue(installation)
   end

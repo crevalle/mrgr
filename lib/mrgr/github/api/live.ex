@@ -1,8 +1,12 @@
 defmodule Mrgr.Github.API.Live do
   import Mrgr.Github.API.Utils
 
-  def get_new_installation_token(client, id) do
-    response = Tentacat.App.Installations.token(client, id)
+  def get_new_installation_token(installation) do
+    jwt = Mrgr.Github.JwtToken.signed_jwt()
+
+    client = Tentacat.Client.new(%{jwt: jwt})
+
+    response = Tentacat.App.Installations.token(client, installation.external_id)
     parse_into(response, Mrgr.Github.AccessToken)
   end
 
@@ -11,17 +15,19 @@ defmodule Mrgr.Github.API.Live do
     handle_response(response)
   end
 
-  def fetch_filtered_pulls(client, owner, repo, opts) do
-    response = Tentacat.Pulls.filter(client, owner, repo, opts)
+  def fetch_filtered_pulls(installation, repo, opts) do
+    client = Mrgr.Github.Client.new(installation)
+    {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
+
+    response = Tentacat.Pulls.filter(client, owner, name, opts)
     result = parse(response)
 
-    write_json(result, "test/response/repo/#{repo}-prs.json")
+    write_json(result, "test/response/repo/#{name}-prs.json")
 
     result
   end
 
   def fetch_members(installation) do
-    # expects installation to have account preloaded
     client = Mrgr.Github.Client.new(installation)
 
     response = Tentacat.Organizations.Members.list(client, installation.account.login)

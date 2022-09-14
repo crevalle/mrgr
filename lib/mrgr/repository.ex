@@ -27,25 +27,23 @@ defmodule Mrgr.Repository do
   defp toggle(true), do: false
   defp toggle(false), do: true
 
-  # gets and stores all for repos - client must be appropriate for repos
-  # TODO repos need merges preloaded
-  # TODO: pass in installation and fetch client from ets or db or something
-  def fetch_and_store_open_merges!(repos, client) when is_list(repos) do
+  @spec fetch_and_store_open_merges!([Mrgr.Schema.Repository.t()], Mrgr.Schema.Installation.t()) ::
+          [Mrgr.Schema.Merge.t()]
+  def fetch_and_store_open_merges!(repos, installation) when is_list(repos) do
     repos
-    |> Enum.map(fn r ->
-      prs = fetch_open_merges(r, client)
+    |> Enum.map(fn repo ->
+      prs = fetch_open_merges(repo, installation)
 
-      create_merges_from_data(r, prs)
+      create_merges_from_data(repo, prs)
     end)
     |> Enum.reject(&is_nil/1)
+    |> Enum.map(&hydrate_merge_data(&1, installation))
   end
 
-  defp fetch_open_merges(repo, client) do
+  defp fetch_open_merges(repo, installation) do
     opts = %{state: "open"}
 
-    {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
-
-    Mrgr.Github.API.fetch_filtered_pulls(client, owner, name, opts)
+    Mrgr.Github.API.fetch_filtered_pulls(installation, repo, opts)
   end
 
   defp create_merges_from_data(_repo, []), do: nil
@@ -53,7 +51,18 @@ defmodule Mrgr.Repository do
   defp create_merges_from_data(repo, data) do
     repo
     |> Mrgr.Schema.Repository.create_merges_changeset(%{merges: data})
-    |> Mrgr.Repo.update()
+    |> Mrgr.Repo.update!()
+  end
+
+  def hydrate_merge_data(repo, installation) do
+    Enum.map(repo.merges, fn merge ->
+      # wish i didn't have to preload the repo here since i already
+      # have it, but i didn't want to change all the github fetching
+      # functions in the Merge module to accept the repo as a separate argument
+      merge
+      |> Mrgr.Repo.preload(:repository)
+      |> Mrgr.Merge.hydrate_github_data(installation)
+    end)
   end
 
   defmodule Query do
