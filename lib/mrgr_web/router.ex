@@ -15,6 +15,10 @@ defmodule MrgrWeb.Router do
     plug :require_user
   end
 
+  pipeline :with_current_installation do
+    plug :notify_missing_installation
+  end
+
   pipeline :admin do
     plug :require_admin
   end
@@ -35,6 +39,7 @@ defmodule MrgrWeb.Router do
 
     # post "/sign-in", AuthController, :create
     delete "/sign-out", AuthController, :delete
+    get "/sign-out", AuthController, :delete
 
     get "/github", AuthController, :github
     get "/github/callback", AuthController, :callback
@@ -42,6 +47,13 @@ defmodule MrgrWeb.Router do
 
   scope "/", MrgrWeb do
     pipe_through [:browser, :authenticate]
+
+    get "/onboarding", OnboardingController, :index
+    get "/onboarding/installation-complete", OnboardingController, :installation_complete
+  end
+
+  scope "/", MrgrWeb do
+    pipe_through [:browser, :authenticate, :with_current_installation]
 
     get "/pending-merges", PendingMergeController, :index
     get "/pending-merges/:id", PendingMergeController, :show

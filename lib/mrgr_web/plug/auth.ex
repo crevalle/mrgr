@@ -40,15 +40,10 @@ defmodule MrgrWeb.Plug.Auth do
 
   @spec require_user(Plug.Conn.t(), list()) :: Plug.Conn.t()
   def require_user(conn, _opts) do
-    case conn.assigns[:current_user] do
+    case signed_in?(conn) do
       nil ->
         conn
         |> redirect_unsigned_in_user()
-        |> halt()
-
-      %{current_installation_id: nil} ->
-        conn
-        |> redirect_connect_github()
         |> halt()
 
       _user ->
@@ -83,6 +78,19 @@ defmodule MrgrWeb.Plug.Auth do
     |> Mrgr.Repo.update!()
   end
 
+  def notify_missing_installation(conn, _opts) do
+    case conn.assigns.current_user.current_installation_id do
+      nil ->
+        message = "<a href=/onboarding>Click here</a> to finish onboarding."
+
+        conn
+        |> Phoenix.Controller.put_flash(:info, Phoenix.HTML.raw(message))
+
+      _id ->
+        conn
+    end
+  end
+
   @spec redirect_to_original_url_or(Plug.Conn.t(), String.t()) :: Plug.Conn.t()
   def redirect_to_original_url_or(conn, new_path) do
     case get_session(conn, :headed_to) do
@@ -107,13 +115,6 @@ defmodule MrgrWeb.Plug.Auth do
     conn
     |> put_session(:headed_to, conn.request_path)
     |> Phoenix.Controller.put_flash(:info, "Please sign in to check that out!")
-    |> Phoenix.Controller.redirect(to: "/")
-  end
-
-  defp redirect_connect_github(conn) do
-    conn
-    |> put_session(:headed_to, conn.request_path)
-    |> Phoenix.Controller.put_flash(:info, "Please connect Github to continue")
     |> Phoenix.Controller.redirect(to: "/")
   end
 end

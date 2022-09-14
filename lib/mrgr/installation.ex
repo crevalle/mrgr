@@ -125,6 +125,10 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.one()
   end
 
+  def installation_url do
+    Application.get_env(:mrgr, :installation)[:url]
+  end
+
   ### HELPERS
   def i do
     Mrgr.Repo.all(Mrgr.Schema.Installation) |> List.first()

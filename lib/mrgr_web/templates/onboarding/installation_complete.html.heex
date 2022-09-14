@@ -1,0 +1,18 @@
+<div class="px-4 pt-4 sm:px-6 lg:px-8">
+  <div class="flex flex-col justify-between">
+    <.heading title="All right!" description="We've connected Mrgr to your <account> account." />
+
+    <div class="flex flex-col mt-8 space-y-4">
+
+      <p>We'll pull information from the following repos:</p>
+      REPOS
+
+      <p>Now let's see what we've got!</p>
+
+      <%= link "Go to pending merges", to: Routes.pending_merge_path(@conn, :index), class: "inline-flex py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 bg-green-600 hover:bg-green-700 focus:ring-green-500" %>
+
+    </div>
+  </div>
+</div>
+
+

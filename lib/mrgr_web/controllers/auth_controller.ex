@@ -31,24 +31,35 @@ defmodule MrgrWeb.AuthController do
 
         user = Mrgr.User.find_or_create_from_github(data, token)
 
+        IO.inspect("**** a ok")
+
         conn
         |> sign_in(user)
         |> put_flash(:info, "Hi there! 👋")
-        |> redirect(to: Routes.pending_merge_path(conn, :index))
+        |> redirect(to: post_sign_in_path(conn, user))
 
       {:error, %OAuth2.Response{body: body}} ->
         IO.inspect("OAuth Error: code #{code} #{inspect(body)}")
 
         conn
         |> put_flash(:info, "Sorry, OAuth expired.  Please log in again.")
-        |> redirect(to: "/")
+        |> redirect(to: Routes.auth_path(conn, :github))
 
       {:error, %OAuth2.Error{reason: reason}} ->
         IO.inspect("OAuth Error: code #{code} #{inspect(reason)}")
 
         conn
         |> put_flash(:info, "Sorry, OAuth expired.  Please log in again.")
-        |> redirect(to: "/")
+        |> redirect(to: Routes.auth_path(conn, :github))
     end
+  end
+
+  # will change when members whom we know about sign up.
+  def post_sign_in_path(conn, %{current_installation_id: nil}) do
+    Routes.onboarding_path(conn, :index)
+  end
+
+  def post_sign_in_path(conn, _user) do
+    Routes.pending_merge_path(conn, :index)
   end
 end
