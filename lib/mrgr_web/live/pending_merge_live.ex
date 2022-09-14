@@ -5,7 +5,7 @@ defmodule MrgrWeb.PendingMergeLive do
   def mount(_params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
-      merges = Mrgr.Merge.pending_merges(current_user)
+      merges = pending_merges(current_user)
       repos = Mrgr.Repository.for_user_with_rules(current_user)
       frozen_repos = frozen_repos(repos)
       subscribe(current_user)
@@ -179,5 +179,11 @@ defmodule MrgrWeb.PendingMergeLive do
       %{merge_freeze_enabled: true} -> "text-blue-600"
       %{merge_freeze_enabled: false} -> "text-gray-500"
     end
+  end
+
+  defp pending_merges(%{current_installation_id: nil}), do: []
+
+  defp pending_merges(user) do
+    Mrgr.Merge.pending_merges(user)
   end
 end

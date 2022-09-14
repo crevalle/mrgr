@@ -21,6 +21,8 @@ defmodule MrgrWeb.Live.ActivityFeed do
     end
   end
 
+  def subscribe(%{current_installation_id: nil}), do: nil
+
   def subscribe(user) do
     topic = Mrgr.PubSub.Topic.installation(user.current_installation)
     Mrgr.PubSub.subscribe(topic)
@@ -29,6 +31,8 @@ defmodule MrgrWeb.Live.ActivityFeed do
   # until i figure out how to represent activity stream events, we translate
   # %IncomingWebhook{} into either a %Merge{} (because we need `files_changed`) or
   # the raw payload of a branch push event.  super ugly : (
+  def load_items(%{current_installation_id: nil}), do: []
+
   def load_items(user) do
     user
     |> Mrgr.ActivityFeed.load_for_user()

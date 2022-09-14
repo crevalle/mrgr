@@ -149,7 +149,7 @@ defmodule Mrgr.User do
 
     def with_installations(query) do
       from(q in query,
-        join: i in assoc(q, :installations),
+        left_join: i in assoc(q, :installations),
         preload: [installations: i]
       )
     end
@@ -162,7 +162,7 @@ defmodule Mrgr.User do
 
     def with_member(query) do
       from(q in query,
-        join: m in assoc(q, :member),
+        left_join: m in assoc(q, :member),
         preload: [member: m]
       )
     end
