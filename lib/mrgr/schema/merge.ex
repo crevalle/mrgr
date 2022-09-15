@@ -51,6 +51,7 @@ defmodule Mrgr.Schema.Merge do
     |> cast_embed(:head)
     |> put_open_status()
     |> put_external_id()
+    |> put_change(:raw, params)
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:author_id)
   end
