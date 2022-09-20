@@ -2,6 +2,7 @@ defmodule Mrgr.Schema.User do
   use Mrgr.Schema
 
   schema "users" do
+    field(:avatar_url, :string)
     field(:birthday, :string)
     field(:description, :string)
     field(:email, :string)
@@ -45,6 +46,7 @@ defmodule Mrgr.Schema.User do
   end
 
   @create_params ~w[
+    avatar_url
     birthday
     description
     email
@@ -55,6 +57,16 @@ defmodule Mrgr.Schema.User do
     name
     nickname
     phone
+  ]a
+
+  @welcome_back_params ~w[
+    avatar_url
+    first_name
+    last_name
+    name
+    nickname
+    image
+    location
   ]a
 
   @tokens ~w[
@@ -88,6 +100,11 @@ defmodule Mrgr.Schema.User do
     |> cast_embed(:urls, with: &url_changeset/2)
   end
 
+  def welcome_back_changeset(schema, params \\ %{}) do
+    schema
+    |> cast(params, @welcome_back_params)
+  end
+
   def url_changeset(schema, params) do
     schema
     |> cast(params, @urls)
@@ -111,6 +128,10 @@ defmodule Mrgr.Schema.User do
     |> change()
     |> put_timestamp(:last_seen_at)
   end
+
+  def image(%{avatar_url: url}) when is_bitstring(url), do: url
+  def image(%{image: url}) when is_bitstring(url), do: url
+  def image(_gee_i_dunno), do: ""
 
   defp accept_login_param(changeset) do
     # the initial oauth params uses a "login" attribute instead of "nickname" like everywhere else

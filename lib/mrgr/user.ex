@@ -41,13 +41,21 @@ defmodule Mrgr.User do
 
     case find_by_email(params["email"]) do
       %Schema{} = user ->
-        associate_member(user)
-        set_tokens(user, params)
+        user
+        |> welcome_back(params)
+        |> associate_member()
+        |> set_tokens(params)
 
       nil ->
         {:ok, user} = create(params)
         user
     end
+  end
+
+  def welcome_back(user, params) do
+    user
+    |> Schema.welcome_back_changeset(params)
+    |> Mrgr.Repo.update!()
   end
 
   @spec find_by_email(String.t()) :: Schema.t() | nil
@@ -102,6 +110,8 @@ defmodule Mrgr.User do
 
       _associated_member ->
         nil
+
+        user
     end
   end
 

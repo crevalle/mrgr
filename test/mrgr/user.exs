@@ -8,6 +8,7 @@ defmodule Mrgr.UserTest do
 
       user = Mrgr.User.find_or_create_from_github(user_data, token)
       assert user.id
+      assert user.avatar_url
       assert user.nickname == user_data["login"]
       assert user.email == user_data["email"]
     end

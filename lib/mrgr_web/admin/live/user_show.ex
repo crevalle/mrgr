@@ -24,6 +24,7 @@ defmodule MrgrWeb.Admin.Live.UserShow do
               <.table_attr obj={@user} key={:first_name} ./>
               <.table_attr obj={@user} key={:last_name} ./>
               <.table_attr obj={@user} key={:location} ./>
+              <.table_attr obj={@user} key={:avatar_url} ./>
               <.table_attr obj={@user} key={:phone} ./>
               <.table_attr obj={@user} key={:refresh_token} ./>
               <.table_attr obj={@user} key={:token} ./>
