@@ -79,6 +79,9 @@ defmodule MrgrWeb.Router do
     live "/incoming-webhooks", Live.IncomingWebhook, :index, as: :incoming_webhook
     live "/incoming-webhooks/:id", Live.IncomingWebhookShow, :show, as: :incoming_webhook
 
+    live "/installations", Live.Installation, :index, as: :installation
+    live "/installations/:id", Live.InstallationShow, :show, as: :installation
+
     live "/users", Live.User, :index, as: :user
     live "/users/:id", Live.UserShow, :show, as: :user
 

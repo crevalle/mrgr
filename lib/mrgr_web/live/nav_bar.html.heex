@@ -57,8 +57,14 @@
               </div>
               <.nav_item
                 route={Routes.admin_incoming_webhook_path(MrgrWeb.Endpoint, :index)}
-                icon="globe-alt"
+                icon="phone-incoming"
                 label="Incoming Webhooks"
+              ./>
+
+              <.nav_item
+                route={Routes.admin_installation_path(MrgrWeb.Endpoint, :index)}
+                icon="globe"
+                label="Installations"
               ./>
 
               <.nav_item

@@ -2,6 +2,32 @@ defmodule Mrgr.Installation do
   alias Mrgr.Schema.Installation, as: Schema
   alias Mrgr.Installation.Query
 
+  def all do
+    Schema
+    |> Query.all()
+    |> Query.with_account()
+    |> Mrgr.Repo.all()
+  end
+
+  def all_admin do
+    Schema
+    |> Query.all()
+    |> Query.with_account()
+    |> Query.with_repositories()
+    |> Query.with_creator()
+    |> Mrgr.Repo.all()
+  end
+
+  def find_admin(id) do
+    Schema
+    |> Query.by_id(id)
+    |> Query.with_account()
+    |> Query.with_repositories()
+    |> Query.with_creator()
+    |> Query.with_users()
+    |> Mrgr.Repo.one()
+  end
+
   def create_from_webhook(payload) do
     installation = create_installation_from_webhook(payload)
 
@@ -149,5 +175,39 @@ defmodule Mrgr.Installation do
 
   defmodule Query do
     use Mrgr.Query
+
+    def all(query) do
+      from(q in query,
+        order_by: [desc: :inserted_at]
+      )
+    end
+
+    def with_account(query) do
+      from(q in query,
+        join: a in assoc(q, :account),
+        preload: [account: a]
+      )
+    end
+
+    def with_repositories(query) do
+      from(q in query,
+        left_join: r in assoc(q, :repositories),
+        preload: [repositories: r]
+      )
+    end
+
+    def with_creator(query) do
+      from(q in query,
+        join: c in assoc(q, :creator),
+        preload: [creator: c]
+      )
+    end
+
+    def with_users(query) do
+      from(q in query,
+        left_join: u in assoc(q, :users),
+        preload: [users: u]
+      )
+    end
   end
 end

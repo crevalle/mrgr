@@ -145,7 +145,6 @@ defmodule MrgrWeb.Components.UI do
   def installation_table(assigns) do
     ~H"""
       <table class="min-w-full">
-        <.table_attr obj={@installation} key={:access_tokens_url} ./>
         <.table_attr obj={@installation} key={:app_id} ./>
         <.table_attr obj={@installation} key={:app_slug} ./>
         <.table_attr obj={@installation} key={:events} ./>
@@ -157,6 +156,7 @@ defmodule MrgrWeb.Components.UI do
         <.table_attr obj={@installation} key={:repository_selection} ./>
         <.table_attr obj={@installation} key={:target_id} ./>
         <.table_attr obj={@installation} key={:target_type} ./>
+        <.table_attr obj={@installation} key={:access_tokens_url} ./>
         <.table_attr obj={@installation} key={:token} tz={@tz} ./>
         <.table_attr obj={@installation} key={:token_expires_at} tz={@tz} ./>
         <.table_attr obj={@installation} key={:updated_at} tz={@tz} ./>
@@ -164,6 +164,81 @@ defmodule MrgrWeb.Components.UI do
       </table>
     """
   end
+
+  def admin_user_table(assigns) do
+    ~H"""
+      <table class="min-w-full">
+        <thead class="bg-white">
+          <tr>
+            <.th uppercase={true}>ID</.th>
+            <.th uppercase={true}>Current Installation</.th>
+            <.th uppercase={true}>nickname</.th>
+            <.th uppercase={true}>Full Name</.th>
+            <.th uppercase={true}>last Seen</.th>
+            <.th uppercase={true}>created</.th>
+            <.th uppercase={true}>updated</.th>
+          </tr>
+        </thead>
+
+        <%= for user <- @users do %>
+          <.tr striped={true}>
+            <.td><%= link user.id, to: Routes.admin_user_path(MrgrWeb.Endpoint, :show, user.id), class: "text-teal-500" %></.td>
+            <.td><%= link_to_installation(user) %></.td>
+            <.td><%= user.nickname %></.td>
+            <.td><%= user.name %></.td>
+            <.td><%= ts(user.last_seen_at, @tz) %></.td>
+            <.td><%= ts(user.inserted_at, @tz) %></.td>
+            <.td><%= ts(user.updated_at, @tz) %></.td>
+          </.tr>
+        <% end %>
+      </table>
+    """
+  end
+
+  def admin_repository_table(assigns) do
+    ~H"""
+      <table class="min-w-full">
+        <thead class="bg-white">
+          <tr>
+            <.th uppercase={true}>ID</.th>
+            <.th uppercase={true}>External ID</.th>
+            <.th uppercase={true}>Full Name</.th>
+            <.th uppercase={true}>Private?</.th>
+            <.th uppercase={true}>Merge Freeze Enabled?</.th>
+            <.th uppercase={true}>Updated</.th>
+            <.th uppercase={true}>Created</.th>
+          </tr>
+        </thead>
+
+        <%= for repo <- @repositories do %>
+          <.tr striped={true}>
+            <.td><%= repo.id %></.td>
+            <.td><%= repo.external_id %></.td>
+            <.td><%= repo.full_name %></.td>
+            <.td><%= repo.private %></.td>
+            <.td><%= repo.merge_freeze_enabled %></.td>
+            <.td><%= ts(repo.updated_at, @tz) %></.td>
+            <.td><%= ts(repo.inserted_at, @tz) %></.td>
+          </.tr>
+        <% end %>
+      </table>
+    """
+  end
+
+  def link_to_installation(user) do
+    title = current_account(user)
+    installation_id = user.current_installation_id
+
+    opts = [
+      to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, installation_id),
+      class: "text-teal-500"
+    ]
+
+    link(title, opts)
+  end
+
+  defp current_account(%{current_installation: %{account: %{login: login}}}), do: login
+  defp current_account(user), do: user.current_installation_id
 
   def nav_item(assigns) do
     link_defaults = [

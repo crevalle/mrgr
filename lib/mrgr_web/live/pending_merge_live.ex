@@ -18,13 +18,7 @@ defmodule MrgrWeb.PendingMergeLive do
       |> assign(:frozen_repos, frozen_repos)
       |> ok()
     else
-      socket
-      |> assign(:current_user, nil)
-      |> assign(:pending_merges, [])
-      |> assign(:selected_merge, nil)
-      |> assign(:repos, [])
-      |> assign(:frozen_repos, [])
-      |> ok()
+      ok(socket)
     end
   end
 
