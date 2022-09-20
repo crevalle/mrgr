@@ -67,7 +67,7 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
     """
   end
 
-  def mount(%{"id" => id}, session, socket) do
+  def mount(%{"id" => id}, _session, socket) do
     if connected?(socket) do
       # subscribe()
 
