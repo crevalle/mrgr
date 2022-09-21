@@ -225,6 +225,13 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.one()
   end
 
+  def find(id) do
+    Mrgr.Schema.Merge
+    |> Query.by_id(id)
+    |> Query.with_file_alert_rules()
+    |> Mrgr.Repo.one()
+  end
+
   def pending_merges(%Mrgr.Schema.Installation{id: id}) do
     pending_merges(id)
   end

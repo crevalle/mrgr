@@ -12,6 +12,8 @@ defmodule Mrgr.PubSub do
   defmodule Topic do
     def installation(%Mrgr.Schema.Installation{id: id}), do: installation(id)
 
+    def installation(%{installation_id: id}), do: installation(id)
+
     def installation(id) do
       "installation:#{id}"
     end
@@ -35,6 +37,8 @@ defmodule Mrgr.PubSub do
         @merge_reopened "merge:reopened"
         @merge_synchronized "merge:synchronized"
         @merge_closed "merge:closed"
+
+        @api_request_completed "api_request:completed"
       end
     end
   end
