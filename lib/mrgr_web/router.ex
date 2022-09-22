@@ -59,6 +59,8 @@ defmodule MrgrWeb.Router do
     get "/pending-merges/:id", PendingMergeController, :show
     resources "/file-change-alerts", FileChangeAlertController, only: [:index, :edit]
 
+    live "/checklists", Live.Checklist, :index, as: :checklist
+
     resources "/repositories", RepositoryController, only: [:index]
   end
 
