@@ -22,7 +22,7 @@ defmodule MrgrWeb.PendingMergeLive do
     end
   end
 
-  def handle_event("toggle_merge_freeze", %{"repo-id" => id}, socket) do
+  def handle_event("toggle-merge-freeze", %{"repo-id" => id}, socket) do
     repo = Mrgr.Utils.find_item_in_list(socket.assigns.repos, id)
 
     updated = Mrgr.Repository.toggle_merge_freeze(repo)
@@ -48,7 +48,7 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply()
   end
 
-  def handle_event("show_preview", %{"merge-id" => id}, socket) do
+  def handle_event("show-preview", %{"merge-id" => id}, socket) do
     selected = Mrgr.Utils.find_item_in_list(socket.assigns.pending_merges, id)
 
     socket
