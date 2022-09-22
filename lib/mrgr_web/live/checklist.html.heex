@@ -31,7 +31,7 @@
               <ul role="list" class="divide-y divide-gray-200">
                 <%= for template <- @templates do %>
                   <li >
-                    <%= link to: "#", phx_click: "show_detail", phx_value_id: template.id, class: "text-sm font-medium text-teal-500 truncate" do %>
+                    <%= link to: "#", phx_click: "show-detail", phx_value_id: template.id, class: "text-sm font-medium text-teal-500 truncate" do %>
                       <div class="block hover:bg-gray-50">
                         <div class="px-4 py-4 sm:px-6">
                           <div class="flex items-center justify-between">
@@ -60,9 +60,12 @@
 
     <%= if @changeset do %>
       <.live_component module={MrgrWeb.Components.Live.ChecklistFormComponent} id="checklist_form" changeset={@changeset} />
-
     <% end %>
-    <%# <.live_component module={MrgrWeb.Components.Live.ChecklistDetailComponent} id="checklist_detail" template={@template} current_user={@current_user} /> %>
+
+    <%= if @detail do %>
+      <.live_component module={MrgrWeb.Components.Live.ChecklistTemplateDetail} id={"checklist_template_#{@detail.id}"} template={@detail} />
+    <% end %>
+
   </div>
 </div>
 

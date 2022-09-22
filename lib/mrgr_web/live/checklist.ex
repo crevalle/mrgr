@@ -10,16 +10,27 @@ defmodule MrgrWeb.Live.Checklist do
       |> assign(:current_user, current_user)
       |> assign(:templates, templates)
       |> assign(:changeset, nil)
+      |> assign(:detail, nil)
       |> ok()
     else
       ok(socket)
     end
   end
 
+  def handle_event("show-detail", %{"id" => id}, socket) do
+    template = Mrgr.Utils.find_item_in_list(socket.assigns.templates, id)
+
+    socket
+    |> assign(:detail, template)
+    |> assign(:changeset, nil)
+    |> noreply()
+  end
+
   def handle_event("open-add-form", _params, socket) do
     cs = Mrgr.Schema.ChecklistTemplate.create_changeset()
 
     socket
+    |> assign(:detail, nil)
     |> assign(:changeset, cs)
     |> noreply()
   end
@@ -47,9 +58,10 @@ defmodule MrgrWeb.Live.Checklist do
     end
   end
 
-  def handle_event("cancel", _params, socket) do
+  def handle_event("close-detail", _params, socket) do
     socket
     |> assign(:changeset, nil)
+    |> assign(:detail, nil)
     |> noreply()
   end
 end
