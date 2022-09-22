@@ -15,6 +15,9 @@ defmodule Mrgr.Schema.Merge do
 
     embeds_many(:commits, Mrgr.Github.Commit, on_replace: :delete)
 
+    embeds_many(:assignees, Mrgr.Github.User, on_replace: :delete)
+    embeds_many(:requested_reviewers, Mrgr.Github.User, on_replace: :delete)
+
     embeds_one(:user, Mrgr.Github.User, on_replace: :update)
 
     embeds_one(:head, Mrgr.Schema.Head, on_replace: :update)
