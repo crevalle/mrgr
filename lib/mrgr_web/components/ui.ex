@@ -257,7 +257,7 @@ defmodule MrgrWeb.Components.UI do
 
     ~H"""
     <%= link @link_opts do %>
-      <.icon name={@icon} type="outline" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
+      <.icon name={@icon} class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
       <span class="flex-1"><%= @label %></span>
 
       <%= render_slot(@inner_block) %>

@@ -75,6 +75,8 @@ config :tailwind,
     cd: Path.expand("../assets", __DIR__)
   ]
 
+config :ex_heroicons, type: "outline"
+
 import_config "#{config_env()}.exs"
 
 import_config "appsignal.exs"

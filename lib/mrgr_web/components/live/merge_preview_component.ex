@@ -16,7 +16,7 @@ defmodule MrgrWeb.Components.Live.MergePreviewComponent do
           <div class="flex items-start items-center">
             <.h1><%= @merge.title %></.h1>
             <%= link to: external_merge_url(@merge), target: "_blank" do %>
-              <.icon name="external-link" type="outline" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+              <.icon name="external-link" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
             <% end %>
           </div>
           <div class="pt-1">

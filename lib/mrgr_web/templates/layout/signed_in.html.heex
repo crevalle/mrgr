@@ -52,12 +52,12 @@
           <nav class="px-2 space-y-1">
             <!-- Current: "bg-gray-100 text-gray-900", Default: "text-gray-600 hover:bg-gray-50 hover:text-gray-900" -->
             <%= link to: Routes.repository_path(@conn, :index), class: "bg-gray-100 text-gray-900 hover:text-gray-900 hover:bg-gray-100 group flex items-center px-2 py-2 text-sm font-medium rounded-md" do %>
-              <.icon name="newspaper" type="outline" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
+              <.icon name="newspaper" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
               <span class="flex-1">Repos</span>
             <% end %>
 
             <%= link to: Routes.pending_merge_path(@conn, :index), class: "text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md" do %>
-              <.icon name="share" type="outline" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
+              <.icon name="share" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
               <span class="flex-1"> Pending Merges </span>
 
               <!-- Current: "bg-white", Default: "bg-gray-100 group-hover:bg-gray-200" -->
@@ -75,17 +75,17 @@
             <%= if admin?(@conn.assigns.current_user) do %>
               <%= link to: Routes.admin_incoming_webhook_path(@conn, :index), class: "text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md" do %>
 
-                <.icon name="globe-alt" type="outline" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
+                <.icon name="globe-alt" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
                 <span class="flex-1"> Admin - Incoming Webhooks </span>
               <% end %>
 
               <%= link to: Routes.admin_user_path(@conn, :index), class: "text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md" do %>
-                <.icon name="users" type="outline" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
+                <.icon name="users" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
                 <span class="flex-1"> Admin - Users </span>
               <% end %>
 
               <%= link to: Routes.admin_waiting_list_signup_path(@conn, :index), class: "text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center px-2 py-2 text-sm font-medium rounded-md" do %>
-                <.icon name="sparkles" type="outline" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
+                <.icon name="sparkles" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
                 <span class="flex-1"> Admin - Waiting List Signups </span>
               <% end %>
             <% end %>
