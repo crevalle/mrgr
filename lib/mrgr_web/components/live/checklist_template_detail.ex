@@ -17,8 +17,16 @@ defmodule MrgrWeb.Components.Live.ChecklistTemplateDetail do
         <h3><%= @template.title %></h3>
         Created by <%= @template.creator.nickname %>
 
+        <h3>Check Templates</h3>
+        <ul>
+
+          <%= for ct <- @template.check_templates do %>
+            <li><%= ct.text %></li>
+            <% end %>
+        </ul>
 
 
+        <%= link "Delete", to: "#", data: [confirm: "Sure about that?"], phx_click: "delete", phx_value_id: @template.id, class: "btn ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" %>
       </div>
 
     </div>
