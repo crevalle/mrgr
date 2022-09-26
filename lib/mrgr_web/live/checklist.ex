@@ -91,10 +91,6 @@ defmodule MrgrWeb.Live.Checklist do
     |> noreply()
   end
 
-  defp gen_temp_id do
-    Ecto.UUID.generate()
-  end
-
   def handle_event("save", %{"checklist_template" => params}, socket) do
     params =
       params
@@ -141,5 +137,9 @@ defmodule MrgrWeb.Live.Checklist do
     |> assign(:changeset, nil)
     |> assign(:detail, nil)
     |> noreply()
+  end
+
+  defp gen_temp_id do
+    Ecto.UUID.generate()
   end
 end

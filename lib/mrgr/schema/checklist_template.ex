@@ -21,12 +21,12 @@ defmodule Mrgr.Schema.ChecklistTemplate do
     |> cast(params, @create_params)
     |> validate_required([:title])
     |> cast_embed(:check_templates, required: true)
-    |> put_relations()
+    |> put_associations()
     |> foreign_key_constraint(:installation_id)
     |> foreign_key_constraint(:creator_id)
   end
 
-  defp put_relations(changeset) do
+  defp put_associations(changeset) do
     creator = changeset.params["creator"]
     installation = changeset.params["installation"]
 

@@ -7,7 +7,7 @@ defmodule MrgrWeb.Components.Live.ChecklistTemplateDetail do
       <div class="flex flex-col space-y-4">
         <div class="flex justify-between">
           <div class="flex items-start items-center">
-            <.h1>Details</.h1>
+            <.h1>Details <%= @template.id %></.h1>
           </div>
           <button phx-click="close-detail" colors="outline-none">
             <.icon name="x" class="text-gray-400 mr-1 h-5 w-5" />

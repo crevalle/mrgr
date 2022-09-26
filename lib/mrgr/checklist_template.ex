@@ -9,6 +9,24 @@ defmodule Mrgr.ChecklistTemplate do
     |> Mrgr.Repo.all()
   end
 
+  def create_checklist(template, merge) do
+    check_attrs = extract_check_text(template.check_templates)
+
+    attrs = %{
+      title: template.title,
+      checklist_template: template,
+      merge: merge,
+      checks: check_attrs
+    }
+
+    Mrgr.Checklist.create!(attrs)
+  end
+
+  defp extract_check_text(check_templates) do
+    # ignore the other attributes
+    Enum.map(check_templates, fn ct -> %{text: ct.text} end)
+  end
+
   defmodule Query do
     use Mrgr.Query
 
