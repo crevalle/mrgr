@@ -26,7 +26,6 @@ defmodule MrgrWeb.Components.Live.ChecklistFormComponent do
             <%= for ct <- inputs_for(f, :check_templates) do %>
               <%= hidden_inputs_for ct %>
               <%= hidden_input ct, :temp_id %>
-              <%= hidden_input ct, :type, value: :checkbox %>
 
               <%= label ct, :text %>
               <div class="flex items-center">
