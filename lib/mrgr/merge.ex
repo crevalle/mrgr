@@ -247,6 +247,7 @@ defmodule Mrgr.Merge do
     |> Query.open()
     |> Query.order_by_priority()
     |> Query.with_file_alert_rules()
+    |> Query.with_checklist()
     |> Mrgr.Repo.all()
   end
 
@@ -378,6 +379,18 @@ defmodule Mrgr.Merge do
       from([q, repository: r] in with_repository(query),
         left_join: a in assoc(r, :file_change_alerts),
         preload: [repository: {r, [file_change_alerts: a]}]
+      )
+    end
+
+    def with_checklist(query) do
+      from(q in query,
+        left_join: checklist in assoc(q, :checklist),
+        left_join: checks in assoc(checklist, :checks),
+        left_join: approval in assoc(checks, :check_approval),
+        left_join: user in assoc(approval, :user),
+        preload: [
+          checklist: {checklist, [checks: {checks, [check_approval: {approval, [user: user]}]}]}
+        ]
       )
     end
   end

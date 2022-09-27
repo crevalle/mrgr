@@ -74,6 +74,29 @@ defmodule Mrgr.Factory do
     }
   end
 
+  def build(:check) do
+    %Mrgr.Schema.Check{
+      text: Faker.Company.bs(),
+      checklist: build(:checklist)
+    }
+  end
+
+  def build(:checklist) do
+    %Mrgr.Schema.Checklist{
+      title: Faker.Company.bs(),
+      merge: build(:merge),
+      checklist_template: build(:checklist_template)
+    }
+  end
+
+  def build(:checklist_template) do
+    %Mrgr.Schema.ChecklistTemplate{
+      title: Faker.Company.bs(),
+      installation: build(:installation),
+      creator: build(:user)
+    }
+  end
+
   # Convenience API
 
   def build(factory_name, attributes) do

@@ -7,4 +7,19 @@ defmodule Mrgr.Schema.CheckApproval do
 
     timestamps()
   end
+
+  def changeset(schema, params) do
+    schema
+    |> cast(params, [:check_id, :user_id])
+    |> put_associations()
+  end
+
+  defp put_associations(changeset) do
+    user = changeset.params["user"]
+    check = changeset.params["check"]
+
+    changeset
+    |> put_assoc(:user, user)
+    |> put_assoc(:check, check)
+  end
 end

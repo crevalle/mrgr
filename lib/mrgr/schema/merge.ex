@@ -25,7 +25,8 @@ defmodule Mrgr.Schema.Merge do
     embeds_one(:merged_by, Mrgr.Github.User, on_replace: :update)
     field(:merged_at, :utc_datetime)
 
-    has_many(:checklists, Mrgr.Schema.Checklist, on_delete: :delete_all)
+    has_one(:checklist, Mrgr.Schema.Checklist, on_delete: :delete_all)
+    has_many(:checks, through: [:checklist, :checks])
 
     timestamps()
   end

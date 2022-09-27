@@ -103,6 +103,9 @@
                            uhoh={true}
                            ./>
                         </p>
+                        <%= if Mrgr.Checklist.complete?(merge.checklist) do %>
+                          <p class="text-green-800">Checklist Completed!  Yay 🎉</p>
+                        <% end %>
                       </div>
                       <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                         <p>
@@ -120,7 +123,9 @@
       </div>
     </div>
 
-    <.live_component module={MrgrWeb.Components.Live.MergePreviewComponent} id="merge_preview" merge={@selected_merge} current_user={@current_user} frozen_repos={@frozen_repos}/>
+    <%= if @selected_merge do %>
+      <.live_component module={MrgrWeb.Components.Live.MergeDetail} id="merge_detail" merge={@selected_merge} current_user={@current_user} frozen_repos={@frozen_repos} timezone={@timezone} />
+    <% end %>
   </div>
 </div>
 <.button phx-click="refresh" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500"> Refresh PRs</.button>
