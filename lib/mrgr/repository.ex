@@ -16,6 +16,13 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.all()
   end
 
+  def find_for_user(user, ids) do
+    Mrgr.Schema.Repository
+    |> Query.for_user(user)
+    |> Query.by_ids(ids)
+    |> Mrgr.Repo.all()
+  end
+
   def toggle_merge_freeze(repo) do
     new_value = toggle(repo.merge_freeze_enabled)
 

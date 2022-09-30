@@ -21,8 +21,8 @@ defmodule Mrgr.Schema.Checklist do
     |> cast(params, @create_params)
     |> validate_required([:title])
     |> put_associations()
-    |> foreign_key_constraint(:checklist_template)
-    |> foreign_key_constraint(:merge)
+    |> foreign_key_constraint(:checklist_template_id)
+    |> foreign_key_constraint(:merge_id)
   end
 
   def put_associations(changeset) do

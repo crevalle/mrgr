@@ -12,6 +12,8 @@ defmodule MrgrWeb.Live.Checklist do
       |> assign(:new_template, nil)
       |> assign(:changeset, nil)
       |> assign(:detail, nil)
+      |> assign(:repository_list, [])
+      |> assign(:selected_repository_ids, MapSet.new())
       |> ok()
     else
       ok(socket)
@@ -34,11 +36,51 @@ defmodule MrgrWeb.Live.Checklist do
 
     cs = Mrgr.Schema.ChecklistTemplate.create_changeset(new_template)
 
+    # Enum.map(@user.roles, &(&1.id)
+    repo_list =
+      socket.assigns.current_user
+      |> Mrgr.Repository.for_user_with_rules()
+
     socket
     |> assign(:detail, nil)
     |> assign(:new_template, new_template)
     |> assign(:changeset, cs)
+    |> assign(:repository_list, repo_list)
     |> noreply()
+  end
+
+  def handle_event("toggle-selected-repository", %{"repo-id" => id}, socket) do
+    selected = socket.assigns.selected_repository_ids
+    id = String.to_integer(id)
+
+    selected =
+      case MapSet.member?(selected, id) do
+        true -> MapSet.delete(selected, id)
+        false -> MapSet.put(selected, id)
+      end
+
+    socket
+    |> assign(:selected_repository_ids, selected)
+    |> noreply()
+  end
+
+  def handle_event("toggle-all-repositories", _params, socket) do
+    selected = socket.assigns.selected_repository_ids
+    all_repos = socket.assigns.repository_list
+
+    selected =
+      case all_repos_selected?(all_repos, selected) do
+        true -> MapSet.new()
+        false -> MapSet.new(Enum.map(all_repos, & &1.id))
+      end
+
+    socket
+    |> assign(:selected_repository_ids, selected)
+    |> noreply()
+  end
+
+  defp all_repos_selected?(all, selected) do
+    Enum.count(all) == Enum.count(selected)
   end
 
   def handle_event("validate", %{"checklist_template" => params}, socket) do
@@ -96,11 +138,9 @@ defmodule MrgrWeb.Live.Checklist do
       params
       |> Map.put("installation", socket.assigns.current_user.current_installation)
       |> Map.put("creator", socket.assigns.current_user)
+      |> Map.put("repository_ids", MapSet.to_list(socket.assigns.selected_repository_ids))
 
-    %Mrgr.Schema.ChecklistTemplate{}
-    |> Mrgr.Schema.ChecklistTemplate.create_changeset(params)
-    |> Mrgr.Repo.insert()
-    |> case do
+    case Mrgr.ChecklistTemplate.create(params) do
       {:ok, template} ->
         templates = socket.assigns.templates
 

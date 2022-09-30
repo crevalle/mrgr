@@ -21,6 +21,21 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def subheading(assigns) do
+    assigns =
+      assigns
+      |> assign_new(:description, fn -> [] end)
+
+    ~H"""
+    <.h3><%= @title %></.h3>
+    <%= unless Enum.empty?(@description) do %>
+      <p class="mt-1 mb-2" >
+        <%= render_slot(@description) %>
+      </p>
+    <% end %>
+    """
+  end
+
   def button(assigns) do
     colors =
       if assigns[:disabled] do

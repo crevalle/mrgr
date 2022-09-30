@@ -7,22 +7,31 @@ defmodule MrgrWeb.Components.Live.ChecklistTemplateDetail do
       <div class="flex flex-col space-y-4">
         <div class="flex justify-between">
           <div class="flex items-start items-center">
-            <.h1>Details <%= @template.id %></.h1>
+            <.h1><%= @template.title %></.h1>
           </div>
           <button phx-click="close-detail" colors="outline-none">
             <.icon name="x" class="text-gray-400 mr-1 h-5 w-5" />
           </button>
         </div>
 
-        <h3><%= @template.title %></h3>
-        Created by <%= @template.creator.nickname %>
+        <div class="flex flex-col">
+          <p>Created by <%= @template.creator.nickname %></p>
+          <p class="text-gray-500">Updated <%= ts(@template.inserted_at, @timezone) %></p>
+        </div>
 
-        <h3>Check Templates</h3>
+        <.h3>Check Templates</.h3>
         <ul>
 
           <%= for ct <- @template.check_templates do %>
             <li><%= ct.text %></li>
-            <% end %>
+          <% end %>
+        </ul>
+
+        <.h3>Applies to Repos</.h3>
+        <ul>
+        <%= for repo <- @template.repositories do %>
+          <li><%= repo.name %></li>
+        <% end %>
         </ul>
 
 

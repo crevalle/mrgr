@@ -9,6 +9,9 @@ defmodule Mrgr.Schema.ChecklistTemplate do
 
     embeds_many(:check_templates, Mrgr.Schema.CheckTemplate, on_replace: :delete)
 
+    has_many(:checklist_template_repositories, Mrgr.Schema.ChecklistTemplateRepository)
+    has_many(:repositories, through: [:checklist_template_repositories, :repository])
+
     timestamps()
   end
 

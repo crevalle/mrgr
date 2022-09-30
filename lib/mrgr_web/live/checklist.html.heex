@@ -55,11 +55,11 @@
 
 
     <%= if @changeset do %>
-      <.live_component module={MrgrWeb.Components.Live.ChecklistFormComponent} id="checklist_form" changeset={@changeset} />
+      <.live_component module={MrgrWeb.Components.Live.ChecklistFormComponent} id="checklist_form" changeset={@changeset} repository_list={@repository_list} selected_repository_ids={@selected_repository_ids} />
     <% end %>
 
     <%= if @detail do %>
-      <.live_component module={MrgrWeb.Components.Live.ChecklistTemplateDetail} id={"checklist_template_#{@detail.id}"} template={@detail} />
+      <.live_component module={MrgrWeb.Components.Live.ChecklistTemplateDetail} id={"checklist_template_#{@detail.id}"} template={@detail} timezone={@timezone} />
     <% end %>
 
   </div>

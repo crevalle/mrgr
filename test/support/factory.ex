@@ -48,6 +48,19 @@ defmodule Mrgr.Factory do
     }
   end
 
+  def build(:membership) do
+    %Mrgr.Schema.Membership{
+      member: build(:member),
+      installation: build(:installation)
+    }
+  end
+
+  def build(:member) do
+    %Mrgr.Schema.Member{
+      user: build(:user)
+    }
+  end
+
   def build(:repository) do
     %Mrgr.Schema.Repository{
       name: Faker.Company.bullshit(),

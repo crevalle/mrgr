@@ -1,12 +1,38 @@
 defmodule Mrgr.ChecklistTemplate do
+  alias Mrgr.Schema.ChecklistTemplate, as: Schema
   alias Mrgr.ChecklistTemplate.Query
 
   def for_installation(installation) do
-    Mrgr.Schema.ChecklistTemplate
+    Schema
     |> Query.for_installation(installation.id)
     |> Query.with_creator()
+    |> Query.with_repositories()
     |> Query.cron()
     |> Mrgr.Repo.all()
+  end
+
+  def create(params) do
+    %Schema{}
+    |> Schema.create_changeset(params)
+    |> Mrgr.Repo.insert()
+    |> case do
+      {:ok, template} ->
+        # ensure user owns the repos
+        repos = Mrgr.Repository.find_for_user(params["creator"], params["repository_ids"])
+
+        Enum.map(repos, fn repo ->
+          %Mrgr.Schema.ChecklistTemplateRepository{
+            repository_id: repo.id,
+            checklist_template_id: template.id
+          }
+          |> Mrgr.Repo.insert!()
+        end)
+
+        {:ok, Mrgr.Repo.preload(template, :repositories)}
+
+      {:error, _changeset} = error ->
+        error
+    end
   end
 
   def create_checklist(template, merge) do
@@ -42,6 +68,13 @@ defmodule Mrgr.ChecklistTemplate do
       from(q in query,
         join: c in assoc(q, :creator),
         preload: [creator: c]
+      )
+    end
+
+    def with_repositories(query) do
+      from(q in query,
+        left_join: r in assoc(q, :repositories),
+        preload: [repositories: r]
       )
     end
   end
