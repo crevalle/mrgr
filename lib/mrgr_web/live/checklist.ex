@@ -79,10 +79,6 @@ defmodule MrgrWeb.Live.Checklist do
     |> noreply()
   end
 
-  defp all_repos_selected?(all, selected) do
-    Enum.count(all) == Enum.count(selected)
-  end
-
   def handle_event("validate", %{"checklist_template" => params}, socket) do
     changeset =
       socket.assigns.new_template
@@ -94,7 +90,7 @@ defmodule MrgrWeb.Live.Checklist do
     |> noreply()
   end
 
-  def handle_event("add-check-template", params, socket) do
+  def handle_event("add-check-template", _params, socket) do
     existing_check_templates =
       Map.get(
         socket.assigns.changeset.changes,
@@ -182,4 +178,9 @@ defmodule MrgrWeb.Live.Checklist do
   defp gen_temp_id do
     Ecto.UUID.generate()
   end
+
+  defp all_repos_selected?(all, selected) do
+    Enum.count(all) == Enum.count(selected)
+  end
+
 end
