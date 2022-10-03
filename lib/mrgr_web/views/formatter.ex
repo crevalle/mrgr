@@ -23,6 +23,7 @@ defmodule MrgrWeb.Formatter do
     Calendar.strftime(timestamp, "%I:%M%p %b %d, '%y")
   end
 
+  def ago(nil), do: nil
   def ago(timestamp) do
     seconds = timestamp_diff_seconds(timestamp)
 

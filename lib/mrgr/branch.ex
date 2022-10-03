@@ -16,4 +16,9 @@ defmodule Mrgr.Branch do
     {:ok, dt, _huh} = DateTime.from_iso8601(ts)
     dt
   end
+
+  # `head_commit` came back as nil once.  why?  merge commit?
+  def head_committed_at(_) do
+    nil
+  end
 end
