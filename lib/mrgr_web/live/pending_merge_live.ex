@@ -22,7 +22,7 @@ defmodule MrgrWeb.PendingMergeLive do
     end
   end
 
-  def handle_event("toggle_merge_freeze", %{"repo-id" => id}, socket) do
+  def handle_event("toggle-merge-freeze", %{"repo-id" => id}, socket) do
     repo = Mrgr.Utils.find_item_in_list(socket.assigns.repos, id)
 
     updated = Mrgr.Repository.toggle_merge_freeze(repo)
@@ -48,7 +48,7 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply()
   end
 
-  def handle_event("show_preview", %{"merge-id" => id}, socket) do
+  def handle_event("show-preview", %{"merge-id" => id}, socket) do
     selected = Mrgr.Utils.find_item_in_list(socket.assigns.pending_merges, id)
 
     socket
@@ -70,6 +70,28 @@ defmodule MrgrWeb.PendingMergeLive do
     {:noreply, socket}
   end
 
+  def handle_event("toggle-check", %{"check-id" => id}, socket) do
+    # this will be here since that's how the detail page gets opened
+    # should eventually have this state live somewhere else
+    checklist = socket.assigns.selected_merge.checklist
+
+    check = Mrgr.Utils.find_item_in_list(checklist.checks, id)
+
+    updated = Mrgr.Check.toggle(check, socket.assigns.current_user)
+
+    updated_checks = Mrgr.Utils.replace_item_in_list(checklist.checks, updated)
+
+    updated_checklist = %{checklist | checks: updated_checks}
+
+    merge = %{socket.assigns.selected_merge | checklist: updated_checklist}
+
+    Mrgr.PubSub.broadcast(merge, installation_topic(socket.assigns.current_user), @merge_edited)
+
+    socket
+    |> assign(:selected_merge, merge)
+    |> noreply
+  end
+
   # pulls the id off the div constructed above
   defp get_id("merge-" <> id), do: String.to_integer(id)
 
@@ -83,8 +105,13 @@ defmodule MrgrWeb.PendingMergeLive do
 
   # event bus
   def subscribe(user) do
-    topic = Mrgr.PubSub.Topic.installation(user.current_installation)
-    Mrgr.PubSub.subscribe(topic)
+    user
+    |> installation_topic()
+    |> Mrgr.PubSub.subscribe()
+  end
+
+  def installation_topic(user) do
+    Mrgr.PubSub.Topic.installation(user)
   end
 
   # repoened will put it at the top, which may not be what we want

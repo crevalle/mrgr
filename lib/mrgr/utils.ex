@@ -15,6 +15,14 @@ defmodule Mrgr.Utils do
     Enum.find(list, fn i -> i.id == id end)
   end
 
+  def remove_item_from_list(list, id) when is_bitstring(id) do
+    remove_item_from_list(list, String.to_integer(id))
+  end
+
+  def remove_item_from_list(list, id) do
+    Enum.reject(list, fn i -> i.id == id end)
+  end
+
   def find_item_index_in_list(list, %{id: id}) do
     Enum.find_index(list, fn i -> i.id == id end)
   end

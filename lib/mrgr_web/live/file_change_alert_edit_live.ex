@@ -36,7 +36,7 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
             <p class="my-1 max-w-2xl text-sm text-gray-500">Badges may be reused across patterns.</p>
           </div>
 
-          <.form let={f} for={@cs}  phx-submit="save_file_alert" class="space-y-8 divide-y divide-gray-200">
+          <.form let={f} for={@cs}  phx-submit="save-file-alert" class="space-y-8 divide-y divide-gray-200">
             <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
               <%= label(f, :pattern, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
               <div class="mt-1 sm:mt-0 sm:col-span-2">
@@ -169,7 +169,7 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
     end
   end
 
-  def handle_event("save_file_alert", %{"file_change_alert" => params}, socket) do
+  def handle_event("save-file-alert", %{"file_change_alert" => params}, socket) do
     params = Map.put(params, "repository_id", socket.assigns.repo.id)
 
     params

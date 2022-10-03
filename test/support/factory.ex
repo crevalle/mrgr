@@ -48,6 +48,19 @@ defmodule Mrgr.Factory do
     }
   end
 
+  def build(:membership) do
+    %Mrgr.Schema.Membership{
+      member: build(:member),
+      installation: build(:installation)
+    }
+  end
+
+  def build(:member) do
+    %Mrgr.Schema.Member{
+      user: build(:user)
+    }
+  end
+
   def build(:repository) do
     %Mrgr.Schema.Repository{
       name: Faker.Company.bullshit(),
@@ -71,6 +84,39 @@ defmodule Mrgr.Factory do
       ref: "Where are the ants?",
       # not really a sha, should be fine :)
       sha: Faker.UUID.v4()
+    }
+  end
+
+  def build(:check) do
+    %Mrgr.Schema.Check{
+      text: Faker.Company.bs(),
+      checklist: build(:checklist)
+    }
+  end
+
+  def build(:checklist) do
+    %Mrgr.Schema.Checklist{
+      title: Faker.Company.bs(),
+      merge: build(:merge),
+      checklist_template: build(:checklist_template)
+    }
+  end
+
+  def build(:checklist_template) do
+    %Mrgr.Schema.ChecklistTemplate{
+      title: Faker.Company.bs(),
+      installation: build(:installation),
+      creator: build(:user)
+    }
+  end
+
+  def build(:checklist_template_repository) do
+    template = build(:checklist_template)
+    repository = build(:repository, installation: template.installation)
+
+    %Mrgr.Schema.ChecklistTemplateRepository{
+      checklist_template: template,
+      repository: repository
     }
   end
 

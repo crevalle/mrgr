@@ -18,6 +18,12 @@ defmodule Mrgr.Query do
         by_id(queryable, String.to_integer(id))
       end
 
+      def by_ids(queryable, list) do
+        from(q in queryable,
+          where: q.id in ^list
+        )
+      end
+
       def by_external_id(queryable, id) do
         from(q in queryable,
           where: q.external_id == ^id

@@ -1,0 +1,68 @@
+<div class="px-4 pt-4 sm:px-6 lg:px-8">
+  <div class="flex justify-between">
+    <.heading title="Checklists" />
+
+    <div class="relative inline-block text-left">
+      <div>
+        <.button phx-click="open-add-form"
+                 colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500">
+          <.icon name="plus-sm" class="mr-1 h-5 w-5" />
+          Add New
+        </.button>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="flex mt-8 space-x-4">
+
+      <div class="basis-1/2 bg-white px-2 py-5 sm:px-6 overflow-hidden shadow rounded-lg">
+        <%= if Enum.empty?(@templates) do %>
+          <p>
+            None yet!  Why don't you <a href="#" phx-click="open-add-form" class="text-teal-500">Add One</a>?
+          </p>
+        <% else %>
+
+            <div class="shadow overflow-hidden sm:rounded-md">
+              <ul role="list" class="divide-y divide-gray-200">
+                <%= for template <- @templates do %>
+                  <li >
+                    <%= link to: "#", phx_click: "show-detail", phx_value_id: template.id, class: "text-sm font-medium text-teal-500 truncate" do %>
+                      <div class="block hover:bg-gray-50">
+                        <div class="px-4 py-4 sm:px-6">
+                          <div class="flex items-center justify-between">
+                            <.h3><%= template.title %></.h3>
+                          </div>
+                          <div class="mt-2 sm:flex sm:justify-between">
+                            <div class="sm:flex">
+                              <p class="flex items-center text-sm">
+                                <.icon name="users" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5" />
+                              </p>
+                              <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                                <.icon name="location-marker" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    <% end %>
+                  </li>
+                <% end %>
+              </ul>
+            </div>
+        <% end %>
+      </div>
+
+
+    <%= if @changeset do %>
+      <.live_component module={MrgrWeb.Components.Live.ChecklistFormComponent} id="checklist_form" changeset={@changeset} repository_list={@repository_list} selected_repository_ids={@selected_repository_ids} />
+    <% end %>
+
+    <%= if @detail do %>
+      <.live_component module={MrgrWeb.Components.Live.ChecklistTemplateDetail} id={"checklist_template_#{@detail.id}"} template={@detail} timezone={@timezone} />
+    <% end %>
+
+  </div>
+</div>
+
+

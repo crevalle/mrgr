@@ -21,6 +21,21 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def subheading(assigns) do
+    assigns =
+      assigns
+      |> assign_new(:description, fn -> [] end)
+
+    ~H"""
+    <.h3><%= @title %></.h3>
+    <%= unless Enum.empty?(@description) do %>
+      <p class="mt-1 mb-2" >
+        <%= render_slot(@description) %>
+      </p>
+    <% end %>
+    """
+  end
+
   def button(assigns) do
     colors =
       if assigns[:disabled] do
@@ -257,7 +272,7 @@ defmodule MrgrWeb.Components.UI do
 
     ~H"""
     <%= link @link_opts do %>
-      <.icon name={@icon} type="outline" class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
+      <.icon name={@icon} class="text-gray-400 group-hover:text-gray-500 mr-3 flex-shrink-0 h-6 w-6" />
       <span class="flex-1"><%= @label %></span>
 
       <%= render_slot(@inner_block) %>

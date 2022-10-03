@@ -22,6 +22,12 @@
         label="File Change Alerts"
       ./>
 
+      <.nav_item
+        route={Routes.checklist_path(MrgrWeb.Endpoint, :index)}
+        icon="clipboard-list"
+        label="Merge Checklists"
+      ./>
+
       <!-- Profile dropdown -->
       <div class="ml-3 relative">
         <div>
@@ -40,7 +46,7 @@
             <p class="flex space-x-2 items-center">
               <%= img_tag Mrgr.Schema.User.image(@current_user), class: "h-8 w-8 rounded-full", alt: @current_user.name %>
               <span><%= @current_user.nickname %></span>
-              <.icon name="chevron-down" type="outline" class="h-5 w-5" />
+              <.icon name="chevron-down" class="h-5 w-5" />
             </p>
           </button>
         </div>

@@ -12,6 +12,8 @@ defmodule Mrgr.PubSub do
   defmodule Topic do
     def installation(%Mrgr.Schema.Installation{id: id}), do: installation(id)
 
+    def installation(%{current_installation_id: id}), do: installation(id)
+
     def installation(%{installation_id: id}), do: installation(id)
 
     def installation(id) do
