@@ -19,7 +19,7 @@ defmodule Mrgr.Check do
     |> Mrgr.Repo.preload(:completer, force: true)
   end
 
-  def uncomplete(check, user) do
+  def uncomplete(check, _user) do
     check
     |> Ecto.Changeset.change()
     |> Ecto.Changeset.put_assoc(:check_approval, nil)
