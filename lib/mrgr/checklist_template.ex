@@ -11,6 +11,15 @@ defmodule Mrgr.ChecklistTemplate do
     |> Mrgr.Repo.all()
   end
 
+  def for_repository(repository) do
+    Schema
+    |> Query.for_repository(repository.id)
+    |> Query.with_creator()
+    |> Query.with_repositories()
+    |> Query.cron()
+    |> Mrgr.Repo.all()
+  end
+
   def create(params) do
     %Schema{}
     |> Schema.create_changeset(params)
@@ -72,9 +81,22 @@ defmodule Mrgr.ChecklistTemplate do
     end
 
     def with_repositories(query) do
-      from(q in query,
-        left_join: r in assoc(q, :repositories),
-        preload: [repositories: r]
+      case has_named_binding?(query, :repositories) do
+        true ->
+          query
+
+        false ->
+          from(q in query,
+            left_join: r in assoc(q, :repositories),
+            as: :repositories,
+            preload: [repositories: r]
+          )
+      end
+    end
+
+    def for_repository(query, repository_id) do
+      from([q, repositories: r] in with_repositories(query),
+        where: r.id == ^repository_id
       )
     end
   end

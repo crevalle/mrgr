@@ -18,7 +18,7 @@ defmodule Mrgr.Merge do
         |> hydrate_github_data()
         |> append_to_merge_queue()
         |> broadcast(@merge_created)
-        |> maybe_create_checklist()
+        |> create_checklists()
 
       {:error, _cs} = err ->
         err
@@ -310,18 +310,14 @@ defmodule Mrgr.Merge do
     Mrgr.Repo.preload(merge, repository: [:installation, :file_change_alerts])
   end
 
-  def maybe_create_checklist(merge) do
-    applicable_checklist_templates = fetch_applicable_checklist_templates(merge)
-
-    Enum.map(applicable_checklist_templates, &Mrgr.ChecklistTemplate.create_checklist(&1, merge))
+  def create_checklists(merge) do
+    merge
+    |> fetch_applicable_checklist_templates()
+    |> Enum.map(&Mrgr.ChecklistTemplate.create_checklist(&1, merge))
   end
 
   defp fetch_applicable_checklist_templates(merge) do
-    # all templates for repo. currently all for installation
-    # assumes installation is preloaded
-    # TODO: templates matching labels
-
-    Mrgr.ChecklistTemplate.for_installation(merge.repository.installation)
+    Mrgr.ChecklistTemplate.for_repository(merge.repository)
   end
 
   defmodule Query do

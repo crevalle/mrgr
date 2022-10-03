@@ -110,6 +110,16 @@ defmodule Mrgr.Factory do
     }
   end
 
+  def build(:checklist_template_repository) do
+    template = build(:checklist_template)
+    repository = build(:repository, installation: template.installation)
+
+    %Mrgr.Schema.ChecklistTemplateRepository{
+      checklist_template: template,
+      repository: repository
+    }
+  end
+
   # Convenience API
 
   def build(factory_name, attributes) do
