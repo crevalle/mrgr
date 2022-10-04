@@ -1,5 +1,5 @@
 defmodule MrgrWeb.Locale do
-  import Mrgr.TupleHelpers, only: [cont: 1]
+  import Mrgr.Tuple, only: [cont: 1]
   import Phoenix.LiveView, only: [assign: 2, get_connect_params: 1]
 
   @default_locale "en"

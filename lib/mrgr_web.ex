@@ -53,7 +53,7 @@ defmodule MrgrWeb do
       use Phoenix.LiveView,
         layout: {MrgrWeb.LayoutView, "live.html"}
 
-      import Mrgr.TupleHelpers
+      import Mrgr.Tuple
 
       alias Phoenix.LiveView.JS
 
@@ -69,7 +69,7 @@ defmodule MrgrWeb do
     quote do
       use Phoenix.LiveComponent
 
-      import Mrgr.TupleHelpers
+      import Mrgr.Tuple
 
       unquote(components())
 

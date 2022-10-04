@@ -1,4 +1,4 @@
-defmodule Mrgr.TupleHelpers do
+defmodule Mrgr.Tuple do
   def ok(state) do
     {:ok, state}
   end
