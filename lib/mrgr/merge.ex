@@ -4,12 +4,13 @@ defmodule Mrgr.Merge do
   require Logger
 
   alias Mrgr.Merge.Query
+  alias Mrgr.Schema.Merge, as: Schema
 
   def create_from_webhook(payload) do
     params = payload_to_params(payload)
 
-    %Mrgr.Schema.Merge{}
-    |> Mrgr.Schema.Merge.create_changeset(params)
+    %Schema{}
+    |> Schema.create_changeset(params)
     |> Mrgr.Repo.insert()
     |> case do
       {:ok, merge} ->
@@ -26,10 +27,10 @@ defmodule Mrgr.Merge do
   end
 
   @spec reopen(map()) ::
-          {:ok, Mrgr.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
+          {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def reopen(payload) do
     with {:ok, merge} <- find_from_payload(payload),
-         cs <- Mrgr.Schema.Merge.create_changeset(merge, payload_to_params(payload)),
+         cs <- Schema.create_changeset(merge, payload_to_params(payload)),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
       |> preload_installation()
@@ -46,10 +47,10 @@ defmodule Mrgr.Merge do
   end
 
   @spec edit(map()) ::
-          {:ok, Mrgr.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
+          {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def edit(payload) do
     with {:ok, merge} <- find_from_payload(payload),
-         cs <- Mrgr.Schema.Merge.synchronize_changeset(merge, payload),
+         cs <- Schema.synchronize_changeset(merge, payload),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
       |> preload_installation()
@@ -61,10 +62,10 @@ defmodule Mrgr.Merge do
   end
 
   @spec synchronize(map()) ::
-          {:ok, Mrgr.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
+          {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def synchronize(payload) do
     with {:ok, merge} <- find_from_payload(payload),
-         cs <- Mrgr.Schema.Merge.synchronize_changeset(merge, payload),
+         cs <- Schema.synchronize_changeset(merge, payload),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
       |> preload_installation()
@@ -77,10 +78,10 @@ defmodule Mrgr.Merge do
   end
 
   @spec close(map()) ::
-          {:ok, Mrgr.Schema.Merge.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
+          {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def close(%{"pull_request" => params} = payload) do
     with {:ok, merge} <- find_from_payload(payload),
-         cs <- Mrgr.Schema.Merge.close_changeset(merge, params),
+         cs <- Schema.close_changeset(merge, params),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
       |> preload_installation()
@@ -103,9 +104,9 @@ defmodule Mrgr.Merge do
     end
   end
 
-  @spec merge!(Mrgr.Schema.Merge.t() | integer(), String.t(), Mrgr.Schema.User.t()) ::
-          {:ok, Mrgr.Schema.Merge.t()} | {:error, String.t()}
-  def merge!(%Mrgr.Schema.Merge{} = merge, message, merger) do
+  @spec merge!(Schema.t() | integer(), String.t(), Mrgr.Schema.User.t()) ::
+          {:ok, Schema.t()} | {:error, String.t()}
+  def merge!(%Schema{} = merge, message, merger) do
     # this only makes the API call.  side effects to the %Merge{} are handled in the close callback
     args = generate_merge_args(merge, message, merger)
 
@@ -162,7 +163,7 @@ defmodule Mrgr.Merge do
       |> Enum.reverse()
 
     merge
-    |> Mrgr.Schema.Merge.commits_changeset(%{commits: commits})
+    |> Schema.commits_changeset(%{commits: commits})
     |> Mrgr.Repo.update!()
   end
 
@@ -207,27 +208,27 @@ defmodule Mrgr.Merge do
   end
 
   def load_merge_for_merging(id) do
-    Mrgr.Schema.Merge
+    Schema
     |> Query.by_id(id)
     |> Query.preload_for_merging()
     |> Mrgr.Repo.one()
   end
 
   def find_by_external_id(id) do
-    Mrgr.Schema.Merge
+    Schema
     |> Query.by_external_id(id)
     |> Mrgr.Repo.one()
   end
 
   def find_for_activity_feed(external_id) do
-    Mrgr.Schema.Merge
+    Schema
     |> Query.by_external_id(external_id)
     |> Query.with_file_alert_rules()
     |> Mrgr.Repo.one()
   end
 
   def find(id) do
-    Mrgr.Schema.Merge
+    Schema
     |> Query.by_id(id)
     |> Query.with_file_alert_rules()
     |> Mrgr.Repo.one()
@@ -242,7 +243,7 @@ defmodule Mrgr.Merge do
   end
 
   def pending_merges(installation_id) do
-    Mrgr.Schema.Merge
+    Schema
     |> Query.for_installation(installation_id)
     |> Query.open()
     |> Query.order_by_priority()
@@ -252,7 +253,7 @@ defmodule Mrgr.Merge do
   end
 
   def merges(%Mrgr.Schema.Installation{id: installation_id}) do
-    Mrgr.Schema.Merge
+    Schema
     |> Query.for_installation(installation_id)
     |> Query.order_by_priority()
     |> Query.with_file_alert_rules()
@@ -264,7 +265,7 @@ defmodule Mrgr.Merge do
   end
 
   def delete_installation_merges(installation) do
-    Mrgr.Schema.Merge
+    Schema
     |> Query.for_installation(installation.id)
     |> Mrgr.Repo.all()
     |> Enum.map(&Mrgr.Repo.delete/1)
