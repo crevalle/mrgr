@@ -18,8 +18,9 @@ defmodule Mrgr.Merge do
         |> preload_installation()
         |> hydrate_github_data()
         |> append_to_merge_queue()
-        |> broadcast(@merge_created)
         |> create_checklists()
+        |> broadcast(@merge_created)
+        |> Mrgr.Tuple.ok()
 
       {:error, _cs} = err ->
         err
@@ -37,6 +38,7 @@ defmodule Mrgr.Merge do
       |> hydrate_github_data()
       |> append_to_merge_queue()
       |> broadcast(@merge_reopened)
+      |> Mrgr.Tuple.ok()
     else
       {:error, :not_found} ->
         create_from_webhook(payload)
@@ -55,6 +57,7 @@ defmodule Mrgr.Merge do
       updated_merge
       |> preload_installation()
       |> broadcast(@merge_edited)
+      |> Mrgr.Tuple.ok()
     else
       {:error, :not_found} -> create_from_webhook(payload)
       error -> error
@@ -71,6 +74,7 @@ defmodule Mrgr.Merge do
       |> preload_installation()
       |> hydrate_github_data()
       |> broadcast(@merge_synchronized)
+      |> Mrgr.Tuple.ok()
     else
       {:error, :not_found} -> create_from_webhook(payload)
       error -> error
@@ -87,6 +91,7 @@ defmodule Mrgr.Merge do
       |> preload_installation()
       |> remove_from_merge_queue()
       |> broadcast(@merge_closed)
+      |> Mrgr.Tuple.ok()
     else
       {:error, :not_found} = error ->
         Logger.warn("found no local PR")
@@ -131,7 +136,7 @@ defmodule Mrgr.Merge do
     topic = Mrgr.PubSub.Topic.installation(merge.repository.installation)
 
     Mrgr.PubSub.broadcast(merge, topic, event)
-    {:ok, merge}
+    merge
   end
 
   def hydrate_github_data(merge) do
