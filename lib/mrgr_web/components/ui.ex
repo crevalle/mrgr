@@ -64,6 +64,15 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def copy_button(assigns) do
+    ~H"""
+    <.button colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+              phx-click={Phoenix.LiveView.JS.dispatch("mrgr:clipcopy", to: @target)}>
+      Copy to Clipboard
+    </.button>
+    """
+  end
+
   def heading(assigns) do
     assigns = assign_new(assigns, :description, fn -> nil end)
 
