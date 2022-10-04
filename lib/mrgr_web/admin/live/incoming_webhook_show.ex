@@ -34,11 +34,12 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
 
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
         <div class="px-4 py-5 sm:px-6">
-          <div class="my-1">
+          <div class="flex items-center justify-between my-1">
             <.h3>Headers</.h3>
+            <.copy_button target="#json-data" />
           </div>
 
-          <pre>
+          <pre id="headers-json">
             <%= render_map(@hook.headers) %>
           </pre>
         </div>
@@ -46,11 +47,12 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
 
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
         <div class="px-4 py-5 sm:px-6">
-          <div class="my-1">
+          <div class="flex items-center justify-between my-1">
             <.h3>Raw Data</.h3>
+            <.copy_button target="#json-data" />
           </div>
 
-          <pre>
+          <pre id="data-json">
             <%= render_map(@hook.data) %>
           </pre>
         </div>

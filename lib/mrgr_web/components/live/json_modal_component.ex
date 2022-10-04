@@ -35,10 +35,13 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
               <div class="relative transform overflow-hidden rounded-lg bg-white px-4 pt-5 pb-4 text-left shadow-xl transition-all sm:my-8 sm:w-full sm:p-6">
                 <div>
                   <div class="mt-3 sm:mt-5">
-                    <h3 class="text-lg font-medium leading-6 text-gray-900"><%= @title %></h3>
+                    <div class="flex items-center justify-between my-1">
+                      <h3 class="text-lg font-medium leading-6 text-gray-900"><%= @title %></h3>
+                      <.copy_button target={"#json-data-#{@id}"} />
+                    </div>
                     <div class="mt-2">
                       <p class="text-sm text-gray-500">
-                        <pre>
+                        <pre id={"json-data-#{@id}"}>
                           <%= Jason.encode!(@data, pretty: true) %>
                         </pre>
                       </p>
