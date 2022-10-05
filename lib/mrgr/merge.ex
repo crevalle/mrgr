@@ -320,6 +320,8 @@ defmodule Mrgr.Merge do
     merge
     |> fetch_applicable_checklist_templates()
     |> Enum.map(&Mrgr.ChecklistTemplate.create_checklist(&1, merge))
+
+    merge
   end
 
   defp fetch_applicable_checklist_templates(merge) do
