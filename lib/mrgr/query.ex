@@ -30,6 +30,12 @@ defmodule Mrgr.Query do
         )
       end
 
+      def by_node_id(queryable, id) do
+        from(q in queryable,
+          where: q.node_id == ^id
+        )
+      end
+
       def limit(queryable, limit) do
         from(q in queryable,
           limit: ^limit

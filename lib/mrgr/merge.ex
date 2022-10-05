@@ -102,8 +102,40 @@ defmodule Mrgr.Merge do
     end
   end
 
-  defp find_from_payload(%{"pull_request" => %{"id" => id}}) do
-    case find_by_external_id(id) do
+  @spec add_pull_request_review_comment(String.t(), Mrgr.Github.Webhook.t()) ::
+          {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
+  def add_pull_request_review_comment(object, params) do
+    with {:ok, merge} <- find_from_payload(params) do
+      create_comment(object, merge, params)
+    end
+  end
+
+  def add_issue_comment(object, params) do
+    with {:ok, merge} <- find_from_payload(params["issue"]) do
+      create_comment(object, merge, params)
+    end
+  end
+
+  defp create_comment(object, merge, params) do
+    attrs = %{
+      object: object,
+      raw: params,
+      merge_id: merge.id
+    }
+
+    attrs
+    |> Mrgr.Schema.Comment.create_changeset()
+    |> Mrgr.Repo.insert()
+  end
+
+  @spec find_from_payload(Mrgr.Github.Webhook.t() | map()) ::
+          {:ok, Schema.t()} | {:error, :not_found}
+  defp find_from_payload(%{"pull_request" => params}) do
+    find_from_payload(params)
+  end
+
+  defp find_from_payload(%{"node_id" => node_id}) do
+    case find_by_node_id(node_id) do
       nil -> {:error, :not_found}
       merge -> {:ok, merge}
     end
@@ -222,6 +254,12 @@ defmodule Mrgr.Merge do
   def find_by_external_id(id) do
     Schema
     |> Query.by_external_id(id)
+    |> Mrgr.Repo.one()
+  end
+
+  def find_by_node_id(id) do
+    Schema
+    |> Query.by_node_id(id)
     |> Mrgr.Repo.one()
   end
 

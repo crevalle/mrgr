@@ -43,25 +43,23 @@ defmodule Mrgr.Github.WebhookTest do
     test "enqueues in the merge queue", ctx do
       subscribe_to_installation(ctx.installation)
 
-      payload = read_webhook_data("pull_request", "opened")
-      {:ok, first_merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+      repo = build(:repository, installation: ctx.installation)
+      first_merge = insert!(:merge, repository: repo, merge_queue_index: 0)
 
       payload = read_webhook_data("pull_request", "opened")
       {:ok, second_merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+
+      assert second_merge.node_id == "PR_kwDOGGc3xc4uUvfP"
 
       assert Mrgr.Merge.pending_merges(ctx.installation) |> Enum.map(& &1.id) == [
                first_merge.id,
                second_merge.id
              ]
 
-      assert first_merge.merge_queue_index == 0
       assert second_merge.merge_queue_index == 1
 
       # need to pull this out for matches to work
-      id_1 = first_merge.id
       id_2 = second_merge.id
-      assert_received(%{event: "merge:created", payload: %Mrgr.Schema.Merge{id: ^id_1}})
-
       assert_received(%{event: "merge:created", payload: %Mrgr.Schema.Merge{id: ^id_2}})
     end
   end
@@ -108,6 +106,32 @@ defmodule Mrgr.Github.WebhookTest do
       assert_received(%{event: "merge:created", payload: %Mrgr.Schema.Merge{id: ^id}})
       assert_received(%{event: "merge:closed", payload: %Mrgr.Schema.Merge{id: ^id}})
       assert_received(%{event: "merge:reopened", payload: %Mrgr.Schema.Merge{id: ^id}})
+    end
+  end
+
+  describe "pull_request_review_comment created" do
+    setup [:with_install_user, :with_installation, :with_open_merge]
+
+    test "adds a comment to the PR" do
+      payload = read_webhook_data("pull_request_review_comment", "created")
+
+      {:ok, comment} = Mrgr.Github.Webhook.handle("pull_request_review_comment", payload)
+
+      assert comment.object == :pull_request_review_comment
+      assert comment.raw
+    end
+  end
+
+  describe "issue_comment created" do
+    setup [:with_install_user, :with_installation, :with_open_merge]
+
+    test "adds a comment to the PR" do
+      payload = read_webhook_data("issue_comment", "created")
+
+      {:ok, comment} = Mrgr.Github.Webhook.handle("issue_comment", payload)
+
+      assert comment.object == :issue_comment
+      assert comment.raw
     end
   end
 
