@@ -148,15 +148,15 @@ defmodule Mrgr.Merge do
 
   @spec find_from_payload(Mrgr.Github.Webhook.t() | map()) ::
           {:ok, Schema.t()} | {:error, :not_found}
-  defp find_from_payload(%{"pull_request" => params}) do
-    find_from_payload(params)
-  end
-
   defp find_from_payload(%{"node_id" => node_id}) do
     case find_by_node_id(node_id) do
       nil -> {:error, :not_found}
       merge -> {:ok, merge}
     end
+  end
+
+  defp find_from_payload(%{"pull_request" => params}) do
+    find_from_payload(params)
   end
 
   @spec merge!(Schema.t() | integer(), String.t(), Mrgr.Schema.User.t()) ::
