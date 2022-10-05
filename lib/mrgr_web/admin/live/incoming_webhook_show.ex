@@ -36,7 +36,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
         <div class="px-4 py-5 sm:px-6">
           <div class="flex items-center justify-between my-1">
             <.h3>Headers</.h3>
-            <.copy_button target="#json-data" />
+            <.copy_button target="#headers-json" />
           </div>
 
           <pre id="headers-json">
@@ -49,7 +49,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
         <div class="px-4 py-5 sm:px-6">
           <div class="flex items-center justify-between my-1">
             <.h3>Raw Data</.h3>
-            <.copy_button target="#json-data" />
+            <.copy_button target="#data-json" />
           </div>
 
           <pre id="data-json">
