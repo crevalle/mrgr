@@ -3,6 +3,8 @@ defmodule Mrgr.Github.Webhook do
     Dispatcher that receives webhooks and figures out what to do with them.
   """
 
+  @type t :: map()
+
   def handle_webhook(headers, params) do
     obj = headers["x-github-event"]
     action = params["action"]
@@ -11,6 +13,11 @@ defmodule Mrgr.Github.Webhook do
 
     Mrgr.Github.Webhook.handle(obj, params)
   end
+
+  ### HANDLER IMPLEMENTATIONS
+  #
+  #
+  ### add new handlers below vvvv
 
   def handle("installation", %{"action" => "created"} = payload) do
     Mrgr.Installation.create_from_webhook(payload)
@@ -50,12 +57,19 @@ defmodule Mrgr.Github.Webhook do
     Mrgr.Branch.push(payload)
   end
 
-  # def handle("check_suite", %{"action" => "requested"} = payload) do
-  # # Mrgr.CheckRun.create(payload)
-  # payload
-  # end
+  # ignore comments being deleted, who cares if we're off by a little bit
+  def handle("pull_request_review_comment" = object, %{"action" => "created"} = payload) do
+    Mrgr.Merge.add_pull_request_review_comment(object, payload)
+  end
 
-  # suspended?
+  def handle("issue_comment" = object, %{"action" => "created"} = payload) do
+    Mrgr.Merge.add_issue_comment(object, payload)
+  end
+
+  ### handlers go above ^^^
+  #
+  #
+  ### DEFAULT HANDLER ###
   def handle(obj, payload) do
     IO.inspect("*** NOT IMPLEMENTED #{obj} ACTION #{payload["action"]}")
     {:ok, payload}

@@ -182,5 +182,4 @@ defmodule MrgrWeb.Live.Checklist do
   defp all_repos_selected?(all, selected) do
     Enum.count(all) == Enum.count(selected)
   end
-
 end

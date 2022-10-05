@@ -24,6 +24,7 @@ defmodule MrgrWeb.Formatter do
   end
 
   def ago(nil), do: nil
+
   def ago(timestamp) do
     seconds = timestamp_diff_seconds(timestamp)
 

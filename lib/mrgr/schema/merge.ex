@@ -4,6 +4,7 @@ defmodule Mrgr.Schema.Merge do
   schema "merges" do
     field(:external_id, :integer)
     field(:number, :integer)
+    field(:node_id, :string)
     field(:opened_at, :utc_datetime)
     field(:status, :string)
     field(:title, :string)
@@ -28,12 +29,15 @@ defmodule Mrgr.Schema.Merge do
     has_one(:checklist, Mrgr.Schema.Checklist, on_delete: :delete_all)
     has_many(:checks, through: [:checklist, :checks])
 
+    has_many(:comments, Mrgr.Schema.Comment)
+
     timestamps()
   end
 
   @create_fields ~w[
     number
     opened_at
+    node_id
     title
     url
     repository_id
