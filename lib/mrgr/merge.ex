@@ -138,7 +138,8 @@ defmodule Mrgr.Merge do
     attrs = %{
       object: object,
       raw: params,
-      merge_id: merge.id
+      merge_id: merge.id,
+      posted_at: params["comment"]["created_at"]
     }
 
     attrs
@@ -310,6 +311,7 @@ defmodule Mrgr.Merge do
     |> Query.order_by_priority()
     |> Query.with_file_alert_rules()
     |> Query.with_checklist()
+    |> Query.with_comments()
     |> Mrgr.Repo.all()
   end
 
@@ -451,6 +453,13 @@ defmodule Mrgr.Merge do
         preload: [
           checklist: {checklist, [checks: {checks, [check_approval: {approval, [user: user]}]}]}
         ]
+      )
+    end
+
+    def with_comments(query) do
+      from(q in query,
+        left_join: c in assoc(q, :comments),
+        preload: [comments: c]
       )
     end
   end
