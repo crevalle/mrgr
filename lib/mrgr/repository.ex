@@ -34,23 +34,22 @@ defmodule Mrgr.Repository do
   defp toggle(true), do: false
   defp toggle(false), do: true
 
-  @spec fetch_and_store_open_merges!([Mrgr.Schema.Repository.t()], Mrgr.Schema.Installation.t()) ::
-          [Mrgr.Schema.Merge.t()]
-  def fetch_and_store_open_merges!(repos, installation) when is_list(repos) do
+  @spec fetch_and_store_open_merges!([Mrgr.Schema.Repository.t()]) :: [Mrgr.Schema.Merge.t()]
+  def fetch_and_store_open_merges!(repos) when is_list(repos) do
     repos
     |> Enum.map(fn repo ->
-      prs = fetch_open_merges(repo, installation)
+      prs = fetch_open_merges(repo)
 
       create_merges_from_data(repo, prs)
     end)
     |> Enum.reject(&is_nil/1)
-    |> Enum.map(&hydrate_merge_data(&1, installation))
+    |> Enum.map(&hydrate_merge_data/1)
   end
 
-  defp fetch_open_merges(repo, installation) do
+  defp fetch_open_merges(repo) do
     opts = %{state: "open"}
 
-    Mrgr.Github.API.fetch_filtered_pulls(installation, repo, opts)
+    Mrgr.Github.API.fetch_filtered_pulls(repo.installation, repo, opts)
   end
 
   defp create_merges_from_data(_repo, []), do: nil
@@ -61,15 +60,17 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.update!()
   end
 
-  def hydrate_merge_data(repo, installation) do
-    Enum.map(repo.merges, fn merge ->
-      # wish i didn't have to preload the repo here since i already
-      # have it, but i didn't want to change all the github fetching
-      # functions in the Merge module to accept the repo as a separate argument
-      merge
-      |> Mrgr.Repo.preload(:repository)
-      |> Mrgr.Merge.hydrate_github_data(installation)
-    end)
+  def hydrate_merge_data(repo) do
+    merges =
+      repo.merges
+      # reverse preloading
+      |> Enum.map(fn m -> %{m | repository: repo} end)
+      |> Enum.map(&Mrgr.Merge.hydrate_github_data/1)
+      # fetch comments outside of `hydrate_github_data` since we only
+      # need to hit the API when we're creating the world
+      |> Enum.map(&Mrgr.Merge.sync_comments/1)
+
+    %{repo | merges: merges}
   end
 
   defmodule Query do
