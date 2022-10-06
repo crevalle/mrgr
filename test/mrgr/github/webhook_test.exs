@@ -131,6 +131,7 @@ defmodule Mrgr.Github.WebhookTest do
       {:ok, comment} = Mrgr.Github.Webhook.handle("issue_comment", payload)
 
       assert comment.object == :issue_comment
+      assert comment.posted_at
       assert comment.raw
     end
   end

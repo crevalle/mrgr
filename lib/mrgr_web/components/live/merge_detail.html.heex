@@ -25,6 +25,12 @@
     </div>
 
     <div class="flex flex-col">
+      <.subheading title="Commentary" />
+
+      <.live_component module={MrgrWeb.Components.Live.CommentSparkline} id={"merge_#{@merge.id}_comments"} comments={@merge.comments} />
+    </div>
+
+    <div class="flex flex-col">
       <.h3>Checklist</.h3>
       <%= if @merge.checklist do %>
         <.live_component module={MrgrWeb.Components.Live.MergeChecklist} id="merge_checklist" checklist={@merge.checklist} current_user={@current_user} timezone={@timezone} />
