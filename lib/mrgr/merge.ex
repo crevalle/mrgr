@@ -120,26 +120,56 @@ defmodule Mrgr.Merge do
     end
   end
 
+  def sync_comments(merge) do
+    merge
+    |> fetch_issue_comments()
+    |> Enum.each(fn c ->
+      create_comment("issue_comment", merge, c["created_at"], c)
+    end)
+
+    merge
+    |> fetch_pr_review_comments()
+    |> Enum.each(fn c ->
+      create_comment("pull_request_review_comment", merge, c["created_at"], c)
+    end)
+  end
+
+  def fetch_pr_review_comments(merge) do
+    Mrgr.Github.API.fetch_pr_review_comments(
+      merge.repository.installation,
+      merge.repository,
+      merge.number
+    )
+  end
+
+  def fetch_issue_comments(merge) do
+    Mrgr.Github.API.fetch_issue_comments(
+      merge.repository.installation,
+      merge.repository,
+      merge.number
+    )
+  end
+
   @spec add_pull_request_review_comment(String.t(), Mrgr.Github.Webhook.t()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def add_pull_request_review_comment(object, params) do
     with {:ok, merge} <- find_from_payload(params) do
-      create_comment(object, merge, params)
+      create_comment(object, merge, params["comment"]["created_at"], params)
     end
   end
 
   def add_issue_comment(object, params) do
     with {:ok, merge} <- find_from_payload(params["issue"]) do
-      create_comment(object, merge, params)
+      create_comment(object, merge, params["comment"]["created_at"], params)
     end
   end
 
-  defp create_comment(object, merge, params) do
+  defp create_comment(object, merge, posted_at, params) do
     attrs = %{
       object: object,
-      raw: params,
       merge_id: merge.id,
-      posted_at: params["comment"]["created_at"]
+      posted_at: posted_at,
+      raw: params
     }
 
     attrs
@@ -191,30 +221,24 @@ defmodule Mrgr.Merge do
   end
 
   def hydrate_github_data(merge) do
-    installation = merge.repository.installation
-
-    hydrate_github_data(merge, installation)
-  end
-
-  def hydrate_github_data(merge, installation) do
     merge
-    |> synchronize_head(installation)
-    |> synchronize_commits(installation)
+    |> synchronize_head()
+    |> synchronize_commits()
   end
 
-  def synchronize_head(merge, installation) do
-    files_changed = fetch_files_changed(merge, installation)
-    head = fetch_head(merge, installation)
+  def synchronize_head(merge) do
+    files_changed = fetch_files_changed(merge)
+    head = fetch_head(merge)
 
     merge
     |> Ecto.Changeset.change(%{files_changed: files_changed, head_commit: head})
     |> Mrgr.Repo.update!()
   end
 
-  def synchronize_commits(merge, installation) do
+  def synchronize_commits(merge) do
     commits =
       merge
-      |> fetch_commits(installation)
+      |> fetch_commits()
       # they come in with first commit first, i want most recent first (head)
       |> Enum.reverse()
 
@@ -223,16 +247,16 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.update!()
   end
 
-  def fetch_commits(merge, installation) do
-    Mrgr.Github.API.commits(merge, installation)
+  def fetch_commits(merge) do
+    Mrgr.Github.API.commits(merge, merge.repository.installation)
   end
 
-  def fetch_head(merge, installation) do
-    Mrgr.Github.API.head_commit(merge, installation)
+  def fetch_head(merge) do
+    Mrgr.Github.API.head_commit(merge, merge.repository.installation)
   end
 
-  def fetch_files_changed(merge, installation) do
-    response = Mrgr.Github.API.files_changed(merge, installation)
+  def fetch_files_changed(merge) do
+    response = Mrgr.Github.API.files_changed(merge, merge.repository.installation)
 
     # ["lib/mrgr/incoming_webhook.ex", "lib/mrgr/merge.ex",
     # "lib/mrgr/schema/merge.ex", "lib/mrgr/user.ex",
