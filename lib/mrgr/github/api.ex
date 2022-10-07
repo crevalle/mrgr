@@ -5,6 +5,8 @@ defmodule Mrgr.Github.API do
 
   defdelegate commits(merge, installation), to: @mod
   defdelegate fetch_filtered_pulls(installation, repo, opts), to: @mod
+  defdelegate fetch_issue_comments(installation, repo, number), to: @mod
+  defdelegate fetch_pr_review_comments(installation, repo, number), to: @mod
   defdelegate fetch_members(installation), to: @mod
   defdelegate files_changed(merge, installation), to: @mod
   defdelegate get_new_installation_token(installation), to: @mod

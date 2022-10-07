@@ -92,7 +92,9 @@ defmodule Mrgr.Installation do
   def hydrate_github_merge_data(installation) do
     # we already have the data here, so we manually preloading the associations
     # to avoid passing redundant data separately further down the stack
-    repositories = Enum.map(installation.repositories, fn r -> %{r | installation: installation} end)
+    repositories =
+      Enum.map(installation.repositories, fn r -> %{r | installation: installation} end)
+
     installation = %{installation | repositories: repositories}
 
     Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories)

@@ -11,6 +11,14 @@ defmodule Mrgr.Github.API.Fake do
     %{}
   end
 
+  def fetch_issue_comments(_installation, _repo, _number) do
+    []
+  end
+
+  def fetch_pr_review_comments(_installation, _repo, _number) do
+    []
+  end
+
   def fetch_members(_installation) do
     []
   end
