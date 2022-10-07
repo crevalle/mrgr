@@ -127,5 +127,8 @@
     <% end %>
   </div>
 </div>
-<.button phx-click="refresh" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500"> Refresh PRs</.button>
+
+<%= if admin?(@current_user) do %>
+  <.button phx-click="refresh" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500"> Refresh PRs</.button>
+<% end %>
 
