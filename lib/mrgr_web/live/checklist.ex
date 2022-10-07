@@ -21,7 +21,7 @@ defmodule MrgrWeb.Live.Checklist do
   end
 
   def handle_event("show-detail", %{"id" => id}, socket) do
-    template = Mrgr.Utils.find_item_in_list(socket.assigns.templates, id)
+    template = Mrgr.List.find(socket.assigns.templates, id)
 
     socket
     |> assign(:detail, template)
@@ -157,8 +157,8 @@ defmodule MrgrWeb.Live.Checklist do
   def handle_event("delete", %{"id" => id}, socket) do
     templates = socket.assigns.templates
 
-    marked = Mrgr.Utils.find_item_in_list(templates, id)
-    updated_list = Mrgr.Utils.remove_item_from_list(templates, id)
+    marked = Mrgr.List.find(templates, id)
+    updated_list = Mrgr.List.remove(templates, id)
 
     {:ok, _obj} = Mrgr.Repo.delete(marked)
 

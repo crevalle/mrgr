@@ -70,7 +70,7 @@ defmodule Mrgr.MergeQueue do
     # they know what they are doing
     updated_merge = unset_merge_index(merge)
 
-    case Mrgr.Utils.find_item_in_list(list, merge) do
+    case Mrgr.List.find(list, merge) do
       %Mrgr.Schema.Merge{} = target ->
         # expects merge to still have its index, don't remove that until after
         # this operation
