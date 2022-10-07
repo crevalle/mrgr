@@ -39,6 +39,7 @@ defmodule Mrgr.PubSub do
         @merge_reopened "merge:reopened"
         @merge_synchronized "merge:synchronized"
         @merge_closed "merge:closed"
+        @merge_comment_created "merge:comment_created"
 
         @api_request_completed "api_request:completed"
       end

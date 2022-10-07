@@ -65,7 +65,9 @@ defmodule MrgrWeb.Components.Merge do
   end
 
   defp to_sparkline_data(bucket) do
-    Map.values(bucket)
+    bucket
+    |> Map.values()
+    |> Enum.reverse()
   end
 
   defmodule Bucket do

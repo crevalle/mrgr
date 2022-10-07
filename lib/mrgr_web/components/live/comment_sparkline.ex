@@ -42,7 +42,9 @@ defmodule MrgrWeb.Components.Live.CommentSparkline do
   end
 
   defp to_sparkline_data(bucket) do
-    Map.values(bucket)
+    bucket
+    |> Map.values()
+    |> Enum.reverse()
   end
 
   def filter_recent_comments(comments) do

@@ -153,14 +153,29 @@ defmodule Mrgr.Merge do
   @spec add_pull_request_review_comment(String.t(), Mrgr.Github.Webhook.t()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def add_pull_request_review_comment(object, params) do
-    with {:ok, merge} <- find_from_payload(params) do
-      create_comment(object, merge, params["comment"]["created_at"], params)
+    with {:ok, merge} <- find_from_payload(params),
+         {:ok, _comment} <- create_comment(object, merge, params["comment"]["created_at"], params) do
+      # broadcast(@merge_created)
+
+      # !!! we broadcast the merge, not the comment,
+      # and let consumers figure out how to reconcile their data,
+      # probably by reloading.
+      #
+      # Later when we know how we want to use comment data that can maybe become
+      # its own data stream.  for now it's easier to just reload the merge
+      # on the one pending_merge screen that uses it
+      merge
+      |> preload_installation()
+      |> broadcast(@merge_comment_created)
     end
   end
 
   def add_issue_comment(object, params) do
-    with {:ok, merge} <- find_from_payload(params["issue"]) do
-      create_comment(object, merge, params["comment"]["created_at"], params)
+    with {:ok, merge} <- find_from_payload(params["issue"]),
+         {:ok, _comment} <- create_comment(object, merge, params["comment"]["created_at"], params) do
+      merge
+      |> preload_installation()
+      |> broadcast(@merge_comment_created)
     end
   end
 
