@@ -14,9 +14,8 @@
             <%= ts(@merge.opened_at) %>
           </span>
         </p>
-        <p>
-          <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: @merge}) %>
-        </p>
+        <p class="text-gray-500">on branch <span class="italic"><%= @merge.head.ref %></span></p>
+        <p class="mt-1"><%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: @merge}) %></p>
       </div>
     </div>
 
