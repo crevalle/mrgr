@@ -25,6 +25,6 @@ defmodule MrgrWeb.Components.Live.MergeDetail do
   end
 
   def merge_frozen?(repos, repo) do
-    Mrgr.Utils.item_in_list?(repos, repo)
+    Mrgr.List.present?(repos, repo)
   end
 end

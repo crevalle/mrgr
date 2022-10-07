@@ -25,11 +25,11 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def handle_event("toggle-merge-freeze", %{"repo-id" => id}, socket) do
-    repo = Mrgr.Utils.find_item_in_list(socket.assigns.repos, id)
+    repo = Mrgr.List.find(socket.assigns.repos, id)
 
     updated = Mrgr.Repository.toggle_merge_freeze(repo)
 
-    updated_list = Mrgr.Utils.replace_item_in_list(socket.assigns.repos, updated)
+    updated_list = Mrgr.List.replace(socket.assigns.repos, updated)
     frozen_repos = frozen_repos(updated_list)
 
     socket
@@ -51,7 +51,7 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def handle_event("show-preview", %{"merge-id" => id}, socket) do
-    selected = Mrgr.Utils.find_item_in_list(socket.assigns.pending_merges, id)
+    selected = Mrgr.List.find(socket.assigns.pending_merges, id)
 
     socket
     |> assign(:selected_merge, selected)
@@ -76,11 +76,11 @@ defmodule MrgrWeb.PendingMergeLive do
     # should eventually have this state live somewhere else
     checklist = socket.assigns.selected_merge.checklist
 
-    check = Mrgr.Utils.find_item_in_list(checklist.checks, id)
+    check = Mrgr.List.find(checklist.checks, id)
 
     updated = Mrgr.Check.toggle(check, socket.assigns.current_user)
 
-    updated_checks = Mrgr.Utils.replace_item_in_list(checklist.checks, updated)
+    updated_checks = Mrgr.List.replace(checklist.checks, updated)
 
     updated_checklist = %{checklist | checks: updated_checks}
 
@@ -97,7 +97,7 @@ defmodule MrgrWeb.PendingMergeLive do
   defp get_id("merge-" <> id), do: String.to_integer(id)
 
   defp find_dragged(merges, id) do
-    Mrgr.Utils.find_item_in_list(merges, id)
+    Mrgr.List.find(merges, id)
   end
 
   defp update_merge_order(merges, updated_item, new_index) do
@@ -126,7 +126,7 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def handle_info(%{event: @merge_closed, payload: payload}, socket) do
-    merges = Enum.reject(socket.assigns.pending_merges, &(&1.id == payload.id))
+    merges = Mrgr.List.remove(socket.assigns.pending_merges, payload.id)
 
     selected =
       case previewing_closed_merge?(socket.assigns.selected_merge, payload) do
@@ -144,7 +144,7 @@ defmodule MrgrWeb.PendingMergeLive do
   def handle_info(%{event: event, payload: merge}, socket)
       when event in [@merge_edited, @merge_synchronized] do
     hydrated = Mrgr.Merge.preload_for_pending_list(merge)
-    merges = replace_updated(socket.assigns.pending_merges, hydrated)
+    merges = Mrgr.List.replace(socket.assigns.pending_merges, hydrated)
 
     previously_selected = find_previously_selected(merges, socket.assigns.selected_merge)
 
@@ -170,22 +170,8 @@ defmodule MrgrWeb.PendingMergeLive do
     put_flash(socket, :info, "#{merge.title} merged! 🍾")
   end
 
-  def replace_updated(merges, updated) do
-    updated_id = updated.id
-
-    Enum.map(merges, fn merge ->
-      case merge do
-        %{id: ^updated_id} ->
-          updated
-
-        not_updated ->
-          not_updated
-      end
-    end)
-  end
-
   def find_previously_selected(_merges, nil), do: nil
-  def find_previously_selected(merges, merge), do: Mrgr.Utils.find_item_in_list(merges, merge)
+  def find_previously_selected(merges, merge), do: Mrgr.List.find(merges, merge)
 
   defp previewing_closed_merge?(%{id: id}, %{id: id}), do: true
   defp previewing_closed_merge?(_previewing, _closed), do: false
@@ -197,7 +183,7 @@ defmodule MrgrWeb.PendingMergeLive do
   # look up the repo in hte socket assigns cause those are the ones who have their
   # merge_freeze_enabled attribute updated
   def repo_text_color(repos, r) do
-    case Mrgr.Utils.find_item_in_list(repos, r) do
+    case Mrgr.List.find(repos, r) do
       %{merge_freeze_enabled: true} -> "text-blue-600"
       %{merge_freeze_enabled: false} -> "text-gray-500"
     end
