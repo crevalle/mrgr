@@ -25,11 +25,7 @@ defmodule Mrgr.Github.API.Live do
   def fetch_filtered_pulls(installation, repo, opts) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
 
-    result = request!(&Tentacat.Pulls.filter/4, installation, [owner, name, opts])
-
-    write_json(result, "test/response/repo/#{name}-prs.json")
-
-    result
+    request!(&Tentacat.Pulls.filter/4, installation, [owner, name, opts])
   end
 
   def fetch_members(installation) do
