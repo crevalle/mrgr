@@ -333,22 +333,21 @@ defmodule Mrgr.Merge do
     |> Query.for_installation(installation_id)
     |> Query.open()
     |> Query.order_by_priority()
-    |> Query.with_file_alert_rules()
-    |> Query.with_checklist()
-    |> Query.with_comments()
+    |> Query.with_pending_preloads()
     |> Mrgr.Repo.all()
   end
 
-  def merges(%Mrgr.Schema.Installation{id: installation_id}) do
+  def for_installation(%Mrgr.Schema.Installation{id: installation_id}) do
     Schema
     |> Query.for_installation(installation_id)
-    |> Query.order_by_priority()
-    |> Query.with_file_alert_rules()
     |> Mrgr.Repo.all()
   end
 
   def preload_for_pending_list(merge) do
-    Mrgr.Repo.preload(merge, repository: :file_change_alerts)
+    Schema
+    |> Query.by_id(merge.id)
+    |> Query.with_pending_preloads()
+    |> Mrgr.Repo.one()
   end
 
   def delete_installation_merges(installation) do
@@ -485,6 +484,13 @@ defmodule Mrgr.Merge do
         left_join: c in assoc(q, :comments),
         preload: [comments: c]
       )
+    end
+
+    def with_pending_preloads(query) do
+      query
+      |> with_file_alert_rules()
+      |> with_checklist()
+      |> with_comments()
     end
   end
 end

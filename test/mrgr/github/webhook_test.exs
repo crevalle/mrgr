@@ -76,7 +76,7 @@ defmodule Mrgr.Github.WebhookTest do
       id = updated_merge.id
 
       assert updated_merge.status == "closed"
-      assert Enum.count(Mrgr.Merge.merges(ctx.installation)) == 1
+      assert Enum.count(Mrgr.Merge.for_installation(ctx.installation)) == 1
       assert Enum.count(Mrgr.Merge.pending_merges(ctx.installation)) == 0
 
       assert_received(%{event: "merge:closed", payload: %Mrgr.Schema.Merge{id: ^id}})
