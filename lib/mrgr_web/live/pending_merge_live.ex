@@ -61,7 +61,6 @@ defmodule MrgrWeb.PendingMergeLive do
   def handle_event("refresh", _params, socket) do
     user = socket.assigns.current_user
 
-    # dangerous!  anyone can do this right now.
     installation = Mrgr.Repo.preload(user.current_installation, :repositories)
     Mrgr.Installation.refresh_merges!(installation)
 
