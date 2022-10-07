@@ -72,10 +72,10 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
   end
 
   def handle_event("open", _, socket) do
-    {:noreply, assign(socket, :state, "OPEN")}
+    {:noreply, assign(socket, :state, "open")}
   end
 
   def handle_event("close", _, socket) do
-    {:noreply, assign(socket, :state, "CLOSED")}
+    {:noreply, assign(socket, :state, "closed")}
   end
 end
