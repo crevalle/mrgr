@@ -28,6 +28,18 @@ defmodule Mrgr.Github.API.Live do
     request!(&Tentacat.Pulls.filter/4, installation, [owner, name, opts])
   end
 
+  def fetch_issue_comments(installation, repo, number) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
+
+    request!(&Tentacat.Issues.Comments.list/4, installation, [owner, name, number])
+  end
+
+  def fetch_pr_review_comments(installation, repo, number) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
+
+    request!(&Tentacat.Pulls.Comments.list/4, installation, [owner, name, number])
+  end
+
   def fetch_members(installation) do
     result =
       request!(
