@@ -142,7 +142,7 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def handle_info(%{event: event, payload: merge}, socket)
-      when event in [@merge_edited, @merge_synchronized] do
+      when event in [@merge_edited, @merge_synchronized, @merge_comment_created] do
     hydrated = Mrgr.Merge.preload_for_pending_list(merge)
     merges = Mrgr.List.replace(socket.assigns.pending_merges, hydrated)
 
