@@ -18,13 +18,13 @@
 
       <.nav_item
         route={Routes.file_change_alert_path(MrgrWeb.Endpoint, :index)}
-        icon="speakerphone"
+        icon="megaphone"
         label="File Change Alerts"
       ./>
 
       <.nav_item
         route={Routes.checklist_path(MrgrWeb.Endpoint, :index)}
-        icon="clipboard-list"
+        icon="document-text"
         label="Merge Checklists"
       ./>
 
@@ -67,13 +67,13 @@
               </div>
               <.nav_item
                 route={Routes.admin_incoming_webhook_path(MrgrWeb.Endpoint, :index)}
-                icon="phone-incoming"
+                icon="phone-arrow-down-left"
                 label="Incoming Webhooks"
               ./>
 
               <.nav_item
                 route={Routes.admin_installation_path(MrgrWeb.Endpoint, :index)}
-                icon="globe"
+                icon="globe-alt"
                 label="Installations"
               ./>
 
@@ -91,7 +91,7 @@
 
               <.nav_item
                 route={Routes.admin_github_api_request_path(MrgrWeb.Endpoint, :index)}
-                icon="cloud-upload"
+                icon="cloud-arrow-up"
                 label="Github Requests"
               ./>
             </div>
@@ -101,7 +101,7 @@
             <.nav_item
               route={Routes.auth_path(MrgrWeb.Endpoint, :delete)}
               link_opts={[method: "delete", data_confirm: "Ready to go?"]}
-              icon="logout"
+              icon="arrow-right-on-rectangle"
               label="Sign Out"
             ./>
           </div>
