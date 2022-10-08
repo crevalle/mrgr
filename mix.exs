@@ -41,7 +41,7 @@ defmodule Mrgr.MixProject do
       {:faker, "~> 0.17.0"},
       {:floki, ">= 0.30.0", only: :test},
       {:gettext, "~> 0.18"},
-      {:ex_heroicons, "~> 0.6.1"},
+      {:ex_heroicons, "~> 2.0.0"},
       {:jason, "~> 1.2"},
       {:joken, "~> 2.4"},
       {:path_glob, "~> 0.1.1"},
