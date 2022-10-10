@@ -11,6 +11,8 @@ defmodule Mrgr.Github.Webhook do
 
     _hook = create_incoming_webhook_record(obj, action, headers, params)
 
+    IO.inspect("*** HANDLING WEBHOOK: #{obj}:#{action}")
+
     Mrgr.Github.Webhook.handle(obj, params)
   end
 
