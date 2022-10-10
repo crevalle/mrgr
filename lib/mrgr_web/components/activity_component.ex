@@ -80,6 +80,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
   end
 
   defp translate_merge_action(action) do
-    Map.get(@translated_merge_actions, action, action)
+    default = String.replace(action, "_", " ")
+    Map.get(@translated_merge_actions, action, default)
   end
 end
