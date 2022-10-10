@@ -30,6 +30,25 @@ defmodule MrgrWeb.Components.Merge do
     end
   end
 
+  def me_tag(assigns) do
+    color =
+      case Mrgr.Merge.tagged?(assigns.merge, assigns.current_user) do
+        true ->
+          "text-emerald-600"
+
+        false ->
+          "text-gray-400"
+      end
+
+    assigns =
+      assigns
+      |> assign(:color, color)
+
+    ~H"""
+    <.icon name="at-symbol" type="solid" class={"#{@color} h-4 w-4"} />
+    """
+  end
+
   def recent_comment_sparkline(assigns) do
     data =
       assigns.comments

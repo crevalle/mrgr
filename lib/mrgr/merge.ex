@@ -120,6 +120,73 @@ defmodule Mrgr.Merge do
     end
   end
 
+  @spec assign_user(Schema.t(), Mrgr.Github.User.t()) ::
+          {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
+  def assign_user(merge, gh_user) do
+    case Mrgr.List.absent?(merge.assignees, gh_user) do
+      true ->
+        set_assignees(merge, [gh_user | merge.assignees])
+
+      false ->
+        # no-op
+        {:ok, merge}
+    end
+  end
+
+  @spec unassign_user(Schema.t(), Mrgr.Github.User.t()) ::
+          {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
+  def unassign_user(merge, gh_user) do
+    case Mrgr.List.present?(merge.assignees, gh_user) do
+      true ->
+        set_assignees(merge, Mrgr.List.remove(merge.assignees, gh_user))
+
+      false ->
+        {:ok, merge}
+    end
+  end
+
+  defp set_assignees(merge, assignees) do
+    merge
+    |> Schema.change_assignees(assignees)
+    |> Mrgr.Repo.update()
+  end
+
+  @spec add_reviewer(Schema.t(), Mrgr.Github.User.t()) ::
+          {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
+  def add_reviewer(merge, gh_user) do
+    case Mrgr.List.absent?(merge.requested_reviewers, gh_user) do
+      true ->
+        set_reviewers(merge, [gh_user | merge.requested_reviewers])
+
+      false ->
+        # no-op
+        {:ok, merge}
+    end
+  end
+
+  @spec remove_reviewer(Schema.t(), Mrgr.Github.User.t()) ::
+          {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
+  def remove_reviewer(merge, gh_user) do
+    case Mrgr.List.present?(merge.assignees, gh_user) do
+      true ->
+        set_reviewers(merge, Mrgr.List.remove(merge.requested_reviewers, gh_user))
+
+      false ->
+        {:ok, merge}
+    end
+  end
+
+  defp set_reviewers(merge, reviewers) do
+    merge
+    |> Schema.change_reviewers(reviewers)
+    |> Mrgr.Repo.update()
+  end
+
+  def tagged?(merge, user) do
+    (merge.assignees ++ merge.requested_reviewers)
+    |> Enum.any?(&Mrgr.Schema.User.is_github_user?(user, &1))
+  end
+
   def sync_comments(merge) do
     merge
     |> fetch_issue_comments()

@@ -40,4 +40,6 @@ defmodule Mrgr.List do
       _i -> true
     end
   end
+
+  def absent?(list, item), do: !present?(list, item)
 end

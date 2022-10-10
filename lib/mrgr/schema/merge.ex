@@ -15,6 +15,8 @@ defmodule Mrgr.Schema.Merge do
     field(:raw, :map)
 
     embeds_many(:commits, Mrgr.Github.Commit, on_replace: :delete)
+    embeds_many(:assignees, Mrgr.Github.User, on_replace: :delete)
+    embeds_many(:requested_reviewers, Mrgr.Github.User, on_replace: :delete)
 
     embeds_one(:user, Mrgr.Github.User, on_replace: :update)
 
@@ -35,14 +37,14 @@ defmodule Mrgr.Schema.Merge do
   end
 
   @create_fields ~w[
+    merge_queue_index
+    node_id
     number
     opened_at
-    node_id
+    raw
+    repository_id
     title
     url
-    repository_id
-    merge_queue_index
-    raw
   ]a
 
   @synchronize_fields ~w[
@@ -55,6 +57,8 @@ defmodule Mrgr.Schema.Merge do
     schema
     |> cast(params, @create_fields)
     |> cast_embed(:user)
+    |> cast_embed(:assignees)
+    |> cast_embed(:requested_reviewers)
     |> cast_embed(:head)
     |> put_open_status()
     |> put_external_id()
@@ -93,6 +97,18 @@ defmodule Mrgr.Schema.Merge do
     schema
     |> cast(params, [])
     |> put_closed_status()
+  end
+
+  def change_assignees(schema, assignees) do
+    schema
+    |> change()
+    |> put_embed(:assignees, assignees)
+  end
+
+  def change_reviewers(schema, reviewers) do
+    schema
+    |> change()
+    |> put_embed(:requested_reviewers, reviewers)
   end
 
   def put_closed_status(changeset) do

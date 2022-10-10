@@ -53,6 +53,22 @@ defmodule Mrgr.Github.Webhook do
     # Mrgr.CheckRun.create(payload)
   end
 
+  def handle("pull_request", %{"action" => "assigned"} = payload) do
+    Mrgr.Merge.Webhook.assign_user(payload)
+  end
+
+  def handle("pull_request", %{"action" => "unassigned"} = payload) do
+    Mrgr.Merge.Webhook.unassign_user(payload)
+  end
+
+  def handle("pull_request", %{"action" => "review_requested"} = payload) do
+    Mrgr.Merge.Webhook.add_reviewer(payload)
+  end
+
+  def handle("pull_request", %{"action" => "review_request_removed"} = payload) do
+    Mrgr.Merge.Webhook.remove_reviewer(payload)
+  end
+
   def handle("push", payload) do
     Mrgr.Branch.push(payload)
   end
