@@ -123,6 +123,8 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
   end
 
   # protects against random id injection
+  # slightly different from our usual list-handling stuff
+  # because we also store a changeset for each alert
   defp fetch_alert(socket, id) when is_bitstring(id),
     do: fetch_alert(socket, String.to_integer(id))
 
@@ -176,7 +178,8 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
     |> Mrgr.FileChangeAlert.create()
     |> case do
       {:ok, alert} ->
-        alerts = [alert | socket.assigns.alerts] |> Enum.sort_by(& &1.pattern)
+        new_alert = {alert, build_changeset(alert)}
+        alerts = [new_alert | socket.assigns.alerts]
 
         socket
         |> assign(:alerts, alerts)
