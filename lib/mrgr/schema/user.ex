@@ -146,6 +146,9 @@ defmodule Mrgr.Schema.User do
     end
   end
 
+  def is_github_user?(%{nickname: nick}, %{login: nick}), do: true
+  def is_github_user?(_user, _gh_user), do: false
+
   # token: "token",
   # refresh_token: "anothr toekn",
   # token_expires_at: integer()

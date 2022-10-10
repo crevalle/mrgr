@@ -38,6 +38,8 @@ defmodule Mrgr.Github.WebhookTest do
 
       {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
       assert merge.merge_queue_index == 0
+      assert Enum.count(merge.assignees) == 1
+      assert Enum.count(merge.requested_reviewers) == 1
     end
 
     test "enqueues in the merge queue", ctx do
@@ -133,6 +135,69 @@ defmodule Mrgr.Github.WebhookTest do
       assert comment.object == :issue_comment
       assert comment.posted_at
       assert comment.raw
+    end
+  end
+
+  describe "pull_request:assigned" do
+    setup [:with_install_user, :with_installation, :with_open_merge]
+
+    test "adds a user to the assignees list" do
+      payload = read_webhook_data("pull_request", "assigned")
+      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+
+      assignees = Enum.map(merge.assignees, & &1.login)
+
+      assert assignees == ["crevalleghtest", "desmondmonster"]
+    end
+
+    test "does not duplicate users" do
+      payload = read_webhook_data("pull_request", "assigned")
+
+      Mrgr.Github.Webhook.handle("pull_request", payload)
+      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+
+      assignees = Enum.map(merge.assignees, & &1.login)
+
+      assert assignees == ["crevalleghtest", "desmondmonster"]
+    end
+  end
+
+  describe "pull_request:unassigned" do
+    setup [:with_install_user, :with_installation, :with_open_merge]
+
+    test "removes the user from the assignees list" do
+      payload = read_webhook_data("pull_request", "unassigned")
+
+      Mrgr.Github.Webhook.handle("pull_request", payload)
+      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+
+      assert merge.assignees == []
+    end
+  end
+
+  describe "pull_request:review_requested" do
+    setup [:with_install_user, :with_installation, :with_open_merge]
+
+    test "adds a user from the list of requestees" do
+      payload = read_webhook_data("pull_request", "review_requested")
+
+      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+
+      assignees = Enum.map(merge.requested_reviewers, & &1.login)
+
+      assert assignees == ["crevalleghtest", "desmondmonster"]
+    end
+  end
+
+  describe "pull_request:review_request_removed" do
+    setup [:with_install_user, :with_installation, :with_open_merge]
+
+    test "removes a user from the list of requestees" do
+      payload = read_webhook_data("pull_request", "review_request_removed")
+
+      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+
+      assert merge.requested_reviewers == []
     end
   end
 
