@@ -40,6 +40,8 @@ defmodule Mrgr.PubSub do
         @merge_synchronized "merge:synchronized"
         @merge_closed "merge:closed"
         @merge_comment_created "merge:comment_created"
+        @merge_assignees_updated "merge:assignees_updated"
+        @merge_reviewers_updated "merge:reviewers_updated"
 
         @api_request_completed "api_request:completed"
       end

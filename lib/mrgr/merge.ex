@@ -149,6 +149,13 @@ defmodule Mrgr.Merge do
     merge
     |> Schema.change_assignees(assignees)
     |> Mrgr.Repo.update()
+    |> case do
+      {:ok, merge} ->
+        broadcast(merge, @merge_assignees_updated)
+
+      error ->
+        error
+    end
   end
 
   @spec add_reviewer(Schema.t(), Mrgr.Github.User.t()) ::
@@ -180,6 +187,13 @@ defmodule Mrgr.Merge do
     merge
     |> Schema.change_reviewers(reviewers)
     |> Mrgr.Repo.update()
+    |> case do
+      {:ok, merge} ->
+        broadcast(merge, @merge_reviewers_updated)
+
+      error ->
+        error
+    end
   end
 
   def tagged?(merge, user) do
