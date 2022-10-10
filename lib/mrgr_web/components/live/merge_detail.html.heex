@@ -41,9 +41,7 @@
 
     <.h3>Merge This Pull Request</.h3>
 
-    <%= if merge_frozen?(@frozen_repos, @merge.repository) do %>
-      <p class="text-blue-600 italic">A Merge Freeze is in effect for this repository. This PR cannot be merged.</p>
-    <% end %>
+    <p :if={merge_frozen?(@frozen_repos, @merge.repository)} class="text-blue-600 italic">A Merge Freeze is in effect for this repository. This PR cannot be merged.</p>
 
     <.form let={f} for={:merge} phx-submit="merge" phx-target={@myself} class="flex flex-col space-y-4">
       <div class="mt-1">

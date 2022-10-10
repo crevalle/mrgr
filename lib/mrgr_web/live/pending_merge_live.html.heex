@@ -99,9 +99,7 @@
                            uhoh={true}
                            ./>
                         </p>
-                        <%= if Mrgr.Checklist.complete?(merge.checklist) do %>
-                          <p class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
-                        <% end %>
+                        <p :if={Mrgr.Checklist.complete?(merge.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
                         <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
                           <.recent_comment_sparkline comments={merge.comments} />
                         </p>
@@ -123,13 +121,9 @@
       </div>
     </div>
 
-    <%= if @selected_merge do %>
-      <.live_component module={MrgrWeb.Components.Live.MergeDetail} id="merge_detail" merge={@selected_merge} current_user={@current_user} frozen_repos={@frozen_repos} timezone={@timezone} />
-    <% end %>
+    <.live_component :if={@selected_merge} module={MrgrWeb.Components.Live.MergeDetail} id="merge_detail" merge={@selected_merge} current_user={@current_user} frozen_repos={@frozen_repos} timezone={@timezone} />
   </div>
 </div>
 
-<%= if admin?(@current_user) do %>
-  <.button phx-click="refresh" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500"> Refresh PRs</.button>
-<% end %>
+<.button :if={admin?(@current_user)} phx-click="refresh" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500"> Refresh PRs</.button>
 
