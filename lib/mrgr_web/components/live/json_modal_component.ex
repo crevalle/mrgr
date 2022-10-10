@@ -37,7 +37,16 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
                   <div class="mt-3 sm:mt-5">
                     <div class="flex items-center justify-between my-1">
                       <h3 class="text-lg font-medium leading-6 text-gray-900"><%= @title %></h3>
-                      <.copy_button target={"#json-data-#{@id}"} />
+                      <div>
+                        <button
+                          phx-click="hide-modal"
+                          phx-value-id={@id}
+                          class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:text-sm"
+                          >
+                          Close
+                        </button>
+                        <.copy_button target={"#json-data-#{@id}"} />
+                      </div>
                     </div>
                     <div class="mt-2">
                       <p class="text-sm text-gray-500">
@@ -52,7 +61,7 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
                   <button
                     phx-click="hide-modal"
                     phx-value-id={@id}
-                    class="inline-flex w-full justify-center rounded-md border border-transparent bg-indigo-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 sm:text-sm"
+                    class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:text-sm"
                     >
                     Close
                   </button>
