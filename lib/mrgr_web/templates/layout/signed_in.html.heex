@@ -107,14 +107,14 @@
         <%= img_tag "/images/logo/Mrgr-B6.png", class: "w-3/5" %>
       </div>
       <div class="mt-5 flex-grow flex flex-col">
-        <%= live_render @conn, MrgrWeb.Live.ActivityFeed, session: %{"user_id" => @conn.assigns.current_user.id} %>
+        <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.ActivityFeed, session: %{"user_id" => @conn.assigns.current_user.id} %>
       </div>
     </div>
   </div>
 
   <!-- nav bar -->
   <div class="md:pl-72 flex flex-col flex-1 min-h-screen">
-    <%= live_render @conn, MrgrWeb.Live.NavBar, session: %{"user_id" => @conn.assigns.current_user.id} %>
+    <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.NavBar, session: %{"user_id" => @conn.assigns.current_user.id} %>
 
     <main class="flex-1">
       <div class="">

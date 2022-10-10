@@ -15,9 +15,7 @@
           </span>
         </p>
         <p class="text-gray-500">on branch <span class="italic"><%= @merge.head.ref %></span></p>
-        <%= if Mrgr.Merge.tagged?(@merge, @current_user) do %>
-          <p class="text-emerald-600">You've been tagged in this Merge</p>
-        <% end %>
+        <p :if={Mrgr.Merge.tagged?(@merge, @current_user)} class="text-emerald-600">You've been tagged in this Merge</p>
         <p class="mt-1"><%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: @merge}) %></p>
       </div>
     </div>

@@ -10,7 +10,7 @@
           </h1>
           <p class="text-base text-gray-300 sm:text-xl lg:text-lg xl:text-xl">Technical managers need tools to know what's being merged and when.  Take control over your code merging and gain visibility into what's going live.</p>
           <div class="mt-10 sm:mt-12">
-            <%= live_render @conn, MrgrWeb.Live.WaitingListSignupForm %>
+            <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.WaitingListSignupForm %>
           </div>
         </div>
       </div>

@@ -12,10 +12,14 @@ defmodule MrgrWeb.Components.ActivityComponent do
   # need to figure out how to store the activity stream - what will i use it for? just webhooks?
   # want to link to a relevant page
   def render(%{event: "merge:" <> action, payload: _} = assigns) do
+    assigns =
+      assigns
+      |> assign(:action, action)
+
     ~H"""
     <.event avatar_url={@payload.user.avatar_url} name={@payload.user.login} at={at(@payload)} >
       <:description>
-        <%= translate_merge_action(action) %> <%= @payload.title %>
+        <%= translate_merge_action(@action) %> <%= @payload.title %>
       </:description>
 
       <:icon>
