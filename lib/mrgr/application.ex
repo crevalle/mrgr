@@ -13,7 +13,8 @@ defmodule Mrgr.Application do
       Mrgr.Repo,
       MrgrWeb.Telemetry,
       {Phoenix.PubSub, name: Mrgr.PubSub},
-      MrgrWeb.Endpoint
+      MrgrWeb.Endpoint,
+      Mrgr.PubSubConsumer
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
