@@ -14,4 +14,7 @@ defmodule Mrgr.Tuple do
   def halt(state) do
     {:halt, state}
   end
+
+  def take_tag({tag, _value}), do: tag
+  def take_value({_tag, value}), do: value
 end

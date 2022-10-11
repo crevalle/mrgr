@@ -2,6 +2,17 @@ defmodule Mrgr.Repository do
   alias Mrgr.Repository.Query
   alias Mrgr.Schema.Repository, as: Schema
 
+  @spec create_for_installation(Mrgr.Schema.Installation.t()) :: Mrgr.Schema.Installation.t()
+  def create_for_installation(installation) do
+    # assumes repos have been deleted
+    repositories = fetch_repositories(installation)
+
+    installation
+    |> Mrgr.Schema.Installation.repositories_changeset(%{"repositories" => repositories})
+    |> Mrgr.Repo.update!()
+    |> generate_default_file_change_alerts()
+  end
+
   def find_by_name_for_user(user, name) do
     Schema
     |> Query.by_name(name)
@@ -35,7 +46,22 @@ defmodule Mrgr.Repository do
   defp toggle(true), do: false
   defp toggle(false), do: true
 
-  @spec fetch_and_store_open_merges!([Mrgr.Schema.Repository.t()]) :: [Mrgr.Schema.Merge.t()]
+  def generate_default_file_change_alerts(%Mrgr.Schema.Installation{} = installation) do
+    # DOES NOT store generated FCAs on repos as preloads.  I don't think we need
+    # that and I don't feel like building it now.  I'd need to unwrap the tuples
+    # returned from create/1 and flat_map the whole thing or some shit.
+    Enum.map(installation.repositories, &generate_default_file_change_alerts/1)
+
+    installation
+  end
+
+  def generate_default_file_change_alerts(%Schema{} = repository) do
+    repository
+    |> Mrgr.FileChangeAlert.defaults_for_repo()
+    |> Enum.map(&Mrgr.FileChangeAlert.create/1)
+  end
+
+  @spec fetch_and_store_open_merges!([Schema.t()]) :: [Mrgr.Schema.Merge.t()]
   def fetch_and_store_open_merges!(repos) when is_list(repos) do
     repos
     |> Enum.map(fn repo ->
@@ -45,6 +71,10 @@ defmodule Mrgr.Repository do
     end)
     |> Enum.reject(&is_nil/1)
     |> Enum.map(&hydrate_merge_data/1)
+  end
+
+  def fetch_repositories(installation) do
+    Mrgr.Github.API.fetch_repositories(installation)
   end
 
   defp fetch_open_merges(repo) do

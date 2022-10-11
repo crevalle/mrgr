@@ -2,7 +2,7 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  import MrgrWeb.Components.PendingMerge
+  import MrgrWeb.Components.Merge
 
   def mount(_session, %{"user_id" => user_id, "repo_name" => name}, socket) do
     if connected?(socket) do
@@ -92,7 +92,10 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
   end
 
   def handle_event("save-file-alert", %{"file_change_alert" => params}, socket) do
-    params = Map.put(params, "repository_id", socket.assigns.repo.id)
+    params =
+      params
+      |> Map.put("repository_id", socket.assigns.repo.id)
+      |> Map.put("source", :user)
 
     params
     |> Mrgr.FileChangeAlert.create()

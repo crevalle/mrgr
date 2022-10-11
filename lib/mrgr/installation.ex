@@ -31,7 +31,7 @@ defmodule Mrgr.Installation do
   def create_from_webhook(payload) do
     payload
     |> create_installation()
-    |> create_repositories()
+    |> Mrgr.Repository.create_for_installation()
     |> hydrate_new_installation_data_from_github()
     |> Mrgr.Tuple.ok()
   end
@@ -56,19 +56,6 @@ defmodule Mrgr.Installation do
     Mrgr.User.set_current_installation(creator, installation)
 
     installation
-  end
-
-  def create_repositories(installation) do
-    # assumes repos have been deleted
-    repositories = fetch_repositories(installation)
-
-    installation
-    |> Mrgr.Schema.Installation.repositories_changeset(%{"repositories" => repositories})
-    |> Mrgr.Repo.update!()
-  end
-
-  def fetch_repositories(installation) do
-    Mrgr.Github.API.fetch_repositories(installation)
   end
 
   def hydrate_new_installation_data_from_github(installation) do

@@ -3,6 +3,8 @@ defmodule MrgrWeb.Components.Merge do
 
   import Heroicons.LiveView, only: [icon: 1]
 
+  alias Mrgr.Schema.Merge
+
   def recent_comment_count(assigns) do
     recent_comments = filter_recent_comments(assigns.comments)
 
@@ -46,6 +48,41 @@ defmodule MrgrWeb.Components.Merge do
 
     ~H"""
     <.icon name="at-symbol" type="solid" class={"ml-1 #{@color} h-4 w-4"} />
+    """
+  end
+
+  def preview_commit(assigns) do
+    ~H"""
+    <li class="p-2">
+      <div class="flex flex-col space-y-1">
+        <div class="flex space-between items-center">
+          <p class="flex-1 truncate"><%= Merge.commit_message(@commit) %></p>
+          <p class="text-sm text-gray-500"><%= ts(Merge.committed_at(@commit)) %></p>
+        </div>
+        <div class="flex space-between space-x-2 divide-x divide-gray-500">
+          <p class="text-sm text-gray-500"><%= Merge.author_name(@commit) %></p>
+          <p class="pl-2 text-sm text-gray-500"><%= shorten_sha(Merge.commit_sha(@commit)) %></p>
+        </div>
+      </div>
+    </li>
+    """
+  end
+
+  def file_change_badges(assigns) do
+    ~H"""
+      <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
+        <%= for alert <- Mrgr.FileChangeAlert.for_merge(@merge) do %>
+          <.file_change_badge bg={alert.bg_color}><%= alert.badge_text %></.file_change_badge>
+        <% end %>
+      </div>
+    """
+  end
+
+  def file_change_badge(%{bg: _} = assigns) do
+    ~H"""
+      <span style={"background-color: #{@bg}; color: rgb(75 85 99);"} class={"px-2 inline-flex text-xs leading-5 font-semibold rounded-full"}>
+        <%= render_slot(@inner_block) %>
+      </span>
     """
   end
 

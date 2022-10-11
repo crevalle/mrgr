@@ -2,10 +2,11 @@ defmodule Mrgr.Schema.FileChangeAlert do
   use Mrgr.Schema
 
   schema "file_change_alerts" do
-    field(:bg_color, :string, default: "#f1e5d1")
-    field(:pattern, :string)
     field(:badge_text, :string)
+    field(:bg_color, :string, default: "#f1e5d1")
     field(:notify_user, :boolean)
+    field(:pattern, :string)
+    field(:source, Ecto.Enum, values: [:user, :system])
 
     belongs_to(:repository, Mrgr.Schema.Repository)
     timestamps()
@@ -13,10 +14,11 @@ defmodule Mrgr.Schema.FileChangeAlert do
 
   @create_params [
     :bg_color,
-    :pattern,
     :badge_text,
     :notify_user,
-    :repository_id
+    :pattern,
+    :repository_id,
+    :source
   ]
 
   @update_params [
