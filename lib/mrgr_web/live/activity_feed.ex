@@ -49,8 +49,17 @@ defmodule MrgrWeb.Live.ActivityFeed do
   end
 
   defp create_event(item) do
-    merge = Mrgr.Merge.find_for_activity_feed(item.data["pull_request"]["id"])
-    %{event: "merge:#{item.action}", payload: merge}
+    case find(item.data) do
+      %Mrgr.Schema.Merge{} = merge ->
+        %{event: "merge:#{item.action}", payload: merge}
+
+      nil ->
+        %{}
+    end
+  end
+
+  def find(data) do
+    Mrgr.Merge.find_for_activity_feed(data["pull_request"]["id"])
   end
 
   def render(assigns) do
