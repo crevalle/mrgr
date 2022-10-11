@@ -16,11 +16,20 @@ defmodule Mrgr.FileChangeAlert do
   end
 
   def applies_to_merge?(alert, merge) do
-    pattern_matches_filenames?(alert.pattern, merge.files_changed)
+    alert
+    |> matching_filenames(merge)
+    |> Enum.any?()
   end
 
-  def pattern_matches_filenames?(pattern, filenames) do
-    Enum.any?(filenames, fn name -> PathGlob.match?(name, pattern) end)
+  def matching_filenames(alert, merge) do
+    filenames = merge.files_changed
+    pattern = alert.pattern
+
+    Enum.filter(filenames, &pattern_matches_filename?(&1, pattern))
+  end
+
+  def pattern_matches_filename?(filename, pattern) do
+    PathGlob.match?(filename, pattern)
   end
 
   def delete(alert) do

@@ -55,8 +55,8 @@ defmodule MrgrWeb.Router do
   scope "/", MrgrWeb do
     pipe_through [:browser, :authenticate, :with_current_installation]
 
-    get "/pending-merges", PendingMergeController, :index
-    get "/pending-merges/:id", PendingMergeController, :show
+    live "/pending-merges", PendingMergeLive, :index
+    live "/pending-merges/:id", PendingMergeLive, :show
     resources "/file-change-alerts", FileChangeAlertController, only: [:index, :edit]
 
     live "/checklists", Live.Checklist, :index, as: :checklist

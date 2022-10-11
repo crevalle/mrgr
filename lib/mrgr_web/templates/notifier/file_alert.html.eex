@@ -1,0 +1,19 @@
+<div>
+  <h1>Hello! 👋</h1>
+
+  <p>A File Change Alert in the <strong><%= @repository_name %></strong> repo was triggered.  Here are the affected files:</p>
+
+  <ul>
+    <%= for file_alert <- @file_alerts, filename <- file_alert.filenames do %>
+      <li>
+        <strong>[<%= file_alert.badge_text %>]</strong> <%= filename %>
+      </li>
+    <% end %>
+  </ul>
+
+  <p><a href="<%= @url %>" target="_blank">Click Here</a> to check it out.</p>
+
+  <p>Have a nice day! ✌️</p>
+
+  <p>- The Mrgr Team</p>
+</div>

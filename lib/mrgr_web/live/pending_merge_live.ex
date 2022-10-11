@@ -4,7 +4,7 @@ defmodule MrgrWeb.PendingMergeLive do
 
   import MrgrWeb.Components.Merge
 
-  def mount(_params, %{"user_id" => user_id}, socket) do
+  def mount(params, %{"user_id" => user_id} = session, socket) do
     if connected?(socket) do
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
       merges = pending_merges(current_user)
@@ -12,10 +12,13 @@ defmodule MrgrWeb.PendingMergeLive do
       frozen_repos = frozen_repos(repos)
       subscribe(current_user)
 
+      # id will be `nil` for the index action
+      selected_merge = Mrgr.List.find(merges, params["id"])
+
       socket
       |> assign(:current_user, current_user)
       |> assign(:pending_merges, merges)
-      |> assign(:selected_merge, nil)
+      |> assign(:selected_merge, selected_merge)
       |> assign(:repos, repos)
       |> assign(:frozen_repos, frozen_repos)
       |> ok()

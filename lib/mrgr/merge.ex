@@ -37,6 +37,7 @@ defmodule Mrgr.Merge do
         |> hydrate_github_data()
         |> append_to_merge_queue()
         |> create_checklists()
+        |> notify_file_alert_consumers()
         |> broadcast(@merge_created)
         |> Mrgr.Tuple.ok()
 
@@ -271,6 +272,40 @@ defmodule Mrgr.Merge do
     attrs
     |> Mrgr.Schema.Comment.create_changeset()
     |> Mrgr.Repo.insert()
+  end
+
+  def notify_file_alert_consumers(merge) do
+    merge
+    |> Mrgr.FileChangeAlert.for_merge()
+    |> Enum.filter(& &1.notify_user)
+    |> send_file_alert(merge)
+  end
+
+  def send_file_alert([], merge), do: merge
+
+  def send_file_alert(alerts, merge) do
+    installation = Mrgr.Repo.preload(merge.repository.installation, :creator)
+    recipient = installation.creator
+    url = build_url_to(merge)
+
+    file_alerts =
+      Enum.map(alerts, fn alert ->
+        filenames = Mrgr.FileChangeAlert.matching_filenames(alert, merge)
+
+        %{
+          filenames: filenames,
+          badge_text: alert.badge_text
+        }
+      end)
+
+    mail = Mrgr.Notifier.file_alert(recipient, merge.repository, file_alerts, url)
+    Mrgr.Mailer.deliver(mail)
+
+    merge
+  end
+
+  defp build_url_to(merge) do
+    MrgrWeb.Router.Helpers.pending_merge_url(MrgrWeb.Endpoint, :show, merge.id)
   end
 
   @spec find_from_payload(Mrgr.Github.Webhook.t() | map()) ::
