@@ -24,29 +24,29 @@ defmodule MrgrWeb.Components.PendingMerge do
     ~H"""
       <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
         <%= if has_migration?(@merge) do %>
-          <.badge bg="bg-green-100" text="text-green-800">migration</.badge>
+          <.badge bg="bg-green-100" text="text-gray-800">migration</.badge>
         <% end %>
 
         <%= if router_changed?(@merge) do %>
-          <.badge bg="bg-blue-100" text="text-blue-800">router</.badge>
+          <.badge bg="bg-blue-100" text="text-gray-800">router</.badge>
         <% end %>
 
         <%= if dependencies_changed?(@merge) do %>
-          <.badge bg="bg-yellow-100" text="text-yellow-800">dependencies</.badge>
+          <.badge bg="bg-yellow-100" text="text-gray-800">dependencies</.badge>
         <% end %>
 
         <%= for alert <- Mrgr.FileChangeAlert.for_merge(@merge) do %>
-          <.badge bg="bg-gray-100" text="text-gray-800"><%= alert.badge_text %></.badge>
+          <.badge bg={alert.bg_color}><%= alert.badge_text %></.badge>
         <% end %>
       </div>
     """
   end
 
-  def badge(%{bg: _, text: _} = assigns) do
+  def badge(%{bg: _} = assigns) do
     ~H"""
-      <p class={"px-2 inline-flex text-xs leading-5 font-semibold rounded-full #{@bg} #{@text}"}>
+      <span style={"background-color: #{@bg}; color: rgb(75 85 99);"} class={"px-2 inline-flex text-xs leading-5 font-semibold rounded-full"}>
         <%= render_slot(@inner_block) %>
-      </p>
+      </span>
     """
   end
 

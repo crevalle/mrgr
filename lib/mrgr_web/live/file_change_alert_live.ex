@@ -54,7 +54,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
                       <tr class="border-t border-gray-300">
                         <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"><pre>'<%= alert.pattern %>'</pre></td>
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                          <MrgrWeb.Component.PendingMerge.badge bg="bg-gray-100" text="text-gray-800">
+                          <MrgrWeb.Components.PendingMerge.badge bg={alert.bg_color}>
                             <%= alert.badge_text %>
                           </MrgrWeb.Components.PendingMerge.badge>
                         </td>

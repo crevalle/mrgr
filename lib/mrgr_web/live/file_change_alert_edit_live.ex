@@ -2,6 +2,8 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
+  import MrgrWeb.Components.PendingMerge
+
   def mount(_session, %{"user_id" => user_id, "repo_name" => name}, socket) do
     if connected?(socket) do
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
@@ -55,6 +57,16 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
   defp update_changeset_in_list(%{assigns: %{alerts: alerts}}, alert, cs) do
     idx = Enum.find_index(alerts, fn {a, _cs} -> a.id == alert.id end)
     List.replace_at(alerts, idx, {alert, cs})
+  end
+
+  def handle_event("form-change", %{"file_change_alert" => params}, socket) do
+    changeset =
+      %Mrgr.Schema.FileChangeAlert{}
+      |> build_changeset(params)
+
+    socket
+    |> assign(:cs, changeset)
+    |> noreply()
   end
 
   def handle_event("update-alert", %{"file_change_alert" => params}, socket) do
@@ -120,11 +132,11 @@ defmodule MrgrWeb.FileChangeAlertEditLive do
     end
   end
 
-  defp build_changeset(schema) do
-    Mrgr.Schema.FileChangeAlert.changeset(schema, %{})
+  defp build_changeset(schema, params \\ %{}) do
+    Mrgr.Schema.FileChangeAlert.changeset(schema, params)
   end
 
-  defp empty_changeset(params \\ %{}) do
-    Mrgr.Schema.FileChangeAlert.changeset(%Mrgr.Schema.FileChangeAlert{}, params)
+  defp empty_changeset do
+    build_changeset(%Mrgr.Schema.FileChangeAlert{})
   end
 end
