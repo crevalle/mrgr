@@ -58,6 +58,13 @@ defmodule MrgrWeb.FileChangeAlertLive do
                             <%= alert.badge_text %>
                           </MrgrWeb.Component.PendingMerge.badge>
                         </td>
+                        <td>
+                          <%= if alert.notify_user do %>
+                            🟢 <span class="text-gray-400 text-sm italic">you will be notified of new Merges</span>
+                          <% else %>
+                            ⭕️ <span class="text-gray-400 text-sm italic">you will not be notified of new Merges</span>
+                          <% end %>
+                        </td>
                         <td class="relative whitespace-nowrap py-4 pl-3 pr-4 text-right text-sm font-medium sm:pr-6">
                         </td>
                       </tr>
