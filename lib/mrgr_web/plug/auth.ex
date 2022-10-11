@@ -5,7 +5,7 @@ defmodule MrgrWeb.Plug.Auth do
     case find_user(params["user_id"]) do
       %Mrgr.Schema.User{} = user ->
         user = record_seen!(user)
-        {:cont, Phoenix.LiveView.assign(socket, :current_user, user)}
+        {:cont, Phoenix.Socket.assign(socket, :current_user, user)}
 
       _nope ->
         {:halt, socket}
