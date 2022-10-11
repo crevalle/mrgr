@@ -194,7 +194,7 @@ defmodule MrgrWeb.PendingMergeLive do
   def repo_text_color(repos, r) do
     case Mrgr.List.find(repos, r) do
       %{merge_freeze_enabled: true} -> "text-blue-600"
-      %{merge_freeze_enabled: false} -> "text-gray-500"
+      %{merge_freeze_enabled: false} -> "text-gray-400"
     end
   end
 

@@ -73,7 +73,12 @@
                   <div class="block hover:bg-gray-50">
                     <div class="px-4 py-4 sm:px-6">
                       <div class="flex items-center justify-between">
-                        <.h3><%= merge.title %></.h3>
+                        <div class="flex items-baseline">
+                          <.h3><%= merge.title %></.h3>
+                          <p class={"ml-2 text-sm italic font-light #{repo_text_color(@repos, merge.repository)}"}>
+                            <%= merge.repository.name %>
+                          </p>
+                        </div>
                         <div class="ml-2 flex-shrink-0 flex">
                           <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                             <p class="truncate max-w-xs">
@@ -83,12 +88,9 @@
                         </div>
                       </div>
                       <div class="mt-2 sm:flex sm:justify-between">
-                        <div class="sm:flex">
-                          <p class={"flex items-center text-sm #{repo_text_color(@repos, merge.repository)}"}>
-                            <.icon name="users" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5" />
-                            <%= merge.repository.name %>
-                          </p>
+                        <div class="sm:flex items-center">
                           <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: merge}) %>
+                          <.me_tag merge={merge} current_user={@current_user} />
                         </div>
                         <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                           <p>
@@ -108,7 +110,6 @@
                           <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
                             <.recent_comment_sparkline comments={merge.comments} />
                           </p>
-                          <.me_tag merge={merge} current_user={@current_user} />
                         </div>
                         <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
                           <p>

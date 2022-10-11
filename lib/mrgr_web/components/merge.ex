@@ -45,7 +45,7 @@ defmodule MrgrWeb.Components.Merge do
       |> assign(:color, color)
 
     ~H"""
-    <.icon name="at-symbol" type="solid" class={"#{@color} h-4 w-4"} />
+    <.icon name="at-symbol" type="solid" class={"ml-1 #{@color} h-4 w-4"} />
     """
   end
 
