@@ -1,4 +1,4 @@
-defmodule MrgrWeb.Component.PendingMerge do
+defmodule MrgrWeb.Components.PendingMerge do
   use MrgrWeb, :component
 
   alias Mrgr.Schema.Merge

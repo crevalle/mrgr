@@ -16,7 +16,7 @@
         </p>
         <p class="text-gray-500">on branch <span class="italic"><%= @merge.head.ref %></span></p>
         <p :if={Mrgr.Merge.tagged?(@merge, @current_user)} class="text-emerald-600">You've been tagged in this Merge</p>
-        <p class="mt-1"><%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: @merge}) %></p>
+        <p class="mt-1"><%= MrgrWeb.Components.PendingMerge.change_badges(%{merge: @merge}) %></p>
       </div>
     </div>
 
@@ -57,7 +57,7 @@
       <.h3>Commits</.h3>
       <ul>
         <%= for c <- @merge.commits do %>
-          <MrgrWeb.Component.PendingMerge.preview_commit commit={c} ./>
+          <MrgrWeb.Components.PendingMerge.preview_commit commit={c} ./>
         <% end %>
       </ul>
     </div>

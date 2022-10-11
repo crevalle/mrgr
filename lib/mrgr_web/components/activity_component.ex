@@ -29,7 +29,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
       </:icon>
 
       <:detail>
-        <%= MrgrWeb.Component.PendingMerge.change_badges(%{merge: @payload}) %>
+        <%= MrgrWeb.Components.PendingMerge.change_badges(%{merge: @payload}) %>
       </:detail>
     </.event>
     """

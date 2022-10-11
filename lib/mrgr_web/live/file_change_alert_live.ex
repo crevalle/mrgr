@@ -56,7 +56,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
                         <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500">
                           <MrgrWeb.Component.PendingMerge.badge bg="bg-gray-100" text="text-gray-800">
                             <%= alert.badge_text %>
-                          </MrgrWeb.Component.PendingMerge.badge>
+                          </MrgrWeb.Components.PendingMerge.badge>
                         </td>
                         <td>
                           <%= if alert.notify_user do %>
