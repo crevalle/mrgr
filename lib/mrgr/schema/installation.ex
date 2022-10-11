@@ -69,6 +69,13 @@ defmodule Mrgr.Schema.Installation do
     |> validate_required(@tokens)
   end
 
+  def repositories_changeset(schema, params) do
+    schema
+    |> Mrgr.Repo.preload(:repositories)
+    |> cast(params, [])
+    |> cast_assoc(:repositories)
+  end
+
   # "access_tokens_url" => "https://api.github.com/app/installations/19872469/access_tokens",
   # "account" => %{
   # "avatar_url" => "https://avatars.githubusercontent.com/u/7728671?v=4",

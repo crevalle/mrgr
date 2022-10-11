@@ -13,9 +13,10 @@ defmodule Mrgr.Schema.IncomingWebhook do
     timestamps()
   end
 
+  @attrs [:source, :object, :action, :data, :installation_id, :headers]
+
   def changeset(schema, params \\ %{}) do
     schema
-    |> cast(params, [:source, :object, :action, :data, :installation_id, :headers])
-    |> foreign_key_constraint(:installation_id)
+    |> cast(params, @attrs)
   end
 end

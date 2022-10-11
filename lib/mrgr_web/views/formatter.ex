@@ -89,4 +89,7 @@ defmodule MrgrWeb.Formatter do
   def render_map(map) when is_map(map) do
     Jason.encode!(map, pretty: true)
   end
+
+  def tf(true), do: "🟢"
+  def tf(false), do: "⭕️"
 end

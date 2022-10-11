@@ -51,6 +51,14 @@ defmodule Mrgr.Github.API.Live do
     parse_into(result, Mrgr.Github.User)
   end
 
+  def fetch_repositories(installation) do
+    request!(
+      &Tentacat.Repositories.list_orgs/2,
+      installation,
+      [installation.account.login]
+    )
+  end
+
   def head_commit(merge, installation) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(merge.repository)
     sha = merge.head.sha

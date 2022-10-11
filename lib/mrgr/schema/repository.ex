@@ -5,6 +5,7 @@ defmodule Mrgr.Schema.Repository do
     field(:data, :map)
     field(:external_id, :integer)
     field(:full_name, :string)
+    field(:language, :string)
     field(:name, :string)
     field(:node_id, :string)
     field(:private, :boolean)
@@ -16,13 +17,14 @@ defmodule Mrgr.Schema.Repository do
 
     has_many(:merges, Mrgr.Schema.Merge)
 
-    has_many(:file_change_alerts, Mrgr.Schema.FileChangeAlert)
+    has_many(:file_change_alerts, Mrgr.Schema.FileChangeAlert, on_delete: :delete_all)
 
     timestamps()
   end
 
   @allowed ~w[
     full_name
+    language
     name
     node_id
     private

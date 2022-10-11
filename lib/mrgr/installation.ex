@@ -29,11 +29,11 @@ defmodule Mrgr.Installation do
   end
 
   def create_from_webhook(payload) do
-    installation = create_installation_from_webhook(payload)
-
-    hydrate_new_installation_data_from_github(installation)
-
-    {:ok, installation}
+    payload
+    |> create_installation()
+    |> create_repositories()
+    |> hydrate_new_installation_data_from_github()
+    |> Mrgr.Tuple.ok()
   end
 
   defp find_user_from_webhook_sender(payload) do
@@ -43,20 +43,32 @@ defmodule Mrgr.Installation do
     |> Mrgr.User.find()
   end
 
-  defp create_installation_from_webhook(payload) do
-    repository_params = payload["repositories"]
+  defp create_installation(payload) do
     creator = find_user_from_webhook_sender(payload)
 
     {:ok, installation} =
       payload
       |> Map.get("installation")
-      |> Map.merge(%{"creator_id" => creator.id, "repositories" => repository_params})
+      |> Map.merge(%{"creator_id" => creator.id})
       |> Mrgr.Schema.Installation.create_changeset()
       |> Mrgr.Repo.insert()
 
     Mrgr.User.set_current_installation(creator, installation)
 
     installation
+  end
+
+  def create_repositories(installation) do
+    # assumes repos have been deleted
+    repositories = fetch_repositories(installation)
+
+    installation
+    |> Mrgr.Schema.Installation.repositories_changeset(%{"repositories" => repositories})
+    |> Mrgr.Repo.update!()
+  end
+
+  def fetch_repositories(installation) do
+    Mrgr.Github.API.fetch_repositories(installation)
   end
 
   def hydrate_new_installation_data_from_github(installation) do
@@ -173,7 +185,10 @@ defmodule Mrgr.Installation do
 
   ### HELPERS
   def i do
-    Mrgr.Repo.all(Mrgr.Schema.Installation) |> List.first()
+    Mrgr.Schema.Installation
+    |> Mrgr.Repo.all()
+    |> List.first()
+    |> Mrgr.Repo.preload(:account)
   end
 
   def delete_all do

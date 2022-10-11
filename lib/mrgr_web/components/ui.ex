@@ -307,4 +307,35 @@ defmodule MrgrWeb.Components.UI do
       </span>
     """
   end
+
+  def language_icon(%{language: nil} = assigns) do
+    ~H()
+  end
+
+  def language_icon(assigns) do
+    name =
+      assigns.language
+      |> String.downcase()
+      |> String.replace("-", "")
+
+    src = language_icon_url(name)
+
+    assigns = assign(assigns, :src, src)
+
+    ~H"""
+      <img src={@src} class="ml-1 h-5 w-5"/>
+    """
+  end
+
+  defp language_icon_url("html" = name) do
+    "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{name}5/#{name}5-original.svg"
+  end
+
+  defp language_icon_url("objectivec" = name) do
+    "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{name}/#{name}-plain.svg"
+  end
+
+  defp language_icon_url(name) do
+    "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{name}/#{name}-original.svg"
+  end
 end
