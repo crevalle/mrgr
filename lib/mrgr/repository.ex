@@ -1,15 +1,16 @@
 defmodule Mrgr.Repository do
   alias Mrgr.Repository.Query
+  alias Mrgr.Schema.Repository, as: Schema
 
   def find_by_name_for_user(user, name) do
-    Mrgr.Schema.Repository
+    Schema
     |> Query.by_name(name)
     |> Query.for_user(user)
     |> Mrgr.Repo.one()
   end
 
   def for_user_with_rules(user) do
-    Mrgr.Schema.Repository
+    Schema
     |> Query.for_user(user)
     |> Query.order(asc: :name)
     |> Query.with_alert_rules()
@@ -17,7 +18,7 @@ defmodule Mrgr.Repository do
   end
 
   def find_for_user(user, ids) do
-    Mrgr.Schema.Repository
+    Schema
     |> Query.for_user(user)
     |> Query.by_ids(ids)
     |> Mrgr.Repo.all()
@@ -27,7 +28,7 @@ defmodule Mrgr.Repository do
     new_value = toggle(repo.merge_freeze_enabled)
 
     repo
-    |> Mrgr.Schema.Repository.merge_freeze_changeset(%{merge_freeze_enabled: new_value})
+    |> Schema.merge_freeze_changeset(%{merge_freeze_enabled: new_value})
     |> Mrgr.Repo.update!()
   end
 
@@ -56,7 +57,7 @@ defmodule Mrgr.Repository do
 
   defp create_merges_from_data(repo, data) do
     repo
-    |> Mrgr.Schema.Repository.create_merges_changeset(%{merges: data})
+    |> Schema.create_merges_changeset(%{merges: data})
     |> Mrgr.Repo.update!()
   end
 
