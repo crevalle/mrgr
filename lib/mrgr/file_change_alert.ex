@@ -23,12 +23,15 @@ defmodule Mrgr.FileChangeAlert do
 
   def matching_filenames(alert, merge) do
     filenames = merge.files_changed
-    pattern = alert.pattern
 
-    Enum.filter(filenames, &pattern_matches_filename?(&1, pattern))
+    Enum.filter(filenames, &pattern_matches_filename?(&1, alert))
   end
 
-  def pattern_matches_filename?(filename, pattern) do
+  def pattern_matches_filename?(filename, %Schema{pattern: pattern}) do
+    pattern_matches_filename?(filename, pattern)
+  end
+
+  def pattern_matches_filename?(filename, pattern) when is_bitstring(pattern) do
     PathGlob.match?(filename, pattern)
   end
 

@@ -5,6 +5,28 @@ defmodule MrgrWeb.Components.Merge do
 
   alias Mrgr.Schema.Merge
 
+  def changed_file_li(assigns) do
+    matching_alert =
+      Enum.find(
+        assigns.alerts,
+        &Mrgr.FileChangeAlert.pattern_matches_filename?(assigns.filename, &1)
+      )
+
+    highlight_color =
+      case matching_alert do
+        nil -> ""
+        alert -> "text-[#{alert.bg_color}]"
+      end
+
+    assigns =
+      assigns
+      |> assign(:highlight_color, highlight_color)
+
+    ~H"""
+      <li class={"pl-2 #{highlight_color}"}><pre><%= @filename %></pre></li>
+    """
+  end
+
   def recent_comment_count(assigns) do
     recent_comments = filter_recent_comments(assigns.comments)
 

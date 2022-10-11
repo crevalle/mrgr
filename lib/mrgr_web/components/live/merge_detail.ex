@@ -2,6 +2,8 @@ defmodule MrgrWeb.Components.Live.MergeDetail do
   use MrgrWeb, :live_component
   use Mrgr.PubSub.Event
 
+  import MrgrWeb.Components.Merge
+
   def handle_event("merge", %{"merge" => params}, socket) do
     id = String.to_integer(params["id"])
     message = params["message"]
