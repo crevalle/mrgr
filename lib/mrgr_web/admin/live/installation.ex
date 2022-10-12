@@ -4,49 +4,46 @@ defmodule MrgrWeb.Admin.Live.Installation do
 
   def render(assigns) do
     ~H"""
-    <div class="px-4 sm:px-6 lg:px-8">
-      <.heading title="Installations" />
+    <.heading title="Installations" />
 
-      <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
-        <div class="px-4 py-5 sm:px-6">
+    <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+      <div class="px-4 py-5 sm:px-6">
 
-          <div class="mt-1">
+        <div class="mt-1">
 
-            <table class="min-w-full">
-              <thead class="bg-white">
-                <tr>
-                  <.th uppercase={true}>ID</.th>
-                  <.th uppercase={true}>App ID</.th>
-                  <.th uppercase={true}>App Slug</.th>
-                  <.th uppercase={true}>Creator</.th>
-                  <.th uppercase={true}>Account</.th>
-                  <.th uppercase={true}>Repositories</.th>
-                  <.th uppercase={true}>Updated</.th>
-                  <.th uppercase={true}>Created</.th>
-                </tr>
-              </thead>
+          <table class="min-w-full">
+            <thead class="bg-white">
+              <tr>
+                <.th uppercase={true}>ID</.th>
+                <.th uppercase={true}>App ID</.th>
+                <.th uppercase={true}>App Slug</.th>
+                <.th uppercase={true}>Creator</.th>
+                <.th uppercase={true}>Account</.th>
+                <.th uppercase={true}>Repositories</.th>
+                <.th uppercase={true}>Updated</.th>
+                <.th uppercase={true}>Created</.th>
+              </tr>
+            </thead>
 
-              <%= for i <- @installations do %>
-                <.tr striped={true}>
-                  <.td><%= link i.id, to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, i.id), class: "text-teal-500" %></.td>
-                  <.td><%= i.app_id %></.td>
-                  <.td><%= i.app_slug %></.td>
-                  <.td><%= i.creator.nickname %></.td>
-                  <.td><%= i.account.login %></.td>
-                  <.td><%= Enum.count(i.repositories) %></.td>
-                  <.td><%= ts(i.updated_at, assigns.timezone) %></.td>
-                  <.td><%= ts(i.inserted_at, assigns.timezone) %></.td>
-                </.tr>
-              <% end %>
-            </table>
+            <%= for i <- @installations do %>
+              <.tr striped={true}>
+                <.td><%= link i.id, to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, i.id), class: "text-teal-500" %></.td>
+                <.td><%= i.app_id %></.td>
+                <.td><%= i.app_slug %></.td>
+                <.td><%= i.creator.nickname %></.td>
+                <.td><%= i.account.login %></.td>
+                <.td><%= Enum.count(i.repositories) %></.td>
+                <.td><%= ts(i.updated_at, assigns.timezone) %></.td>
+                <.td><%= ts(i.inserted_at, assigns.timezone) %></.td>
+              </.tr>
+            <% end %>
+          </table>
 
-
-          </div>
 
         </div>
+
       </div>
     </div>
-
     """
   end
 

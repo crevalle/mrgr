@@ -3,17 +3,15 @@ defmodule MrgrWeb.Admin.Live.User do
 
   def render(assigns) do
     ~H"""
-    <div class="px-4 sm:px-6 lg:px-8">
-      <.heading title="Users" />
+    <.heading title="Users" />
 
-      <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
-        <div class="px-4 py-5 sm:px-6">
+    <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+      <div class="px-4 py-5 sm:px-6">
 
-          <div class="mt-1">
-            <.admin_user_table users={@users} tz={@timezone} ./>
-          </div>
-
+        <div class="mt-1">
+          <.admin_user_table users={@users} tz={@timezone} ./>
         </div>
+
       </div>
     </div>
     """

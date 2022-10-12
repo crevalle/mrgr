@@ -1,134 +1,132 @@
-<div class="">
-  <div class="flex justify-between">
-    <.heading title="Pending Merges" />
+<div class="flex justify-between">
+  <.heading title="Pending Merges" />
 
-    <div class="relative inline-block text-left">
-      <div>
+  <div class="relative inline-block text-left">
+    <div>
 
-        <.button :if={admin?(@current_user)} phx-click="refresh" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500"> Refresh PRs</.button>
-        <.button phx-click={JS.toggle(
-            to: "#merge-freeze-menu",
-            in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
-            out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
-          )}
-          colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
-          id="menu-button"
-          aria-expanded="false"
-          aria-haspopup="true">
-          Freeze Merging
-          <.icon name="chevron-down" class="-mr-1 ml-2 h-5 w-5" />
-        </.button>
-      </div>
+      <.button :if={admin?(@current_user)} phx-click="refresh" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500"> Refresh PRs</.button>
+      <.button phx-click={JS.toggle(
+          to: "#merge-freeze-menu",
+          in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
+          out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
+        )}
+        colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+        id="menu-button"
+        aria-expanded="false"
+        aria-haspopup="true">
+        Freeze Merging
+        <.icon name="chevron-down" class="-mr-1 ml-2 h-5 w-5" />
+      </.button>
+    </div>
 
-      <div style="display: none;" id="merge-freeze-menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
-        <div class="py-1" role="none">
-          <%= for r <- @repos do %>
-            <%= link to: "#", phx_click: "toggle-merge-freeze", phx_value_repo_id: r.id, data_confirm: "Sure about that?", class: "text-gray-700 block my-2 text-sm outline-none", role: "menuitem", tabindex: "-1", id: "repo-menu-item-#{r.id}" do %>
-              <div class="flex items-center hover:bg-gray-50">
-                <div class="basis-8 text-blue-400 ml-2">
-                  <%= if r.merge_freeze_enabled do %>
-                  ❄️
-                  <% end %>
-                </div>
-                <%= r.name %>
+    <div style="display: none;" id="merge-freeze-menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+      <div class="py-1" role="none">
+        <%= for r <- @repos do %>
+          <%= link to: "#", phx_click: "toggle-merge-freeze", phx_value_repo_id: r.id, data_confirm: "Sure about that?", class: "text-gray-700 block my-2 text-sm outline-none", role: "menuitem", tabindex: "-1", id: "repo-menu-item-#{r.id}" do %>
+            <div class="flex items-center hover:bg-gray-50">
+              <div class="basis-8 text-blue-400 ml-2">
+                <%= if r.merge_freeze_enabled do %>
+                ❄️
+                <% end %>
               </div>
-            <% end %>
+              <%= r.name %>
+            </div>
           <% end %>
-        </div>
+        <% end %>
       </div>
     </div>
   </div>
+</div>
 
 
-  <%= if Enum.count(@frozen_repos) > 0 do %>
-    <div class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50">
+<%= if Enum.count(@frozen_repos) > 0 do %>
+  <div class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50">
 
-      <.h3 color="text-blue-600">❄️ There is a Merge Freeze in effect❄️</.h3>
-      <p class="my-3">PR merging is disabled for the following repos:</p>
-      <ul class="list-disc my-3 mx-6">
-        <%= for r <- @frozen_repos do %>
-          <li>
-            <%= r.name %>
-          </li>
-        <% end %>
-      </ul>
+    <.h3 color="text-blue-600">❄️ There is a Merge Freeze in effect❄️</.h3>
+    <p class="my-3">PR merging is disabled for the following repos:</p>
+    <ul class="list-disc my-3 mx-6">
+      <%= for r <- @frozen_repos do %>
+        <li>
+          <%= r.name %>
+        </li>
+      <% end %>
+    </ul>
 
-      <p class="my-3">To resume merging for these repos, disable the Merge Freeze.</p>
+    <p class="my-3">To resume merging for these repos, disable the Merge Freeze.</p>
 
-    </div>
-  <% end %>
+  </div>
+<% end %>
 
-  <div class="flex mt-8 space-x-4">
-    <%= if @pending_merges == [] do %>
-      Nothing yet!  Why don't you get some work done? 😊
-    <% else %>
-      <div class="basis-1/2 bg-white px-2 py-5 sm:px-6 overflow-hidden shadow rounded-lg">
+<div class="flex mt-8 space-x-4">
+  <%= if @pending_merges == [] do %>
+    Nothing yet!  Why don't you get some work done? 😊
+  <% else %>
+    <div class="basis-1/2 bg-white px-2 py-5 sm:px-6 overflow-hidden shadow rounded-lg">
 
-        <div class="shadow overflow-hidden sm:rounded-md" phx-hook="Drag" id="drag">
+      <div class="shadow overflow-hidden sm:rounded-md" phx-hook="Drag" id="drag">
 
-          <ul role="list" class="divide-y divide-gray-200 dropzone" id="pending-merge-list">
-            <%= for merge <- @pending_merges do %>
-              <li draggable="true" class="draggable merge-list" id={"merge-#{merge.id}"}>
-                <%= link to: "#", phx_click: "show-preview", phx_value_merge_id: merge.id, class: "text-sm font-medium text-teal-500 truncate" do %>
-                  <div class="block hover:bg-gray-50">
-                    <div class="px-4 py-4 sm:px-6">
-                      <div class="flex items-center justify-between">
-                        <div class="flex items-baseline">
-                          <.h3><%= merge.title %></.h3>
-                          <p class={"ml-2 text-sm italic font-light #{repo_text_color(@repos, merge.repository)}"}>
-                            <%= merge.repository.name %>
-                          </p>
-                        </div>
-                        <div class="ml-2 flex-shrink-0 flex">
-                          <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                            <p class="truncate max-w-xs">
-                              "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
-                            </p>
-                          </div>
-                        </div>
+        <ul role="list" class="divide-y divide-gray-200 dropzone" id="pending-merge-list">
+          <%= for merge <- @pending_merges do %>
+            <li draggable="true" class="draggable merge-list" id={"merge-#{merge.id}"}>
+              <%= link to: "#", phx_click: "show-preview", phx_value_merge_id: merge.id, class: "text-sm font-medium text-teal-500 truncate" do %>
+                <div class="block hover:bg-gray-50">
+                  <div class="px-4 py-4 sm:px-6">
+                    <div class="flex items-center justify-between">
+                      <div class="flex items-baseline">
+                        <.h3><%= merge.title %></.h3>
+                        <p class={"ml-2 text-sm italic font-light #{repo_text_color(@repos, merge.repository)}"}>
+                          <%= merge.repository.name %>
+                        </p>
                       </div>
-                      <div class="mt-2 sm:flex sm:justify-between">
-                        <div class="sm:flex items-center">
-                          <%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: merge}) %>
-                          <.me_tag merge={merge} current_user={@current_user} />
-                        </div>
+                      <div class="ml-2 flex-shrink-0 flex">
                         <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                          <p>
-                            <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
-                          </p>
-                        </div>
-                      </div>
-                      <div class="mt-2 sm:flex sm:justify-between items-start">
-                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                          <p>
-                          Opened <.timeago
-                             datetime={merge.opened_at}
-                             uhoh={true}
-                             ./>
-                          </p>
-                          <p :if={Mrgr.Checklist.complete?(merge.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
-                          <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                            <.recent_comment_sparkline comments={merge.comments} />
-                          </p>
-                        </div>
-                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                          <p>
-                            <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
+                          <p class="truncate max-w-xs">
+                            "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
                           </p>
                         </div>
                       </div>
                     </div>
+                    <div class="mt-2 sm:flex sm:justify-between">
+                      <div class="sm:flex items-center">
+                        <%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: merge}) %>
+                        <.me_tag merge={merge} current_user={@current_user} />
+                      </div>
+                      <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                        <p>
+                          <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
+                        </p>
+                      </div>
+                    </div>
+                    <div class="mt-2 sm:flex sm:justify-between items-start">
+                      <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                        <p>
+                        Opened <.timeago
+                           datetime={merge.opened_at}
+                           uhoh={true}
+                           ./>
+                        </p>
+                        <p :if={Mrgr.Checklist.complete?(merge.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
+                        <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                          <.recent_comment_sparkline comments={merge.comments} />
+                        </p>
+                      </div>
+                      <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                        <p>
+                          <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                <% end %>
-              </li>
-            <% end %>
-          </ul>
+                </div>
+              <% end %>
+            </li>
+          <% end %>
+        </ul>
 
-        </div>
       </div>
-    <% end %>
+    </div>
+  <% end %>
 
-    <.live_component :if={@selected_merge} module={MrgrWeb.Components.Live.MergeDetail} id="merge_detail" merge={@selected_merge} current_user={@current_user} frozen_repos={@frozen_repos} timezone={@timezone} />
-  </div>
+  <.live_component :if={@selected_merge} module={MrgrWeb.Components.Live.MergeDetail} id="merge_detail" merge={@selected_merge} current_user={@current_user} frozen_repos={@frozen_repos} timezone={@timezone} />
 </div>
 
