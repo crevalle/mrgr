@@ -29,7 +29,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
       </:icon>
 
       <:detail>
-        <%= MrgrWeb.Components.Merge.file_change_badges(%{merge: @payload}) %>
+        <%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: @payload}) %>
       </:detail>
     </.event>
     """

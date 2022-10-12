@@ -57,7 +57,7 @@ defmodule MrgrWeb.Router do
 
     live "/pending-merges", PendingMergeLive, :index
     live "/pending-merges/:id", PendingMergeLive, :show
-    resources "/file-change-alerts", FileChangeAlertController, only: [:index, :edit]
+    live "/file-change-alerts", FileChangeAlertLive, :index
 
     live "/checklists", Live.Checklist, :index, as: :checklist
 

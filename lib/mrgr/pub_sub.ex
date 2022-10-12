@@ -1,4 +1,10 @@
 defmodule Mrgr.PubSub do
+  def subscribe_to_installation(user) do
+    user
+    |> Mrgr.PubSub.Topic.installation()
+    |> subscribe()
+  end
+
   def subscribe(topic) do
     Phoenix.PubSub.subscribe(__MODULE__, topic)
   end

@@ -23,7 +23,7 @@ defmodule MrgrWeb.Components.Merge do
       |> assign(:highlight_color, highlight_color)
 
     ~H"""
-      <li class={"pl-2 #{highlight_color}"}><pre><%= @filename %></pre></li>
+      <li class={"pl-2 #{@highlight_color}"}><pre><%= @filename %></pre></li>
     """
   end
 
@@ -87,24 +87,6 @@ defmodule MrgrWeb.Components.Merge do
         </div>
       </div>
     </li>
-    """
-  end
-
-  def file_change_badges(assigns) do
-    ~H"""
-      <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
-        <%= for alert <- Mrgr.FileChangeAlert.for_merge(@merge) do %>
-          <.file_change_badge bg={alert.bg_color}><%= alert.badge_text %></.file_change_badge>
-        <% end %>
-      </div>
-    """
-  end
-
-  def file_change_badge(%{bg: _} = assigns) do
-    ~H"""
-      <span style={"background-color: #{@bg}; color: rgb(75 85 99);"} class={"px-2 inline-flex text-xs leading-5 font-semibold rounded-full"}>
-        <%= render_slot(@inner_block) %>
-      </span>
     """
   end
 

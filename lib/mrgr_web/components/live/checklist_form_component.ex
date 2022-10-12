@@ -10,7 +10,7 @@ defmodule MrgrWeb.Components.Live.ChecklistFormComponent do
             <.h1>Create a Merge Checklist</.h1>
           </div>
           <button phx-click="close-detail" colors="outline-none">
-            <.icon name="x" class="text-gray-400 mr-1 h-5 w-5" />
+            <.icon name="x-circle" class="text-gray-400 mr-1 h-5 w-5" />
           </button>
         </div>
 

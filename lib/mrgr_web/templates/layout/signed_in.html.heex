@@ -126,7 +126,9 @@
           <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
         <% end %>
 
-        <%= @inner_content %>
+        <div class="m-4 sm:mx-6 lg:mx-8">
+          <%= @inner_content %>
+        </div>
       </div>
     </main>
     <footer class="mt-auto">

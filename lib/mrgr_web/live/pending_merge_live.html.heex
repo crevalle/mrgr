@@ -1,4 +1,4 @@
-<div class="px-4 pt-4 sm:px-6 lg:px-8">
+<div class="">
   <div class="flex justify-between">
     <.heading title="Pending Merges" />
 
@@ -89,7 +89,7 @@
                       </div>
                       <div class="mt-2 sm:flex sm:justify-between">
                         <div class="sm:flex items-center">
-                          <%= MrgrWeb.Components.Merge.file_change_badges(%{merge: merge}) %>
+                          <%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: merge}) %>
                           <.me_tag merge={merge} current_user={@current_user} />
                         </div>
                         <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
