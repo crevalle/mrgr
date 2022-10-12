@@ -4,7 +4,7 @@
   <div class="relative inline-block text-left">
     <div>
 
-      <.button :if={admin?(@current_user)} phx-click="refresh" colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500"> Refresh PRs</.button>
+      <.button :if={admin?(@current_user)} phx-click="refresh" colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">Refresh PRs</.button>
       <.button phx-click={JS.toggle(
           to: "#merge-freeze-menu",
           in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
@@ -68,7 +68,7 @@
         <ul role="list" class="divide-y divide-gray-200 dropzone" id="pending-merge-list">
           <%= for merge <- @pending_merges do %>
             <li draggable="true" class="draggable merge-list" id={"merge-#{merge.id}"}>
-              <%= link to: "#", phx_click: "show-preview", phx_value_merge_id: merge.id, class: "text-sm font-medium text-teal-500 truncate" do %>
+              <%= link to: "#", phx_click: "show-preview", phx_value_merge_id: merge.id, class: "text-sm font-medium" do %>
                 <div class="block hover:bg-gray-50">
                   <div class="px-4 py-4 sm:px-6">
                     <div class="flex items-center justify-between">

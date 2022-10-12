@@ -206,7 +206,7 @@ defmodule MrgrWeb.Components.UI do
 
         <%= for user <- @users do %>
           <.tr striped={true}>
-            <.td><%= link user.id, to: Routes.admin_user_path(MrgrWeb.Endpoint, :show, user.id), class: "text-teal-500" %></.td>
+            <.td><%= link user.id, to: Routes.admin_user_path(MrgrWeb.Endpoint, :show, user.id), class: "text-teal-700 hover:text-teal-500" %></.td>
             <.td><%= link_to_installation(user) %></.td>
             <.td><%= user.nickname %></.td>
             <.td><%= user.name %></.td>
@@ -255,7 +255,7 @@ defmodule MrgrWeb.Components.UI do
 
     opts = [
       to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, installation_id),
-      class: "text-teal-500"
+      class: "text-teal-700 hover:text-teal-500"
     ]
 
     link(title, opts)

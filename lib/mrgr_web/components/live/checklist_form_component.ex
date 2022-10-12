@@ -38,15 +38,15 @@ defmodule MrgrWeb.Components.Live.ChecklistFormComponent do
             <% end %>
           </div>
           <div class="flex items-center mt-1">
-            <.icon name="plus-circle" class="text-teal-500 mr-1 flex-shrink-0 h-6 w-6" />
-            <a href="#" phx-click="add-check-template" class="text-teal-500">Add Another Check</a>
+            <.icon name="plus-circle" class="text-teal-700 hover:text-teal-500 mr-1 flex-shrink-0 h-6 w-6" />
+            <a href="#" phx-click="add-check-template" class="text-teal-700 hover:text-teal-500">Add Another Check</a>
           </div>
 
           <div class="flex flex-col my-1">
             <.subheading title="Apply to Repositories">
               <:description>
                 This checklist will apply to ALL merges in the repos you select.
-                <%= link "Toggle All/None", to: "#", phx_click: "toggle-all-repositories", class: "text-teal-500" %>
+                <%= link "Toggle All/None", to: "#", phx_click: "toggle-all-repositories", class: "text-teal-700 hover:text-teal-500" %>
               </:description>
             </.subheading>
 
@@ -60,7 +60,7 @@ defmodule MrgrWeb.Components.Live.ChecklistFormComponent do
 
           </div>
           <div class="flex items-end">
-            <.button submit={true} phx_disable_with="Saving..." colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500">
+            <.button submit={true} phx_disable_with="Saving..." colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">
               Save
             </.button>
           </div>

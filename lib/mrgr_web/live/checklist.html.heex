@@ -18,7 +18,7 @@
   <div class="basis-1/2 bg-white px-2 py-5 sm:px-6 overflow-hidden shadow rounded-lg">
     <%= if Enum.empty?(@templates) do %>
       <p>
-        None yet!  Why don't you <a href="#" phx-click="open-add-form" class="text-teal-500">Add One</a>?
+        None yet!  Why don't you <a href="#" phx-click="open-add-form" class="text-teal-700 hover:text-teal-500">Add One</a>?
       </p>
     <% else %>
 
@@ -26,7 +26,7 @@
         <ul role="list" class="divide-y divide-gray-200">
           <%= for template <- @templates do %>
             <li >
-              <%= link to: "#", phx_click: "show-detail", phx_value_id: template.id, class: "text-sm font-medium text-teal-500 truncate" do %>
+              <%= link to: "#", phx_click: "show-detail", phx_value_id: template.id, class: "text-sm font-medium" do %>
                 <div class="block hover:bg-gray-50">
                   <div class="px-4 py-4 sm:px-6">
                     <div class="flex items-center justify-between">

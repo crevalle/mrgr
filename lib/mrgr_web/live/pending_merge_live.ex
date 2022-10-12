@@ -41,6 +41,12 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply()
   end
 
+  def handle_event("close-detail", _params, socket) do
+    socket
+    |> assign(:selected_merge, nil)
+    |> noreply()
+  end
+
   def handle_event("dropped", %{"draggedId" => id, "draggableIndex" => index}, socket) do
     dragged = find_dragged(socket.assigns.pending_merges, get_id(id))
 

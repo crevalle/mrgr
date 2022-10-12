@@ -27,7 +27,7 @@ defmodule MrgrWeb.Admin.Live.Installation do
 
             <%= for i <- @installations do %>
               <.tr striped={true}>
-                <.td><%= link i.id, to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, i.id), class: "text-teal-500" %></.td>
+                <.td><%= link i.id, to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, i.id), class: "text-teal-700 hover:text-teal-500" %></.td>
                 <.td><%= i.app_id %></.td>
                 <.td><%= i.app_slug %></.td>
                 <.td><%= i.creator.nickname %></.td>

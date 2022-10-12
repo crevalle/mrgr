@@ -29,18 +29,18 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
             <%= for r <- @requests do %>
               <.tr striped={true}>
                 <.td><%= r.id %></.td>
-                <.td><%= link r.installation.account.login, to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, r.installation_id), class: "text-teal-500" %></.td>
+                <.td><%= link r.installation.account.login, to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, r.installation_id), class: "text-teal-700 hover:text-teal-500" %></.td>
                 <.td><%= r.api_call %></.td>
                 <.td><%= r.response_code %></.td>
                 <.td><%= r.elapsed_time %></.td>
                 <.td>
-                  <button phx-click="show-modal" phx-value-id={"data-modal-#{r.id}"} class="text-teal-500">
+                  <button phx-click="show-modal" phx-value-id={"data-modal-#{r.id}"} class="text-teal-700 hover:text-teal-600">
                     Show
                   </button>
                   <.live_component module={MrgrWeb.Components.Live.JSONModalComponent} id={"data-modal-#{r.id}"} title={"Request #{r.id} Data"} data={r.data} ./>
                 </.td>
                 <.td>
-                  <button phx-click="show-modal" phx-value-id={"headers-modal-#{r.id}"} class="text-teal-500">
+                  <button phx-click="show-modal" phx-value-id={"headers-modal-#{r.id}"} class="text-teal-700 hover:text-teal-600">
                     Show
                   </button>
                   <.live_component module={MrgrWeb.Components.Live.JSONModalComponent} id={"headers-modal-#{r.id}"} title={"Request #{r.id} Response Headers"} data={r.response_headers} ./>

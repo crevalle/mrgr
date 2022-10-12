@@ -25,13 +25,13 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
 
             <%= for hook <- @incoming_webhooks do %>
               <.tr striped={true}>
-                <.td><%= link hook.id, to: Routes.admin_incoming_webhook_path(@socket, :show, hook.id), class: "text-teal-500" %></.td>
+                <.td><%= link hook.id, to: Routes.admin_incoming_webhook_path(@socket, :show, hook.id), class: "text-teal-700 hover:text-teal-500" %></.td>
                 <.td><%= hook.installation_id %></.td>
                 <.td><%= hook.object %></.td>
                 <.td><%= hook.action %></.td>
                 <.td><%= ts(hook.inserted_at, assigns.timezone) %></.td>
                 <.td>
-                  <.button phx-click="fire" phx-value-id={hook.id} phx_disable_with="Firing 🚀..." colors="bg-emerald-600 hover:bg-emerald-700 focus:ring-emerald-500">Fire!</.button>
+                  <.button phx-click="fire" phx-value-id={hook.id} phx_disable_with="Firing 🚀..." colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">Fire!</.button>
                 </.td>
               </.tr>
             <% end %>
