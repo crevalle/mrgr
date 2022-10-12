@@ -2,8 +2,6 @@ defmodule MrgrWeb.FileChangeAlertLive do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  import MrgrWeb.Components.FileChangeAlert
-
   def mount(_params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
       current_user = MrgrWeb.Plug.Auth.find_user(user_id)
