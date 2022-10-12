@@ -1,0 +1,12 @@
+<div class="px-4 pt-4 sm:px-6 lg:px-8">
+  <.heading title="File Change Alerts" description="Add alerts based on custom file or folder names." />
+
+  <div class="mt-8 flex">
+    <div class="basis-1/2 py-5 align-middle">
+      <%= for repo <- @repos do %>
+        <.live_component module={MrgrWeb.Components.Live.FileChangeAlertComponent} id={"repo_#{repo.id}"} repo={repo} timezone={@timezone} />
+      <% end %>
+    </div>
+  </div>
+</div>
+

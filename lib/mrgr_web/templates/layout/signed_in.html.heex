@@ -1,4 +1,4 @@
-<div class="h-full bg-stone-50">
+<div class="h-full">
   <!-- Off-canvas menu for mobile, show/hide based on off-canvas menu state. -->
   <div class="relative z-40 md:hidden" role="dialog" aria-modal="true">
     <!--
@@ -116,7 +116,7 @@
   <div class="md:pl-72 flex flex-col flex-1 min-h-screen">
     <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.NavBar, session: %{"user_id" => @conn.assigns.current_user.id} %>
 
-    <main class="flex-1">
+    <main class="flex-1 bg-stone-50">
       <div class="">
         <%= if Map.get(@conn.assigns, :live_module) do %>
           <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>

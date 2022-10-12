@@ -1,0 +1,48 @@
+<div class="my-4 overflow-hidden shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+  <!-- header row with Add New -->
+  <div class="flex items-center justify-between bg-gray-100 py-3.5 pl-6 pr-4 text-left text-sm font-semibold text-gray-900">
+    <div class="flex">
+      <span><%= @repo.name %></span>
+      <.language_icon language={@repo.language} />
+    </div>
+    <div class="pr-2">
+      <%= link to: "#", class: "flex items-center font-light text-teal-500" do %>
+        <.icon name="plus-circle" class="mr-1 flex-shrink-0 h-6 w-6" />
+        Add Alert
+      <% end %>
+    </div>
+  </div>
+
+  <table class="min-w-full">
+    <thead :if={Enum.any?(@repo.file_change_alerts)}>
+      <tr class="border-t border-gray-200">
+        <th class="pl-6 py-2 text-left text-sm font-light text-gray-400">File Pattern</th>
+        <th class="py-2 text-left text-sm font-light text-gray-400">Badge</th>
+        <th class="py-2 text-center text-sm font-light text-gray-400">Notify me of new Merges?</th>
+        <th class="py-2 text-left text-sm font-light text-gray-400"></th>
+      </tr>
+    </thead>
+
+    <tbody class="bg-white">
+      <%= for alert <- @repo.file_change_alerts do %>
+        <tr class="border-t border-gray-300">
+          <td class="whitespace-nowrap pl-6 py-2 text-sm font-medium text-gray-900">
+            <pre><%= alert.pattern %></pre>
+          </td>
+          <td class="whitespace-nowrap py-2 text-sm text-gray-500">
+            <MrgrWeb.Components.Merge.file_change_badge bg={alert.bg_color}>
+              <%= alert.badge_text %>
+            </MrgrWeb.Components.Merge.file_change_badge>
+          </td>
+          <td class="text-center">
+            <%= tf(alert.notify_user) %>
+          </td>
+          <td class="whitespace-nowrap pr-4 py-2 text-right text-sm font-medium">
+              <%= link "Edit", to: Routes.file_change_alert_path(MrgrWeb.Endpoint, :edit, @repo.name), class: "text-teal-500 px-2 py-2 text-sm font-medium rounded-md" %>
+          </td>
+        </tr>
+
+      <% end %>
+    </tbody>
+  </table>
+</div>
