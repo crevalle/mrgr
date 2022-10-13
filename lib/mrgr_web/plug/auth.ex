@@ -2,12 +2,26 @@ defmodule MrgrWeb.Plug.Auth do
   import Plug.Conn
 
   def on_mount(:default, _session, params, socket) do
-    case find_user(params["user_id"]) do
-      %Mrgr.Schema.User{} = user ->
-        user = record_seen!(user)
-        {:cont, Phoenix.Socket.assign(socket, :current_user, user)}
+    socket =
+      Phoenix.Component.assign_new(socket, :current_user, fn ->
+        look_for_user(params["user_id"])
+      end)
 
-      _nope ->
+    case socket.assigns.current_user do
+      %Mrgr.Schema.User{} = user ->
+        {:cont, socket}
+
+      nil ->
+        {:halt, socket}
+    end
+  end
+
+  def on_mount(:admin, _session, params, socket) do
+    case admin?(socket.assigns.current_user) do
+      true ->
+        {:cont, socket}
+
+      false ->
         {:halt, socket}
     end
   end
@@ -29,8 +43,7 @@ defmodule MrgrWeb.Plug.Auth do
   @spec authenticate_user(Plug.Conn.t(), list()) :: Plug.Conn.t()
   def authenticate_user(conn, _opts) do
     with user_id when not is_nil(user_id) <- get_session(conn, :user_id),
-         %Mrgr.Schema.User{} = user <- find_user(user_id) do
-      user = record_seen!(user)
+         %Mrgr.Schema.User{} = user <- look_for_user(user_id) do
       assign(conn, :current_user, user)
     else
       _bogus ->
@@ -67,9 +80,11 @@ defmodule MrgrWeb.Plug.Auth do
   def admin?(%{nickname: "desmondmonster"}), do: true
   def admin?(_), do: false
 
-  @spec find_user(integer) :: Mrgr.Schema.User.t() | nil
-  def find_user(id) do
-    Mrgr.User.find_with_current_installation(id)
+  @spec look_for_user(integer) :: Mrgr.Schema.User.t() | nil
+  def look_for_user(id) do
+    with %Mrgr.Schema.User{} = user <- Mrgr.User.find_with_current_installation(id) do
+      record_seen!(user)
+    end
   end
 
   def record_seen!(user) do

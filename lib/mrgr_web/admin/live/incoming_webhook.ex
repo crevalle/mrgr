@@ -2,6 +2,9 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
+  on_mount MrgrWeb.Plug.Auth
+  on_mount {MrgrWeb.Plug.Auth, :admin}
+
   def render(assigns) do
     ~H"""
     <.heading title="Webhooks we've Received" />

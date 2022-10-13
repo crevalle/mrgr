@@ -19,19 +19,12 @@ defmodule MrgrWeb.AuthController do
   # user sign in
   def callback(conn, %{"code" => code}) do
     # Exchange an auth code for an access token
-    %{token: token} =
-      client =
-      Auth.GitHub.get_token!(code: code)
-      |> IO.inspect(label: "CLIENT")
+    %{token: token} = client = Auth.GitHub.get_token!(code: code)
 
     # Request the user's data with the access token
     case OAuth2.Client.get(client, "/user") do
       {:ok, %OAuth2.Response{body: data}} ->
-        IO.inspect(data, label: "*** GITHUB DATA")
-
         user = Mrgr.User.find_or_create_from_github(data, token)
-
-        IO.inspect("**** a ok")
 
         conn
         |> sign_in(user)
@@ -39,15 +32,11 @@ defmodule MrgrWeb.AuthController do
         |> redirect(to: post_sign_in_path(conn, user))
 
       {:error, %OAuth2.Response{body: body}} ->
-        IO.inspect("OAuth Error: code #{code} #{inspect(body)}")
-
         conn
         |> put_flash(:info, "Sorry, OAuth expired.  Please log in again.")
         |> redirect(to: Routes.auth_path(conn, :github))
 
       {:error, %OAuth2.Error{reason: reason}} ->
-        IO.inspect("OAuth Error: code #{code} #{inspect(reason)}")
-
         conn
         |> put_flash(:info, "Sorry, OAuth expired.  Please log in again.")
         |> redirect(to: Routes.auth_path(conn, :github))

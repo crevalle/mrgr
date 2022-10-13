@@ -2,22 +2,20 @@ defmodule MrgrWeb.Live.ActivityFeed do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
+  on_mount MrgrWeb.Plug.Auth
+
   def mount(_params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
-      current_user = MrgrWeb.Plug.Auth.find_user(user_id)
+      current_user = socket.assigns.current_user
       items = load_items(current_user)
 
       subscribe(current_user)
 
       socket
-      |> assign(:current_user, current_user)
       |> assign(:items, items)
       |> ok()
     else
-      socket
-      |> assign(:current_user, nil)
-      |> assign(:items, [])
-      |> ok()
+      ok(socket)
     end
   end
 

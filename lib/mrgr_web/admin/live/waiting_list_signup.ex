@@ -3,6 +3,9 @@ defmodule MrgrWeb.Admin.Live.WaitingListSignup do
 
   require Ecto.Query
 
+  on_mount MrgrWeb.Plug.Auth
+  on_mount {MrgrWeb.Plug.Auth, :admin}
+
   def mount(_params, _session, socket) do
     if connected?(socket) do
       signups =
