@@ -45,7 +45,7 @@ defmodule MrgrWeb.Components.UI do
       end
 
     class =
-      "inline-flex items-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 #{colors}"
+      "inline-flex items-center py-2 px-4 border border-transparent shadow-md text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 #{colors}"
 
     type = if assigns[:submit], do: "submit", else: false
 

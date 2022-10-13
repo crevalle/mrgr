@@ -13,7 +13,7 @@ defmodule MrgrWeb.Components.Form do
     defaults = [
       rows: 4,
       class:
-        "shadow-sm border-emerald-100 focus:ring-emerald-500 focus:border-emerald-500 block w-full sm:text-sm border-gray-300 rounded-md"
+        "shadow-inner border-emerald-100 focus:ring-emerald-500 focus:border-emerald-500 block w-full sm:text-sm border-gray-300 rounded-md"
     ]
 
     assigns =
@@ -55,7 +55,7 @@ defmodule MrgrWeb.Components.Form do
       |> assign_new(:value, fn -> Phoenix.HTML.Form.input_value(assigns.f, assigns.field) end)
       |> assign_new(:secondary, fn -> [] end)
       |> assign_new(:common_styles, fn ->
-        "max-w-lg block w-full sm:max-w-xs sm:text-sm rounded-md"
+        "max-w-lg block w-full sm:max-w-xs sm:text-sm shadow-inner rounded-md"
       end)
       |> assign_new(:error_styles, fn ->
         "pr-10 border-red-300 text-red-900 placeholder-red-300 focus:outline-none focus:ring-red-500 focus:border-red-500"
