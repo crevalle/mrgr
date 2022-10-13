@@ -48,7 +48,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
         </svg>
       </:icon>
       <:detail>
-        <%= @payload["head_commit"]["message"] %>
+        <%= quote_if_present(@payload["head_commit"]["message"]) %>
       </:detail>
     </.event>
     """
@@ -56,19 +56,19 @@ defmodule MrgrWeb.Components.ActivityComponent do
 
   def event(assigns) do
     ~H"""
-    <li class="p-2">
+    <li class="py-4">
       <div class="flex space-x-3">
-        <div class="flex flex-col space-y-1">
+        <div class="flex flex-col space-y-2">
           <img class="h-6 w-6 rounded-full" src={"#{@avatar_url}"} alt="">
           <p class="text-sm text-gray-500"><%= render_slot(@icon) %></p>
         </div>
-        <div class="flex-1 space-y-1">
+        <div class="flex-1 space-y-2">
           <div class="flex items-center justify-between">
             <h3 class="text-sm font-medium"><%= @name %></h3>
             <p class="text-sm text-gray-500"><%= @at %></p>
           </div>
           <p class="text-sm text-gray-500"><%= render_slot(@description) %></p>
-          <p class="text-sm text-gray-500"><%= render_slot(@detail) %></p>
+          <p class="text-sm text-gray-500 italic"><%= render_slot(@detail) %></p>
         </div>
       </div>
     </li>

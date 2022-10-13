@@ -62,13 +62,15 @@ defmodule MrgrWeb.Live.ActivityFeed do
 
   def render(assigns) do
     ~H"""
-    <div>
-      <.h3>Latest Activity</.h3>
-      <ul role="list" class="divide-y divide-gray-200">
-        <%= for %{event: e, payload: p} <- @items do %>
-          <MrgrWeb.Components.ActivityComponent.render event={e} payload={p} tz={@timezone}) />
-        <% end %>
-      </ul>
+    <div class="shadow-inner">
+      <div class="mx-2">
+        <.h3>Latest Activity</.h3>
+        <ul role="list" class="divide-y divide-gray-200">
+          <%= for %{event: e, payload: p} <- @items do %>
+            <MrgrWeb.Components.ActivityComponent.render event={e} payload={p} tz={@timezone}) />
+          <% end %>
+        </ul>
+      </div>
     </div>
     """
   end

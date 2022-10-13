@@ -92,4 +92,7 @@ defmodule MrgrWeb.Formatter do
 
   def tf(true), do: "🟢"
   def tf(false), do: "⭕️"
+
+  def quote_if_present(nil), do: nil
+  def quote_if_present(str), do: ~s("#{str}")
 end
