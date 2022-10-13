@@ -12,18 +12,18 @@ defmodule MrgrWeb.Components.Merge do
         &Mrgr.FileChangeAlert.pattern_matches_filename?(assigns.filename, &1)
       )
 
-    highlight_color =
+    color =
       case matching_alert do
-        nil -> ""
-        alert -> "text-[#{alert.bg_color}]"
+        nil -> "transparent"
+        alert -> alert.bg_color
       end
 
     assigns =
       assigns
-      |> assign(:highlight_color, highlight_color)
+      |> assign(:color, color)
 
     ~H"""
-      <li class={"pl-2 #{@highlight_color}"}><pre><%= @filename %></pre></li>
+      <li style={"border-color: #{color};"} class="pl-2 border-l-2"><pre><%= @filename %></pre></li>
     """
   end
 
