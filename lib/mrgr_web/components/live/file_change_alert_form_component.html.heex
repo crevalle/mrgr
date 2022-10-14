@@ -51,9 +51,9 @@
         </div>
 
         <div class="pt-5">
-          <div class="flex space-x-4 justify-end">
+          <div class="flex space-x-4 justify-end items-center">
             <%= if @form.action == :edit do %>
-              <%= link "Delete", to: "#", phx_click: "delete-alert", data: [confirm: "Sure about that?"], class: "text-teal-700 hover:text-teal-500 px-4 py-2 text-base sm:text-sm" %>
+              <%= link "Delete", to: "#", phx_click: "delete-alert", data: [confirm: "Sure about that?"], class: "mr-2 text-red-500 hover:text-red-400 sm:text-sm" %>
             <% end %>
             <.button type="submit" colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">Save</.button>
           </div>

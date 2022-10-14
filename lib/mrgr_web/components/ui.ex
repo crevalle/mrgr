@@ -64,6 +64,52 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def secondary_button(assigns) do
+    colors =
+      if assigns[:disabled] do
+        "text-gray-700 border-gray-700 hover:bg-gray-700"
+      else
+        assigns[:colors]
+      end
+
+    standard_opts =
+      Enum.join(
+        [
+          "inline-flex",
+          "items-center",
+          "py-2",
+          "px-4",
+          "shadow-md",
+          "text-sm",
+          "font-medium",
+          "border",
+          "hover:border-transparent",
+          "hover:text-white",
+          "rounded-md",
+          "bg-transparent"
+        ],
+        " "
+      )
+
+    class = "#{standard_opts} #{colors}"
+
+    type = if assigns[:submit], do: "submit", else: false
+
+    extra = assigns_to_attributes(assigns, [:submit])
+
+    assigns =
+      assigns
+      |> assign(:type, type)
+      |> assign(:class, class)
+      |> assign(:extra, extra)
+
+    ~H"""
+      <button type={@type} class={@class} {@extra} >
+        <%= render_slot(@inner_block) %>
+      </button>
+    """
+  end
+
   def copy_button(assigns) do
     ~H"""
     <.button colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
