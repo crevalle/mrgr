@@ -23,7 +23,7 @@ defmodule Mrgr.Github.Client do
   def token_expired?(%Installation{token_expires_at: nil}), do: true
 
   def token_expired?(%{token_expires_at: expires}) do
-    Mrgr.DateMath.in_the_past?(expires)
+    Mrgr.DateTime.in_the_past?(expires)
   end
 
   def refresh_token!(%User{} = user) do

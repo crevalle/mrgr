@@ -93,10 +93,15 @@
                     <.me_tag merge={merge} current_user={@current_user} />
                   </div>
                   <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <p>
-                      <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
-                    </p>
+
+                    <%= link "2 Days", to: "#", phx_click: "snooze-merge", phx_value_id: merge.id, phx_value_time: "2", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
+
+                    <%= link "5 Days", to: "#", phx_click: "snooze-merge", phx_value_id: merge.id, phx_value_time: "5", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
+
+                    <%= link "Indefinitely", to: "#", phx_click: "snooze-merge", phx_value_id: merge.id, phx_value_time: "indefinitely", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
                   </div>
+
+
                 </div>
                 <div class="mt-2 sm:flex sm:justify-between items-start">
                   <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">

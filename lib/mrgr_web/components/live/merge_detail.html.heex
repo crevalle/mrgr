@@ -25,8 +25,10 @@
       </div>
     </div>
 
-    <div>
-      <%= @merge.id %>
+    <div :if={Mrgr.Merge.snoozed?(@merge)} >
+      <p class="text-gray-400 italic">
+      😴 Snoozed until <%= ts(@merge.snoozed_until) %>. <.l phx_click="unsnooze-merge" phx_value_id={@merge.id}>Unsnooze</.l>
+      </p>
     </div>
 
     <div class="flex flex-col">
@@ -77,10 +79,7 @@
     </div>
 
     <div>
-      <.h3>Raw Data</.h3>
-      <pre>
-        <%= Jason.encode!(@merge.raw, pretty: true) %>
-      </pre>
+      <%= @merge.id %>
     </div>
   </div>
 

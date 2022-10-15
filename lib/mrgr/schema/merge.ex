@@ -3,16 +3,17 @@ defmodule Mrgr.Schema.Merge do
 
   schema "merges" do
     field(:external_id, :integer)
-    field(:number, :integer)
+    field(:files_changed, {:array, :string})
+    field(:head_commit, :map)
+    field(:merge_queue_index, :integer)
     field(:node_id, :string)
+    field(:number, :integer)
     field(:opened_at, :utc_datetime)
+    field(:raw, :map)
+    field(:snoozed_until, :utc_datetime)
     field(:status, :string)
     field(:title, :string)
     field(:url, :string)
-    field(:merge_queue_index, :integer)
-    field(:files_changed, {:array, :string})
-    field(:head_commit, :map)
-    field(:raw, :map)
 
     embeds_many(:commits, Mrgr.Github.Commit, on_replace: :delete)
     embeds_many(:assignees, Mrgr.Github.User, on_replace: :delete)
@@ -109,6 +110,12 @@ defmodule Mrgr.Schema.Merge do
     schema
     |> change()
     |> put_embed(:requested_reviewers, reviewers)
+  end
+
+  def snooze_changeset(schema, ts) do
+    schema
+    |> change()
+    |> put_timestamp(:snoozed_until, ts)
   end
 
   def put_closed_status(changeset) do

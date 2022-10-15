@@ -308,6 +308,24 @@ defmodule Mrgr.Merge do
     MrgrWeb.Router.Helpers.pending_merge_url(MrgrWeb.Endpoint, :show, merge.id)
   end
 
+  def snooze(merge, until) do
+    merge
+    |> Schema.snooze_changeset(until)
+    |> Mrgr.Repo.update!()
+  end
+
+  def unsnooze(merge) do
+    merge
+    |> Schema.snooze_changeset(nil)
+    |> Mrgr.Repo.update!()
+  end
+
+  def snoozed?(%{snoozed_until: nil}), do: false
+
+  def snoozed?(%{snoozed_until: until}) do
+    Mrgr.DateTime.in_the_future?(until)
+  end
+
   @spec find_from_payload(Mrgr.Github.Webhook.t() | map()) ::
           {:ok, Schema.t()} | {:error, :not_found}
   defp find_from_payload(%{"node_id" => node_id}) do

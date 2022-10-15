@@ -104,6 +104,50 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply
   end
 
+  def handle_event("snooze-merge", %{"id" => id, "time" => time}, socket) do
+    pending_merges = socket.assigns.pending_merges
+
+    updated =
+      pending_merges
+      |> Mrgr.List.find(id)
+      |> Mrgr.Merge.snooze(translate_snooze(time))
+
+    merges = Mrgr.List.replace(pending_merges, updated)
+
+    selected =
+      case previewing_merge?(socket.assigns.selected_merge, updated) do
+        true -> updated
+        false -> nil
+      end
+
+    socket
+    |> assign(:pending_merges, merges)
+    |> assign(:selected_merge, selected)
+    |> noreply()
+  end
+
+  def handle_event("unsnooze-merge", %{"id" => id}, socket) do
+    pending_merges = socket.assigns.pending_merges
+
+    updated =
+      pending_merges
+      |> Mrgr.List.find(id)
+      |> Mrgr.Merge.unsnooze()
+
+    merges = Mrgr.List.replace(pending_merges, updated)
+
+    selected =
+      case previewing_merge?(socket.assigns.selected_merge, updated) do
+        true -> updated
+        false -> nil
+      end
+
+    socket
+    |> assign(:pending_merges, merges)
+    |> assign(:selected_merge, selected)
+    |> noreply()
+  end
+
   # pulls the id off the div constructed above
   defp get_id("merge-" <> id), do: String.to_integer(id)
 
@@ -140,7 +184,7 @@ defmodule MrgrWeb.PendingMergeLive do
     merges = Mrgr.List.remove(socket.assigns.pending_merges, payload.id)
 
     selected =
-      case previewing_closed_merge?(socket.assigns.selected_merge, payload) do
+      case previewing_merge?(socket.assigns.selected_merge, payload) do
         true -> nil
         false -> socket.assigns.selected_merge
       end
@@ -190,8 +234,8 @@ defmodule MrgrWeb.PendingMergeLive do
   def find_previously_selected(_merges, nil), do: nil
   def find_previously_selected(merges, merge), do: Mrgr.List.find(merges, merge)
 
-  defp previewing_closed_merge?(%{id: id}, %{id: id}), do: true
-  defp previewing_closed_merge?(_previewing, _closed), do: false
+  defp previewing_merge?(%{id: id}, %{id: id}), do: true
+  defp previewing_merge?(_previewing, _closed), do: false
 
   def frozen_repos(repos) do
     Enum.filter(repos, & &1.merge_freeze_enabled)
@@ -214,4 +258,17 @@ defmodule MrgrWeb.PendingMergeLive do
 
   defp highlighted_color(%{id: id}, %{id: id}), do: "border-teal-500"
   defp highlighted_color(_merge, _selected), do: "border-gray-200"
+
+  defp translate_snooze("2") do
+    Mrgr.DateTime.now() |> DateTime.add(2, :day)
+  end
+
+  defp translate_snooze("5") do
+    Mrgr.DateTime.now() |> DateTime.add(5, :day)
+  end
+
+  defp translate_snooze("indefinitely") do
+    # 10 years
+    Mrgr.DateTime.now() |> DateTime.add(3650, :day)
+  end
 end

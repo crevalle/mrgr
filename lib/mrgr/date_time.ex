@@ -1,4 +1,4 @@
-defmodule Mrgr.DateMath do
+defmodule Mrgr.DateTime do
   # false if they're the same time
   def before?(dt1, dt2) do
     case DateTime.compare(dt1, dt2) do
@@ -16,10 +16,29 @@ defmodule Mrgr.DateMath do
   end
 
   def in_the_past?(dt) do
-    before?(dt, DateTime.utc_now())
+    before?(dt, now())
   end
 
   def in_the_future?(dt) do
-    after?(dt, DateTime.utc_now())
+    after?(dt, now())
+  end
+
+  def future?(dt) do
+    dt
+    |> DateTime.compare(now())
+    |> case do
+      :gt -> true
+      _ -> false
+    end
+  end
+
+  def now do
+    DateTime.utc_now()
+  end
+
+  def safe_truncate(nil), do: nil
+
+  def safe_truncate(dt) do
+    DateTime.truncate(dt, :second)
   end
 end
