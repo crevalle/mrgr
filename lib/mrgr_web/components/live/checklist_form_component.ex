@@ -32,7 +32,7 @@ defmodule MrgrWeb.Components.Live.ChecklistFormComponent do
 
               <.input f={ct} field={:text} type="text" placeholder="ex. 'There is no SQL Injection'" >
                 <:secondary>
-                  <%= link "Remove", to: "#", phx_click: "remove-check-template", phx_value_remove: ct.data.temp_id, class: "text-red-400 ml-2" %>
+                  <%= link "Remove", to: "#", phx_click: "remove-check-template", phx_value_remove: ct.data.temp_id, class: "text-rose-600 hover:text-rose-500  ml-2" %>
                 </:secondary>
               </.input>
             <% end %>
@@ -45,8 +45,10 @@ defmodule MrgrWeb.Components.Live.ChecklistFormComponent do
           <div class="flex flex-col my-1">
             <.subheading title="Apply to Repositories">
               <:description>
-                This checklist will apply to ALL merges in the repos you select.
-                <%= link "Toggle All/None", to: "#", phx_click: "toggle-all-repositories", class: "text-teal-700 hover:text-teal-500" %>
+                <div class="flex flex-col">
+                  This checklist will apply to ALL merges in the repos you select.
+                  <%= link "Toggle All/None", to: "#", phx_click: "toggle-all-repositories", class: "text-teal-700 hover:text-teal-500" %>
+                </div>
               </:description>
             </.subheading>
 

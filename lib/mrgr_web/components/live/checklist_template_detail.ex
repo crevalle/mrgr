@@ -35,7 +35,7 @@ defmodule MrgrWeb.Components.Live.ChecklistTemplateDetail do
         </ul>
 
 
-        <%= link "Delete", to: "#", data: [confirm: "Sure about that?"], phx_click: "delete", phx_value_id: @template.id, class: "btn ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rose-600 hover:bg-rose-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500" %>
+        <%= link "Delete", to: "#", data: [confirm: "Sure about that?"], phx_click: "delete", phx_value_id: @template.id, class: "btn ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rose-600 hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-offset-2" %>
       </div>
 
     </div>
