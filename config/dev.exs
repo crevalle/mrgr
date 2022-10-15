@@ -57,7 +57,7 @@ config :mrgr, MrgrWeb.Endpoint,
     patterns: [
       ~r"priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$",
       ~r"priv/gettext/.*(po)$",
-      ~r"lib/mrgr_web/(live|views)/.*(ex)$",
+      ~r"lib/mrgr_web/(components|live|views)/.*(ex)$",
       ~r"lib/mrgr_web/templates/.*(eex)$"
     ]
   ]
