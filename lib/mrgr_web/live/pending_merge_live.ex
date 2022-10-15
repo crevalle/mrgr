@@ -211,4 +211,7 @@ defmodule MrgrWeb.PendingMergeLive do
   defp pending_merges(user) do
     Mrgr.Merge.pending_merges(user)
   end
+
+  defp highlighted_color(%{id: id}, %{id: id}), do: "border-teal-500"
+  defp highlighted_color(_merge, _selected), do: "border-gray-200"
 end

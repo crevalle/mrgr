@@ -65,69 +65,64 @@
   <%= if @pending_merges == [] do %>
     Nothing yet!  Why don't you get some work done? 😊
   <% else %>
-    <div class="basis-1/2 bg-white px-2 py-5 sm:px-6 overflow-hidden shadow rounded-lg">
+    <div class="basis-1/2 overflow-hidden" phx-hoox="Drag" id="drag">
 
-      <div class="shadow overflow-hidden sm:rounded-md" phx-hook="Drag" id="drag">
-
-        <ul role="list" class="divide-y divide-gray-200 dropzone" id="pending-merge-list">
-          <%= for merge <- @pending_merges do %>
-            <li draggable="true" class="draggable merge-list" id={"merge-#{merge.id}"}>
-              <%= link to: "#", phx_click: "show-preview", phx_value_merge_id: merge.id, class: "text-sm font-medium" do %>
-                <div class="block hover:bg-gray-50">
-                  <div class="px-4 py-4 sm:px-6">
-                    <div class="flex items-center justify-between">
-                      <div class="flex items-baseline">
-                        <.h3><%= merge.title %></.h3>
-                        <p class={"ml-2 text-sm italic font-light #{repo_text_color(@repos, merge.repository)}"}>
-                          <%= merge.repository.name %>
-                        </p>
-                      </div>
-                      <div class="ml-2 flex-shrink-0 flex">
-                        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                          <p class="truncate max-w-xs">
-                            "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="mt-2 sm:flex sm:justify-between">
-                      <div class="sm:flex items-center">
-                        <%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: merge}) %>
-                        <.me_tag merge={merge} current_user={@current_user} />
-                      </div>
-                      <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                        <p>
-                          <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
-                        </p>
-                      </div>
-                    </div>
-                    <div class="mt-2 sm:flex sm:justify-between items-start">
-                      <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                        <p>
-                        Opened <.timeago
-                           datetime={merge.opened_at}
-                           uhoh={true}
-                           ./>
-                        </p>
-                        <p :if={Mrgr.Checklist.complete?(merge.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
-                        <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                          <.recent_comment_sparkline comments={merge.comments} />
-                        </p>
-                      </div>
-                      <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                        <p>
-                          <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
-                        </p>
-                      </div>
+      <div role="list" class="flex flex-col space-y-3 dropzone" id="pending-merge-list">
+        <%= for merge <- @pending_merges do %>
+          <div draggable="true" class={"bg-white hover:bg-stone-50 border #{highlighted_color(merge, @selected_merge)} shadow rounded-lg draggable merge-list"} id={"merge-#{merge.id}"}>
+            <%= link to: "#", phx_click: "show-preview", phx_value_merge_id: merge.id, class: "text-sm font-medium" do %>
+              <div class="px-4 py-4 sm:px-6">
+                <div class="flex items-center justify-between">
+                  <div class="flex items-baseline">
+                    <.h3><%= merge.title %></.h3>
+                    <p class={"ml-2 text-sm italic font-light #{repo_text_color(@repos, merge.repository)}"}>
+                      <%= merge.repository.name %>
+                    </p>
+                  </div>
+                  <div class="ml-2 flex-shrink-0 flex">
+                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                      <p class="truncate max-w-xs">
+                        "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
+                      </p>
                     </div>
                   </div>
                 </div>
-              <% end %>
-            </li>
-          <% end %>
-        </ul>
-
+                <div class="mt-2 sm:flex sm:justify-between">
+                  <div class="sm:flex items-center">
+                    <%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: merge}) %>
+                    <.me_tag merge={merge} current_user={@current_user} />
+                  </div>
+                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                    <p>
+                      <%= shorten_sha(merge.head.sha) %> by <%= Mrgr.Schema.Merge.head_committer(merge) %>
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-2 sm:flex sm:justify-between items-start">
+                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                    <p>
+                    Opened <.timeago
+                       datetime={merge.opened_at}
+                       uhoh={true}
+                       ./>
+                    </p>
+                    <p :if={Mrgr.Checklist.complete?(merge.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
+                    <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+                      <.recent_comment_sparkline comments={merge.comments} />
+                    </p>
+                  </div>
+                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                    <p>
+                      <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
+                    </p>
+                  </div>
+                </div>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
       </div>
+
     </div>
   <% end %>
 
