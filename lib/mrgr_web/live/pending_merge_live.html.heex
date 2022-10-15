@@ -1,5 +1,13 @@
 <div class="flex justify-between">
-  <.heading title="Pending Merges" />
+  <div class="flex flex-col">
+    <.heading title="Pending Merges" />
+
+    <div :if={Enum.any?(@snoozed)} >
+      <p class="text-gray-400 italic">
+        <%= Enum.count(@snoozed) %> merges are snoozed. <.l phx-click="show-snoozed-merges">Show Them</.l>
+      </p>
+    </div>
+  </div>
 
   <div class="relative inline-block text-left">
     <div>
@@ -62,19 +70,19 @@
 <% end %>
 
 <div class="flex mt-8 space-x-4">
-  <%= if @pending_merges == [] do %>
+  <%= if @merges == [] do %>
     Nothing yet!  Why don't you get some work done? 😊
   <% else %>
     <div class="basis-1/2 overflow-hidden" phx-hoox="Drag" id="drag">
 
       <div role="list" class="flex flex-col space-y-3 dropzone" id="pending-merge-list">
-        <%= for merge <- @pending_merges do %>
+        <%= for merge <- @merges do %>
           <div draggable="true" class={"bg-white hover:bg-stone-50 border #{highlighted_color(merge, @selected_merge)} shadow rounded-lg draggable merge-list"} id={"merge-#{merge.id}"}>
             <%= link to: "#", phx_click: "show-preview", phx_value_merge_id: merge.id, class: "text-sm font-medium" do %>
               <div class="px-4 py-4 sm:px-6">
                 <div class="flex items-center justify-between">
                   <div class="flex items-baseline">
-                    <.h3><%= merge.title %></.h3>
+                    <.h3 color={if Mrgr.Merge.snoozed?(merge), do: "text-gray-400"}><%= merge.title %></.h3>
                     <p class={"ml-2 text-sm italic font-light #{repo_text_color(@repos, merge.repository)}"}>
                       <%= merge.repository.name %>
                     </p>
@@ -92,14 +100,37 @@
                     <%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: merge}) %>
                     <.me_tag merge={merge} current_user={@current_user} />
                   </div>
-                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+                  <%= if Mrgr.Merge.snoozed?(merge) do %>
+                    <p class="text-gray-400 italic">
+                    😴 Snoozed until <%= ts(merge.snoozed_until) %>.
+                    </p>
+                  <% else %>
+                    <div class="relative">
+                      <.l phx-click={JS.toggle(
+                          to: "#snooze-menu-#{merge.id}",
+                          in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
+                          out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
+                        )}
+                        id={"snooze-menu-button-#{merge.id}"}
+                        aria-expanded="false"
+                        aria-haspopup="true">
+                        <div class="flex items-end">
+                          Snooze
+                          <.icon name="chevron-down" class="ml-1 h-5 w-5" />
+                        </div>
+                      </.l>
 
-                    <%= link "2 Days", to: "#", phx_click: "snooze-merge", phx_value_id: merge.id, phx_value_time: "2", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
+                      <div style="display: none;" id={"snooze-menu-#{merge.id}"} class="origin-top-right absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"snooze-menu-button-#{merge.id}"} tabindex="-1">
+                        <div class="mt-2 flex flex-col text-sm text-gray-500 sm:mt-0">
+                          <%= link "2 Days", to: "#", phx_click: "snooze-merge", phx_value_id: merge.id, phx_value_time: "2", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
 
-                    <%= link "5 Days", to: "#", phx_click: "snooze-merge", phx_value_id: merge.id, phx_value_time: "5", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
+                          <%= link "5 Days", to: "#", phx_click: "snooze-merge", phx_value_id: merge.id, phx_value_time: "5", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
 
-                    <%= link "Indefinitely", to: "#", phx_click: "snooze-merge", phx_value_id: merge.id, phx_value_time: "indefinitely", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
-                  </div>
+                          <%= link "Indefinitely", to: "#", phx_click: "snooze-merge", phx_value_id: merge.id, phx_value_time: "indefinitely", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
+                        </div>
+                      </div>
+                    </div>
+                  <% end %>
 
 
                 </div>

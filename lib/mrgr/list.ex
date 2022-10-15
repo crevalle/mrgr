@@ -29,6 +29,10 @@ defmodule Mrgr.List do
     Enum.reject(list, fn i -> i.id == id end)
   end
 
+  def add(list, item) do
+    [item | list]
+  end
+
   @spec find_index(list(), map()) :: list()
   def find_index(list, %{id: id}) do
     Enum.find_index(list, fn i -> i.id == id end)
@@ -40,6 +44,21 @@ defmodule Mrgr.List do
 
     idx = find_index(list, item)
     List.replace_at(list, idx, item)
+  end
+
+  @spec replace!(list(), map()) :: list()
+  def replace!(list, item) do
+    # if present, replace, else add it
+
+    idx = find_index(list, item)
+
+    case idx do
+      nil ->
+        add(list, item)
+
+      idx ->
+        List.replace_at(list, idx, item)
+    end
   end
 
   @spec present?(list(), map()) :: boolean()

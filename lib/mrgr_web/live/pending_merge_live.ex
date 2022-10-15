@@ -9,7 +9,7 @@ defmodule MrgrWeb.PendingMergeLive do
   def mount(params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
       current_user = socket.assigns.current_user
-      merges = pending_merges(current_user)
+      {snoozed, merges} = fetch_pending_merges(current_user) |> partition_snoozed_merges()
       repos = Mrgr.Repository.for_user_with_rules(current_user)
       frozen_repos = frozen_repos(repos)
       subscribe(current_user)
@@ -19,7 +19,8 @@ defmodule MrgrWeb.PendingMergeLive do
       selected_merge = Mrgr.List.find(merges, params["id"])
 
       socket
-      |> assign(:pending_merges, merges)
+      |> assign(:merges, merges)
+      |> assign(:snoozed, snoozed)
       |> assign(:selected_merge, selected_merge)
       |> assign(:repos, repos)
       |> assign(:frozen_repos, frozen_repos)
@@ -50,19 +51,20 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def handle_event("dropped", %{"draggedId" => id, "draggableIndex" => index}, socket) do
-    dragged = find_dragged(socket.assigns.pending_merges, get_id(id))
+    dragged = find_dragged(socket.assigns.merges, get_id(id))
 
     merges =
-      socket.assigns.pending_merges
+      socket.assigns.merges
       |> update_merge_order(dragged, index)
 
     socket
-    |> assign(:pending_merges, merges)
+    |> assign(:merges, merges)
     |> noreply()
   end
 
   def handle_event("show-preview", %{"merge-id" => id}, socket) do
-    selected = Mrgr.List.find(socket.assigns.pending_merges, id)
+    selected =
+      Mrgr.List.find(socket.assigns.merges, id) || Mrgr.List.find(socket.assigns.snoozed, id)
 
     socket
     |> assign(:selected_merge, selected)
@@ -75,9 +77,9 @@ defmodule MrgrWeb.PendingMergeLive do
     installation = Mrgr.Repo.preload(user.current_installation, :repositories)
     Mrgr.Installation.refresh_merges!(installation)
 
-    merges = Mrgr.Merge.pending_merges(user)
+    merges = fetch_pending_merges(user)
 
-    socket = assign(socket, :pending_merges, merges)
+    socket = assign(socket, :merges, merges)
 
     {:noreply, socket}
   end
@@ -104,15 +106,27 @@ defmodule MrgrWeb.PendingMergeLive do
     |> noreply
   end
 
+  def handle_event("show-snoozed-merges", _params, socket) do
+    snoozed = socket.assigns.snoozed
+
+    merges =
+      (socket.assigns.snoozed ++ socket.assigns.merges) |> Enum.sort_by(& &1.merge_queue_index)
+
+    socket
+    |> assign(:merges, merges)
+    |> noreply()
+  end
+
   def handle_event("snooze-merge", %{"id" => id, "time" => time}, socket) do
-    pending_merges = socket.assigns.pending_merges
+    merges = socket.assigns.merges
 
     updated =
-      pending_merges
+      merges
       |> Mrgr.List.find(id)
       |> Mrgr.Merge.snooze(translate_snooze(time))
 
-    merges = Mrgr.List.replace(pending_merges, updated)
+    merges = Mrgr.List.remove(merges, updated)
+    snoozed = Mrgr.List.add(socket.assigns.snoozed, updated)
 
     selected =
       case previewing_merge?(socket.assigns.selected_merge, updated) do
@@ -121,20 +135,22 @@ defmodule MrgrWeb.PendingMergeLive do
       end
 
     socket
-    |> assign(:pending_merges, merges)
+    |> assign(:merges, merges)
+    |> assign(:snoozed, snoozed)
     |> assign(:selected_merge, selected)
     |> noreply()
   end
 
   def handle_event("unsnooze-merge", %{"id" => id}, socket) do
-    pending_merges = socket.assigns.pending_merges
+    snoozed = socket.assigns.snoozed
 
     updated =
-      pending_merges
+      snoozed
       |> Mrgr.List.find(id)
       |> Mrgr.Merge.unsnooze()
 
-    merges = Mrgr.List.replace(pending_merges, updated)
+    snoozed = Mrgr.List.remove(snoozed, updated)
+    merges = Mrgr.List.replace!(socket.assigns.merges, updated)
 
     selected =
       case previewing_merge?(socket.assigns.selected_merge, updated) do
@@ -143,7 +159,8 @@ defmodule MrgrWeb.PendingMergeLive do
       end
 
     socket
-    |> assign(:pending_merges, merges)
+    |> assign(:merges, merges)
+    |> assign(:snoozed, snoozed)
     |> assign(:selected_merge, selected)
     |> noreply()
   end
@@ -173,15 +190,15 @@ defmodule MrgrWeb.PendingMergeLive do
   # repoened will put it at the top, which may not be what we want
   def handle_info(%{event: event, payload: payload}, socket)
       when event in [@merge_created, @merge_reopened] do
-    merges = socket.assigns.pending_merges
+    merges = socket.assigns.merges
 
     socket
-    |> assign(:pending_merges, [payload | merges])
+    |> assign(:merges, [payload | merges])
     |> noreply()
   end
 
   def handle_info(%{event: @merge_closed, payload: payload}, socket) do
-    merges = Mrgr.List.remove(socket.assigns.pending_merges, payload.id)
+    merges = Mrgr.List.remove(socket.assigns.merges, payload.id)
 
     selected =
       case previewing_merge?(socket.assigns.selected_merge, payload) do
@@ -191,7 +208,7 @@ defmodule MrgrWeb.PendingMergeLive do
 
     socket
     |> put_closed_flash_message(payload)
-    |> assign(:pending_merges, merges)
+    |> assign(:merges, merges)
     |> assign(:selected_merge, selected)
     |> noreply()
   end
@@ -205,7 +222,7 @@ defmodule MrgrWeb.PendingMergeLive do
              @merge_assignees_updated
            ] do
     hydrated = Mrgr.Merge.preload_for_pending_list(merge)
-    merges = Mrgr.List.replace(socket.assigns.pending_merges, hydrated)
+    merges = Mrgr.List.replace(socket.assigns.merges, hydrated)
 
     previously_selected = find_previously_selected(merges, socket.assigns.selected_merge)
 
@@ -214,7 +231,7 @@ defmodule MrgrWeb.PendingMergeLive do
       :info,
       "Open PR \"#{merge.title}\" updated with commit \"#{Mrgr.Schema.Merge.head_commit_message(merge)}\"."
     )
-    |> assign(:pending_merges, merges)
+    |> assign(:merges, merges)
     |> assign(:selected_merge, previously_selected)
     |> noreply()
   end
@@ -250,9 +267,9 @@ defmodule MrgrWeb.PendingMergeLive do
     end
   end
 
-  defp pending_merges(%{current_installation_id: nil}), do: []
+  defp fetch_pending_merges(%{current_installation_id: nil}), do: []
 
-  defp pending_merges(user) do
+  defp fetch_pending_merges(user) do
     Mrgr.Merge.pending_merges(user)
   end
 
@@ -270,5 +287,9 @@ defmodule MrgrWeb.PendingMergeLive do
   defp translate_snooze("indefinitely") do
     # 10 years
     Mrgr.DateTime.now() |> DateTime.add(3650, :day)
+  end
+
+  defp partition_snoozed_merges(merges) do
+    Enum.split_with(merges, &Mrgr.Merge.snoozed?/1)
   end
 end
