@@ -33,135 +33,60 @@
 
     <div style="display: none;" id="merge-freeze-menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
       <div class="py-1" role="none">
-        <%= for r <- @repos do %>
-          <%= link to: "#", phx_click: "toggle-merge-freeze", phx_value_repo_id: r.id, data_confirm: "Sure about that?", class: "text-gray-700 block my-2 text-sm outline-none", role: "menuitem", tabindex: "-1", id: "repo-menu-item-#{r.id}" do %>
-            <div class="flex items-center hover:bg-gray-50">
-              <div class="basis-8 text-blue-400 ml-2">
-                <%= if r.merge_freeze_enabled do %>
-                ❄️
-                <% end %>
-              </div>
-              <%= r.name %>
+        <.l :for={r <- @repos}
+          id={"repo-menu-item-#{r.id}"}
+          phx_click="toggle-merge-freeze"
+          phx_value_repo_id={r.id}
+          data_confirm="Sure about that?"
+          class="text-gray-700 block my-2 text-sm outline-none"
+          role="menuitem"
+          tabindex="-1" >
+          <div class="flex items-center hover:bg-gray-50">
+            <div class="basis-8 text-blue-400 ml-2">
+              <%= if r.merge_freeze_enabled do %>
+              ❄️
+              <% end %>
             </div>
-          <% end %>
-        <% end %>
+            <%= r.name %>
+          </div>
+        </.l>
       </div>
     </div>
   </div>
 </div>
 
+<div :if={Enum.any?(@frozen_repos)} class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50">
+  <.h3 color="text-blue-600">❄️ There is a Merge Freeze in effect❄️</.h3>
+  <p class="my-3">PR merging is disabled for the following repos:</p>
 
-<%= if Enum.count(@frozen_repos) > 0 do %>
-  <div class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50">
+  <ul class="list-disc my-3 mx-6">
+    <li :for={r <- @frozen_repos} >
+      <%= r.name %>
+    </li>
+  </ul>
 
-    <.h3 color="text-blue-600">❄️ There is a Merge Freeze in effect❄️</.h3>
-    <p class="my-3">PR merging is disabled for the following repos:</p>
-    <ul class="list-disc my-3 mx-6">
-      <%= for r <- @frozen_repos do %>
-        <li>
-          <%= r.name %>
-        </li>
-      <% end %>
-    </ul>
-
-    <p class="my-3">To resume merging for these repos, disable the Merge Freeze.</p>
-
-  </div>
-<% end %>
+  <p class="my-3">To resume merging for these repos, disable the Merge Freeze.</p>
+</div>
 
 <div class="flex mt-8 space-x-4">
   <%= if @merges == [] do %>
     Nothing yet!  Why don't you get some work done? 😊
   <% else %>
     <div class="basis-1/2 overflow-hidden" phx-hoox="Drag" id="drag">
-
       <div role="list" class="flex flex-col space-y-3 dropzone" id="pending-merge-list">
-        <%= for merge <- @merges do %>
-          <div draggable="true" class={"bg-white hover:bg-stone-50 border #{highlighted_color(merge, @selected_merge)} shadow rounded-lg draggable merge-list"} id={"merge-#{merge.id}"}>
-            <%= link to: "#", phx_click: "show-preview", phx_value_merge_id: merge.id, class: "text-sm font-medium" do %>
-              <div class="px-4 py-4 sm:px-6">
-                <div class="flex items-center justify-between">
-                  <div class="flex items-baseline">
-                    <.h3 color={if Mrgr.Merge.snoozed?(merge), do: "text-gray-400"}><%= merge.title %></.h3>
-                    <p class={"ml-2 text-sm italic font-light #{repo_text_color(@repos, merge.repository)}"}>
-                      <%= merge.repository.name %>
-                    </p>
-                  </div>
-                  <div class="ml-2 flex-shrink-0 flex">
-                    <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                      <p class="truncate max-w-xs">
-                        "<%= Mrgr.Schema.Merge.head_commit_message(merge) %>"
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <div class="mt-2 sm:flex sm:justify-between">
-                  <div class="sm:flex items-center">
-                    <%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: merge}) %>
-                    <.me_tag merge={merge} current_user={@current_user} />
-                  </div>
-                  <%= if Mrgr.Merge.snoozed?(merge) do %>
-                    <p class="text-gray-400 italic">
-                    😴 Snoozed until <%= ts(merge.snoozed_until) %>.
-                    </p>
-                  <% else %>
-                    <div class="relative">
-                      <.l phx-click={JS.toggle(
-                          to: "#snooze-menu-#{merge.id}",
-                          in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
-                          out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
-                        )}
-                        id={"snooze-menu-button-#{merge.id}"}
-                        aria-expanded="false"
-                        aria-haspopup="true">
-                        <div class="flex items-end">
-                          Snooze
-                          <.icon name="chevron-down" class="ml-1 h-5 w-5" />
-                        </div>
-                      </.l>
-
-                      <div style="display: none;" id={"snooze-menu-#{merge.id}"} class="origin-top-right absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"snooze-menu-button-#{merge.id}"} tabindex="-1">
-                        <div class="mt-2 flex flex-col text-sm text-gray-500 sm:mt-0">
-                          <%= link "2 Days", to: "#", phx_click: "snooze-merge", phx_value_id: merge.id, phx_value_time: "2", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
-
-                          <%= link "5 Days", to: "#", phx_click: "snooze-merge", phx_value_id: merge.id, phx_value_time: "5", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
-
-                          <%= link "Indefinitely", to: "#", phx_click: "snooze-merge", phx_value_id: merge.id, phx_value_time: "indefinitely", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
-                        </div>
-                      </div>
-                    </div>
-                  <% end %>
-
-
-                </div>
-                <div class="mt-2 sm:flex sm:justify-between items-start">
-                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <p>
-                    Opened <.timeago
-                       datetime={merge.opened_at}
-                       uhoh={true}
-                       ./>
-                    </p>
-                    <p :if={Mrgr.Checklist.complete?(merge.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
-                    <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                      <.recent_comment_sparkline comments={merge.comments} />
-                    </p>
-                  </div>
-                  <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-                    <p>
-                      <%= ts(Mrgr.Schema.Merge.head_committed_at(merge), assigns.timezone) %>
-                    </p>
-                  </div>
-                </div>
-              </div>
-            <% end %>
-          </div>
-        <% end %>
+        <.live_component
+          :for={merge <- @merges} 
+          module={MrgrWeb.Components.Live.PendingMergeItem}
+          id={"merge_#{merge.id}"}
+          merge={merge}
+          selected={selected?(merge, @selected_merge)}
+          merge_frozen={merge_frozen?(@frozen_repos, merge)}
+          current_user={@current_user}
+          timezone={@timezone} />
       </div>
-
     </div>
   <% end %>
 
-  <.live_component :if={@selected_merge} module={MrgrWeb.Components.Live.MergeDetail} id="merge_detail" merge={@selected_merge} current_user={@current_user} frozen_repos={@frozen_repos} timezone={@timezone} />
+  <.live_component :if={@selected_merge} module={MrgrWeb.Components.Live.MergeDetail} id="merge_detail" merge={@selected_merge} current_user={@current_user} merge_frozen={merge_frozen?(@frozen_repos, @selected_merge)} timezone={@timezone} />
 </div>
 

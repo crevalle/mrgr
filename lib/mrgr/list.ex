@@ -16,6 +16,13 @@ defmodule Mrgr.List do
     Enum.find(list, fn i -> i.id == id end)
   end
 
+  def member?(list, item) do
+    case find(list, item) do
+      nil -> false
+      _item -> true
+    end
+  end
+
   @spec remove(list(), map() | String.t() | integer()) :: list()
   def remove(list, %{id: id}) do
     remove(list, id)

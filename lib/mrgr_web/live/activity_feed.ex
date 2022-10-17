@@ -66,9 +66,7 @@ defmodule MrgrWeb.Live.ActivityFeed do
       <div class="mx-2">
         <.h3>Latest Activity</.h3>
         <ul role="list" class="divide-y divide-gray-200">
-          <%= for %{event: e, payload: p} <- @items do %>
-            <MrgrWeb.Components.ActivityComponent.render event={e} payload={p} tz={@timezone}) />
-          <% end %>
+          <MrgrWeb.Components.ActivityComponent.render :for={%{event: e, payload: p} <- @items} event={e} payload={p} tz={@timezone}) />
         </ul>
       </div>
     </div>

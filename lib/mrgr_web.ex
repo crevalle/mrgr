@@ -71,6 +71,8 @@ defmodule MrgrWeb do
 
       import Mrgr.Tuple
 
+      alias Phoenix.LiveView.JS
+
       unquote(components())
 
       unquote(view_helpers())

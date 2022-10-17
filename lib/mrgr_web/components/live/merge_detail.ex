@@ -25,8 +25,4 @@ defmodule MrgrWeb.Components.Live.MergeDetail do
   def external_merge_url(merge) do
     Mrgr.Schema.Merge.external_merge_url(merge)
   end
-
-  def merge_frozen?(repos, repo) do
-    Mrgr.List.present?(repos, repo)
-  end
 end

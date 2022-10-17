@@ -17,16 +17,14 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white">
-            <%= for repo <- @repos do %>
-              <tr>
-                <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"><%= repo.name %></td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= repo.full_name %></td>
-                <td class="flex whitespace-nowrap px-3 py-4 text-sm text-gray-500">
-                  <%= repo.language %> <.language_icon language={repo.language} />
-                </td>
-                <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= tf(repo.private) %></td>
-              </tr>
-            <% end %>
+            <tr :for={repo <- @repos} >
+              <td class="whitespace-nowrap py-4 pl-4 pr-3 text-sm font-medium text-gray-900 sm:pl-6"><%= repo.name %></td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= repo.full_name %></td>
+              <td class="flex whitespace-nowrap px-3 py-4 text-sm text-gray-500">
+                <%= repo.language %> <.language_icon language={repo.language} />
+              </td>
+              <td class="whitespace-nowrap px-3 py-4 text-sm text-gray-500"><%= tf(repo.private) %></td>
+            </tr>
 
           </tbody>
         </table>

@@ -48,7 +48,7 @@
 
     <.h3>Merge This Pull Request</.h3>
 
-    <p :if={merge_frozen?(@frozen_repos, @merge.repository)} class="text-blue-600 italic">A Merge Freeze is in effect for this repository. This PR cannot be merged.</p>
+    <p :if={@merge_frozen}} class="text-blue-600 italic">A Merge Freeze is in effect for this repository. This PR cannot be merged.</p>
 
     <.form let={f} for={:merge} phx-submit="merge" phx-target={@myself} class="flex flex-col space-y-4">
       <div class="mt-1">
@@ -56,25 +56,21 @@
       </div>
       <%= hidden_input f, :id, value: @merge.id %>
       <div class="flex items-end">
-        <.button disabled={merge_frozen?(@frozen_repos, @merge.repository)} submit={true} phx_disable_with="Merging..." colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">Merge!</.button>
+        <.button disabled={@merge_frozen} submit={true} phx_disable_with="Merging..." colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">Merge!</.button>
       </div>
     </.form>
 
     <div>
       <.h3>Commits</.h3>
       <ul>
-        <%= for c <- @merge.commits do %>
-          <MrgrWeb.Components.Merge.preview_commit commit={c} ./>
-        <% end %>
+        <MrgrWeb.Components.Merge.preview_commit :for={c <- @merge.commits} commit={c} ./>
       </ul>
     </div>
 
     <div>
       <.h3>Files Changed</.h3>
       <ul>
-        <%= for f <- @merge.files_changed do %>
-          <.changed_file_li filename={f} alerts={@merge.repository.file_change_alerts} />
-        <% end %>
+        <.changed_file_li :for={f <- @merge.files_changed} filename={f} alerts={@merge.repository.file_change_alerts} />
       </ul>
     </div>
 

@@ -1,0 +1,80 @@
+<div draggable="true" class={"bg-white hover:bg-stone-50 border #{highlighted_color(@selected)} shadow rounded-lg draggable merge-list"} id={"merge-#{@merge.id}"}>
+  <%= link to: "#", phx_click: "show-preview", phx_value_merge_id: @merge.id, class: "text-sm font-medium" do %>
+    <div class="px-4 py-4 sm:px-6">
+      <div class="flex items-center justify-between">
+        <div class="flex items-baseline">
+          <.h3 color={if Mrgr.Merge.snoozed?(@merge), do: "text-gray-400"}><%= @merge.title %></.h3>
+          <p class={"ml-2 text-sm italic font-light #{repo_text_color(@merge_frozen)}"}>
+            <%= @merge.repository.name %>
+          </p>
+        </div>
+        <div class="ml-2 flex-shrink-0 flex">
+          <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+            <p class="truncate max-w-xs">
+              "<%= Mrgr.Schema.Merge.head_commit_message(@merge) %>"
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="mt-2 sm:flex sm:justify-between">
+        <div class="sm:flex items-center">
+          <%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: @merge}) %>
+          <.me_tag merge={@merge} current_user={@current_user} />
+        </div>
+        <%= if Mrgr.Merge.snoozed?(@merge) do %>
+          <p class="text-gray-400 italic">
+          😴 Snoozed until <%= ts(@merge.snoozed_until) %>.
+          </p>
+        <% else %>
+          <div class="relative">
+            <.l phx-click={JS.toggle(
+                to: "#snooze-menu-#{@merge.id}",
+                in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
+                out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
+              )}
+              id={"snooze-menu-button-#{@merge.id}"}
+              aria-expanded="false"
+              aria-haspopup="true">
+              <div class="flex items-end">
+                Snooze
+                <.icon name="chevron-down" class="ml-1 h-5 w-5" />
+              </div>
+            </.l>
+
+            <div style="display: none;" id={"snooze-menu-#{@merge.id}"} class="origin-top-right absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"snooze-menu-button-#{@merge.id}"} tabindex="-1">
+              <div class="mt-2 flex flex-col text-sm text-gray-500 sm:mt-0">
+                <%= link "2 Days", to: "#", phx_click: "snooze-merge", phx_value_id: @merge.id, phx_value_time: "2", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
+
+                <%= link "5 Days", to: "#", phx_click: "snooze-merge", phx_value_id: @merge.id, phx_value_time: "5", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
+
+                <%= link "Indefinitely", to: "#", phx_click: "snooze-merge", phx_value_id: @merge.id, phx_value_time: "indefinitely", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
+              </div>
+            </div>
+          </div>
+        <% end %>
+
+
+      </div>
+      <div class="mt-2 sm:flex sm:justify-between items-start">
+        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+          <p>
+          Opened <.timeago
+             datetime={@merge.opened_at}
+             uhoh={true}
+             ./>
+          </p>
+          <p :if={Mrgr.Checklist.complete?(@merge.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
+          <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
+            <.recent_comment_sparkline comments={@merge.comments} />
+          </p>
+        </div>
+        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
+          <p>
+            <%= ts(Mrgr.Schema.Merge.head_committed_at(@merge), assigns.timezone) %>
+          </p>
+        </div>
+      </div>
+    </div>
+  <% end %>
+</div>
+

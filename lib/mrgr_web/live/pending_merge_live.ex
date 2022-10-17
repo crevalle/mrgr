@@ -11,7 +11,7 @@ defmodule MrgrWeb.PendingMergeLive do
       current_user = socket.assigns.current_user
       {snoozed, merges} = fetch_pending_merges(current_user) |> partition_snoozed_merges()
       repos = Mrgr.Repository.for_user_with_rules(current_user)
-      frozen_repos = frozen_repos(repos)
+      frozen_repos = filter_frozen_repos(repos)
       subscribe(current_user)
 
       # id will be `nil` for the index action
@@ -36,7 +36,7 @@ defmodule MrgrWeb.PendingMergeLive do
     updated = Mrgr.Repository.toggle_merge_freeze(repo)
 
     updated_list = Mrgr.List.replace(socket.assigns.repos, updated)
-    frozen_repos = frozen_repos(updated_list)
+    frozen_repos = filter_frozen_repos(updated_list)
 
     socket
     |> assign(:repos, updated_list)
@@ -252,17 +252,14 @@ defmodule MrgrWeb.PendingMergeLive do
   defp previewing_merge?(%{id: id}, %{id: id}), do: true
   defp previewing_merge?(_previewing, _closed), do: false
 
-  def frozen_repos(repos) do
+  def filter_frozen_repos(repos) do
     Enum.filter(repos, & &1.merge_freeze_enabled)
   end
 
   # look up the repo in hte socket assigns cause those are the ones who have their
   # merge_freeze_enabled attribute updated
-  def repo_text_color(repos, r) do
-    case Mrgr.List.find(repos, r) do
-      %{merge_freeze_enabled: true} -> "text-blue-600"
-      %{merge_freeze_enabled: false} -> "text-gray-400"
-    end
+  defp merge_frozen?(repos, merge) do
+    Mrgr.List.member?(repos, merge.repository)
   end
 
   defp fetch_pending_merges(%{current_installation_id: nil}), do: []
@@ -271,8 +268,8 @@ defmodule MrgrWeb.PendingMergeLive do
     Mrgr.Merge.pending_merges(user)
   end
 
-  defp highlighted_color(%{id: id}, %{id: id}), do: "border-teal-500"
-  defp highlighted_color(_merge, _selected), do: "border-gray-200"
+  defp selected?(%{id: id}, %{id: id}), do: true
+  defp selected?(_merge, _selected), do: false
 
   defp translate_snooze("2") do
     Mrgr.DateTime.now() |> DateTime.add(2, :day)
