@@ -31,12 +31,12 @@ defmodule MrgrWeb.AuthController do
         |> put_flash(:info, "Hi there! 👋")
         |> redirect(to: post_sign_in_path(conn, user))
 
-      {:error, %OAuth2.Response{body: body}} ->
+      {:error, %OAuth2.Response{body: _body}} ->
         conn
         |> put_flash(:info, "Sorry, OAuth expired.  Please log in again.")
         |> redirect(to: Routes.auth_path(conn, :github))
 
-      {:error, %OAuth2.Error{reason: reason}} ->
+      {:error, %OAuth2.Error{reason: _reason}} ->
         conn
         |> put_flash(:info, "Sorry, OAuth expired.  Please log in again.")
         |> redirect(to: Routes.auth_path(conn, :github))

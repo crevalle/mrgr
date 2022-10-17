@@ -6,7 +6,7 @@ defmodule MrgrWeb.PendingMergeLive do
 
   on_mount MrgrWeb.Plug.Auth
 
-  def mount(params, %{"user_id" => user_id}, socket) do
+  def mount(params, _session, socket) do
     if connected?(socket) do
       current_user = socket.assigns.current_user
       {snoozed, merges} = fetch_pending_merges(current_user) |> partition_snoozed_merges()
@@ -107,8 +107,6 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   def handle_event("show-snoozed-merges", _params, socket) do
-    snoozed = socket.assigns.snoozed
-
     merges =
       (socket.assigns.snoozed ++ socket.assigns.merges) |> Enum.sort_by(& &1.merge_queue_index)
 

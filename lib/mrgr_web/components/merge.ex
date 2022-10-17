@@ -23,7 +23,7 @@ defmodule MrgrWeb.Components.Merge do
       |> assign(:color, color)
 
     ~H"""
-      <li style={"border-color: #{color};"} class="pl-2 border-l-2"><pre><%= @filename %></pre></li>
+      <li style={"border-color: #{@color};"} class="pl-2 border-l-2"><pre><%= @filename %></pre></li>
     """
   end
 

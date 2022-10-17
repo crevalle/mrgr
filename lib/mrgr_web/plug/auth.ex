@@ -8,7 +8,7 @@ defmodule MrgrWeb.Plug.Auth do
       end)
 
     case socket.assigns.current_user do
-      %Mrgr.Schema.User{} = user ->
+      %Mrgr.Schema.User{} = _user ->
         {:cont, socket}
 
       nil ->
@@ -16,7 +16,7 @@ defmodule MrgrWeb.Plug.Auth do
     end
   end
 
-  def on_mount(:admin, _session, params, socket) do
+  def on_mount(:admin, _session, _params, socket) do
     case admin?(socket.assigns.current_user) do
       true ->
         {:cont, socket}

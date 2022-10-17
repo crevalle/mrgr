@@ -3,7 +3,7 @@ defmodule MrgrWeb.Live.Checklist do
 
   on_mount MrgrWeb.Plug.Auth
 
-  def mount(_params, %{"user_id" => user_id}, socket) do
+  def mount(_params, _session, socket) do
     if connected?(socket) do
       current_user = socket.assigns.current_user
       templates = Mrgr.ChecklistTemplate.for_installation(current_user.current_installation)
