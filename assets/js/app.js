@@ -64,3 +64,10 @@ window.addEventListener("mrgr:clipcopy", (event) => {
     alert("Sorry, your browser does not support clipboard copy.");
   }
 });
+
+// push JS commands from the server
+window.addEventListener("phx:js-exec", ({detail}) => {
+  document.querySelectorAll(detail.to).forEach(el => {
+    liveSocket.execJS(el, el.getAttribute(detail.attr))
+  })
+})

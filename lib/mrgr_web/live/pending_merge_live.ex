@@ -2,8 +2,6 @@ defmodule MrgrWeb.PendingMergeLive do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  import MrgrWeb.Components.Merge
-
   on_mount MrgrWeb.Plug.Auth
 
   def mount(params, _session, socket) do

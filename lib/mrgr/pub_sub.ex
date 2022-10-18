@@ -5,17 +5,26 @@ defmodule Mrgr.PubSub do
     |> subscribe()
   end
 
+  def subscribe_to_flash(user) do
+    user
+    |> Mrgr.PubSub.Topic.flash()
+    |> subscribe()
+  end
+
   def subscribe(topic) do
     Phoenix.PubSub.subscribe(__MODULE__, topic)
   end
 
   def broadcast(payload, topic, event) do
     data = %{payload: payload, topic: topic, event: event}
-    IO.inspect(event, label: "PUBLISHING")
     Phoenix.PubSub.broadcast(__MODULE__, topic, data)
   end
 
   defmodule Topic do
+    def flash(user) do
+      "user:#{user.id}"
+    end
+
     def installation(%Mrgr.Schema.Installation{id: id}), do: installation(id)
 
     def installation(%{current_installation_id: id}), do: installation(id)
@@ -50,6 +59,9 @@ defmodule Mrgr.PubSub do
         @merge_reviewers_updated "merge:reviewers_updated"
 
         @api_request_completed "api_request:completed"
+
+        @flash_info "flash:info"
+        @flash_error "flash:error"
       end
     end
   end
