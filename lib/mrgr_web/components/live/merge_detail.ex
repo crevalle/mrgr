@@ -12,12 +12,11 @@ defmodule MrgrWeb.Components.Live.MergeDetail do
     |> case do
       {:ok, _merge} ->
         socket
-        |> put_flash(:info, "OK! 🥳")
         |> noreply()
 
       {:error, message} ->
         socket
-        |> put_flash(:error, message)
+        |> Flash.put(:error, message)
         |> noreply()
     end
   end

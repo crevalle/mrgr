@@ -56,6 +56,7 @@ defmodule MrgrWeb do
       import Mrgr.Tuple
 
       alias Phoenix.LiveView.JS
+      alias MrgrWeb.Live.Flash
 
       on_mount MrgrWeb.Locale
 

@@ -15,6 +15,12 @@ defmodule Mrgr.PubSub do
     Phoenix.PubSub.subscribe(__MODULE__, topic)
   end
 
+  def broadcast_flash(user, key, message) do
+    topic = Mrgr.PubSub.Topic.flash(user)
+
+    Mrgr.PubSub.broadcast(message, topic, "flash:#{key}")
+  end
+
   def broadcast(payload, topic, event) do
     data = %{payload: payload, topic: topic, event: event}
     Phoenix.PubSub.broadcast(__MODULE__, topic, data)
