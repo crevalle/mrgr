@@ -118,13 +118,7 @@
 
     <main class="flex-1 bg-stone-50">
       <div class="">
-        <%= if Map.get(@conn.assigns, :live_module) do %>
-          <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-          <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
-        <% else %>
-          <p class="alert alert-info" role="alert"><%= get_flash(@conn, :info) %></p>
-          <p class="alert alert-danger" role="alert"><%= get_flash(@conn, :error) %></p>
-        <% end %>
+        <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.Flash, session: %{"user_id" => @conn.assigns.current_user.id} %>
 
         <div class="m-4 sm:mx-6 lg:mx-8">
           <%= @inner_content %>
