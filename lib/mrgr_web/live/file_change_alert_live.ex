@@ -106,6 +106,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
       {:ok, _alert} ->
         socket
         |> assign(:form, nil)
+        |> Flash.put(:info, "Alert saved ✌️")
         |> noreply()
 
       {:error, changeset} ->
@@ -127,6 +128,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
         socket
         |> assign(:repos, repos)
         |> assign(:form, nil)
+        |> Flash.put(:info, "Alert deleted ✌️")
         |> noreply()
 
       _que ->

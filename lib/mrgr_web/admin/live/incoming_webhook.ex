@@ -65,7 +65,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
     Mrgr.IncomingWebhook.fire!(hook)
 
     socket
-    |> put_flash(:info, "fired! 🚀")
+    |> Flash.put(:info, "fired! 🚀")
     |> noreply()
   end
 

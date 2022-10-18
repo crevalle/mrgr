@@ -223,7 +223,7 @@ defmodule MrgrWeb.PendingMergeLive do
     previously_selected = find_previously_selected(merges, socket.assigns.selected_merge)
 
     socket
-    |> put_flash(
+    |> Flash.put(
       :info,
       "Open PR \"#{merge.title}\" updated with commit \"#{Mrgr.Schema.Merge.head_commit_message(merge)}\"."
     )
@@ -237,11 +237,11 @@ defmodule MrgrWeb.PendingMergeLive do
   end
 
   defp put_closed_flash_message(socket, %{merged_at: nil} = merge) do
-    put_flash(socket, :warn, "#{merge.title} closed, but not merged")
+    Flash.put(socket, :warn, "#{merge.title} closed, but not merged")
   end
 
   defp put_closed_flash_message(socket, merge) do
-    put_flash(socket, :info, "#{merge.title} merged! 🍾")
+    Flash.put(socket, :info, "#{merge.title} merged! 🍾")
   end
 
   def find_previously_selected(_merges, nil), do: nil

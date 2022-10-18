@@ -145,7 +145,7 @@ defmodule MrgrWeb.Live.Checklist do
         |> assign(:templates, [template] ++ templates)
         |> assign(:changeset, nil)
         |> assign(:new_template, nil)
-        |> put_flash(:info, "Checklist created!")
+        |> Flash.put(:info, "Checklist created!")
         |> noreply()
 
       {:error, changeset} ->
