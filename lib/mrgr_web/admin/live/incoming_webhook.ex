@@ -28,9 +28,9 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
 
             <%= for hook <- @incoming_webhooks do %>
               <.tr striped={true}>
-                <.td><%= link hook.id, to: Routes.admin_incoming_webhook_path(@socket, :show, hook.id), class: "text-teal-700 hover:text-teal-500" %></.td>
+                <.td><%= hook.id %></.td>
                 <.td><%= hook.installation_id %></.td>
-                <.td><%= hook.object %></.td>
+                <.td><%= link hook.object, to: Routes.admin_incoming_webhook_path(@socket, :show, hook.id), class: "text-teal-700 hover:text-teal-500" %></.td>
                 <.td><%= hook.action %></.td>
                 <.td><%= ts(hook.inserted_at, assigns.timezone) %></.td>
                 <.td>
