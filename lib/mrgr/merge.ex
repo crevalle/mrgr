@@ -126,7 +126,22 @@ defmodule Mrgr.Merge do
   def assign_user(merge, gh_user) do
     case Mrgr.List.absent?(merge.assignees, gh_user) do
       true ->
-        set_assignees(merge, [gh_user | merge.assignees])
+        case set_assignees(merge, [gh_user | merge.assignees]) do
+          {:ok, merge} ->
+            # we want to unsnooze only if the user has been tagged,
+            # but we don't have the concept of per-user snoozing so
+            # we can't answer the question "have i been tagged?" because we don't
+            # know who "i" is.  the app is currently built around a #single_user
+            # using it.
+            #
+            # rather than build out per-user snoozing,
+            # just blanket unsnooze whenever anyone is added to tags, which should
+            # be infrequent enough not to mess with the benefit of being snoozed.
+            {:ok, unsnooze(merge)}
+
+          error ->
+            error
+        end
 
       false ->
         # no-op
@@ -164,7 +179,22 @@ defmodule Mrgr.Merge do
   def add_reviewer(merge, gh_user) do
     case Mrgr.List.absent?(merge.requested_reviewers, gh_user) do
       true ->
-        set_reviewers(merge, [gh_user | merge.requested_reviewers])
+        case set_reviewers(merge, [gh_user | merge.requested_reviewers]) do
+          {:ok, merge} ->
+            # we want to unsnooze only if the user has been tagged,
+            # but we don't have the concept of per-user snoozing so
+            # we can't answer the question "have i been tagged?" because we don't
+            # know who "i" is.  the app is currently built around a #single_user
+            # using it.
+            #
+            # rather than build out per-user snoozing,
+            # just blanket unsnooze whenever anyone is added to tags, which should
+            # be infrequent enough not to mess with the benefit of being snoozed.
+            {:ok, unsnooze(merge)}
+
+          error ->
+            error
+        end
 
       false ->
         # no-op
