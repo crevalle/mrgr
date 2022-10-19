@@ -1,4 +1,6 @@
 defmodule Mrgr.Installation do
+  use Mrgr.PubSub.Event
+
   alias Mrgr.Schema.Installation, as: Schema
   alias Mrgr.Installation.Query
 
@@ -18,6 +20,15 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.all()
   end
 
+  def find_for_setup(id) do
+    Schema
+    |> Query.by_id(id)
+    |> Query.with_account()
+    |> Query.with_creator()
+    |> Query.with_repositories()
+    |> Mrgr.Repo.one()
+  end
+
   def find_admin(id) do
     Schema
     |> Query.by_id(id)
@@ -31,8 +42,7 @@ defmodule Mrgr.Installation do
   def create_from_webhook(payload) do
     payload
     |> create_installation()
-    |> Mrgr.Repository.create_for_installation()
-    |> hydrate_new_installation_data_from_github()
+    |> queue_initial_setup()
     |> Mrgr.Tuple.ok()
   end
 
@@ -56,6 +66,28 @@ defmodule Mrgr.Installation do
     Mrgr.User.set_current_installation(creator, installation)
 
     installation
+  end
+
+  def queue_initial_setup(installation) do
+    %{id: installation.id}
+    |> Mrgr.Installation.Facilitator.new()
+    |> Oban.insert()
+
+    installation
+  end
+
+  def complete_setup(installation) do
+    installation
+    |> Mrgr.Repository.create_for_installation()
+    |> hydrate_new_installation_data_from_github()
+    |> mark_setup_completed()
+    |> broadcast(@installation_setup_completed)
+  end
+
+  def mark_setup_completed(installation) do
+    installation
+    |> Ecto.Changeset.change(%{setup_completed: true})
+    |> Mrgr.Repo.update!()
   end
 
   def hydrate_new_installation_data_from_github(installation) do
@@ -171,6 +203,13 @@ defmodule Mrgr.Installation do
 
   def installation_url do
     Application.get_env(:mrgr, :installation)[:url]
+  end
+
+  def broadcast(installation, event) do
+    topic = Mrgr.PubSub.Topic.installation(installation)
+    Mrgr.PubSub.broadcast(installation, topic, event)
+
+    installation
   end
 
   ### HELPERS

@@ -13,6 +13,7 @@ defmodule Mrgr.Schema.Installation do
     field(:permissions, :map)
     field(:repositories_url, :string)
     field(:repository_selection, :string)
+    field(:setup_completed, :boolean)
     field(:target_id, :integer)
     field(:target_type, :string)
     field(:token, :string)
@@ -44,6 +45,7 @@ defmodule Mrgr.Schema.Installation do
     permissions
     repositories_url
     repository_selection
+    setup_completed
     target_id
     target_type
   ]a

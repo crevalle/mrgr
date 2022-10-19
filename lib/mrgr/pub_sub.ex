@@ -47,13 +47,19 @@ defmodule Mrgr.PubSub do
   defmodule Event do
     defmacro __using__(_opts) do
       quote do
-        @incoming_webhook_created "incoming_webhook:created"
+        @api_request_completed "api_request:completed"
 
         @branch_pushed "branch:pushed"
 
         @file_change_alert_created "file_change_alert:created"
         @file_change_alert_updated "file_change_alert:updated"
         @file_change_alert_deleted "file_change_alert:deleted"
+
+        @flash_info "flash:info"
+        @flash_error "flash:error"
+
+        @incoming_webhook_created "incoming_webhook:created"
+        @installation_setup_completed "installation:setup_completed"
 
         @merge_created "merge:created"
         @merge_edited "merge:edited"
@@ -63,11 +69,6 @@ defmodule Mrgr.PubSub do
         @merge_comment_created "merge:comment_created"
         @merge_assignees_updated "merge:assignees_updated"
         @merge_reviewers_updated "merge:reviewers_updated"
-
-        @api_request_completed "api_request:completed"
-
-        @flash_info "flash:info"
-        @flash_error "flash:error"
       end
     end
   end
