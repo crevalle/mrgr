@@ -52,6 +52,12 @@ defmodule Mrgr.User do
     end
   end
 
+  def find_member(member_id) do
+    Mrgr.Schema.Member
+    |> Query.by_external_id(member_id)
+    |> Mrgr.Repo.one()
+  end
+
   def welcome_back(user, params) do
     user
     |> Schema.welcome_back_changeset(params)

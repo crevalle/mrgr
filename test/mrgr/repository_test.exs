@@ -1,6 +1,20 @@
 defmodule Mrgr.RepositoryTest do
   use Mrgr.DataCase
 
+  describe "create_for_installation/1" do
+    test "fetches repo data from github and creates repos in the installation" do
+      installation = insert!(:installation)
+
+      i = Mrgr.Repository.create_for_installation(installation)
+
+      assert Enum.count(i.repositories) == 3
+
+      languages = Enum.map(i.repositories, & &1.language)
+
+      assert languages == ["JavaScript", "Ruby", "Elixir"]
+    end
+  end
+
   describe "generate_default_file_change_alerts/1" do
     test "creates default file change alerts according to repo language" do
       %{id: id} = r = insert!(:repository, language: "Elixir")

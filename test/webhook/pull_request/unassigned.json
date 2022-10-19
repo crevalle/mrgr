@@ -1,7 +1,24 @@
-{
+        {
   "action": "unassigned",
   "assignee": {
- "avatar_url": "https://avatars.githubusercontent.com/u/572921?v=4", "events_url": "https://api.github.com/users/desmondmonster/events{/privacy}
+    "avatar_url": "https://avatars.githubusercontent.com/u/114118706?v=4",
+    "events_url": "https://api.github.com/users/crevalleghtest/events{/privacy}",
+    "followers_url": "https://api.github.com/users/crevalleghtest/followers",
+    "following_url": "https://api.github.com/users/crevalleghtest/following{/other_user}",
+    "gists_url": "https://api.github.com/users/crevalleghtest/gists{/gist_id}",
+    "gravatar_id": "",
+    "html_url": "https://github.com/crevalleghtest",
+    "id": 114118706,
+    "login": "crevalleghtest",
+    "node_id": "U_kgDOBs1QMg==",
+    "organizations_url": "https://api.github.com/users/crevalleghtest/orgs",
+    "received_events_url": "https://api.github.com/users/crevalleghtest/received_events",
+    "repos_url": "https://api.github.com/users/crevalleghtest/repos",
+    "site_admin": false,
+    "starred_url": "https://api.github.com/users/crevalleghtest/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/crevalleghtest/subscriptions",
+    "type": "User",
+    "url": "https://api.github.com/users/crevalleghtest"
   },
   "installation": {
     "id": 29227099,

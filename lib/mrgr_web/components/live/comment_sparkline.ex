@@ -69,7 +69,7 @@ defmodule MrgrWeb.Components.Live.CommentSparkline do
       Enum.reduce(comments, bucket, fn c, acc ->
         key = determine_key(c)
 
-        count = Map.get(acc, key)
+        count = Map.get(acc, key, 0)
         Map.put(acc, key, count + 1)
       end)
     end

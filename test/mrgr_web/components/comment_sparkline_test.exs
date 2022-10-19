@@ -15,7 +15,11 @@ defmodule MrgrWeb.CommentSparklineTest do
         %Mrgr.Schema.Comment{posted_at: yesterday}
       ]
 
-      bucket = MrgrWeb.Components.Live.CommentSparkline.bucketize(comments)
+      # yikes, would be nice if the bucket filtered these :/
+      bucket =
+        comments
+        |> MrgrWeb.Components.Live.CommentSparkline.filter_recent_comments()
+        |> MrgrWeb.Components.Live.CommentSparkline.bucketize()
 
       assert bucket[0] == 1
       assert bucket[1] == 1

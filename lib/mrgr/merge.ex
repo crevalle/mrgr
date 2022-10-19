@@ -3,6 +3,8 @@ defmodule Mrgr.Merge do
 
   require Logger
 
+  import Mrgr.Tuple
+
   alias Mrgr.Merge.Query
   alias Mrgr.Schema.Merge, as: Schema
 
@@ -40,7 +42,7 @@ defmodule Mrgr.Merge do
         |> create_checklists()
         |> notify_file_alert_consumers()
         |> broadcast(@merge_created)
-        |> Mrgr.Tuple.ok()
+        |> ok()
 
       {:error, _cs} = err ->
         err
@@ -58,7 +60,7 @@ defmodule Mrgr.Merge do
       |> hydrate_github_data()
       |> append_to_merge_queue()
       |> broadcast(@merge_reopened)
-      |> Mrgr.Tuple.ok()
+      |> ok()
     else
       {:error, :not_found} ->
         create_from_webhook(payload)
@@ -77,7 +79,7 @@ defmodule Mrgr.Merge do
       updated_merge
       |> preload_installation()
       |> broadcast(@merge_edited)
-      |> Mrgr.Tuple.ok()
+      |> ok()
     else
       {:error, :not_found} -> create_from_webhook(payload)
       error -> error
@@ -94,7 +96,7 @@ defmodule Mrgr.Merge do
       |> preload_installation()
       |> hydrate_github_data()
       |> broadcast(@merge_synchronized)
-      |> Mrgr.Tuple.ok()
+      |> ok()
     else
       {:error, :not_found} -> create_from_webhook(payload)
       error -> error
@@ -111,7 +113,7 @@ defmodule Mrgr.Merge do
       |> preload_installation()
       |> remove_from_merge_queue()
       |> broadcast(@merge_closed)
-      |> Mrgr.Tuple.ok()
+      |> ok()
     else
       {:error, :not_found} = error ->
         Logger.warn("found no local PR")
@@ -168,7 +170,9 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.update()
     |> case do
       {:ok, merge} ->
-        broadcast(merge, @merge_assignees_updated)
+        merge
+        |> broadcast(@merge_assignees_updated)
+        |> ok()
 
       error ->
         error
@@ -221,7 +225,9 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.update()
     |> case do
       {:ok, merge} ->
-        broadcast(merge, @merge_reviewers_updated)
+        merge
+        |> broadcast(@merge_reviewers_updated)
+        |> ok()
 
       error ->
         error
@@ -267,9 +273,7 @@ defmodule Mrgr.Merge do
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def add_pull_request_review_comment(object, params) do
     with {:ok, merge} <- find_from_payload(params),
-         {:ok, _comment} <- create_comment(object, merge, params["comment"]["created_at"], params) do
-      # broadcast(@merge_created)
-
+         {:ok, comment} <- create_comment(object, merge, params["comment"]["created_at"], params) do
       # !!! we broadcast the merge, not the comment,
       # and let consumers figure out how to reconcile their data,
       # probably by reloading.
@@ -277,18 +281,24 @@ defmodule Mrgr.Merge do
       # Later when we know how we want to use comment data that can maybe become
       # its own data stream.  for now it's easier to just reload the merge
       # on the one pending_merge screen that uses it
+      merge = %{merge | comments: [comment | merge.comments]}
+
       merge
       |> preload_installation()
       |> broadcast(@merge_comment_created)
+      |> ok()
     end
   end
 
   def add_issue_comment(object, params) do
     with {:ok, merge} <- find_from_payload(params["issue"]),
-         {:ok, _comment} <- create_comment(object, merge, params["comment"]["created_at"], params) do
+         {:ok, comment} <- create_comment(object, merge, params["comment"]["created_at"], params) do
+      merge = %{merge | comments: [comment | merge.comments]}
+
       merge
       |> preload_installation()
       |> broadcast(@merge_comment_created)
+      |> ok()
     end
   end
 
@@ -489,6 +499,8 @@ defmodule Mrgr.Merge do
   def find_by_node_id(id) do
     Schema
     |> Query.by_node_id(id)
+    |> Query.preload_for_merging()
+    |> Query.with_comments()
     |> Mrgr.Repo.one()
   end
 
@@ -544,8 +556,7 @@ defmodule Mrgr.Merge do
   end
 
   defp payload_to_params(%{"pull_request" => params} = payload) do
-    repository_id = payload["repository"]["id"]
-    repo = Mrgr.Github.find(Mrgr.Schema.Repository, repository_id)
+    repo = Mrgr.Repository.find_by_node_id(payload["repository"]["node_id"])
 
     params
     |> Map.put("repository_id", repo.id)
@@ -557,7 +568,7 @@ defmodule Mrgr.Merge do
   defp author_id_from_payload(payload) do
     user_id = payload["pull_request"]["user"]["id"]
 
-    case Mrgr.Github.find(Mrgr.Schema.Member, user_id) do
+    case Mrgr.User.find_member(user_id) do
       %Mrgr.Schema.Member{id: id} -> id
       nil -> nil
     end

@@ -41,6 +41,12 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.all()
   end
 
+  def find_by_node_id(id) do
+    Schema
+    |> Query.by_node_id(id)
+    |> Mrgr.Repo.one()
+  end
+
   def toggle_merge_freeze(repo) do
     new_value = toggle(repo.merge_freeze_enabled)
 

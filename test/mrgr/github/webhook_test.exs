@@ -117,10 +117,10 @@ defmodule Mrgr.Github.WebhookTest do
     test "adds a comment to the PR" do
       payload = read_webhook_data("pull_request_review_comment", "created")
 
-      {:ok, comment} = Mrgr.Github.Webhook.handle("pull_request_review_comment", payload)
+      {:ok, %{comments: [c]}} = Mrgr.Github.Webhook.handle("pull_request_review_comment", payload)
 
-      assert comment.object == :pull_request_review_comment
-      assert comment.raw
+      assert c.object == :pull_request_review_comment
+      assert c.raw
     end
   end
 
@@ -130,11 +130,11 @@ defmodule Mrgr.Github.WebhookTest do
     test "adds a comment to the PR" do
       payload = read_webhook_data("issue_comment", "created")
 
-      {:ok, comment} = Mrgr.Github.Webhook.handle("issue_comment", payload)
+      {:ok, %{comments: [c]}} = Mrgr.Github.Webhook.handle("issue_comment", payload)
 
-      assert comment.object == :issue_comment
-      assert comment.posted_at
-      assert comment.raw
+      assert c.object == :issue_comment
+      assert c.posted_at
+      assert c.raw
     end
   end
 
@@ -171,7 +171,8 @@ defmodule Mrgr.Github.WebhookTest do
       Mrgr.Github.Webhook.handle("pull_request", payload)
       {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
-      assert merge.assignees == []
+      assignees = Enum.map(merge.assignees, & &1.login)
+      assert assignees == ["desmondmonster"]
     end
   end
 
@@ -183,9 +184,9 @@ defmodule Mrgr.Github.WebhookTest do
 
       {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
-      assignees = Enum.map(merge.requested_reviewers, & &1.login)
+      requested_reviewers = Enum.map(merge.requested_reviewers, & &1.login)
 
-      assert assignees == ["crevalleghtest", "desmondmonster"]
+      assert requested_reviewers == ["crevalleghtest", "desmondmonster"]
     end
   end
 
@@ -197,7 +198,8 @@ defmodule Mrgr.Github.WebhookTest do
 
       {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
-      assert merge.requested_reviewers == []
+      requested_reviewers = Enum.map(merge.requested_reviewers, & &1.login)
+      assert requested_reviewers == ["desmondmonster"]
     end
   end
 
