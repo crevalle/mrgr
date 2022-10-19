@@ -81,11 +81,23 @@ defmodule MrgrWeb.Live.ActivityFeed do
     |> noreply()
   end
 
-  def handle_info(%{event: _event, payload: _payload} = item, socket) do
+  def handle_info(%{event: event, payload: _payload} = item, socket)
+      when event in [
+             @branch_pushed,
+             @merge_created,
+             @merge_reopened,
+             @merge_synchronized,
+             @merge_closed
+           ] do
     items = socket.assigns.items
 
     socket
     |> assign(:items, [item | items])
+    |> noreply()
+  end
+
+  def handle_info(%{event: _whatever}, socket) do
+    socket
     |> noreply()
   end
 end
