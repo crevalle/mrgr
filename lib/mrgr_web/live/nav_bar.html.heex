@@ -65,6 +65,12 @@
                 <p class="text-gray-600">🍣 ADMIN 🍣</p>
               </div>
               <.nav_item
+                route={Routes.admin_github_api_request_path(MrgrWeb.Endpoint, :index)}
+                icon="cloud-arrow-up"
+                label="Github Requests"
+              ./>
+
+              <.nav_item
                 route={Routes.admin_incoming_webhook_path(MrgrWeb.Endpoint, :index)}
                 icon="phone-arrow-down-left"
                 label="Incoming Webhooks"
@@ -86,12 +92,6 @@
                 route={Routes.admin_waiting_list_signup_path(MrgrWeb.Endpoint, :index)}
                 icon="sparkles"
                 label="Waiting List Signups"
-              ./>
-
-              <.nav_item
-                route={Routes.admin_github_api_request_path(MrgrWeb.Endpoint, :index)}
-                icon="cloud-arrow-up"
-                label="Github Requests"
               ./>
             </div>
           <% end %>
