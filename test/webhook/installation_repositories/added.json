@@ -1,1 +1,93 @@
-{"action":"added","installation":{"access_tokens_url":"https://api.github.com/app/installations/20351672/access_tokens","account":{"avatar_url":"https://avatars.githubusercontent.com/u/7728671?v=4","events_url":"https://api.github.com/users/crevalle/events{/privacy}","followers_url":"https://api.github.com/users/crevalle/followers","following_url":"https://api.github.com/users/crevalle/following{/other_user}","gists_url":"https://api.github.com/users/crevalle/gists{/gist_id}","gravatar_id":"","html_url":"https://github.com/crevalle","id":7728671,"login":"crevalle","node_id":"MDEyOk9yZ2FuaXphdGlvbjc3Mjg2NzE=","organizations_url":"https://api.github.com/users/crevalle/orgs","received_events_url":"https://api.github.com/users/crevalle/received_events","repos_url":"https://api.github.com/users/crevalle/repos","site_admin":false,"starred_url":"https://api.github.com/users/crevalle/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/crevalle/subscriptions","type":"Organization","url":"https://api.github.com/users/crevalle"},"app_id":139973,"app_slug":"mrgr-app","created_at":"2021-10-27T12:36:57.000-07:00","events":["check_run","check_suite","create","pull_request","pull_request_review"],"has_multiple_single_files":false,"html_url":"https://github.com/organizations/crevalle/settings/installations/20351672","id":20351672,"permissions":{"administration":"read","checks":"write","contents":"read","issues":"write","members":"read","metadata":"read","pull_requests":"write"},"repositories_url":"https://api.github.com/installation/repositories","repository_selection":"all","single_file_name":null,"single_file_paths":[],"suspended_at":null,"suspended_by":null,"target_id":7728671,"target_type":"Organization","updated_at":"2021-10-27T12:36:57.000-07:00"},"repositories_added":[{"full_name":"crevalle/mrgr","id":409417669,"name":"mrgr","node_id":"R_kgDOGGc3xQ","private":true}],"repositories_removed":[],"repository_selection":"selected","requester":null,"sender":{"avatar_url":"https://avatars.githubusercontent.com/u/572921?v=4","events_url":"https://api.github.com/users/desmondmonster/events{/privacy}","followers_url":"https://api.github.com/users/desmondmonster/followers","following_url":"https://api.github.com/users/desmondmonster/following{/other_user}","gists_url":"https://api.github.com/users/desmondmonster/gists{/gist_id}","gravatar_id":"","html_url":"https://github.com/desmondmonster","id":572921,"login":"desmondmonster","node_id":"MDQ6VXNlcjU3MjkyMQ==","organizations_url":"https://api.github.com/users/desmondmonster/orgs","received_events_url":"https://api.github.com/users/desmondmonster/received_events","repos_url":"https://api.github.com/users/desmondmonster/repos","site_admin":false,"starred_url":"https://api.github.com/users/desmondmonster/starred{/owner}{/repo}","subscriptions_url":"https://api.github.com/users/desmondmonster/subscriptions","type":"User","url":"https://api.github.com/users/desmondmonster"}}
+{
+  "action": "added",
+  "installation": {
+    "access_tokens_url": "https://api.github.com/app/installations/29227099/access_tokens",
+    "account": {
+      "avatar_url": "https://avatars.githubusercontent.com/u/7728671?v=4",
+      "events_url": "https://api.github.com/users/crevalle/events{/privacy}",
+      "followers_url": "https://api.github.com/users/crevalle/followers",
+      "following_url": "https://api.github.com/users/crevalle/following{/other_user}",
+      "gists_url": "https://api.github.com/users/crevalle/gists{/gist_id}",
+      "gravatar_id": "",
+      "html_url": "https://github.com/crevalle",
+      "id": 7728671,
+      "login": "crevalle",
+      "node_id": "MDEyOk9yZ2FuaXphdGlvbjc3Mjg2NzE=",
+      "organizations_url": "https://api.github.com/users/crevalle/orgs",
+      "received_events_url": "https://api.github.com/users/crevalle/received_events",
+      "repos_url": "https://api.github.com/users/crevalle/repos",
+      "site_admin": false,
+      "starred_url": "https://api.github.com/users/crevalle/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/crevalle/subscriptions",
+      "type": "Organization",
+      "url": "https://api.github.com/users/crevalle"
+    },
+    "app_id": 238080,
+    "app_slug": "mrgr-development",
+    "created_at": "2022-09-14T10:38:18.000-07:00",
+    "events": [
+      "check_run",
+      "check_suite",
+      "create",
+      "issue_comment",
+      "pull_request",
+      "pull_request_review",
+      "pull_request_review_comment",
+      "push"
+    ],
+    "has_multiple_single_files": false,
+    "html_url": "https://github.com/organizations/crevalle/settings/installations/29227099",
+    "id": 20310985,
+    "permissions": {
+      "administration": "read",
+      "checks": "write",
+      "contents": "read",
+      "issues": "write",
+      "members": "read",
+      "metadata": "read",
+      "pull_requests": "write"
+    },
+    "repositories_url": "https://api.github.com/installation/repositories",
+    "repository_selection": "all",
+    "single_file_name": null,
+    "single_file_paths": [],
+    "suspended_at": null,
+    "suspended_by": null,
+    "target_id": 7728671,
+    "target_type": "Organization",
+    "updated_at": "2022-10-18T15:54:21.000-07:00"
+  },
+  "repositories_added": [
+    {
+      "full_name": "crevalle/test-repo",
+      "id": 553872057,
+      "name": "test-repo",
+      "node_id": "R_kgDOIQNquQ",
+      "private": true
+    }
+  ],
+  "repositories_removed": [],
+  "repository_selection": "all",
+  "requester": null,
+  "sender": {
+    "avatar_url": "https://avatars.githubusercontent.com/u/572921?v=4",
+    "events_url": "https://api.github.com/users/desmondmonster/events{/privacy}",
+    "followers_url": "https://api.github.com/users/desmondmonster/followers",
+    "following_url": "https://api.github.com/users/desmondmonster/following{/other_user}",
+    "gists_url": "https://api.github.com/users/desmondmonster/gists{/gist_id}",
+    "gravatar_id": "",
+    "html_url": "https://github.com/desmondmonster",
+    "id": 572921,
+    "login": "desmondmonster",
+    "node_id": "MDQ6VXNlcjU3MjkyMQ==",
+    "organizations_url": "https://api.github.com/users/desmondmonster/orgs",
+    "received_events_url": "https://api.github.com/users/desmondmonster/received_events",
+    "repos_url": "https://api.github.com/users/desmondmonster/repos",
+    "site_admin": false,
+    "starred_url": "https://api.github.com/users/desmondmonster/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/desmondmonster/subscriptions",
+    "type": "User",
+    "url": "https://api.github.com/users/desmondmonster"
+  }
+}
+

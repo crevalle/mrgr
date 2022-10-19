@@ -29,9 +29,9 @@ defmodule Mrgr.Github.Webhook do
     Mrgr.Installation.delete_from_webhook(payload)
   end
 
-  # def handle("installation", %{"action" => "requested"} = payload) do
-  # payload
-  # end
+  def handle("installation_repositories", %{"action" => "added"} = payload) do
+    Mrgr.Repository.Webhook.create(payload)
+  end
 
   def handle("pull_request", %{"action" => "opened"} = payload) do
     Mrgr.Merge.create_from_webhook(payload)

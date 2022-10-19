@@ -29,6 +29,7 @@ defmodule Mrgr.Schema.Repository do
     node_id
     private
     external_id
+    installation_id
   ]a
 
   def changeset(schema, params) do

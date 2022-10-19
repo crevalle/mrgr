@@ -13,6 +13,12 @@ defmodule Mrgr.Repository do
     |> generate_default_file_change_alerts()
   end
 
+  def create(params) do
+    %Schema{}
+    |> Schema.changeset(params)
+    |> Mrgr.Repo.insert()
+  end
+
   def find_by_name_for_user(user, name) do
     Schema
     |> Query.by_name(name)

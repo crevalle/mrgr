@@ -201,6 +201,21 @@ defmodule Mrgr.Github.WebhookTest do
     end
   end
 
+  describe "installation_repositories:added" do
+    setup [:with_install_user, :with_installation]
+
+    test "creates a repo associated with the installation", ctx do
+      payload = read_webhook_data("installation_repositories", "added")
+
+      # this wehbook returns a list of things added, why i don't know
+      [{:ok, repository}] = Mrgr.Github.Webhook.handle("installation_repositories", payload)
+
+      assert repository.name == "test-repo"
+      assert repository.private
+      assert repository.installation_id == ctx.installation.id
+    end
+  end
+
   # a user signs up, then authorizes the app
   defp with_install_user(_ctx) do
     installer = insert!(:desmond)
@@ -210,7 +225,9 @@ defmodule Mrgr.Github.WebhookTest do
 
   defp with_installation(_ctx) do
     payload = read_webhook_data("installation", "created")
-    {:ok, installation} = Mrgr.Github.Webhook.handle("installation", payload)
+
+    {:ok, %Mrgr.Schema.Installation{} = installation} =
+      Mrgr.Github.Webhook.handle("installation", payload)
 
     %{installation: installation}
   end
