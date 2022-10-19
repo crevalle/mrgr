@@ -54,13 +54,13 @@ defmodule MrgrWeb.Plug.Auth do
   @spec require_user(Plug.Conn.t(), list()) :: Plug.Conn.t()
   def require_user(conn, _opts) do
     case signed_in?(conn) do
-      nil ->
+      true ->
+        conn
+
+      false ->
         conn
         |> redirect_unsigned_in_user()
         |> halt()
-
-      _user ->
-        conn
     end
   end
 
@@ -130,6 +130,6 @@ defmodule MrgrWeb.Plug.Auth do
     conn
     |> put_session(:headed_to, conn.request_path)
     |> Phoenix.Controller.put_flash(:info, "Please sign in to check that out!")
-    |> Phoenix.Controller.redirect(to: "/")
+    |> Phoenix.Controller.redirect(to: "/sign-in")
   end
 end
