@@ -98,7 +98,10 @@ defmodule Mrgr.Installation do
 
     Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories)
 
+    # this returns a list, not the installation
     Mrgr.MergeQueue.regenerate_merge_queue(installation)
+
+    installation
   end
 
   def set_tokens(install, %Mrgr.Github.AccessToken{} = token) do
