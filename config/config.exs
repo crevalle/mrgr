@@ -77,6 +77,11 @@ config :tailwind,
 
 config :ex_heroicons, type: "outline"
 
+config :mrgr, Oban,
+  repo: Mrgr.Repo,
+  plugins: [Oban.Plugins.Pruner],
+  queues: [default: 10]
+
 import_config "#{config_env()}.exs"
 
 import_config "appsignal.exs"

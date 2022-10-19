@@ -14,7 +14,8 @@ defmodule Mrgr.Application do
       MrgrWeb.Telemetry,
       {Phoenix.PubSub, name: Mrgr.PubSub},
       MrgrWeb.Endpoint,
-      Mrgr.PubSubConsumer
+      Mrgr.PubSubConsumer,
+      {Oban, Application.fetch_env!(:mrgr, Oban)}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
