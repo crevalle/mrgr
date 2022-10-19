@@ -73,6 +73,7 @@ defmodule MrgrWeb do
       import Mrgr.Tuple
 
       alias Phoenix.LiveView.JS
+      alias MrgrWeb.Live.Flash
 
       unquote(components())
 
