@@ -9,6 +9,7 @@ defmodule Mrgr.Github.API do
   defdelegate fetch_pr_review_comments(installation, repo, number), to: @mod
   defdelegate fetch_members(installation), to: @mod
   defdelegate fetch_repositories(installation), to: @mod
+  defdelegate fetch_repository(installation, repository), to: @mod
   defdelegate files_changed(merge, installation), to: @mod
   defdelegate get_new_installation_token(installation), to: @mod
   defdelegate head_commit(merge, installation), to: @mod

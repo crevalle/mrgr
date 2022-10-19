@@ -34,6 +34,7 @@ defmodule Mrgr.Merge do
       {:ok, merge} ->
         merge
         |> preload_installation()
+        |> ensure_repository_hydrated()
         |> hydrate_github_data()
         |> append_to_merge_queue()
         |> create_checklists()
@@ -367,6 +368,12 @@ defmodule Mrgr.Merge do
 
   defp find_from_payload(%{"pull_request" => params}) do
     find_from_payload(params)
+  end
+
+  def ensure_repository_hydrated(merge) do
+    definitely_hydrated = Mrgr.Repository.ensure_hydrated(merge.repository)
+
+    %{merge | repository: definitely_hydrated}
   end
 
   @spec merge!(Schema.t() | integer(), String.t(), Mrgr.Schema.User.t()) ::

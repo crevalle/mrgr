@@ -59,6 +59,16 @@ defmodule Mrgr.Github.API.Live do
     )
   end
 
+  def fetch_repository(installation, repository) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(repository)
+
+    request!(
+      &Tentacat.Repositories.repo_get/3,
+      installation,
+      [owner, name]
+    )
+  end
+
   def head_commit(merge, installation) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(merge.repository)
     sha = merge.head.sha

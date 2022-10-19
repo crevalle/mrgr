@@ -52,6 +52,23 @@ defmodule Mrgr.Repository do
   defp toggle(true), do: false
   defp toggle(false), do: true
 
+  # when we get a new repo hook it only has minimal data
+  # check to see if we need to gather the rest
+  def ensure_hydrated(%{language: nil} = repository) do
+    data = fetch_repository_data(repository)
+
+    repository
+    |> Schema.changeset(data)
+    |> Mrgr.Repo.update!()
+    |> generate_default_file_change_alerts()
+  end
+
+  def ensure_hydrated(repository), do: repository
+
+  def fetch_repository_data(repository) do
+    Mrgr.Github.API.fetch_repository(repository.installation, repository)
+  end
+
   def generate_default_file_change_alerts(%Mrgr.Schema.Installation{} = installation) do
     # DOES NOT store generated FCAs on repos as preloads.  I don't think we need
     # that and I don't feel like building it now.  I'd need to unwrap the tuples
