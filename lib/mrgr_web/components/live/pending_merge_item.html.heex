@@ -1,5 +1,5 @@
 <div draggable="true" class={"bg-white hover:bg-stone-50 border #{highlighted_color(@selected)} shadow rounded-lg draggable merge-list"} id={"merge-#{@merge.id}"}>
-  <%= link to: "#", phx_click: "show-preview", phx_value_merge_id: @merge.id, class: "text-sm font-medium" do %>
+  <a href="#" phx-click="show-preview" phx-value-merge-id={"#{@merge.id}"} class="text-sm font-medium">
     <div class="px-4 py-4 sm:px-6">
       <div class="flex items-center justify-between">
         <div class="flex items-baseline">
@@ -65,9 +65,7 @@
           </p>
           <p :if={Mrgr.Checklist.complete?(@merge.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
 
-          <div>
-          <.live_component module={MrgrWeb.Components.Live.Sparkline} id={"merge_#{@merge.id}_activity_socks"} comments={[]} commits={[]} />
-          </div>
+          <.live_component module={MrgrWeb.Components.Live.Sparkline} id={"merge_#{@merge.id}_activity_socks"} comments={@merge.comments} commits={@merge.commits} />
         </div>
         <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
           <p>
@@ -76,6 +74,6 @@
         </div>
       </div>
     </div>
-  <% end %>
+  </a>
 </div>
 
