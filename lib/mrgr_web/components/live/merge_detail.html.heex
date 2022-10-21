@@ -32,8 +32,9 @@
     </div>
 
     <div class="flex flex-col">
-      <.subheading title="Commentary" />
+      <.subheading title="Activity" />
 
+      <.live_component module={MrgrWeb.Components.Live.Sparkline} id={"merge_#{@merge.id}_activity"} comments={@merge.comments} commits={@merge.commits} />
     </div>
 
     <div class="flex flex-col">

@@ -89,5 +89,4 @@ defmodule MrgrWeb.Components.Merge do
     </li>
     """
   end
-
 end
