@@ -1,9 +1,11 @@
-defmodule MrgrWeb.Components.Live.CommentSparkline do
+defmodule MrgrWeb.Components.Live.Sparkline do
   use MrgrWeb, :live_component
 
   def update(assigns, socket) do
-    recent_comments = filter_recent_comments(assigns.comments)
-    data = sparkline_data(recent_comments)
+    recent_comments = filter_recent(assigns.comments)
+    recent_commits = filter_recent(assigns.commits)
+
+    data = sparkline_data(recent_comments ++ recent_commits)
 
     line = "#b2892b"
     fill = "#fce09f"
@@ -47,26 +49,29 @@ defmodule MrgrWeb.Components.Live.CommentSparkline do
     |> Enum.reverse()
   end
 
-  def filter_recent_comments(comments) do
-    Enum.filter(comments, &recent?/1)
+  def filter_recent(interesting_thing) do
+    Enum.filter(interesting_thing, &recent?/1)
   end
 
-  defp recent?(comment) do
+  defp recent?(interesting_thing) do
     threshold = DateTime.add(DateTime.utc_now(), -24, :hour)
 
-    case DateTime.compare(comment.posted_at, threshold) do
+    interesting_thing
+    |> Mrgr.DateTime.happened_at()
+    |> DateTime.compare(threshold)
+    |> case do
       :gt -> true
       _stale_mf -> false
     end
   end
 
   defmodule Bucket do
-    def new(comments) do
+    def new(things) do
       bucket = empty_bucket()
 
       # assumes all comments fit in bucket, ie, have been filtered
       # for today
-      Enum.reduce(comments, bucket, fn c, acc ->
+      Enum.reduce(things, bucket, fn c, acc ->
         key = determine_key(c)
 
         count = Map.get(acc, key, 0)
@@ -80,10 +85,10 @@ defmodule MrgrWeb.Components.Live.CommentSparkline do
       end)
     end
 
-    def determine_key(comment) do
+    def determine_key(interesting_thing) do
       # 0-based.  eg, something 30 mins ago is "0" hours ago
       now = DateTime.utc_now()
-      then = comment.posted_at
+      then = Mrgr.DateTime.happened_at(interesting_thing)
 
       DateTime.diff(now, then, :hour)
     end

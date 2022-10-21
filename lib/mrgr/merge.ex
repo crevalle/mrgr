@@ -518,6 +518,14 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.one()
   end
 
+  def find_with_everything(id) do
+    Schema
+    |> Query.by_id(id)
+    |> Query.preload_for_merging()
+    |> Query.with_comments()
+    |> Mrgr.Repo.one()
+  end
+
   def pending_merges(%Mrgr.Schema.Installation{id: id}) do
     pending_merges(id)
   end

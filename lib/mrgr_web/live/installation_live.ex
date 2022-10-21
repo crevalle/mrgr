@@ -68,7 +68,7 @@ defmodule MrgrWeb.Live.InstallationLoading do
     |> noreply()
   end
 
-  def handle_info(%{event: @installation_setup_completed, payload: installation}, socket) do
+  def handle_info(%{event: @installation_setup_completed, payload: _installation}, socket) do
     socket
     |> assign(:dots, "OK!")
     |> redirect(to: Routes.pending_merge_path(MrgrWeb.Endpoint, :index))
