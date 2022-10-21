@@ -65,7 +65,7 @@
           </p>
           <p :if={Mrgr.Checklist.complete?(@merge.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
 
-          <.live_component module={MrgrWeb.Components.Live.Sparkline} id={"merge_#{@merge.id}_activity_socks"} comments={@merge.comments} commits={@merge.commits} />
+          <.live_component module={MrgrWeb.Components.Live.Sparkline} id={"merge_#{@merge.id}_activity_preview"} comments={@merge.comments} commits={@merge.commits} />
         </div>
         <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
           <p>
