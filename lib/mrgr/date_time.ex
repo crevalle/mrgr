@@ -41,4 +41,13 @@ defmodule Mrgr.DateTime do
   def safe_truncate(dt) do
     DateTime.truncate(dt, :second)
   end
+
+  ### PROTOCOL ALERT ###
+  def happened_at(%Mrgr.Schema.Comment{} = comment) do
+    comment.posted_at
+  end
+
+  def happened_at(%Mrgr.Github.Commit{} = commit) do
+    commit.commit.committer.date
+  end
 end
