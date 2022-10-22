@@ -2,13 +2,21 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
   use MrgrWeb, :live_component
 
   def mount(socket) do
-    {:ok, assign(socket, state: "closed")}
+    button = socket.assigns[:button] || "Show"
+
+    socket
+    |> assign(:button, button)
+    |> assign(:state, "closed")
+    |> ok()
   end
 
   def render(assigns) do
     ~H"""
 
     <div>
+      <.button phx-click="open" phx-target={@myself} colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">
+        <%= @button %>
+      </.button>
       <%= if @state == "open" do %>
         <div class="relative z-10" aria-labelledby="modal-title" role="dialog" aria-modal="true">
           <!--
@@ -39,8 +47,8 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
                       <h3 class="text-lg font-medium leading-6 text-gray-900"><%= @title %></h3>
                       <div>
                         <button
-                          phx-click="hide-modal"
-                          phx-value-id={@id}
+                          phx-click="close"
+                          phx-target={@myself}
                           class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:text-sm"
                           >
                           Close
@@ -59,8 +67,8 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
                 </div>
                 <div class="mt-5 sm:mt-6">
                   <button
-                    phx-click="hide-modal"
-                    phx-value-id={@id}
+                    phx-click="close"
+                    phx-target={@myself}
                     class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:text-sm"
                     >
                     Close
@@ -70,8 +78,6 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
             </div>
           </div>
         </div>
-
-
 
     <% end %>
 

@@ -37,15 +37,9 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
                 <.td><%= r.response_code %></.td>
                 <.td><%= r.elapsed_time %></.td>
                 <.td>
-                  <button phx-click="show-modal" phx-value-id={"data-modal-#{r.id}"} class="text-teal-700 hover:text-teal-600">
-                    Show
-                  </button>
                   <.live_component module={MrgrWeb.Components.Live.JSONModalComponent} id={"data-modal-#{r.id}"} title={"Request #{r.id} Data"} data={r.data} ./>
                 </.td>
                 <.td>
-                  <button phx-click="show-modal" phx-value-id={"headers-modal-#{r.id}"} class="text-teal-700 hover:text-teal-600">
-                    Show
-                  </button>
                   <.live_component module={MrgrWeb.Components.Live.JSONModalComponent} id={"headers-modal-#{r.id}"} title={"Request #{r.id} Response Headers"} data={r.response_headers} ./>
                 </.td>
                 <.td><%= ts(r.updated_at, @timezone) %></.td>
