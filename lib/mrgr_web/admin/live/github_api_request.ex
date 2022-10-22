@@ -78,7 +78,11 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
       subscribe()
 
       requests = Mrgr.Github.API.list_requests()
-      {:ok, assign(socket, :requests, requests)}
+
+      socket
+      |> assign(:requests, requests)
+      |> put_title("API Requests")
+      |> ok()
     else
       {:ok, socket}
     end

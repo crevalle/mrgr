@@ -9,6 +9,8 @@ import Config
 
 config :elixir, :time_zone_database, Tzdata.TimeZoneDatabase
 
+config :mrgr, :env, "dev"
+
 config :mrgr,
   ecto_repos: [Mrgr.Repo]
 
