@@ -74,8 +74,10 @@
       </ul>
     </div>
 
-    <div>
-      <%= @merge.id %>
+    <div :if={admin?(@current_user)}>
+      id: <%= @merge.id %>
+      number: <%= @merge.number %>
+      <.live_component module={MrgrWeb.Components.Live.JSONModalComponent} id={"merge-data-modal-#{@merge.id}"} button="Raw Data" title={"Merge #{@merge.id} Data"} data={@merge.raw} ./>
     </div>
   </div>
 
