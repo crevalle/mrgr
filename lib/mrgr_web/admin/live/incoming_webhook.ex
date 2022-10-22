@@ -19,6 +19,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
               <tr>
                 <.th uppercase={true}>ID</.th>
                 <.th uppercase={true}>Installation</.th>
+                <.th uppercase={true}>PR Number</.th>
                 <.th uppercase={true}>object</.th>
                 <.th uppercase={true}>action</.th>
                 <.th uppercase={true}>received</.th>
@@ -30,6 +31,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
               <.tr striped={true}>
                 <.td><%= hook.id %></.td>
                 <.td><%= hook.installation_id %></.td>
+                <.td><%= pr_number(hook) %></.td>
                 <.td><%= link hook.object, to: Routes.admin_incoming_webhook_path(@socket, :show, hook.id), class: "text-teal-700 hover:text-teal-500" %></.td>
                 <.td><%= hook.action %></.td>
                 <.td><%= ts(hook.inserted_at, assigns.timezone) %></.td>
@@ -84,4 +86,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
 
   # ignore other messages
   def handle_info(%{event: _}, socket), do: {:noreply, socket}
+
+  def pr_number(%{data: %{"pull_request" => %{"number" => number}}}), do: number
+  def pr_number(_), do: ""
 end
