@@ -54,6 +54,7 @@ defmodule MrgrWeb do
         layout: {MrgrWeb.LayoutView, "live.html"}
 
       import Mrgr.Tuple
+      import MrgrWeb.Live
 
       alias Phoenix.LiveView.JS
       alias MrgrWeb.Live.Flash

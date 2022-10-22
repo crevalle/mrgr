@@ -22,6 +22,7 @@ defmodule MrgrWeb.PendingMergeLive do
       |> assign(:selected_merge, selected_merge)
       |> assign(:repos, repos)
       |> assign(:frozen_repos, frozen_repos)
+      |> put_title("Pending Merges")
       |> ok()
     else
       ok(socket)

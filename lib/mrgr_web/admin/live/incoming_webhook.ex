@@ -53,9 +53,12 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
       subscribe()
 
       hooks = Mrgr.IncomingWebhook.all()
-      {:ok, assign(socket, :incoming_webhooks, hooks)}
+      socket
+      |> assign(:incoming_webhooks, hooks)
+      |> put_title("Webhooks")
+      |> ok()
     else
-      {:ok, assign(socket, :incoming_webhooks, [])}
+      {:ok, socket}
     end
   end
 

@@ -70,6 +70,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
 
     socket
     |> assign(hook: hook)
+    |> put_title("Webhook #{hook.id}")
     |> ok
   end
 
