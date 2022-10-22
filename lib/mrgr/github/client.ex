@@ -3,7 +3,11 @@ defmodule Mrgr.Github.Client do
 
   @spec new(Installation.t() | User.t()) :: Tentacat.Client.t()
   def new(actor) do
-    case token_expired?(actor) do
+    actor = fetch_token(actor)
+
+    actor
+    |> token_expired?()
+    |> case do
       true ->
         actor
         |> refresh_token!()
@@ -12,6 +16,19 @@ defmodule Mrgr.Github.Client do
       false ->
         clientize(actor)
     end
+  end
+
+  def fetch_token(actor) do
+    # reload the thing to make sure we have the latest tokenry.
+    # when performing multiple requests on, say, a list of merges, they
+    # pass in their one copy of the installation that was set at the beginning.
+    # a refreshed installation is not used, so we think its token has expired prematurely
+    # and we refresh it with each request :/.
+    #
+    # in future we'll look up the token itself but i don't want to build
+    # that out as a separate concern right now for time's sake.  reloading
+    # the actor will "fetch the latest token"
+    Mrgr.Repo.get(actor.__struct__, actor.id)
   end
 
   # new installation.  users should get a token immediately upon creation
