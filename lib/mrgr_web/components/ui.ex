@@ -382,7 +382,6 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-<<<<<<< HEAD
   def language_icon(%{language: nil} = assigns) do
     ~H()
   end
