@@ -11,6 +11,16 @@ defmodule Mrgr.Github.API.Fake do
     %{}
   end
 
+  def fetch_pulls_graphql(_installation, _repo) do
+    %{
+      "repository" => %{
+        "pullRequests" => %{
+          "edges" => []
+        }
+      }
+    }
+  end
+
   def fetch_issue_comments(_installation, _repo, _number) do
     []
   end

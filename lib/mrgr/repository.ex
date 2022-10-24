@@ -107,9 +107,9 @@ defmodule Mrgr.Repository do
   end
 
   # def fetch_open_merges(repo) do
-    # opts = %{state: "open"}
+  # opts = %{state: "open"}
 
-    # Mrgr.Github.API.fetch_filtered_pulls(repo.installation, repo, opts)
+  # Mrgr.Github.API.fetch_filtered_pulls(repo.installation, repo, opts)
   # end
 
   def fetch_open_merges(repo) do

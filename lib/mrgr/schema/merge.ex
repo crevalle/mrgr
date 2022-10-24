@@ -83,6 +83,7 @@ defmodule Mrgr.Schema.Merge do
     |> put_external_id()
     |> validate_mergeable_fields()
     |> put_change(:raw, params)
+    |> unique_constraint(:node_id)
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:author_id)
   end
