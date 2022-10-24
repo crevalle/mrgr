@@ -95,4 +95,8 @@ defmodule MrgrWeb.Formatter do
 
   def quote_if_present(nil), do: nil
   def quote_if_present(str), do: ~s("#{str}")
+
+  def shorten(text, length \\ 50) do
+    "#{String.slice(text, 1..length)}..."
+  end
 end

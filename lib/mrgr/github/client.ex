@@ -18,6 +18,16 @@ defmodule Mrgr.Github.Client do
     end
   end
 
+  def graphql(installation) do
+    %Tentacat.Client{auth: %{access_token: token}} = new(installation)
+
+    token
+  end
+
+  def graphql_token(client) do
+    client.auth.access_token
+  end
+
   def fetch_token(actor) do
     # reload the thing to make sure we have the latest tokenry.
     # when performing multiple requests on, say, a list of merges, they

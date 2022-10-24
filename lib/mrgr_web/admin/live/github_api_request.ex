@@ -33,7 +33,7 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
               <.tr striped={true}>
                 <.td><%= r.id %></.td>
                 <.td><%= link r.installation.account.login, to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, r.installation_id), class: "text-teal-700 hover:text-teal-500" %></.td>
-                <.td><%= r.api_call %></.td>
+                <.td><%= shorten(r.api_call) %></.td>
                 <.td><%= r.response_code %></.td>
                 <.td><%= r.elapsed_time %></.td>
                 <.td>

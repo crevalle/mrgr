@@ -11,6 +11,8 @@ defmodule Mrgr.Github.User do
     field(:html_url, :string)
     field(:id, :integer)
     field(:login, :string)
+    # only in graphql
+    field(:name, :string)
     field(:node_id, :string)
     field(:organizations_url, :string)
     field(:received_events_url, :string)
@@ -32,6 +34,7 @@ defmodule Mrgr.Github.User do
     html_url
     id
     login
+    name
     node_id
     organizations_url
     received_events_url
@@ -51,6 +54,43 @@ defmodule Mrgr.Github.User do
 
   def changeset(schema, params) do
     cast(schema, params, @fields)
+  end
+
+  def graphql_to_attrs(list) when is_list(list) do
+    Enum.map(list, &graphql_to_attrs/1)
+  end
+
+  def graphql_to_attrs(map) do
+    %{
+      "avatar_url" => map["avatarUrl"],
+      "node_id" => map["id"],
+      "id" => map["databaseId"],
+      "login" => map["login"],
+      "name" => map["name"]
+    }
+  end
+
+  defmodule GraphQL do
+    def actor do
+      """
+      {
+        avatarUrl
+        login
+      }
+      """
+    end
+
+    def user do
+      """
+      {
+        avatarUrl
+        login
+        databaseId
+        id
+        name
+      }
+      """
+    end
   end
 
   # %{

@@ -1,10 +1,24 @@
 defmodule Mrgr.Schema.Merge do
   use Mrgr.Schema
 
+  @mergeable_states ["MERGEABLE", "CONFLICTING", "UNKNOWN"]
+  @merge_state_statuses [
+    "BEHIND",
+    "BLOCKED",
+    "CLEAN",
+    "DIRTY",
+    "DRAFT",
+    "HAS_HOOKS",
+    "UNKNOWN",
+    "UNSTABLE"
+  ]
+
   schema "merges" do
     field(:external_id, :integer)
     field(:files_changed, {:array, :string})
     field(:head_commit, :map)
+    field(:mergeable, :string)
+    field(:merge_state_status, :string)
     field(:merge_queue_index, :integer)
     field(:node_id, :string)
     field(:number, :integer)
@@ -38,6 +52,8 @@ defmodule Mrgr.Schema.Merge do
   end
 
   @create_fields ~w[
+    mergeable
+    merge_state_status
     merge_queue_index
     node_id
     number
@@ -49,6 +65,8 @@ defmodule Mrgr.Schema.Merge do
   ]a
 
   @synchronize_fields ~w[
+    mergeable
+    merge_state_status
     title
   ]a
 
@@ -63,6 +81,7 @@ defmodule Mrgr.Schema.Merge do
     |> cast_embed(:head)
     |> put_open_status()
     |> put_external_id()
+    |> validate_mergeable_fields()
     |> put_change(:raw, params)
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:author_id)
@@ -83,6 +102,7 @@ defmodule Mrgr.Schema.Merge do
     schema
     |> cast(params, @synchronize_fields)
     |> cast_embed(:head)
+    |> validate_mergeable_fields()
     |> put_change(:raw, params)
   end
 
@@ -140,6 +160,38 @@ defmodule Mrgr.Schema.Merge do
     Map.put(params, "opened_at", at)
   end
 
+  # also upcases the strings
+  def validate_mergeable_fields(changeset) do
+    changeset
+    |> validate_mergeable()
+    |> validate_merge_state()
+  end
+
+  defp validate_mergeable(changeset) do
+    case get_change(changeset, :mergeable) do
+      empty when empty in [nil, ""] ->
+        changeset
+
+      change ->
+        changeset
+        |> put_change(:mergeable, String.upcase(change))
+        |> validate_inclusion(:mergeable, @mergeable_states)
+    end
+  end
+
+  defp validate_merge_state(changeset) do
+    case get_change(changeset, :merge_state_status) do
+      empty when empty in [nil, ""] ->
+        changeset
+
+      change ->
+        changeset
+        |> put_change(:merge_state_status, String.upcase(change))
+        |> validate_inclusion(:merge_state_status, @merge_state_statuses)
+    end
+  end
+
+  def external_merge_url(%{url: url}) when is_bitstring(url), do: url
   def external_merge_url(%{raw: %{"_links" => %{"html" => %{"href" => url}}}}), do: url
   def external_merge_url(_merge), do: ""
 
@@ -172,99 +224,7 @@ defmodule Mrgr.Schema.Merge do
     commit.sha
   end
 
-  ### HEAD_COMMIT
-  #  %{
-  #    "author" => %{
-  #      "avatar_url" => "https://avatars.githubusercontent.com/u/572921?v=4",
-  #      "events_url" => "https://api.github.com/users/desmondmonster/events{/privacy}",
-  #      "followers_url" => "https://api.github.com/users/desmondmonster/followers",
-  #      "following_url" => "https://api.github.com/users/desmondmonster/following{/other_user}",
-  #      "gists_url" => "https://api.github.com/users/desmondmonster/gists{/gist_id}",
-  #      "gravatar_id" => "",
-  #      "html_url" => "https://github.com/desmondmonster",
-  #      "id" => 572921,
-  #      "login" => "desmondmonster",
-  #      "node_id" => "MDQ6VXNlcjU3MjkyMQ==",
-  #      "organizations_url" => "https://api.github.com/users/desmondmonster/orgs",
-  #      "received_events_url" => "https://api.github.com/users/desmondmonster/received_events",
-  #      "repos_url" => "https://api.github.com/users/desmondmonster/repos",
-  #      "site_admin" => false,
-  #      "starred_url" => "https://api.github.com/users/desmondmonster/starred{/owner}{/repo}",
-  #      "subscriptions_url" => "https://api.github.com/users/desmondmonster/subscriptions",
-  #      "type" => "User",
-  #      "url" => "https://api.github.com/users/desmondmonster"
-  #    },
-  #    "comments_url" => "https://api.github.com/repos/crevalle/mrgr/commits/5ffdd99905664ba68a33b984ec9f58b57fe8d126/comments",
-  #    "commit" => %{
-  #      "author" => %{
-  #        "date" => "2022-07-06T01:12:36Z",
-  #        "email" => "desmond@crevalle.io",
-  #        "name" => "Desmond Bowe"
-  #      },
-  #      "comment_count" => 0,
-  #      "committer" => %{
-  #        "date" => "2022-07-06T01:12:36Z",
-  #        "email" => "desmond@crevalle.io",
-  #        "name" => "Desmond Bowe"
-  #      },
-  #      "message" => "the actual name",
-  #      "tree" => %{
-  #        "sha" => "1bff6060e30d706ffff42c956b15c32d029ce473",
-  #        "url" => "https://api.github.com/repos/crevalle/mrgr/git/trees/1bff6060e30d706ffff42c956b15c32d029ce473"
-  #      },
-  #      "url" => "https://api.github.com/repos/crevalle/mrgr/git/commits/5ffdd99905664ba68a33b984ec9f58b57fe8d126",
-  #      "verification" => %{
-  #        "payload" => nil,
-  #        "reason" => "unsigned",
-  #        "signature" => nil,
-  #        "verified" => false
-  #      }
-  #    },
-  #    "committer" => %{
-  #      "avatar_url" => "https://avatars.githubusercontent.com/u/572921?v=4",
-  #      "events_url" => "https://api.github.com/users/desmondmonster/events{/privacy}",
-  #      "followers_url" => "https://api.github.com/users/desmondmonster/followers",
-  #      "following_url" => "https://api.github.com/users/desmondmonster/following{/other_user}",
-  #      "gists_url" => "https://api.github.com/users/desmondmonster/gists{/gist_id}",
-  #      "gravatar_id" => "",
-  #      "html_url" => "https://github.com/desmondmonster",
-  #      "id" => 572921,
-  #      "login" => "desmondmonster",
-  #      "node_id" => "MDQ6VXNlcjU3MjkyMQ==",
-  #      "organizations_url" => "https://api.github.com/users/desmondmonster/orgs",
-  #      "received_events_url" => "https://api.github.com/users/desmondmonster/received_events",
-  #      "repos_url" => "https://api.github.com/users/desmondmonster/repos",
-  #      "site_admin" => false,
-  #      "starred_url" => "https://api.github.com/users/desmondmonster/starred{/owner}{/repo}",
-  #      "subscriptions_url" => "https://api.github.com/users/desmondmonster/subscriptions",
-  #      "type" => "User",
-  #      "url" => "https://api.github.com/users/desmondmonster"
-  #    },
-  #    "files" => [
-  #      %{
-  #        "additions" => 1,
-  #        "blob_url" => "https://github.com/crevalle/mrgr/blob/5ffdd99905664ba68a33b984ec9f58b57fe8d126/lib%2Fmrgr_web%2Flive%2Fpending_merge_live.ex",
-  #        "changes" => 2,
-  #        "contents_url" => "https://api.github.com/repos/crevalle/mrgr/contents/lib%2Fmrgr_web%2Flive%2Fpending_merge_live.ex?ref=5ffdd99905664ba68a33b984ec9f58b57fe8d126",
-  #        "deletions" => 1,
-  #        "filename" => "lib/mrgr_web/live/pending_merge_live.ex",
-  #        "patch" => "@@ -185,7 +185,7 @@ defmodule MrgrWeb.PendingMergeLive do\n \n   def has_migration?(%{files_changed: files}) do\n     Enum.any?(files, fn f ->\n-      String.starts_with?(f, \"priv\")\n+      String.starts_with?(f, \"priv/repo/migrations\")\n     end)\n   end\n end",
-  #        "raw_url" => "https://github.com/crevalle/mrgr/raw/5ffdd99905664ba68a33b984ec9f58b57fe8d126/lib%2Fmrgr_web%2Flive%2Fpending_merge_live.ex",
-  #        "sha" => "acbf69f1c03d61d34032fdc539421de362f1ee42",
-  #        "status" => "modified"
-  #      }
-  #    ],
-  #    "html_url" => "https://github.com/crevalle/mrgr/commit/5ffdd99905664ba68a33b984ec9f58b57fe8d126",
-  #    "node_id" => "C_kwDOGGc3xdoAKDVmZmRkOTk5MDU2NjRiYTY4YTMzYjk4NGVjOWY1OGI1N2ZlOGQxMjY",
-  #    "parents" => [
-  #      %{
-  #        "html_url" => "https://github.com/crevalle/mrgr/commit/3fef6c68cc71e774e7752edcd169bd2d1e46fd57",
-  #        "sha" => "3fef6c68cc71e774e7752edcd169bd2d1e46fd57",
-  #        "url" => "https://api.github.com/repos/crevalle/mrgr/commits/3fef6c68cc71e774e7752edcd169bd2d1e46fd57"
-  #      }
-  #    ],
-  #    "sha" => "5ffdd99905664ba68a33b984ec9f58b57fe8d126",
-  #    "stats" => %{"additions" => 1, "deletions" => 1, "total" => 2},
-  #    "url" => "https://api.github.com/repos/crevalle/mrgr/commits/5ffdd99905664ba68a33b984ec9f58b57fe8d126"
-  #    }
+  def mergeable_status(merge) do
+    "#{merge.mergeable} #{merge.merge_state_status}"
+  end
 end

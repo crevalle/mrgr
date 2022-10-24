@@ -106,10 +106,51 @@ defmodule Mrgr.Repository do
     Mrgr.Github.API.fetch_repositories(installation)
   end
 
-  defp fetch_open_merges(repo) do
-    opts = %{state: "open"}
+  # def fetch_open_merges(repo) do
+    # opts = %{state: "open"}
 
-    Mrgr.Github.API.fetch_filtered_pulls(repo.installation, repo, opts)
+    # Mrgr.Github.API.fetch_filtered_pulls(repo.installation, repo, opts)
+  # end
+
+  def fetch_open_merges(repo) do
+    result = Mrgr.Github.API.fetch_pulls_graphql(repo.installation, repo)
+
+    result
+    |> translate_graphql_attrs()
+  end
+
+  def translate_graphql_attrs(attrs) do
+    attrs["repository"]["pullRequests"]["edges"]
+    |> Enum.map(fn %{"node" => node} ->
+      translate_node(node)
+    end)
+  end
+
+  defp translate_node(node) do
+    requested_reviewers =
+      node["reviewRequests"]["nodes"]
+      |> Enum.map(fn node -> node["requestedReviewer"] end)
+      |> Enum.map(&Mrgr.Github.User.graphql_to_attrs/1)
+
+    translated = %{
+      "assignees" => Mrgr.Github.User.graphql_to_attrs(node["assignees"]["nodes"]),
+      "created_at" => node["createdAt"],
+      "head" => %{
+        "node_id" => node["headRef"]["id"],
+        "ref" => node["headRef"]["name"],
+        "sha" => node["headRef"]["target"]["oid"]
+      },
+      "id" => node["databaseId"],
+      "node_id" => node["id"],
+      "requested_reviewers" => requested_reviewers,
+      "url" => node["permalink"],
+      "user" => %{
+        "login" => node["author"]["login"],
+        "avatar_url" => node["author"]["avatarUrl"]
+      }
+    }
+
+    Map.merge(node, translated)
   end
 
   defp create_merges_from_data(_repo, []), do: nil

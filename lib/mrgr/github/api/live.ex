@@ -22,6 +22,53 @@ defmodule Mrgr.Github.API.Live do
     handle_response(response)
   end
 
+  def fetch_pulls_graphql(installation, repo) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
+
+    query = """
+      query {
+        repository(owner:"#{owner}", name:"#{name}") {
+          pullRequests(last: 50, states: [OPEN]) {
+            edges {
+              node {
+                assignees(first: 20) {
+                  nodes #{Mrgr.Github.User.GraphQL.user()}
+                }
+                author #{Mrgr.Github.User.GraphQL.actor()}
+                createdAt
+                databaseId
+                mergeStateStatus
+                mergeable
+                headRef {
+                  id
+                  name
+                  target {
+                    oid
+                  }
+                }
+                id
+                number
+                permalink
+                reviewRequests(first: 20) {
+                  nodes {
+                    databaseId
+                    requestedReviewer {
+                      ... on User #{Mrgr.Github.User.GraphQL.user()}
+                    }
+                  }
+                }
+                state
+                title
+              }
+            }
+          }
+        }
+      }
+    """
+
+    neuron_request!(installation, query)
+  end
+
   def fetch_filtered_pulls(installation, repo, opts) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
 
@@ -90,6 +137,57 @@ defmodule Mrgr.Github.API.Live do
     request!(&Tentacat.Pulls.commits/4, installation, [owner, name, number])
   end
 
+  def neuron_request!(installation, query) do
+    token = Mrgr.Github.Client.graphql(installation)
+
+    opts = [
+      url: "https://api.github.com/graphql",
+      headers: [
+        Authorization: "bearer #{token}",
+        Accept: "application/vnd.github.merge-info-preview+json"
+      ]
+    ]
+
+    neuron_request!(installation, query, opts)
+  end
+
+  def neuron_request!(installation, query, opts) do
+    # logs the query string
+    record = create_api_request(installation, query)
+
+    result = do_neuron_request!(query, opts)
+
+    complete_api_request(record, result)
+
+    result.data
+  end
+
+  defp do_neuron_request!(query, opts) do
+    start_time = DateTime.utc_now()
+
+    {status, response} = Neuron.query(query, %{}, opts)
+
+    elapsed_time = DateTime.diff(DateTime.utc_now(), start_time, :millisecond)
+
+    data =
+      case status do
+        :ok ->
+          response.body["data"]
+
+        :error ->
+          # message and documentation_url
+          response.body
+      end
+
+    %{
+      response_code: response.status_code,
+      data: data,
+      response: response,
+      elapsed_time: elapsed_time,
+      response_headers: Map.new(response.headers)
+    }
+  end
+
   def request!(f, installation, args) do
     client = generate_client!(installation)
     request!(f, installation, client, args)
@@ -112,7 +210,13 @@ defmodule Mrgr.Github.API.Live do
 
     elapsed_time = DateTime.diff(DateTime.utc_now(), start_time, :millisecond)
 
-    %{response_code: code, data: data, response: response, elapsed_time: elapsed_time}
+    %{
+      response_code: code,
+      data: data,
+      response: response,
+      elapsed_time: elapsed_time,
+      response_headers: Map.new(response.headers)
+    }
   end
 
   defp generate_client!(installation) do
@@ -131,13 +235,7 @@ defmodule Mrgr.Github.API.Live do
     |> Mrgr.Repo.insert!()
   end
 
-  defp complete_api_request(schema, params) do
-    response_headers = Map.new(params.response.headers)
-
-    attrs =
-      params
-      |> Map.put(:response_headers, response_headers)
-
+  defp complete_api_request(schema, attrs) do
     schema
     |> Mrgr.Schema.GithubAPIRequest.complete_changeset(attrs)
     |> Mrgr.Repo.update!()

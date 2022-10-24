@@ -44,6 +44,7 @@ defmodule Mrgr.MixProject do
       {:ex_heroicons, "~> 2.0.0"},
       {:jason, "~> 1.2"},
       {:joken, "~> 2.4"},
+      {:neuron, "~> 5.0"},
       {:oban, "~> 2.13"},
       {:path_glob, "~> 0.1.1"},
       {:phoenix, "~> 1.6"},

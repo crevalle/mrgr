@@ -4,6 +4,7 @@ defmodule Mrgr.Schema.Head do
   embedded_schema do
     field(:external_id, :integer)
     field(:ref, :string)
+    field(:node_id, :string)
     field(:sha, :string)
 
     embeds_one(:user, Mrgr.Github.User, on_replace: :update)
@@ -12,6 +13,7 @@ defmodule Mrgr.Schema.Head do
 
   @fields ~w[
     sha
+    node_id
     ref
   ]a
 
