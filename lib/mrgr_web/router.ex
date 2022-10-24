@@ -1,6 +1,10 @@
 defmodule MrgrWeb.Router do
   use MrgrWeb, :router
 
+  @moduledoc """
+  My router is sweet.
+  """
+
   pipeline :browser do
     plug :accepts, ["html"]
     plug :fetch_session
