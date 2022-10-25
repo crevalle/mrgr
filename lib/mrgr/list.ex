@@ -47,10 +47,17 @@ defmodule Mrgr.List do
 
   @spec replace(list(), map()) :: list()
   def replace(list, item) do
-    # assumes item is in list
+    # no-op if not in list
 
     idx = find_index(list, item)
-    List.replace_at(list, idx, item)
+
+    case idx do
+      nil ->
+        list
+
+      idx ->
+        List.replace_at(list, idx, item)
+    end
   end
 
   @spec replace!(list(), map()) :: list()
