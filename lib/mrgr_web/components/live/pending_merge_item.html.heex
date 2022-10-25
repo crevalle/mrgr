@@ -1,36 +1,27 @@
-<div draggable="true" class={"bg-white hover:bg-stone-50 border #{highlighted_color(@selected)} shadow rounded-lg draggable merge-list"} id={"merge-#{@merge.id}"}>
-  <a href="#" phx-click="show-preview" phx-value-merge-id={"#{@merge.id}"} class="text-sm font-medium">
-    <div class="px-4 py-4 sm:px-6">
-      <div class="flex items-center justify-between">
-        <div class="flex items-baseline">
-          <.h3 color={if Mrgr.Merge.snoozed?(@merge), do: "text-gray-400"}><%= @merge.title %></.h3>
-          <p class={"ml-2 text-sm italic font-light #{repo_text_color(@merge_frozen)}"}>
-            <%= @merge.repository.name %>
-          </p>
-        </div>
-        <div class="ml-2 flex-shrink-0 flex">
-          <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-            <p class="truncate max-w-xs">
-              "<%= Mrgr.Schema.Merge.head_commit_message(@merge) %>"
-            </p>
-          </div>
-        </div>
-      </div>
-      <div class="mt-2 sm:flex sm:justify-between">
-        <div class="sm:flex items-center">
-          <%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: @merge}) %>
-          <.me_tag merge={@merge} current_user={@current_user} />
-        </div>
+<div draggable="true" class={"bg-white hover:bg-stone-50 border #{highlighted_color(@selected)} shadow rounded-lg draggable"} id={"merge-#{@merge.id}"}>
+  <div class="px-4 py-4 sm:px-6">
 
-        <div>
-          <%= Mrgr.Schema.Merge.mergeable_status(@merge) %>
-        </div>
+    <!-- top row -->
+    <div class="flex items-center mb-4 justify-between items-baseline">
+
+      <!-- title -->
+      <div class="flex items-baseline">
+        <.h3>
+          <.l phx-click="show-preview" phx-value-merge-id={"#{@merge.id}"} class="text-teal-700 hover:text-teal-500">
+            <%= @merge.title %>
+          </.l>
+        </.h3>
+        <p class={"ml-2 text-sm italic font-light #{repo_text_color(@merge_frozen)}"}>
+          <%= @merge.repository.name %>
+        </p>
+      </div>
+      <!-- action button -->
+      <div class="relative">
         <%= if Mrgr.Merge.snoozed?(@merge) do %>
           <p class="text-gray-400 italic">
           😴 Snoozed until <%= ts(@merge.snoozed_until) %>.
           </p>
         <% else %>
-          <div class="relative">
             <.l phx-click={JS.toggle(
                 to: "#snooze-menu-#{@merge.id}",
                 in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
@@ -38,11 +29,10 @@
               )}
               id={"snooze-menu-button-#{@merge.id}"}
               aria-expanded="false"
-              aria-haspopup="true">
-              <div class="flex items-end">
-                Snooze
-                <.icon name="chevron-down" class="ml-1 h-5 w-5" />
-              </div>
+              aria-haspopup="true"
+              class="flex text-teal-700 hover:text-teal-500 font-light text-sm">
+              Snooze
+              <.icon name="chevron-down" class="ml-1 h-5 w-5" />
             </.l>
 
             <div style="display: none;" id={"snooze-menu-#{@merge.id}"} class="origin-top-right absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"snooze-menu-button-#{@merge.id}"} tabindex="-1">
@@ -54,30 +44,49 @@
                 <%= link "Indefinitely", to: "#", phx_click: "snooze-merge", phx_value_id: @merge.id, phx_value_time: "indefinitely", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
               </div>
             </div>
-          </div>
         <% end %>
-
-
-      </div>
-      <div class="mt-2 sm:flex sm:justify-between items-start">
-        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-          <p>
-          Opened <.timeago
-             datetime={@merge.opened_at}
-             uhoh={true}
-             ./>
-          </p>
-          <p :if={Mrgr.Checklist.complete?(@merge.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
-
-          <.live_component module={MrgrWeb.Components.Live.Sparkline} id={"merge_#{@merge.id}_activity_preview"} comments={@merge.comments} commits={@merge.commits} />
-        </div>
-        <div class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0">
-          <p>
-            <%= ts(Mrgr.Schema.Merge.head_committed_at(@merge), assigns.timezone) %>
-          </p>
-        </div>
       </div>
     </div>
-  </a>
+
+    <!-- 2nd row -->
+    <div class="mt-2 sm:flex sm:justify-between">
+
+      <div class="sm:flex items-center">
+        <.me_tag merge={@merge} current_user={@current_user} />
+        <%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: @merge}) %>
+      </div>
+
+
+      <.live_component module={MrgrWeb.Components.Live.Sparkline} id={"merge_#{@merge.id}_activity_preview"} comments={@merge.comments} commits={@merge.commits} />
+    </div>
+
+    <!-- 3rd row -->
+    <div class="mt-2 sm:flex sm:justify-between text-sm text-gray-500 items-start">
+      <div>
+        <%= if Mrgr.Schema.Merge.is_mergeable(@merge) do %>
+          <p class="flex">
+            <.icon name="check" class="text-sky-600 mr-1 h-5 w-5" />
+            Ready to merge
+          </p>
+        <% else %>
+          <p class="flex">
+            <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" />
+            Awaiting approvals
+          </p>
+        <% end %>
+
+        <p :if={Mrgr.Checklist.complete?(@merge.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
+      </div>
+
+      <p>
+      Opened <.timeago
+         datetime={@merge.opened_at}
+         uhoh={true}
+         ./>
+      </p>
+
+    </div>
+
+  </div>
 </div>
 

@@ -25,10 +25,8 @@ defmodule MrgrWeb.Components.Live.Sparkline do
 
   def render(assigns) do
     ~H"""
-      <div class="flex flex-col">
+      <div class="">
         <%= @sp %>
-        <p class="text-gray-500"><span class="font-bold"><%= Enum.count(@recent_comments) %></span> in last 24 hours</p>
-        <p class="text-gray-500"><span class="font-bold"><%= Enum.count(@comments) %></span> comments total</p>
       </div>
     """
   end

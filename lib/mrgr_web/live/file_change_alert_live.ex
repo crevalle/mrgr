@@ -13,6 +13,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
       socket
       |> assign(:form, nil)
       |> assign(:repos, repos)
+      |> put_title("File Change Alerts")
       |> ok()
     else
       ok(socket)

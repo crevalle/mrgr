@@ -55,28 +55,21 @@ defmodule MrgrWeb.Components.Merge do
   end
 
   def me_tag(assigns) do
-    color =
-      case Mrgr.Merge.tagged?(assigns.merge, assigns.current_user) do
-        true ->
-          "text-emerald-600"
-
-        false ->
-          "text-gray-400"
-      end
+    tagged = Mrgr.Merge.tagged?(assigns.merge, assigns.current_user)
 
     assigns =
       assigns
-      |> assign(:color, color)
+      |> assign(:tagged, tagged)
 
     ~H"""
-    <.icon name="at-symbol" type="solid" class={"ml-1 #{@color} h-4 w-4"} />
+      <.icon :if={@tagged} name="at-symbol" type="solid" class={"mr-1 text-emerald-600 h-4 w-4"} />
     """
   end
 
   def preview_commit(assigns) do
     ~H"""
     <li class="p-2">
-      <div class="flex flex-col space-y-1">
+      <div class="flex flex-col ">
         <div class="flex space-between items-center">
           <p class="flex-1 truncate"><%= Merge.commit_message(@commit) %></p>
           <p class="text-sm text-gray-500"><%= ts(Merge.committed_at(@commit)) %></p>

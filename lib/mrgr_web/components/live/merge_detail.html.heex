@@ -1,12 +1,12 @@
 <div class="basis-1/2 p-4 bg-white overflow-hidden shadow rounded-lg">
-  <div class="flex flex-col space-y-4">
+  <div class="flex flex-col space-y-6">
     <div class="flex flex-col">
       <div class="flex justify-between items-center">
         <div class="flex items-start items-center">
           <.h1><%= @merge.title %></.h1>
-          <%= link to: external_merge_url(@merge), target: "_blank" do %>
-            <.icon name="arrow-top-right-on-square" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-          <% end %>
+          <.l href={external_merge_url(@merge)} class="text-gray-400 hover:text-gray-500 ml-2" target="_blank">
+            <.icon name="arrow-top-right-on-square" class="flex-shrink-0 mr-1.5 h-5 w-5" />
+          </.l>
         </div>
         <button phx-click="close-detail" colors="outline-none">
           <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
@@ -23,18 +23,38 @@
         <p :if={Mrgr.Merge.tagged?(@merge, @current_user)} class="text-emerald-600">You've been tagged in this Merge</p>
         <p class="mt-1"><%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: @merge}) %></p>
       </div>
+
+      <p class="flex items-center space-x-2 mt-2 text-gray-500">
+        <%= if Mrgr.Schema.Merge.is_mergeable(@merge) do %>
+          <.icon name="check" class="text-sky-600 h-5 w-5" />
+          <span>Ready to merge</span>
+          <.aside>(2/2 approvals)</.aside>
+        <% else %>
+          <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" />
+          <span>Awaiting approvals</span>
+          <.aside>(0/2 approvals)</.aside>
+        <% end %>
+      </p>
+
+
+      <div :if={Mrgr.Merge.snoozed?(@merge)} >
+        <p class="text-gray-400 italic">
+        😴 Snoozed until <%= ts(@merge.snoozed_until) %>. <.l phx_click="unsnooze-merge" phx_value_id={@merge.id}>Unsnooze</.l>
+        </p>
+      </div>
     </div>
 
-    <div :if={Mrgr.Merge.snoozed?(@merge)} >
-      <p class="text-gray-400 italic">
-      😴 Snoozed until <%= ts(@merge.snoozed_until) %>. <.l phx_click="unsnooze-merge" phx_value_id={@merge.id}>Unsnooze</.l>
-      </p>
-    </div>
 
     <div class="flex flex-col">
-      <.subheading title="Activity" />
+      <.subheading title="Recent Activity" />
 
       <.live_component module={MrgrWeb.Components.Live.Sparkline} id={"merge_#{@merge.id}_activity"} comments={@merge.comments} commits={@merge.commits} />
+      <p class="text-gray-500">
+      <%= Enum.count(MrgrWeb.Components.Live.Sparkline.filter_recent(@merge.comments)) %> comments <.aside>(<%= Enum.count(@merge.comments) %> total)</.aside>
+      </p>
+      <p class="text-gray-500">
+      <%= Enum.count(MrgrWeb.Components.Live.Sparkline.filter_recent(@merge.commits)) %> commits <.aside>(<%= Enum.count(@merge.commits) %> total)</.aside>
+      </p>
     </div>
 
     <div class="flex flex-col">
@@ -44,6 +64,20 @@
       <% else %>
         <p class="italic text-gray-300">No checklists for this PR.</p>
       <% end %>
+    </div>
+
+    <div>
+      <.h3>Commits</.h3>
+      <ul>
+        <MrgrWeb.Components.Merge.preview_commit :for={c <- @merge.commits} commit={c} ./>
+      </ul>
+    </div>
+
+    <div>
+      <.h3>Files Changed</.h3>
+      <ul>
+        <.changed_file_li :for={f <- @merge.files_changed} filename={f} alerts={@merge.repository.file_change_alerts} />
+      </ul>
     </div>
 
     <.h3>Merge This Pull Request</.h3>
@@ -60,23 +94,10 @@
       </div>
     </.form>
 
-    <div>
-      <.h3>Commits</.h3>
-      <ul>
-        <MrgrWeb.Components.Merge.preview_commit :for={c <- @merge.commits} commit={c} ./>
-      </ul>
-    </div>
-
-    <div>
-      <.h3>Files Changed</.h3>
-      <ul>
-        <.changed_file_li :for={f <- @merge.files_changed} filename={f} alerts={@merge.repository.file_change_alerts} />
-      </ul>
-    </div>
-
-    <div :if={admin?(@current_user)}>
-      id: <%= @merge.id %>
-      number: <%= @merge.number %>
+    <div :if={admin?(@current_user)} class="flex flex-col">
+      <p>--- Admin ---</p>
+      <p>id: <%= @merge.id %></p>
+      <p>number: <%= @merge.number %></p>
       <.live_component module={MrgrWeb.Components.Live.JSONModalComponent} id={"merge-data-modal-#{@merge.id}"} button="Raw Data" title={"Merge #{@merge.id} Data"} data={@merge.raw} ./>
     </div>
   </div>

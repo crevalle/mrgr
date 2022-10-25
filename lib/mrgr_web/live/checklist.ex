@@ -9,6 +9,7 @@ defmodule MrgrWeb.Live.Checklist do
       templates = Mrgr.ChecklistTemplate.for_installation(current_user.current_installation)
 
       socket
+      |> put_title("File Change Alerts")
       |> assign(:templates, templates)
       |> assign(:new_template, nil)
       |> assign(:changeset, nil)

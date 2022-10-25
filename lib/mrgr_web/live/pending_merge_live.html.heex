@@ -75,7 +75,7 @@
     <div class="basis-1/2 overflow-hidden" phx-hoox="Drag" id="drag">
       <div role="list" class="flex flex-col space-y-3 dropzone" id="pending-merge-list">
         <.live_component
-          :for={merge <- @merges} 
+          :for={merge <- @merges}
           module={MrgrWeb.Components.Live.PendingMergeItem}
           id={"merge_#{merge.id}"}
           merge={merge}

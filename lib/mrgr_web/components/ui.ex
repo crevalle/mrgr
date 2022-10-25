@@ -2,7 +2,7 @@ defmodule MrgrWeb.Components.UI do
   use MrgrWeb, :component
 
   def l(assigns) do
-    default_class = "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md"
+    default_class = "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm"
     class = Map.get(assigns, :class, default_class)
     href = Map.get(assigns, :href, "#")
 
@@ -18,6 +18,14 @@ defmodule MrgrWeb.Components.UI do
     <a href={@href} class={@class} {@extra}>
       <%= render_slot(@inner_block) %>
     </a>
+    """
+  end
+
+  def aside(assigns) do
+    ~H"""
+    <span class="italic text-sm text-gray-400">
+      <%= render_slot(@inner_block) %>
+    </span>
     """
   end
 
