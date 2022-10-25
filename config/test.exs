@@ -31,3 +31,6 @@ config :logger, level: :warn
 config :phoenix, :plug_init_mode, :runtime
 
 config :mrgr, Oban, testing: :inline
+
+config :mrgr, Mrgr.Mailer, adapter: Swoosh.Adapters.Local
+config :swoosh, :api_client, false

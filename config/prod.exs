@@ -56,3 +56,8 @@ config :logger, level: :info
 # Check `Plug.SSL` for all available options in `force_ssl`.
 
 config :appsignal, :config, active: true
+
+config :mrgr, Mrgr.Mailer,
+  adapter: Swoosh.Adapters.Sendgrid,
+  api_key: System.get_env("SENDGRID_API_KEY")
+
