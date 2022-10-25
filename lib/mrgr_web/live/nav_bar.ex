@@ -7,13 +7,21 @@ defmodule MrgrWeb.Live.NavBar do
   def mount(_params, _session, socket) do
     if connected?(socket) do
       current_user = socket.assigns.current_user
-      pending_merge_count = Enum.count(Mrgr.Merge.pending_merges(current_user))
 
-      subscribe(current_user)
+      case current_user.current_installation do
+        nil ->
+          # onboarding, no current installation
+          socket
+          |> assign(:pending_merge_count, 0)
+          |> ok()
 
-      socket
-      |> assign(:pending_merge_count, pending_merge_count)
-      |> ok()
+        _installation ->
+          subscribe(current_user)
+
+          socket
+          |> assign(:pending_merge_count, Enum.count(Mrgr.Merge.pending_merges(current_user)))
+          |> ok()
+      end
     else
       ok(socket)
     end
