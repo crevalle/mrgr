@@ -113,6 +113,7 @@ defmodule Mrgr.User do
       nil ->
         # TODO: create_member!()
         nil
+        user
 
       _associated_member ->
         nil
