@@ -35,13 +35,13 @@
               <.icon name="chevron-down" class="ml-1 h-3 w-3" />
             </.l>
 
-            <div style="display: none;" id={"snooze-menu-#{@merge.id}"} class="origin-top-right z-1000 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"snooze-menu-button-#{@merge.id}"} tabindex="-1">
+            <div style="display: none;" id={"snooze-menu-#{@merge.id}"} class="origin-top-right z-50 mt-2 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"snooze-menu-button-#{@merge.id}"} tabindex="-1">
               <div class="mt-2 flex flex-col text-sm text-gray-500 sm:mt-0">
-                <%= link "2 Days", to: "#", phx_click: "snooze-merge", phx_value_id: @merge.id, phx_value_time: "2", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
-
-                <%= link "5 Days", to: "#", phx_click: "snooze-merge", phx_value_id: @merge.id, phx_value_time: "5", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
-
-                <%= link "Indefinitely", to: "#", phx_click: "snooze-merge", phx_value_id: @merge.id, phx_value_time: "indefinitely", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
+                <%= for %{title: title, value: value} <- MrgrWeb.PendingMergeLive.snooze_options() do %>
+                  <.l phx_click="snooze-merge" phx_value_id={@merge.id} phx_value_time={value} class="text-teal-700 hover:text-teal-500 font-light p-3 text-sm rounded-md" >
+                    <%= title %>
+                  </.l>
+                <% end %>
               </div>
             </div>
         <% end %>

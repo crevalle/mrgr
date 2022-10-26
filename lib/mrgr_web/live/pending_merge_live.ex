@@ -237,6 +237,14 @@ defmodule MrgrWeb.PendingMergeLive do
     noreply(socket)
   end
 
+  def snooze_options do
+    [
+      %{title: "2 Days", value: "2"},
+      %{title: "5 Days", value: "5"},
+      %{title: "Indefinitely", value: "indefinitely"}
+    ]
+  end
+
   defp put_closed_flash_message(socket, %{merged_at: nil} = merge) do
     Flash.put(socket, :warn, "#{merge.title} closed, but not merged")
   end
