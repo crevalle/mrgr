@@ -11,6 +11,10 @@ defmodule Mrgr.Schema.Repository do
     field(:private, :boolean)
     field(:merge_freeze_enabled, :boolean, default: false)
 
+    field(:dismiss_stale_reviews, :boolean, read_after_writes: true)
+    field(:require_code_owner_reviews, :boolean, read_after_writes: true)
+    field(:required_approving_review_count, :integer, read_after_writes: true)
+
     belongs_to(:installation, Mrgr.Schema.Installation)
     has_many(:members, through: [:installation, :member])
     has_many(:users, through: [:installation, :users])
@@ -52,11 +56,23 @@ defmodule Mrgr.Schema.Repository do
     |> cast(attrs, [:merge_freeze_enabled])
   end
 
+  def branch_protection_changeset(schema, attrs) do
+    schema
+    |> cast(attrs, [
+      :dismiss_stale_reviews,
+      :require_code_owner_reviews,
+      :required_approving_review_count
+    ])
+  end
+
   def owner_name(%{full_name: full_name}) do
     full_name
     |> String.split("/")
     |> List.to_tuple()
   end
+
+  def main_branch(%{data: %{"default_branch" => branch}}), do: branch
+  def main_branch(_repo), do: "master"
 
   # %{
   #   "full_name" => "crevalle/node-cql-binary",

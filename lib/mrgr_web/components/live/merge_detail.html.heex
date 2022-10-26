@@ -28,11 +28,11 @@
         <%= if Mrgr.Schema.Merge.is_mergeable(@merge) do %>
           <.icon name="check" class="text-sky-600 h-5 w-5" />
           <span>Ready to merge</span>
-          <.aside>(2/2 approvals)</.aside>
+          <.aside><%= Mrgr.Merge.calculate_approvals(@merge) %></.aside>
         <% else %>
           <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" />
           <span>Awaiting approvals</span>
-          <.aside>(0/2 approvals)</.aside>
+          <.aside><%= Mrgr.Merge.calculate_approvals(@merge) %></.aside>
         <% end %>
       </p>
 

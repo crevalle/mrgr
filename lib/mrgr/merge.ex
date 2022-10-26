@@ -614,6 +614,16 @@ defmodule Mrgr.Merge do
     Mrgr.ChecklistTemplate.for_repository(merge.repository)
   end
 
+  def calculate_approvals(merge) do
+    case merge.repository.required_approving_review_count do
+      0 ->
+        ""
+
+      num ->
+        "(2/#{num}) approvals"
+    end
+  end
+
   defmodule Query do
     use Mrgr.Query
 

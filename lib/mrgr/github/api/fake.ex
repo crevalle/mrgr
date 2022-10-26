@@ -33,6 +33,44 @@ defmodule Mrgr.Github.API.Fake do
     []
   end
 
+  def fetch_branch_protection(%{name: "no-branch-protection"}) do
+    %{
+      "documentation_url" => "https://docs.github.com/rest/reference/repos#get-branch-protection",
+      "message" => "Branch not protected"
+    }
+  end
+
+  def fetch_branch_protection(_repository) do
+    %{
+      "allow_deletions" => %{"enabled" => true},
+      "allow_force_pushes" => %{"enabled" => true},
+      "allow_fork_syncing" => %{"enabled" => false},
+      "block_creations" => %{"enabled" => false},
+      "enforce_admins" => %{
+        "enabled" => false,
+        "url" =>
+          "https://api.github.com/repos/crevalle/mrgr/branches/master/protection/enforce_admins"
+      },
+      "lock_branch" => %{"enabled" => false},
+      "required_conversation_resolution" => %{"enabled" => false},
+      "required_linear_history" => %{"enabled" => false},
+      "required_pull_request_reviews" => %{
+        "dismiss_stale_reviews" => true,
+        "require_code_owner_reviews" => false,
+        "require_last_push_approval" => false,
+        "required_approving_review_count" => 2,
+        "url" =>
+          "https://api.github.com/repos/crevalle/mrgr/branches/master/protection/required_pull_request_reviews"
+      },
+      "required_signatures" => %{
+        "enabled" => false,
+        "url" =>
+          "https://api.github.com/repos/crevalle/mrgr/branches/master/protection/required_signatures"
+      },
+      "url" => "https://api.github.com/repos/crevalle/mrgr/branches/master/protection"
+    }
+  end
+
   def fetch_repository(_installation, _repository) do
     %{
       labels_url: "https://api.github.com/repos/crevalle/mrgr/labels{/name}",

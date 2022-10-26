@@ -1,7 +1,7 @@
 defmodule Mrgr.Github.Client do
   alias Mrgr.Schema.{Installation, User}
 
-  @spec new(Installation.t() | User.t()) :: Tentacat.Client.t()
+  @spec new(Installation.t() | User.t() | integer()) :: Tentacat.Client.t()
   def new(actor) do
     actor = fetch_token(actor)
 
@@ -26,6 +26,10 @@ defmodule Mrgr.Github.Client do
 
   def graphql_token(client) do
     client.auth.access_token
+  end
+
+  def fetch_token(id) when is_integer(id) do
+    Mrgr.Repo.get(Mrgr.Schema.Installation, id)
   end
 
   def fetch_token(actor) do

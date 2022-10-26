@@ -106,6 +106,17 @@ defmodule Mrgr.Github.API.Live do
     )
   end
 
+  def fetch_branch_protection(repository) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(repository)
+    branch = Mrgr.Schema.Repository.main_branch(repository)
+
+    request!(
+      &Tentacat.Repositories.Branches.protection/4,
+      repository.installation_id,
+      [owner, name, branch]
+    )
+  end
+
   def fetch_repository(installation, repository) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(repository)
 
@@ -224,9 +235,11 @@ defmodule Mrgr.Github.API.Live do
     Mrgr.Github.Client.new(installation)
   end
 
-  defp create_api_request(installation, api_call) do
+  defp create_api_request(%{id: id}, api_call), do: create_api_request(id, api_call)
+
+  defp create_api_request(installation_id, api_call) do
     params = %{
-      installation_id: installation.id,
+      installation_id: installation_id,
       api_call: inspect(api_call)
     }
 

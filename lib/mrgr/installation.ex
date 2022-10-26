@@ -78,8 +78,9 @@ defmodule Mrgr.Installation do
 
   def complete_setup(installation) do
     installation
-    |> Mrgr.Repository.create_for_installation()
-    |> hydrate_new_installation_data_from_github()
+    |> create_members()
+    |> create_repositories()
+    |> hydrate_github_merge_data()
     |> mark_setup_completed()
     |> broadcast(@installation_setup_completed)
   end
@@ -90,14 +91,31 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.update!()
   end
 
-  def hydrate_new_installation_data_from_github(installation) do
-    # assumes account and repositories have been preloaded
-
+  def create_members(installation) do
     # create memberships
     members = Mrgr.Github.API.fetch_members(installation)
     add_team_members(installation, members)
 
-    hydrate_github_merge_data(installation)
+    installation
+  end
+
+  @spec create_repositories(Mrgr.Schema.Installation.t()) :: Mrgr.Schema.Installation.t()
+  def create_repositories(installation) do
+    # assumes repos have been deleted
+    repositories = fetch_repositories(installation)
+
+    installation =
+      installation
+      |> Mrgr.Schema.Installation.repositories_changeset(%{"repositories" => repositories})
+      |> Mrgr.Repo.update!()
+
+    repositories = Enum.map(installation.repositories, &Mrgr.Repository.hydrate_ancillary_data/1)
+
+    %{installation | repositories: repositories}
+  end
+
+  def fetch_repositories(installation) do
+    Mrgr.Github.API.fetch_repositories(installation)
   end
 
   def delete_from_webhook(payload) do
@@ -121,14 +139,16 @@ defmodule Mrgr.Installation do
   end
 
   def hydrate_github_merge_data(installation) do
-    # we already have the data here, so we manually preloading the associations
-    # to avoid passing redundant data separately further down the stack
+    # assumes account and repositories have been preloaded
+
+    # we already have the installation here, so we reverse preload it onto its children repositories
+    # so they'll have it for their API calls
     repositories =
-      Enum.map(installation.repositories, fn r -> %{r | installation: installation} end)
+      installation.repositories
+      |> Enum.map(fn r -> %{r | installation: installation} end)
+      |> Enum.map(&Mrgr.Repository.fetch_and_store_open_merges!/1)
 
     installation = %{installation | repositories: repositories}
-
-    Mrgr.Repository.fetch_and_store_open_merges!(installation.repositories)
 
     # this returns a list, not the installation
     Mrgr.MergeQueue.regenerate_merge_queue(installation)
@@ -151,7 +171,7 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.update!()
   end
 
-  def add_team_members(installation, github_members) do
+  defp add_team_members(installation, github_members) do
     members = Enum.map(github_members, &find_or_create_member/1)
     Enum.map(members, &create_membership(installation, &1))
 

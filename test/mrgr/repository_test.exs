@@ -1,27 +1,11 @@
 defmodule Mrgr.RepositoryTest do
   use Mrgr.DataCase
 
-  describe "create_for_installation/1" do
-    test "fetches repo data from github and creates repos in the installation" do
-      installation = insert!(:installation)
-
-      i = Mrgr.Repository.create_for_installation(installation)
-
-      assert Enum.count(i.repositories) == 3
-
-      languages = Enum.map(i.repositories, & &1.language)
-
-      assert languages == ["JavaScript", "Ruby", "Elixir"]
-    end
-  end
-
   describe "generate_default_file_change_alerts/1" do
     test "creates default file change alerts according to repo language" do
       %{id: id} = r = insert!(:repository, language: "Elixir")
 
-      fcas =
-        Mrgr.Repository.generate_default_file_change_alerts(r)
-        |> Enum.map(&Mrgr.Tuple.take_value/1)
+      %{file_change_alerts: fcas} = Mrgr.Repository.generate_default_file_change_alerts(r)
 
       assert [
                %{
@@ -54,7 +38,27 @@ defmodule Mrgr.RepositoryTest do
     test "creates nothing if repo language is unsupported" do
       r = insert!(:repository, language: "que")
 
-      assert Mrgr.Repository.generate_default_file_change_alerts(r) == []
+      %{file_change_alerts: fcas} = Mrgr.Repository.generate_default_file_change_alerts(r)
+      assert fcas == []
+    end
+  end
+
+  describe "hydrate_branch_protection/1" do
+    test "adds branch approval &c details to the repo" do
+      r = insert!(:repository)
+
+      updated = Mrgr.Repository.hydrate_branch_protection(r)
+
+      assert updated.dismiss_stale_reviews
+      refute updated.require_code_owner_reviews
+      assert updated.required_approving_review_count == 2
+    end
+
+    test "gracefully handles unprotected branches" do
+      r = insert!(:repository, name: "no-branch-protection")
+
+      updated = Mrgr.Repository.hydrate_branch_protection(r)
+      assert updated.required_approving_review_count == 0
     end
   end
 end
