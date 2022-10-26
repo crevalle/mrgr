@@ -22,7 +22,7 @@
           in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
           out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
         )}
-        colors="text-blue-700 border-blue-700 hover:bg-blue-700"
+        colors="text-gray-700 border-gray-300 hover:bg-gray-50"
         id="menu-button"
         aria-expanded="false"
         aria-haspopup="true">
@@ -73,7 +73,7 @@
     All done!  Yay!  😊
   <% else %>
     <div class="basis-1/2 overflow-hidden">
-      <div role="list" class="flex flex-col space-y-3 dropzone" id="pending-merge-list">
+      <div role="list" class="flex flex-col space-y-4 dropzone" id="pending-merge-list">
         <.live_component
           :for={merge <- @merges}
           module={MrgrWeb.Components.Live.PendingMergeItem}

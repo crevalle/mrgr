@@ -1,13 +1,13 @@
-<div draggable="true" class={"bg-white hover:bg-stone-50 border #{highlighted_color(@selected)} shadow rounded-lg draggable"} id={"merge-#{@merge.id}"}>
-  <div class="px-4 py-4 sm:px-6">
+<div draggable="true" class={"bg-white border #{highlighted_color(@selected)} shadow rounded-lg draggable"} id={"merge-#{@merge.id}"}>
+  <div class="p-3">
 
     <!-- top row -->
-    <div class="flex items-center mb-4 justify-between items-baseline">
+    <div class="flex items-center justify-between items-baseline">
 
       <!-- title -->
       <div class="flex items-baseline">
         <.h3>
-          <.l phx-click="show-preview" phx-value-merge-id={"#{@merge.id}"} class="text-teal-700 hover:text-teal-500">
+          <.l phx-click="show-preview" phx-value-merge-id={"#{@merge.id}"} class="text-teal-700 text-xl hover:text-teal-500">
             <%= @merge.title %>
           </.l>
         </.h3>
@@ -30,12 +30,12 @@
               id={"snooze-menu-button-#{@merge.id}"}
               aria-expanded="false"
               aria-haspopup="true"
-              class="flex text-teal-700 hover:text-teal-500 font-light text-sm">
+              class="flex items-baseline px-2 py-1 text-gray-700 border-gray-300 border hover:bg-gray-50 rounded-md font-light text-sm">
               Snooze
-              <.icon name="chevron-down" class="ml-1 h-5 w-5" />
+              <.icon name="chevron-down" class="ml-1 h-3 w-3" />
             </.l>
 
-            <div style="display: none;" id={"snooze-menu-#{@merge.id}"} class="origin-top-right absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"snooze-menu-button-#{@merge.id}"} tabindex="-1">
+            <div style="display: none;" id={"snooze-menu-#{@merge.id}"} class="origin-top-right z-1000 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"snooze-menu-button-#{@merge.id}"} tabindex="-1">
               <div class="mt-2 flex flex-col text-sm text-gray-500 sm:mt-0">
                 <%= link "2 Days", to: "#", phx_click: "snooze-merge", phx_value_id: @merge.id, phx_value_time: "2", class: "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm rounded-md" %>
 
