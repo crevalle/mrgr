@@ -84,6 +84,10 @@ defmodule Mrgr.Github.Webhook do
     Mrgr.Merge.add_issue_comment(object, payload)
   end
 
+  def handle("pull_request_review", %{"action" => "submitted"} = payload) do
+    Mrgr.Merge.Webhook.add_pr_review(payload)
+  end
+
   ### handlers go above ^^^
   #
   #

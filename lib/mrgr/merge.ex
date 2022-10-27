@@ -315,6 +315,39 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.insert()
   end
 
+  @spec add_pr_review(Schema.t(), map()) :: {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
+  def add_pr_review(merge, %{"state" => "commented"}) do
+    ### WARNING!  Silently does nothing.
+    #
+    # Add a review comment will also create a PR review with a state of "commented".
+    # This will double-count the event in our activity stream.  However, doing Add Review -> Comment
+    # will also create a pr_review, but no review comment, so by skipping all pr_reviews with a
+    # state of "commented" we will ignore those items.  I think that's okay because who really does that
+    # and it's better than double-counting things.
+
+    # We still preload the existing pr_reviews to keep parity with the workhorse function below.
+    {:ok, Mrgr.Repo.preload(merge, :pr_reviews)}
+  end
+
+  def add_pr_review(merge, params) do
+    merge = Mrgr.Repo.preload(merge, :pr_reviews)
+
+    merge
+    |> Ecto.build_assoc(:pr_reviews)
+    |> Mrgr.Schema.PRReview.create_changeset(params)
+    |> Mrgr.Repo.insert()
+    |> case do
+      {:ok, review} ->
+        reviews = [review | merge.pr_reviews]
+
+        # broadcast update
+        {:ok, %{merge | pr_reviews: reviews}}
+
+      error ->
+        error
+    end
+  end
+
   def notify_file_alert_consumers(merge) do
     merge
     |> Mrgr.FileChangeAlert.for_merge()
@@ -617,11 +650,18 @@ defmodule Mrgr.Merge do
   def calculate_approvals(merge) do
     case merge.repository.required_approving_review_count do
       0 ->
-        ""
+        "no approvals required for this repo"
 
       num ->
-        "(2/#{num}) approvals"
+
+        "(#{approving_reviews(merge)}/#{num}) approvals"
     end
+  end
+
+  def approving_reviews(merge) do
+    merge.pr_reviews
+    |> Enum.filter(& &1.state == "approved")
+    |> Enum.count()
   end
 
   defmodule Query do
@@ -701,11 +741,19 @@ defmodule Mrgr.Merge do
       )
     end
 
+    def with_pr_reviews(query) do
+      from(q in query,
+        left_join: prr in assoc(q, :pr_reviews),
+        preload: [pr_reviews: prr]
+      )
+    end
+
     def with_pending_preloads(query) do
       query
       |> with_file_alert_rules()
       |> with_checklist()
       |> with_comments()
+      |> with_pr_reviews()
     end
   end
 end

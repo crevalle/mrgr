@@ -138,6 +138,39 @@ defmodule Mrgr.Github.WebhookTest do
     end
   end
 
+  describe "pull_request_review:submitted" do
+    setup [:with_install_user, :with_installation, :with_open_merge]
+
+    test "creates a pr_review for approved reviews" do
+      payload = read_webhook_data("pull_request_review", "approved")
+
+      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request_review", payload)
+
+      review = hd(merge.pr_reviews)
+
+      assert review.state == "approved"
+    end
+
+    test "creates a pr_review when changes are requested" do
+      payload = read_webhook_data("pull_request_review", "changes_requested")
+
+      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request_review", payload)
+
+      review = hd(merge.pr_reviews)
+
+      assert review.state == "changes_requested"
+    end
+
+    test "does NOT create a pr_review for commented reviews" do
+      # this will overlook when you click Add Review -> comment btu who does that
+      payload = read_webhook_data("pull_request_review", "commented")
+
+      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request_review", payload)
+
+      assert merge.pr_reviews == []
+    end
+  end
+
   describe "pull_request:assigned" do
     setup [:with_install_user, :with_installation, :with_open_merge]
 

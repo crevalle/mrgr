@@ -47,6 +47,7 @@ defmodule Mrgr.Schema.Merge do
     has_many(:checks, through: [:checklist, :checks])
 
     has_many(:comments, Mrgr.Schema.Comment)
+    has_many(:pr_reviews, Mrgr.Schema.PRReview)
 
     timestamps()
   end
