@@ -174,6 +174,10 @@ defmodule Mrgr.Schema.Merge do
     hd(merge.commits)
   end
 
+  def branch_name(merge) do
+    merge.raw["head"]["ref"]
+  end
+
   def commit_message(%Mrgr.Github.Commit{commit: commit}) do
     commit.message
   end

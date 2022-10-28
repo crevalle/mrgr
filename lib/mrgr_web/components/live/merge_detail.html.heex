@@ -19,7 +19,7 @@
             <%= ts(@merge.opened_at) %>
           </span>
         </p>
-        <p class="text-gray-500">on branch <span class="italic"><%= Mrgr.Schema.Merge.head(@merge).ref %></span></p>
+        <p class="text-gray-500">on branch <span class="italic"><%= Mrgr.Schema.Merge.branch_name(@merge) %></span></p>
         <p :if={Mrgr.Merge.tagged?(@merge, @current_user)} class="text-emerald-600">You've been tagged in this Merge</p>
         <p class="mt-1"><%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: @merge}) %></p>
       </div>
