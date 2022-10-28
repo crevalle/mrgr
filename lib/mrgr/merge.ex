@@ -8,30 +8,6 @@ defmodule Mrgr.Merge do
   alias Mrgr.Merge.Query
   alias Mrgr.Schema.Merge, as: Schema
 
-  ## release task
-  def migrate_merge_status do
-    Mrgr.Repo.all(Schema)
-    |> Enum.map(fn m -> Mrgr.Repo.preload(m, :repository) end)
-    |> Enum.map(&synchronize_most_stuff/1)
-  end
-
-  def migrate_node_ids do
-    Mrgr.Repo.all(Schema)
-    |> Enum.map(fn m ->
-      case Map.get(m.raw, "node_id") do
-        nil ->
-          m.id
-
-        node_id ->
-          m
-          |> Ecto.Changeset.change(%{node_id: node_id})
-          |> Mrgr.Repo.update()
-
-          :ok
-      end
-    end)
-  end
-
   def create_from_webhook(payload) do
     params = payload_to_params(payload)
 
