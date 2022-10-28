@@ -69,6 +69,7 @@ defmodule Mrgr.PubSub do
         @merge_comment_created "merge:comment_created"
         @merge_assignees_updated "merge:assignees_updated"
         @merge_reviewers_updated "merge:reviewers_updated"
+        @merge_reviews_updated "merge:reviews_updated"
       end
     end
   end

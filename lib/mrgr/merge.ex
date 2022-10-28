@@ -317,10 +317,11 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.insert()
     |> case do
       {:ok, review} ->
-        reviews = [review | merge.pr_reviews]
+        merge = %{merge | pr_reviews: [review | merge.pr_reviews]}
 
-        # broadcast update
-        {:ok, %{merge | pr_reviews: reviews}}
+        merge
+        |> broadcast(@merge_reviews_updated)
+        |> ok()
 
       error ->
         error
@@ -334,7 +335,10 @@ defmodule Mrgr.Merge do
       |> Mrgr.Repo.update!()
     end
 
-    {:ok, Mrgr.Repo.preload(merge, :pr_reviews, force: true)}
+    merge
+    |> Mrgr.Repo.preload(:pr_reviews, force: true)
+    |> broadcast(@merge_reviews_updated)
+    |> ok()
   end
 
   def notify_file_alert_consumers(merge) do

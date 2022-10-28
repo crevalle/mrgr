@@ -216,7 +216,8 @@ defmodule MrgrWeb.PendingMergeLive do
              @merge_synchronized,
              @merge_comment_created,
              @merge_reviewers_updated,
-             @merge_assignees_updated
+             @merge_assignees_updated,
+             @merge_reviews_updated
            ] do
     hydrated = Mrgr.Merge.preload_for_pending_list(merge)
     merges = Mrgr.List.replace(socket.assigns.merges, hydrated)
