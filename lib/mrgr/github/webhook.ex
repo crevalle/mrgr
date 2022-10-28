@@ -88,6 +88,10 @@ defmodule Mrgr.Github.Webhook do
     Mrgr.Merge.Webhook.add_pr_review(payload)
   end
 
+  def handle("pull_request_review", %{"action" => "dismissed"} = payload) do
+    Mrgr.Merge.Webhook.dismiss_pr_review(payload)
+  end
+
   ### handlers go above ^^^
   #
   #

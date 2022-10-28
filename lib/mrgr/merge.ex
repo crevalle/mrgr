@@ -327,6 +327,16 @@ defmodule Mrgr.Merge do
     end
   end
 
+  def dismiss_pr_review(merge, review_node_id) do
+    with %Mrgr.Schema.PRReview{} = review <- Mrgr.PRReview.find_for_merge(merge, review_node_id) do
+      review
+      |> Mrgr.Schema.PRReview.dismiss_changeset()
+      |> Mrgr.Repo.update!()
+    end
+
+    {:ok, Mrgr.Repo.preload(merge, :pr_reviews, force: true)}
+  end
+
   def notify_file_alert_consumers(merge) do
     merge
     |> Mrgr.FileChangeAlert.for_merge()

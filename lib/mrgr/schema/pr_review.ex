@@ -31,4 +31,9 @@ defmodule Mrgr.Schema.PRReview do
     |> validate_required(@create_params)
     |> foreign_key_constraint(:merge_id)
   end
+
+  def dismiss_changeset(schema) do
+    schema
+    |> change(%{state: "dismissed"})
+  end
 end

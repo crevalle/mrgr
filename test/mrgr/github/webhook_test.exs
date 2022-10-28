@@ -171,6 +171,22 @@ defmodule Mrgr.Github.WebhookTest do
     end
   end
 
+  describe "pull_request_review:dismissed" do
+    setup [:with_install_user, :with_installation, :with_open_merge]
+
+    test "changes the state of the review" do
+      approved = read_webhook_data("pull_request_review", "approved")
+      Mrgr.Github.Webhook.handle("pull_request_review", approved)
+
+      dismissed = read_webhook_data("pull_request_review", "dismissed")
+      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request_review", dismissed)
+
+      review = hd(merge.pr_reviews)
+
+      assert review.state == "dismissed"
+    end
+  end
+
   describe "pull_request:assigned" do
     setup [:with_install_user, :with_installation, :with_open_merge]
 

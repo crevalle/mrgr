@@ -48,6 +48,13 @@ defmodule Mrgr.Merge.Webhook do
     end
   end
 
+  @spec dismiss_pr_review(webhook()) :: success() | change_error() | not_found()
+  def dismiss_pr_review(payload) do
+    with {:ok, merge} <- find_merge(payload) do
+      Mrgr.Merge.dismiss_pr_review(merge, payload["review"]["node_id"])
+    end
+  end
+
   @spec find_merge(webhook() | map()) :: {:ok, Schema.t()} | not_found()
   defp find_merge(%{"node_id" => node_id}) do
     case Mrgr.Merge.find_by_node_id(node_id) do
