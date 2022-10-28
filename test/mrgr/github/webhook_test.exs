@@ -163,6 +163,7 @@ defmodule Mrgr.Github.WebhookTest do
 
     test "does NOT create a pr_review for commented reviews" do
       # this will overlook when you click Add Review -> comment btu who does that
+      # "commented" comes in as a "submittted" action.  commented is the state
       payload = read_webhook_data("pull_request_review", "commented")
 
       {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request_review", payload)
