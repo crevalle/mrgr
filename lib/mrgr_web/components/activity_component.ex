@@ -76,7 +76,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
   end
 
   def at(%Mrgr.Schema.Merge{} = merge) do
-    ago(Mrgr.Schema.Merge.head_committed_at(merge))
+    ago(merge.updated_at)
   end
 
   def at(branch_webhook) do

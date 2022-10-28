@@ -65,11 +65,12 @@ defmodule Mrgr.Schema.Merge do
     url
   ]a
 
-  @synchronize_fields ~w[
-    mergeable
+  @most_params ~w(
+    files_changed
     merge_state_status
+    mergeable
     title
-  ]a
+  )a
 
   def create_changeset(schema, params) do
     params = set_opened_at(params)
@@ -82,7 +83,6 @@ defmodule Mrgr.Schema.Merge do
     |> cast_embed(:head)
     |> put_open_status()
     |> put_external_id()
-    |> validate_mergeable_fields()
     |> put_change(:raw, params)
     |> unique_constraint(:node_id)
     |> foreign_key_constraint(:repository_id)
@@ -98,14 +98,6 @@ defmodule Mrgr.Schema.Merge do
   def merge_queue_changeset(schema, attrs) do
     schema
     |> cast(attrs, [:merge_queue_index])
-  end
-
-  def synchronize_changeset(schema, %{"pull_request" => params}) do
-    schema
-    |> cast(params, @synchronize_fields)
-    |> cast_embed(:head)
-    |> validate_mergeable_fields()
-    |> put_change(:raw, params)
   end
 
   def close_changeset(schema, %{"merged" => true} = params) do
@@ -140,6 +132,18 @@ defmodule Mrgr.Schema.Merge do
     |> put_timestamp(:snoozed_until, ts)
   end
 
+  def edit_changeset(schema, params) do
+    schema
+    |> cast(params, [:title])
+  end
+
+  def most_changeset(schema, params) do
+    schema
+    |> cast(params, @most_params)
+    |> validate_inclusion(:mergeable, @mergeable_states)
+    |> validate_inclusion(:merge_state_status, @merge_state_statuses)
+  end
+
   def put_closed_status(changeset) do
     put_change(changeset, :status, "closed")
   end
@@ -162,53 +166,13 @@ defmodule Mrgr.Schema.Merge do
     Map.put(params, "opened_at", at)
   end
 
-  # also upcases the strings
-  def validate_mergeable_fields(changeset) do
-    changeset
-    |> validate_mergeable()
-    |> validate_merge_state()
-  end
-
-  defp validate_mergeable(changeset) do
-    case get_change(changeset, :mergeable) do
-      empty when empty in [nil, ""] ->
-        changeset
-
-      change ->
-        changeset
-        |> put_change(:mergeable, String.upcase(change))
-        |> validate_inclusion(:mergeable, @mergeable_states)
-    end
-  end
-
-  defp validate_merge_state(changeset) do
-    case get_change(changeset, :merge_state_status) do
-      empty when empty in [nil, ""] ->
-        changeset
-
-      change ->
-        changeset
-        |> put_change(:merge_state_status, String.upcase(change))
-        |> validate_inclusion(:merge_state_status, @merge_state_statuses)
-    end
-  end
-
   def external_merge_url(%{url: url}) when is_bitstring(url), do: url
   def external_merge_url(%{raw: %{"_links" => %{"html" => %{"href" => url}}}}), do: url
   def external_merge_url(_merge), do: ""
 
-  def head_commit_message(%{head_commit: %{"commit" => %{"message" => message}}}), do: message
-  def head_commit_message(_), do: "-"
-
-  def head_committer(%{head_commit: %{"commit" => %{"committer" => %{"name" => name}}}}), do: name
-  def head_committer(_), do: "-"
-
-  def head_committed_at(%{head_commit: %{"commit" => %{"committer" => %{"date" => date}}}}) do
-    {:ok, dt, _huh} = DateTime.from_iso8601(date)
-    dt
+  def head(merge) do
+    hd(merge.commits)
   end
-
-  def head_committed_at(_), do: nil
 
   def commit_message(%Mrgr.Github.Commit{commit: commit}) do
     commit.message

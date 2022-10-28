@@ -71,6 +71,17 @@ defmodule Mrgr.Github.User do
   end
 
   defmodule GraphQL do
+    def git_actor do
+      """
+      {
+        avatarUrl
+        date
+        email
+        name
+      }
+      """
+    end
+
     def actor do
       """
       {

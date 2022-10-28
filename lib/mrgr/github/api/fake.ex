@@ -33,6 +33,55 @@ defmodule Mrgr.Github.API.Fake do
     []
   end
 
+  def fetch_most_merge_data(_merge) do
+    %{
+      "node" => %{
+        "files" => %{
+          "nodes" => [
+            %{"changeType" => "MODIFIED", "path" => "assets/css/app.css"},
+            %{"changeType" => "MODIFIED", "path" => "assets/tailwind.config.js"},
+            %{"changeType" => "MODIFIED", "path" => "lib/mrgr_web.ex"},
+            %{
+              "changeType" => "MODIFIED",
+              "path" => "lib/mrgr_web/components/form.ex"
+            },
+            %{
+              "changeType" => "MODIFIED",
+              "path" => "lib/mrgr_web/components/pending_merge.ex"
+            },
+            %{"changeType" => "MODIFIED", "path" => "lib/mrgr_web/components/ui.ex"},
+            %{"changeType" => "MODIFIED", "path" => "lib/mrgr_web/live/nav_bar.ex"},
+            %{
+              "changeType" => "MODIFIED",
+              "path" => "lib/mrgr_web/live/pending_merge_live.ex"
+            },
+            %{
+              "changeType" => "MODIFIED",
+              "path" => "lib/mrgr_web/templates/layout/live.html.heex"
+            },
+            %{
+              "changeType" => "MODIFIED",
+              "path" => "lib/mrgr_web/templates/layout/signed_in.html.heex"
+            },
+            %{"changeType" => "MODIFIED", "path" => "mix.exs"},
+            %{"changeType" => "MODIFIED", "path" => "mix.lock"},
+            %{"changeType" => "MODIFIED", "path" => "socks"}
+          ]
+        },
+        "headRef" => %{
+          "id" => "REF_kwDOGGc3xbtyZWZzL2hlYWRzL3BldGFsLWNvbXBvbmVudHM",
+          "name" => "petal-components",
+          "target" => %{"oid" => "b9294de8d07e6c8fae6e7c4069b9689d957dd1d2"}
+        },
+        "id" => "PR_kwDOGGc3xc5Bs6kZ",
+        "mergeStateStatus" => "DIRTY",
+        "mergeable" => "CONFLICTING",
+        "number" => 38,
+        "title" => "WIP"
+      }
+    }
+  end
+
   def fetch_branch_protection(%{name: "no-branch-protection"}) do
     %{
       "documentation_url" => "https://docs.github.com/rest/reference/repos#get-branch-protection",
@@ -520,10 +569,6 @@ defmodule Mrgr.Github.API.Fake do
   end
 
   def head_commit(_merge, _installation) do
-    %{}
-  end
-
-  def files_changed(_merge, _installation) do
     %{}
   end
 

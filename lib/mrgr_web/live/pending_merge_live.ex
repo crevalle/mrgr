@@ -224,10 +224,7 @@ defmodule MrgrWeb.PendingMergeLive do
     previously_selected = find_previously_selected(merges, socket.assigns.selected_merge)
 
     socket
-    |> Flash.put(
-      :info,
-      "Open PR \"#{merge.title}\" updated with commit \"#{Mrgr.Schema.Merge.head_commit_message(merge)}\"."
-    )
+    |> Flash.put(:info, "Pull Request \"#{merge.title}\" updated.")
     |> assign(:merges, merges)
     |> assign(:selected_merge, previously_selected)
     |> noreply()

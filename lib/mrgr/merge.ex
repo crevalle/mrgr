@@ -9,6 +9,12 @@ defmodule Mrgr.Merge do
   alias Mrgr.Schema.Merge, as: Schema
 
   ## release task
+  def migrate_merge_status do
+    Mrgr.Repo.all(Schema)
+    |> Enum.map(fn m -> Mrgr.Repo.preload(m, :repository) end)
+    |> Enum.map(&synchronize_most_stuff/1)
+  end
+
   def migrate_node_ids do
     Mrgr.Repo.all(Schema)
     |> Enum.map(fn m ->
@@ -74,7 +80,7 @@ defmodule Mrgr.Merge do
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def edit(payload) do
     with {:ok, merge} <- find_from_payload(payload),
-         cs <- Schema.synchronize_changeset(merge, payload),
+         cs <- Schema.edit_changeset(merge, payload),
          {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
       updated_merge
       |> preload_installation()
@@ -89,17 +95,14 @@ defmodule Mrgr.Merge do
   @spec synchronize(map()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def synchronize(payload) do
-    with {:ok, merge} <- find_from_payload(payload),
-         cs <- Schema.synchronize_changeset(merge, payload),
-         {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
-      updated_merge
+    with {:ok, merge} <- find_from_payload(payload) do
+      merge
       |> preload_installation()
       |> hydrate_github_data()
       |> broadcast(@merge_synchronized)
       |> ok()
     else
       {:error, :not_found} -> create_from_webhook(payload)
-      error -> error
     end
   end
 
@@ -451,16 +454,26 @@ defmodule Mrgr.Merge do
 
   def hydrate_github_data(merge) do
     merge
-    |> synchronize_head()
+    |> synchronize_most_stuff()
     |> synchronize_commits()
   end
 
-  def synchronize_head(merge) do
-    files_changed = fetch_files_changed(merge)
-    head = fetch_head(merge)
+  # most, but not all.  doesn't include commits.  have been drinking sake and
+  # will do that later ✌️
+  def synchronize_most_stuff(merge) do
+    %{"node" => node} = Mrgr.Github.API.fetch_most_merge_data(merge)
+
+    files_changed = Enum.map(node["files"]["nodes"], & &1["path"])
+
+    translated = %{
+      files_changed: files_changed,
+      merge_state_status: node["mergeStateStatus"],
+      mergeable: node["mergeable"],
+      title: node["title"]
+    }
 
     merge
-    |> Ecto.Changeset.change(%{files_changed: files_changed, head_commit: head})
+    |> Schema.most_changeset(translated)
     |> Mrgr.Repo.update!()
   end
 
@@ -480,24 +493,6 @@ defmodule Mrgr.Merge do
     Mrgr.Github.API.commits(merge, merge.repository.installation)
   end
 
-  def fetch_head(merge) do
-    Mrgr.Github.API.head_commit(merge, merge.repository.installation)
-  end
-
-  def fetch_files_changed(merge) do
-    response = Mrgr.Github.API.files_changed(merge, merge.repository.installation)
-
-    # ["lib/mrgr/incoming_webhook.ex", "lib/mrgr/merge.ex",
-    # "lib/mrgr/schema/merge.ex", "lib/mrgr/user.ex",
-    # "lib/mrgr_web/admin/live/incoming_webhook.ex",
-    # "lib/mrgr_web/admin/live/incoming_webhook_show.ex",
-    # "lib/mrgr_web/live/pending_merge_live.ex", "lib/mrgr_web/router.ex",
-    # "lib/mrgr_web/templates/layout/root.html.heex",
-    # "priv/repo/migrations/20220703202923_create_merge_raw_data.exs"]
-
-    Enum.map(response, fn c -> c["filename"] end)
-  end
-
   def generate_merge_args(merge, message, merger) do
     installation = merge.repository.installation
 
@@ -505,11 +500,12 @@ defmodule Mrgr.Merge do
     owner = installation.account.login
     repo = merge.repository.name
     number = merge.number
+    head_commit = Mrgr.Schema.Merge.head(merge)
 
     body = %{
       "commit_title" => merge.title,
       "commit_message" => message,
-      "sha" => merge.head.sha,
+      "sha" => head_commit.sha,
       "merge_method" => "squash"
     }
 
@@ -653,14 +649,13 @@ defmodule Mrgr.Merge do
         "no approvals required for this repo"
 
       num ->
-
         "(#{approving_reviews(merge)}/#{num}) approvals"
     end
   end
 
   def approving_reviews(merge) do
     merge.pr_reviews
-    |> Enum.filter(& &1.state == "approved")
+    |> Enum.filter(&(&1.state == "approved"))
     |> Enum.count()
   end
 

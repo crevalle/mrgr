@@ -22,6 +22,31 @@ defmodule Mrgr.Github.API.Live do
     handle_response(response)
   end
 
+  def fetch_most_merge_data(merge) do
+    # don't feel like paginating today.  if >99 files have changed,
+    # you've got other problems.
+    github_limit = 100
+
+    query = """
+      query {
+        node(id:"#{merge.node_id}") {
+          ... on PullRequest {
+            id
+            number
+            mergeStateStatus
+            mergeable
+            title
+            files(first: #{github_limit}) {
+              nodes #{Mrgr.Github.PullRequest.GraphQL.files()}
+            }
+          }
+        }
+      }
+    """
+
+    neuron_request!(merge.repository.installation_id, query)
+  end
+
   def fetch_pulls_graphql(installation, repo) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
 
@@ -39,16 +64,12 @@ defmodule Mrgr.Github.API.Live do
                 databaseId
                 mergeStateStatus
                 mergeable
-                headRef {
-                  id
-                  name
-                  target {
-                    oid
-                  }
-                }
                 id
                 number
                 permalink
+                state
+                title
+                headRef #{Mrgr.Github.PullRequest.GraphQL.head_ref()}
                 reviewRequests(first: 20) {
                   nodes {
                     databaseId
@@ -57,8 +78,6 @@ defmodule Mrgr.Github.API.Live do
                     }
                   }
                 }
-                state
-                title
               }
             }
           }
@@ -129,16 +148,9 @@ defmodule Mrgr.Github.API.Live do
 
   def head_commit(merge, installation) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(merge.repository)
-    sha = merge.head.sha
+    sha = Mrgr.Schema.Merge.head(merge).sha
 
     request!(&Tentacat.Commits.find/4, installation, [sha, owner, name])
-  end
-
-  def files_changed(merge, installation) do
-    {owner, name} = Mrgr.Schema.Repository.owner_name(merge.repository)
-    number = merge.number
-
-    request!(&Tentacat.Pulls.files/4, installation, [owner, name, number])
   end
 
   def commits(merge, installation) do
