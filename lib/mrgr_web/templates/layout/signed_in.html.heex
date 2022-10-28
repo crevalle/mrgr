@@ -1,21 +1,19 @@
-<div class="h-full bg-stone-50">
+<div>
   <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.NavBar, session: %{"user_id" => @conn.assigns.current_user.id} %>
-  <div>
 
-    <main class="flex-1">
-      <div class="">
-        <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.Flash, session: %{"user_id" => @conn.assigns.current_user.id} %>
+  <main class="flex-1">
+    <div>
+      <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.Flash, session: %{"user_id" => @conn.assigns.current_user.id} %>
 
-        <div class="m-6">
-          <%= @inner_content %>
-        </div>
+      <div class="m-6">
+        <%= @inner_content %>
       </div>
-    </main>
-    <footer class="mt-auto">
-      <div class="bg-white text-gray-500 px-6 py-2 flex flex-col">
-        <div>©<%= Date.utc_today.year %> Crevalle, LLC</div>
-        <div>Made with ☀️  in Los Angeles, California 🏝</div>
-      </div>
-    </footer>
-  </div>
+    </div>
+  </main>
+  <footer class="mt-auto">
+    <div class="bg-white text-gray-500 px-6 py-2 flex flex-col">
+      <div>©<%= Date.utc_today.year %> Crevalle, LLC</div>
+      <div>Made with ☀️  in Los Angeles, California 🏝</div>
+    </div>
+  </footer>
 </div>
