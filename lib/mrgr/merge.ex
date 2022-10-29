@@ -91,6 +91,7 @@ defmodule Mrgr.Merge do
       updated_merge
       |> preload_installation()
       |> remove_from_merge_queue()
+      |> refresh_sibling_merge_statuses()
       |> broadcast(@merge_closed)
       |> ok()
     else
@@ -101,6 +102,12 @@ defmodule Mrgr.Merge do
       {:error, _cs} = error ->
         error
     end
+  end
+
+  def refresh_sibling_merge_statuses(merge) do
+    Mrgr.Repository.update_mergeable_statuses(merge.repository)
+
+    merge
   end
 
   @spec assign_user(Schema.t(), Mrgr.Github.User.t()) ::
@@ -320,6 +327,8 @@ defmodule Mrgr.Merge do
         merge = %{merge | pr_reviews: [review | merge.pr_reviews]}
 
         merge
+        # see if merge is unblocked
+        |> synchronize_most_stuff()
         |> broadcast(@merge_reviews_updated)
         |> ok()
 
@@ -337,6 +346,8 @@ defmodule Mrgr.Merge do
 
     merge
     |> Mrgr.Repo.preload(:pr_reviews, force: true)
+    # see if merge is blocked
+    |> synchronize_most_stuff()
     |> broadcast(@merge_reviews_updated)
     |> ok()
   end
@@ -465,6 +476,21 @@ defmodule Mrgr.Merge do
     merge
     |> Schema.most_changeset(translated)
     |> Mrgr.Repo.update!()
+  end
+
+  def update_mergeable_status(node) do
+    with %Mrgr.Schema.Merge{} = merge <- find_by_node_id(node["id"]) do
+      translated = %{
+        merge_state_status: node["mergeStateStatus"],
+        mergeable: node["mergeable"]
+      }
+
+      merge
+      |> Schema.most_changeset(translated)
+      |> Mrgr.Repo.update!()
+      # not really sync'd, but gotta update consumers
+      |> broadcast(@merge_synchronized)
+    end
   end
 
   def synchronize_commits(merge) do

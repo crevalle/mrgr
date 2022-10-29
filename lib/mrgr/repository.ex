@@ -99,6 +99,14 @@ defmodule Mrgr.Repository do
     Mrgr.Github.API.fetch_branch_protection(repository)
   end
 
+  def update_mergeable_statuses(repository) do
+    result = Mrgr.Github.API.fetch_mergeable_statuses_on_open_merges(repository)
+
+    Enum.map(result["repository"]["pullRequests"]["edges"], fn %{"node" => node} ->
+      Mrgr.Merge.update_mergeable_status(node)
+    end)
+  end
+
   @spec fetch_and_store_open_merges!(Schema.t()) :: Schema.t()
   def fetch_and_store_open_merges!(repo) do
     case fetch_open_merges(repo) do

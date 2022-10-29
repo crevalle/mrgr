@@ -47,6 +47,29 @@ defmodule Mrgr.Github.API.Live do
     neuron_request!(merge.repository.installation_id, query)
   end
 
+  def fetch_mergeable_statuses_on_open_merges(repository) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(repository)
+
+    query = """
+      query {
+        repository(owner:"#{owner}", name:"#{name}") {
+          pullRequests(last: 50, states: [OPEN]) {
+            edges {
+              node {
+                id
+                number
+                mergeStateStatus
+                mergeable
+              }
+            }
+          }
+        }
+      }
+    """
+
+    neuron_request!(repository.installation_id, query)
+  end
+
   def fetch_pulls_graphql(installation, repo) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
 

@@ -33,6 +33,49 @@ defmodule Mrgr.Github.API.Fake do
     []
   end
 
+  def fetch_mergeable_statuses_on_open_merges(_repository) do
+    %{
+      "repository" => %{
+        "pullRequests" => %{
+          "edges" => [
+            %{
+              "node" => %{
+                "id" => "PR_kwDOGGc3xc4uat-e",
+                "mergeStateStatus" => "DIRTY",
+                "mergeable" => "CONFLICTING",
+                "number" => 19
+              }
+            },
+            %{
+              "node" => %{
+                "id" => "PR_kwDOGGc3xc4-PQGc",
+                "mergeStateStatus" => "BLOCKED",
+                "mergeable" => "MERGEABLE",
+                "number" => 32
+              }
+            },
+            %{
+              "node" => %{
+                "id" => "PR_kwDOGGc3xc4_j-Vs",
+                "mergeStateStatus" => "BLOCKED",
+                "mergeable" => "MERGEABLE",
+                "number" => 33
+              }
+            },
+            %{
+              "node" => %{
+                "id" => "PR_kwDOGGc3xc5Bs6kZ",
+                "mergeStateStatus" => "DIRTY",
+                "mergeable" => "CONFLICTING",
+                "number" => 38
+              }
+            }
+          ]
+        }
+      }
+    }
+  end
+
   def fetch_most_merge_data(_merge) do
     %{
       "node" => %{
