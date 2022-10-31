@@ -8,12 +8,19 @@ defmodule Mrgr.Github.Webhook do
   def handle_webhook(headers, params) do
     obj = headers["x-github-event"]
     action = params["action"]
-
-    _hook = create_incoming_webhook_record(obj, action, headers, params)
-
     IO.inspect("*** HANDLING WEBHOOK: #{obj}:#{action}")
 
-    Mrgr.Github.Webhook.handle(obj, params)
+    {:ok, hook} = create_incoming_webhook_record(obj, action, headers, params)
+
+    enqueue_webhook_handling(hook)
+
+    hook
+  end
+
+  def enqueue_webhook_handling(hook) do
+    %{id: hook.id}
+    |> Mrgr.Worker.Webhook.new()
+    |> Oban.insert()
   end
 
   ### HANDLER IMPLEMENTATIONS
