@@ -91,7 +91,6 @@ defmodule Mrgr.Merge do
       updated_merge
       |> preload_installation()
       |> remove_from_merge_queue()
-      |> refresh_sibling_merge_statuses()
       |> broadcast(@merge_closed)
       |> ok()
     else
@@ -102,12 +101,6 @@ defmodule Mrgr.Merge do
       {:error, _cs} = error ->
         error
     end
-  end
-
-  def refresh_sibling_merge_statuses(merge) do
-    Mrgr.Repository.update_mergeable_statuses(merge.repository)
-
-    merge
   end
 
   @spec assign_user(Schema.t(), Mrgr.Github.User.t()) ::
@@ -459,8 +452,6 @@ defmodule Mrgr.Merge do
     |> synchronize_commits()
   end
 
-  # most, but not all.  doesn't include commits.  have been drinking sake and
-  # will do that later ✌️
   def synchronize_most_stuff(merge) do
     %{"node" => node} = Mrgr.Github.API.fetch_most_merge_data(merge)
 
@@ -476,21 +467,6 @@ defmodule Mrgr.Merge do
     merge
     |> Schema.most_changeset(translated)
     |> Mrgr.Repo.update!()
-  end
-
-  def update_mergeable_status(node) do
-    with %Mrgr.Schema.Merge{} = merge <- find_by_node_id(node["id"]) do
-      translated = %{
-        merge_state_status: node["mergeStateStatus"],
-        mergeable: node["mergeable"]
-      }
-
-      merge
-      |> Schema.most_changeset(translated)
-      |> Mrgr.Repo.update!()
-      # not really sync'd, but gotta update consumers
-      |> broadcast(@merge_synchronized)
-    end
   end
 
   def synchronize_commits(merge) do
@@ -659,14 +635,8 @@ defmodule Mrgr.Merge do
     Mrgr.ChecklistTemplate.for_repository(merge.repository)
   end
 
-  def calculate_approvals(merge) do
-    case merge.repository.required_approving_review_count do
-      0 ->
-        "no approvals required for this repo"
-
-      num ->
-        "(#{approving_reviews(merge)}/#{num}) approvals"
-    end
+  def fully_approved?(merge) do
+    approving_reviews(merge) >= Schema.required_approvals(merge)
   end
 
   def approving_reviews(merge) do

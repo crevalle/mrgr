@@ -194,13 +194,7 @@ defmodule Mrgr.Schema.Merge do
     commit.sha
   end
 
-  def is_mergeable(merge) do
-    case merge.title do
-      title when title in ["The best PR is here", "Add the test file", "Socks"] ->
-        true
-
-      _ ->
-        false
-    end
+  def required_approvals(merge) do
+    merge.repository.required_approving_review_count
   end
 end
