@@ -13,6 +13,7 @@ defmodule MrgrWeb.Live.InstallationLoading do
 
     socket
     |> assign(:dots, cycle_dots())
+    |> assign(:events, [])
     |> ok()
   end
 
@@ -24,8 +25,12 @@ defmodule MrgrWeb.Live.InstallationLoading do
 
       <p>We are currently syncing all of your data.  When that's done, you'll be automatically redirected to get started. 🙂</p>
 
-      <div class="flex space-x-4">
+      <div class="flex flex-col space-y-4">
         <p><%= @dots %></p>
+
+        <%= for event <- @events do %>
+          <p class="text-gray-500"><%= event %></p>
+        <% end %>
       </div>
 
     </div>
@@ -42,6 +47,17 @@ defmodule MrgrWeb.Live.InstallationLoading do
     # seconds after page load to make the user think we are Working Very Hard.
 
     Process.send_after(self(), "installation_already_set_up", 3000)
+  end
+
+  defp translate_event(pubsub_event) do
+    names = %{
+      @installation_loading_members => "Loading Members...",
+      @installation_loading_repositories => "Loading Repositories...",
+      @installation_loading_merges => "Loading Merge Data..."
+    }
+
+    # no default, since our handle_info guards against what events it receives
+    Map.get(names, pubsub_event)
   end
 
   def handle_info("installation_already_set_up", socket) do
@@ -68,6 +84,22 @@ defmodule MrgrWeb.Live.InstallationLoading do
     |> noreply()
   end
 
+  def handle_info(%{event: loading_event, payload: _installation}, socket)
+      when loading_event in [
+             @installation_loading_members,
+             @installation_loading_repositories,
+             @installation_loading_merges
+           ] do
+    event = translate_event(loading_event)
+
+    events = [event | socket.assigns.events]
+
+    # reverse to keep them chronological
+    socket
+    |> assign(:events, Enum.reverse(events))
+    |> noreply()
+  end
+
   def handle_info(%{event: @installation_setup_completed, payload: _installation}, socket) do
     socket
     |> assign(:dots, "OK!")
@@ -80,10 +112,10 @@ defmodule MrgrWeb.Live.InstallationLoading do
     |> noreply()
   end
 
-  def cycle_dots(), do: "Loading "
-  def cycle_dots("Loading "), do: "Loading ."
-  def cycle_dots("Loading ."), do: "Loading .."
-  def cycle_dots("Loading .."), do: "Loading ..."
-  def cycle_dots("Loading ..."), do: "Loading ...."
-  def cycle_dots("Loading ...."), do: "Loading "
+  def cycle_dots(), do: "Syncing "
+  def cycle_dots("Syncing "), do: "Syncing ."
+  def cycle_dots("Syncing ."), do: "Syncing .."
+  def cycle_dots("Syncing .."), do: "Syncing ..."
+  def cycle_dots("Syncing ..."), do: "Syncing ...."
+  def cycle_dots("Syncing ...."), do: "Syncing "
 end

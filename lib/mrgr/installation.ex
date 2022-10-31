@@ -78,8 +78,11 @@ defmodule Mrgr.Installation do
 
   def complete_setup(installation) do
     installation
+    |> broadcast(@installation_loading_members)
     |> create_members()
+    |> broadcast(@installation_loading_repositories)
     |> create_repositories()
+    |> broadcast(@installation_loading_merges)
     |> hydrate_github_merge_data()
     |> mark_setup_completed()
     |> broadcast(@installation_setup_completed)

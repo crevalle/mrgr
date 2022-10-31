@@ -60,6 +60,9 @@ defmodule Mrgr.PubSub do
 
         @incoming_webhook_created "incoming_webhook:created"
         @installation_setup_completed "installation:setup_completed"
+        @installation_loading_members "installation:loading_members"
+        @installation_loading_repositories "installation:loading_repositories"
+        @installation_loading_merges "installation:loading_merges"
 
         @merge_created "merge:created"
         @merge_edited "merge:edited"

@@ -133,8 +133,12 @@ defmodule Mrgr.User do
     Mrgr.Repo.get_by(Mrgr.Schema.Member, user_id: user.id)
   end
 
+  @spec installed_github_app?(Schema.t()) :: boolean()
+  def installed_github_app?(%{current_installation: %{setup_completed: true}}), do: true
+  def installed_github_app?(_user), do: false
+
   def desmond do
-    Mrgr.Repo.get_by(Mrgr.Schema.User, nickname: "desmondmonster")
+    Mrgr.Repo.get_by(Schema, nickname: "desmondmonster")
   end
 
   defmodule Query do

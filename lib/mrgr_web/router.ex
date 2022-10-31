@@ -15,7 +15,7 @@ defmodule MrgrWeb.Router do
     plug :require_user
   end
 
-  pipeline :with_current_installation do
+  pipeline :require_installation do
     plug :notify_missing_installation
   end
 
@@ -53,7 +53,7 @@ defmodule MrgrWeb.Router do
   end
 
   scope "/", MrgrWeb do
-    pipe_through [:browser, :authenticate, :with_current_installation]
+    pipe_through [:browser, :authenticate, :require_installation]
 
     live "/pending-merges", PendingMergeLive, :index
     live "/pending-merges/:id", PendingMergeLive, :show
