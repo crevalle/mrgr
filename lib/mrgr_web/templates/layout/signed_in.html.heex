@@ -1,7 +1,6 @@
-<div>
-  <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.NavBar, session: %{"user_id" => @conn.assigns.current_user.id} %>
-
-  <main class="flex-1">
+<div class="flex flex-col h-screen">
+  <main class="flex-auto">
+    <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.NavBar, session: %{"user_id" => @conn.assigns.current_user.id} %>
     <div>
       <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.Flash, session: %{"user_id" => @conn.assigns.current_user.id} %>
 
@@ -10,7 +9,7 @@
       </div>
     </div>
   </main>
-  <footer class="mt-auto">
+  <footer class="shrink-0">
     <div class="bg-white text-gray-500 px-6 py-2 flex flex-col">
       <div>©<%= Date.utc_today.year %> Crevalle, LLC</div>
       <div>Made with ☀️  in Los Angeles, California 🏝</div>
