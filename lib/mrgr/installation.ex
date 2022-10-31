@@ -70,7 +70,7 @@ defmodule Mrgr.Installation do
 
   def queue_initial_setup(installation) do
     %{id: installation.id}
-    |> Mrgr.Installation.Facilitator.new()
+    |> Mrgr.Worker.InstallationSetup.new()
     |> Oban.insert()
 
     installation

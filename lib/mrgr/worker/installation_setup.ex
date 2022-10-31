@@ -1,4 +1,4 @@
-defmodule Mrgr.Installation.Facilitator do
+defmodule Mrgr.Worker.InstallationSetup do
   use Oban.Worker, queue: :default
 
   @impl Oban.Worker
