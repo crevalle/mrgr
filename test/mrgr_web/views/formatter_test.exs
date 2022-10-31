@@ -40,7 +40,7 @@ defmodule MrgrWeb.Views.FormatterTest do
     test "when date is 2 months or more in the past but less than 2 years" do
       now = DateTime.utc_now()
 
-      assert MrgrWeb.Formatter.ago(DateTime.add(now, -86400 * 7 * 8, :second)) == "2mo"
+      assert MrgrWeb.Formatter.ago(DateTime.add(now, -86400 * 7 * 9, :second)) == "2mo"
 
       assert MrgrWeb.Formatter.ago(DateTime.add(now, -86400 * (30 * 18), :second)) ==
                "18mo"
