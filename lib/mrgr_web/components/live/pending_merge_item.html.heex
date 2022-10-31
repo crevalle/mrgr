@@ -63,18 +63,7 @@
     <!-- 3rd row -->
     <div class="mt-2 sm:flex sm:justify-between text-sm text-gray-500 items-start">
       <div>
-        <%= @merge.mergeable %> <%= @merge.merge_state_status %>
-        <%= if Mrgr.Schema.Merge.is_mergeable(@merge) do %>
-          <p class="flex">
-            <.icon name="check" class="text-sky-600 mr-1 h-5 w-5" />
-            Ready to merge
-          </p>
-        <% else %>
-          <p class="flex">
-            <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" />
-            Awaiting approvals
-          </p>
-        <% end %>
+        <.merge_approval_badge merge={@merge} />
 
         <p :if={Mrgr.Checklist.complete?(@merge.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
       </div>

@@ -66,6 +66,45 @@ defmodule MrgrWeb.Components.Merge do
     """
   end
 
+  def merge_approval_badge(assigns) do
+    fully_approved = Mrgr.Merge.fully_approved?(assigns.merge)
+
+    assigns =
+      assigns
+      |> assign(:fully_approved, fully_approved)
+
+    ~H"""
+    <%= if @fully_approved do %>
+      <p class="flex">
+        <.icon name="check" class="text-sky-600 mr-1 h-5 w-5" />
+        Ready to merge
+      </p>
+    <% else %>
+      <p class="flex">
+        <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" />
+        Awaiting approvals
+      </p>
+    <% end %>
+    """
+  end
+
+  def merge_approval_text(assigns) do
+    text =
+      case Mrgr.Schema.Merge.required_approvals(assigns.merge) do
+        0 ->
+          "no approvals required for this repo"
+
+        num ->
+          "(#{Mrgr.Merge.approving_reviews(assigns.merge)}/#{num}) approvals"
+      end
+
+    assigns = assign(assigns, :text, text)
+
+    ~H"""
+    <%= @text %>
+    """
+  end
+
   def preview_commit(assigns) do
     ~H"""
     <li class="p-2">

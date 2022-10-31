@@ -24,17 +24,10 @@
         <p class="mt-1"><%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: @merge}) %></p>
       </div>
 
-      <p class="flex items-center space-x-2 mt-2 text-gray-500">
-        <%= if Mrgr.Schema.Merge.is_mergeable(@merge) do %>
-          <.icon name="check" class="text-sky-600 h-5 w-5" />
-          <span>Ready to merge</span>
-          <.aside><%= Mrgr.Merge.calculate_approvals(@merge) %></.aside>
-        <% else %>
-          <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" />
-          <span>Awaiting approvals</span>
-          <.aside><%= Mrgr.Merge.calculate_approvals(@merge) %></.aside>
-        <% end %>
-      </p>
+      <div class="flex items-center space-x-2 mt-2 text-gray-500">
+        <.merge_approval_badge merge={@merge} />
+        <.aside><.merge_approval_text merge={@merge} /></.aside>
+      </div>
 
 
       <div :if={Mrgr.Merge.snoozed?(@merge)} >

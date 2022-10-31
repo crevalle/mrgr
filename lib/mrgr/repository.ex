@@ -99,14 +99,6 @@ defmodule Mrgr.Repository do
     Mrgr.Github.API.fetch_branch_protection(repository)
   end
 
-  def update_mergeable_statuses(repository) do
-    result = Mrgr.Github.API.fetch_mergeable_statuses_on_open_merges(repository)
-
-    Enum.map(result["repository"]["pullRequests"]["edges"], fn %{"node" => node} ->
-      Mrgr.Merge.update_mergeable_status(node)
-    end)
-  end
-
   @spec fetch_and_store_open_merges!(Schema.t()) :: Schema.t()
   def fetch_and_store_open_merges!(repo) do
     case fetch_open_merges(repo) do
@@ -170,7 +162,7 @@ defmodule Mrgr.Repository do
   def hydrate_merge_data(repo) do
     merges =
       repo.merges
-      # reverse preloading
+      # reverse preloading for API call
       |> Enum.map(fn m -> %{m | repository: repo} end)
       |> Enum.map(&Mrgr.Merge.hydrate_github_data/1)
       # fetch comments outside of `hydrate_github_data` since we only
