@@ -6,15 +6,15 @@ defmodule Mrgr.Schema.Comment do
     field(:posted_at, :utc_datetime)
     field(:raw, :map)
 
-    belongs_to(:merge, Mrgr.Schema.Merge)
+    belongs_to(:pull_request, Mrgr.Schema.PullRequest)
 
     timestamps()
   end
 
   def create_changeset(params \\ %{}) do
     %__MODULE__{}
-    |> cast(params, [:object, :raw, :merge_id, :posted_at])
+    |> cast(params, [:object, :raw, :pull_request_id, :posted_at])
     |> validate_required([:object, :posted_at])
-    |> foreign_key_constraint(:merge_id)
+    |> foreign_key_constraint(:pull_request_id)
   end
 end

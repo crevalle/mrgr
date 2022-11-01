@@ -27,7 +27,7 @@ defmodule MrgrWeb.Live.ActivityFeed do
   end
 
   # until i figure out how to represent activity stream events, we translate
-  # %IncomingWebhook{} into either a %Merge{} (because we need `files_changed`) or
+  # %IncomingWebhook{} into either a %PullRequest{} (because we need `files_changed`) or
   # the raw payload of a branch push event.  super ugly : (
   def load_items(%{current_installation_id: nil}), do: []
 
@@ -48,8 +48,8 @@ defmodule MrgrWeb.Live.ActivityFeed do
 
   defp create_event(item) do
     case find(item.data) do
-      %Mrgr.Schema.Merge{} = merge ->
-        %{event: "merge:#{item.action}", payload: merge}
+      %Mrgr.Schema.PullRequest{} = pull_request ->
+        %{event: "pull_request:#{item.action}", payload: pull_request}
 
       nil ->
         %{}
@@ -57,7 +57,7 @@ defmodule MrgrWeb.Live.ActivityFeed do
   end
 
   def find(data) do
-    Mrgr.Merge.find_for_activity_feed(data["pull_request"]["id"])
+    Mrgr.PullRequest.find_for_activity_feed(data["pull_request"]["id"])
   end
 
   def render(assigns) do
@@ -84,10 +84,10 @@ defmodule MrgrWeb.Live.ActivityFeed do
   def handle_info(%{event: event, payload: _payload} = item, socket)
       when event in [
              @branch_pushed,
-             @merge_created,
-             @merge_reopened,
-             @merge_synchronized,
-             @merge_closed
+             @pull_request_created,
+             @pull_request_reopened,
+             @pull_request_synchronized,
+             @pull_request_closed
            ] do
     items = socket.assigns.items
 

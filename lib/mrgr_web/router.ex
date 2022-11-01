@@ -55,8 +55,8 @@ defmodule MrgrWeb.Router do
   scope "/", MrgrWeb do
     pipe_through [:browser, :authenticate, :require_installation]
 
-    live "/pending-merges", PendingMergeLive, :index
-    live "/pending-merges/:id", PendingMergeLive, :show
+    live "/pending-pull-requests", PendingPullRequestLive, :index
+    live "/pending-pull-requests/:id", PendingPullRequestLive, :show
     live "/file-change-alerts", FileChangeAlertLive, :index
 
     live "/checklists", Live.Checklist, :index, as: :checklist

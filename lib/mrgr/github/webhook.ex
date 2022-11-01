@@ -41,41 +41,41 @@ defmodule Mrgr.Github.Webhook do
   end
 
   def handle("pull_request", %{"action" => "opened"} = payload) do
-    Mrgr.Merge.create_from_webhook(payload)
+    Mrgr.PullRequest.create_from_webhook(payload)
   end
 
   def handle("pull_request", %{"action" => "reopened"} = payload) do
-    Mrgr.Merge.reopen(payload)
+    Mrgr.PullRequest.reopen(payload)
   end
 
   def handle("pull_request", %{"action" => "edited"} = payload) do
-    Mrgr.Merge.edit(payload)
+    Mrgr.PullRequest.edit(payload)
   end
 
   def handle("pull_request", %{"action" => "closed"} = payload) do
-    Mrgr.Merge.close(payload)
+    Mrgr.PullRequest.close(payload)
   end
 
   # HEAD OF PR IS UPDATED - create a new check suite/run, new checklist
   def handle("pull_request", %{"action" => "synchronize"} = payload) do
-    Mrgr.Merge.synchronize(payload)
+    Mrgr.PullRequest.synchronize(payload)
     # Mrgr.CheckRun.create(payload)
   end
 
   def handle("pull_request", %{"action" => "assigned"} = payload) do
-    Mrgr.Merge.Webhook.assign_user(payload)
+    Mrgr.PullRequest.Webhook.assign_user(payload)
   end
 
   def handle("pull_request", %{"action" => "unassigned"} = payload) do
-    Mrgr.Merge.Webhook.unassign_user(payload)
+    Mrgr.PullRequest.Webhook.unassign_user(payload)
   end
 
   def handle("pull_request", %{"action" => "review_requested"} = payload) do
-    Mrgr.Merge.Webhook.add_reviewer(payload)
+    Mrgr.PullRequest.Webhook.add_reviewer(payload)
   end
 
   def handle("pull_request", %{"action" => "review_request_removed"} = payload) do
-    Mrgr.Merge.Webhook.remove_reviewer(payload)
+    Mrgr.PullRequest.Webhook.remove_reviewer(payload)
   end
 
   def handle("push", payload) do
@@ -84,19 +84,19 @@ defmodule Mrgr.Github.Webhook do
 
   # ignore comments being deleted, who cares if we're off by a little bit
   def handle("pull_request_review_comment" = object, %{"action" => "created"} = payload) do
-    Mrgr.Merge.add_pull_request_review_comment(object, payload)
+    Mrgr.PullRequest.add_pull_request_review_comment(object, payload)
   end
 
   def handle("issue_comment" = object, %{"action" => "created"} = payload) do
-    Mrgr.Merge.add_issue_comment(object, payload)
+    Mrgr.PullRequest.add_issue_comment(object, payload)
   end
 
   def handle("pull_request_review", %{"action" => "submitted"} = payload) do
-    Mrgr.Merge.Webhook.add_pr_review(payload)
+    Mrgr.PullRequest.Webhook.add_pr_review(payload)
   end
 
   def handle("pull_request_review", %{"action" => "dismissed"} = payload) do
-    Mrgr.Merge.Webhook.dismiss_pr_review(payload)
+    Mrgr.PullRequest.Webhook.dismiss_pr_review(payload)
   end
 
   ### handlers go above ^^^

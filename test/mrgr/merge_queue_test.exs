@@ -5,13 +5,13 @@ defmodule Mrgr.MrgrQueueTest do
   use Mrgr.DataCase
 
   describe "clear_current_queue/1" do
-    setup [:with_installation, :with_repositories, :with_open_merges]
+    setup [:with_installation, :with_repositories, :with_open_pull_requests]
 
     test "clears out all merge indices", ctx do
-      Mrgr.MergeQueue.clear_current_queue(ctx.merges)
+      Mrgr.MergeQueue.clear_current_queue(ctx.pull_requests)
 
-      Enum.each(ctx.merges, fn m ->
-        %{merge_queue_index: i} = Mrgr.Repo.get(Mrgr.Schema.Merge, m.id)
+      Enum.each(ctx.pull_requests, fn m ->
+        %{merge_queue_index: i} = Mrgr.Repo.get(Mrgr.Schema.PullRequest, m.id)
         assert i == nil
       end)
     end
@@ -21,84 +21,84 @@ defmodule Mrgr.MrgrQueueTest do
     test "adds items to the end of the list" do
       list =
         []
-        |> Mrgr.MergeQueue.enqueue(insert!(:merge))
-        |> Mrgr.MergeQueue.enqueue(insert!(:merge))
-        |> Mrgr.MergeQueue.enqueue(insert!(:merge))
+        |> Mrgr.MergeQueue.enqueue(insert!(:pull_request))
+        |> Mrgr.MergeQueue.enqueue(insert!(:pull_request))
+        |> Mrgr.MergeQueue.enqueue(insert!(:pull_request))
 
       assert Enum.map(list, & &1.merge_queue_index) == [0, 1, 2]
     end
   end
 
   describe "remove/2" do
-    test "removes a merge from the list and unsets the queue index of the removed merge" do
-      merge_1 = insert!(:merge)
-      merge_2 = insert!(:merge)
+    test "removes a pull_request from the list and unsets the queue index of the removed pull_request" do
+      pull_request_1 = insert!(:pull_request)
+      pull_request_2 = insert!(:pull_request)
 
       list =
         []
-        |> Mrgr.MergeQueue.enqueue(merge_1)
-        |> Mrgr.MergeQueue.enqueue(merge_2)
+        |> Mrgr.MergeQueue.enqueue(pull_request_1)
+        |> Mrgr.MergeQueue.enqueue(pull_request_2)
 
-      # expects the passed-in merge to be current, ie, have the merge_queue_index set
+      # expects the passed-in pull_request to be current, ie, have the merge_queue_index set
       # otherwise the changeset to nilify it won't work
       # enqueuing updates the items
-      [merge_1, _second] = list
-      {[%{id: id}], removed} = Mrgr.MergeQueue.remove(list, merge_1)
+      [pull_request_1, _second] = list
+      {[%{id: id}], removed} = Mrgr.MergeQueue.remove(list, pull_request_1)
 
-      assert id == merge_2.id
+      assert id == pull_request_2.id
 
-      assert removed.id == merge_1.id
+      assert removed.id == pull_request_1.id
       assert removed.merge_queue_index == nil
-      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.Merge, merge_1.id)
+      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.PullRequest, pull_request_1.id)
       assert idx == nil
     end
 
-    test "ignores when merge is not in list" do
+    test "ignores when pull_request is not in list" do
       list =
         []
-        |> Mrgr.MergeQueue.enqueue(insert!(:merge))
-        |> Mrgr.MergeQueue.enqueue(insert!(:merge))
+        |> Mrgr.MergeQueue.enqueue(insert!(:pull_request))
+        |> Mrgr.MergeQueue.enqueue(insert!(:pull_request))
 
-      {updated, _m} = Mrgr.MergeQueue.remove(list, insert!(:merge))
+      {updated, _m} = Mrgr.MergeQueue.remove(list, insert!(:pull_request))
 
       assert updated == list
     end
 
-    test "updates subsequent merge indices" do
-      m1 = insert!(:merge)
-      m2 = insert!(:merge)
+    test "updates subsequent pull_request indices" do
+      m1 = insert!(:pull_request)
+      m2 = insert!(:pull_request)
 
       list =
         []
         |> Mrgr.MergeQueue.enqueue(m1)
         |> Mrgr.MergeQueue.enqueue(m2)
 
-      # expects the passed-in merge to be current, ie, have the merge_queue_index set
+      # expects the passed-in pull_request to be current, ie, have the merge_queue_index set
       # otherwise the changeset to nilify it won't work
       [m1, _rest] = list
-      {[updated], updated_merge} = Mrgr.MergeQueue.remove(list, m1)
+      {[updated], updated_pull_request} = Mrgr.MergeQueue.remove(list, m1)
 
-      assert updated_merge.id == m1.id
+      assert updated_pull_request.id == m1.id
       assert updated.id == m2.id
 
-      assert updated_merge.merge_queue_index == nil
+      assert updated_pull_request.merge_queue_index == nil
 
-      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.Merge, m1.id)
+      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.PullRequest, m1.id)
 
       assert idx == nil
 
-      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.Merge, m2.id)
+      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.PullRequest, m2.id)
       assert idx == 0
     end
   end
 
   describe "update_at/3" do
-    test "inserts merge at the specified location and updates subsequent merges" do
+    test "inserts pull request at the specified location and updates subsequent pull requests" do
       list =
         []
-        |> Mrgr.MergeQueue.enqueue(insert!(:merge))
-        |> Mrgr.MergeQueue.enqueue(insert!(:merge))
-        |> Mrgr.MergeQueue.enqueue(insert!(:merge))
+        |> Mrgr.MergeQueue.enqueue(insert!(:pull_request))
+        |> Mrgr.MergeQueue.enqueue(insert!(:pull_request))
+        |> Mrgr.MergeQueue.enqueue(insert!(:pull_request))
 
       [m1, m2, m3] = list
 
@@ -106,13 +106,13 @@ defmodule Mrgr.MrgrQueueTest do
 
       assert Enum.map(updated, & &1.id) == [m3.id, m1.id, m2.id]
 
-      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.Merge, m1.id)
+      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.PullRequest, m1.id)
       assert idx == 1
 
-      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.Merge, m2.id)
+      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.PullRequest, m2.id)
       assert idx == 2
 
-      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.Merge, m3.id)
+      %{merge_queue_index: idx} = Mrgr.Repo.get(Mrgr.Schema.PullRequest, m3.id)
       assert idx == 0
     end
   end
@@ -130,15 +130,15 @@ defmodule Mrgr.MrgrQueueTest do
     %{repositories: repos}
   end
 
-  defp with_open_merges(%{repositories: repositories}) do
-    merges =
+  defp with_open_pull_requests(%{repositories: repositories}) do
+    pull_request =
       repositories
       |> Enum.reduce([], fn r, acc ->
         idx = Enum.count(acc)
-        merge = insert!(:merge, repository: r, merge_queue_index: idx)
-        [merge | acc]
+        pull_request = insert!(:pull_request, repository: r, merge_queue_index: idx)
+        [pull_request | acc]
       end)
 
-    %{merges: merges}
+    %{pull_requests: pull_request}
   end
 end

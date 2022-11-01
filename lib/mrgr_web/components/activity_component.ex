@@ -2,7 +2,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
   use MrgrWeb, :component
   use Mrgr.PubSub.Event
 
-  @translated_merge_actions %{
+  @translated_pull_request_actions %{
     "synchronize" => "updated"
   }
 
@@ -11,7 +11,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
   #
   # need to figure out how to store the activity stream - what will i use it for? just webhooks?
   # want to link to a relevant page
-  def render(%{event: "merge:" <> action, payload: _} = assigns) do
+  def render(%{event: "pull_request:" <> action, payload: _} = assigns) do
     assigns =
       assigns
       |> assign(:action, action)
@@ -19,7 +19,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
     ~H"""
     <.event avatar_url={@payload.user.avatar_url} name={@payload.user.login} at={at(@payload)} >
       <:description>
-        <%= translate_merge_action(@action) %> <%= @payload.title %>
+        <%= translate_pull_request_action(@action) %> <%= @payload.title %>
       </:description>
 
       <:icon>
@@ -29,7 +29,7 @@ defmodule MrgrWeb.Components.ActivityComponent do
       </:icon>
 
       <:detail>
-        <%= MrgrWeb.Components.FileChangeAlert.badges(%{merge: @payload}) %>
+        <%= MrgrWeb.Components.FileChangeAlert.badges(%{pull_request: @payload}) %>
       </:detail>
     </.event>
     """
@@ -75,16 +75,16 @@ defmodule MrgrWeb.Components.ActivityComponent do
     """
   end
 
-  def at(%Mrgr.Schema.Merge{} = merge) do
-    ago(merge.updated_at)
+  def at(%Mrgr.Schema.PullRequest{} = pull_request) do
+    ago(pull_request.updated_at)
   end
 
   def at(branch_webhook) do
     ago(Mrgr.Branch.head_committed_at(branch_webhook))
   end
 
-  defp translate_merge_action(action) do
+  defp translate_pull_request_action(action) do
     default = String.replace(action, "_", " ")
-    Map.get(@translated_merge_actions, action, default)
+    Map.get(@translated_pull_request_actions, action, default)
   end
 end

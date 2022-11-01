@@ -8,7 +8,7 @@ defmodule Mrgr.Schema.PRReview do
     field(:submitted_at, :utc_datetime)
     field(:data, :map)
 
-    belongs_to(:merge, Mrgr.Schema.Merge)
+    belongs_to(:pull_request, Mrgr.Schema.PullRequest)
     embeds_one(:user, Mrgr.Github.User)
 
     timestamps()
@@ -17,7 +17,7 @@ defmodule Mrgr.Schema.PRReview do
   @create_params ~w(
     commit_id
     data
-    merge_id
+    pull_request_id
     node_id
     state
     submitted_at
@@ -29,7 +29,7 @@ defmodule Mrgr.Schema.PRReview do
     |> put_data_map()
     |> cast_embed(:user)
     |> validate_required(@create_params)
-    |> foreign_key_constraint(:merge_id)
+    |> foreign_key_constraint(:pull_request_id)
   end
 
   def dismiss_changeset(schema) do

@@ -146,9 +146,9 @@ defmodule Mrgr.User do
 
     def repos(%{id: user_id}) do
       from(q in Mrgr.Schema.Repository,
-        left_join: m in assoc(q, :merges),
+        left_join: m in assoc(q, :pull_requests),
         join: u in assoc(q, :users),
-        preload: [merges: m],
+        preload: [pull_requests: m],
         where: u.id == ^user_id
       )
     end

@@ -19,7 +19,7 @@ defmodule Mrgr.Schema.Repository do
     has_many(:members, through: [:installation, :member])
     has_many(:users, through: [:installation, :users])
 
-    has_many(:merges, Mrgr.Schema.Merge)
+    has_many(:pull_requests, Mrgr.Schema.PullRequest)
 
     has_many(:file_change_alerts, Mrgr.Schema.FileChangeAlert, on_delete: :delete_all)
 
@@ -44,11 +44,11 @@ defmodule Mrgr.Schema.Repository do
     |> put_data_map()
   end
 
-  def create_merges_changeset(schema, params) do
+  def create_pull_requests_changeset(schema, params) do
     schema
-    |> Mrgr.Repo.preload(:merges)
+    |> Mrgr.Repo.preload(:pull_requests)
     |> cast(params, [])
-    |> cast_assoc(:merges, with: &Mrgr.Schema.Merge.create_changeset/2)
+    |> cast_assoc(:pull_requests, with: &Mrgr.Schema.PullRequest.create_changeset/2)
   end
 
   def merge_freeze_changeset(schema, attrs) do

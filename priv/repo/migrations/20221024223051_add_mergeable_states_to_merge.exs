@@ -1,4 +1,4 @@
-defmodule Mrgr.Repo.Migrations.AddMergeableStatesToMerge do
+defmodule Mrgr.Repo.Migrations.AddPullRequestableStatesToPullRequest do
   use Ecto.Migration
 
   def change do

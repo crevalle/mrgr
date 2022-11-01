@@ -62,17 +62,17 @@ defmodule Mrgr.PubSub do
         @installation_setup_completed "installation:setup_completed"
         @installation_loading_members "installation:loading_members"
         @installation_loading_repositories "installation:loading_repositories"
-        @installation_loading_merges "installation:loading_merges"
+        @installation_loading_pull_requests "installation:loading_pull_requests"
 
-        @merge_created "merge:created"
-        @merge_edited "merge:edited"
-        @merge_reopened "merge:reopened"
-        @merge_synchronized "merge:synchronized"
-        @merge_closed "merge:closed"
-        @merge_comment_created "merge:comment_created"
-        @merge_assignees_updated "merge:assignees_updated"
-        @merge_reviewers_updated "merge:reviewers_updated"
-        @merge_reviews_updated "merge:reviews_updated"
+        @pull_request_created "pull_request:created"
+        @pull_request_edited "pull_request:edited"
+        @pull_request_reopened "pull_request:reopened"
+        @pull_request_synchronized "pull_request:synchronized"
+        @pull_request_closed "pull_request:closed"
+        @pull_request_comment_created "pull_request:comment_created"
+        @pull_request_assignees_updated "pull_request:assignees_updated"
+        @pull_request_reviewers_updated "pull_request:reviewers_updated"
+        @pull_request_reviews_updated "pull_request:reviews_updated"
       end
     end
   end

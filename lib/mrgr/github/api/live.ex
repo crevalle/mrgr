@@ -22,14 +22,14 @@ defmodule Mrgr.Github.API.Live do
     handle_response(response)
   end
 
-  def fetch_most_merge_data(merge) do
+  def fetch_most_pull_request_data(pull_request) do
     # don't feel like paginating today.  if >99 files have changed,
     # you've got other problems.
     github_limit = 100
 
     query = """
       query {
-        node(id:"#{merge.node_id}") {
+        node(id:"#{pull_request.node_id}") {
           ... on PullRequest {
             id
             number
@@ -44,10 +44,10 @@ defmodule Mrgr.Github.API.Live do
       }
     """
 
-    neuron_request!(merge.repository.installation_id, query)
+    neuron_request!(pull_request.repository.installation_id, query)
   end
 
-  def fetch_mergeable_statuses_on_open_merges(repository) do
+  def fetch_mergeable_statuses_on_open_pull_requests(repository) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(repository)
 
     query = """
@@ -169,16 +169,16 @@ defmodule Mrgr.Github.API.Live do
     )
   end
 
-  def head_commit(merge, installation) do
-    {owner, name} = Mrgr.Schema.Repository.owner_name(merge.repository)
-    sha = Mrgr.Schema.Merge.head(merge).sha
+  def head_commit(pull_request, installation) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(pull_request.repository)
+    sha = Mrgr.Schema.PullRequest.head(pull_request).sha
 
     request!(&Tentacat.Commits.find/4, installation, [sha, owner, name])
   end
 
-  def commits(merge, installation) do
-    {owner, name} = Mrgr.Schema.Repository.owner_name(merge.repository)
-    number = merge.number
+  def commits(pull_request, installation) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(pull_request.repository)
+    number = pull_request.number
 
     request!(&Tentacat.Pulls.commits/4, installation, [owner, name, number])
   end

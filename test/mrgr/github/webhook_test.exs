@@ -36,52 +36,56 @@ defmodule Mrgr.Github.WebhookTest do
     test "creates a new PR" do
       payload = read_webhook_data("pull_request", "opened")
 
-      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
-      assert merge.merge_queue_index == 0
-      assert Enum.count(merge.assignees) == 1
-      assert Enum.count(merge.requested_reviewers) == 1
+      {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
+      assert pull_request.merge_queue_index == 0
+      assert Enum.count(pull_request.assignees) == 1
+      assert Enum.count(pull_request.requested_reviewers) == 1
     end
 
     test "enqueues in the merge queue", ctx do
       subscribe_to_installation(ctx.installation)
 
       repo = build(:repository, installation: ctx.installation)
-      first_merge = insert!(:merge, repository: repo, merge_queue_index: 0)
+      first_pull_request = insert!(:pull_request, repository: repo, merge_queue_index: 0)
 
       payload = read_webhook_data("pull_request", "opened")
-      {:ok, second_merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+      {:ok, second_pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
-      assert second_merge.node_id == "PR_kwDOGGc3xc4uUvfP"
+      assert second_pull_request.node_id == "PR_kwDOGGc3xc4uUvfP"
 
-      assert Mrgr.Merge.pending_merges(ctx.installation) |> Enum.map(& &1.id) == [
-               first_merge.id,
-               second_merge.id
+      assert Mrgr.PullRequest.pending_pull_requests(ctx.installation) |> Enum.map(& &1.id) == [
+               first_pull_request.id,
+               second_pull_request.id
              ]
 
-      assert second_merge.merge_queue_index == 1
+      assert second_pull_request.merge_queue_index == 1
 
       # need to pull this out for matches to work
-      id_2 = second_merge.id
-      assert_received(%{event: "merge:created", payload: %Mrgr.Schema.Merge{id: ^id_2}})
+      id_2 = second_pull_request.id
+
+      assert_received(%{
+        event: "pull_request:created",
+        payload: %Mrgr.Schema.PullRequest{id: ^id_2}
+      })
     end
   end
 
   describe "pull_request closed" do
-    setup [:with_install_user, :with_installation, :with_open_merge]
+    setup [:with_install_user, :with_installation, :with_open_pull_request]
 
     test "changes the status of the PR", ctx do
       subscribe_to_installation(ctx.installation)
 
       payload = read_webhook_data("pull_request", "closed")
-      {:ok, updated_merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+      {:ok, updated_pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
-      id = updated_merge.id
+      id = updated_pull_request.id
 
-      assert updated_merge.status == "closed"
-      assert Enum.count(Mrgr.Merge.for_installation(ctx.installation)) == 1
-      assert Enum.count(Mrgr.Merge.pending_merges(ctx.installation)) == 0
+      assert updated_pull_request.status == "closed"
+      assert Enum.count(Mrgr.PullRequest.for_installation(ctx.installation)) == 1
+      assert Enum.count(Mrgr.PullRequest.pending_pull_requests(ctx.installation)) == 0
 
-      assert_received(%{event: "merge:closed", payload: %Mrgr.Schema.Merge{id: ^id}})
+      assert_received(%{event: "pull_request:closed", payload: %Mrgr.Schema.PullRequest{id: ^id}})
     end
   end
 
@@ -89,30 +93,36 @@ defmodule Mrgr.Github.WebhookTest do
     setup [:with_install_user, :with_installation]
 
     test "changes the status of the PR", ctx do
-      # to test all the messages, don't create the merge in the setup block
+      # to test all the messages, don't create the pull_request in the setup block
       subscribe_to_installation(ctx.installation)
 
       payload = read_webhook_data("pull_request", "opened")
-      {:ok, _merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+      {:ok, _pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
       payload = read_webhook_data("pull_request", "closed")
-      {:ok, _merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+      {:ok, _pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
       payload = read_webhook_data("pull_request", "reopened")
       {:ok, reopened} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
       assert reopened.status == "open"
-      assert Enum.count(Mrgr.Merge.pending_merges(ctx.installation)) == 1
+      assert Enum.count(Mrgr.PullRequest.pending_pull_requests(ctx.installation)) == 1
 
       id = reopened.id
-      assert_received(%{event: "merge:created", payload: %Mrgr.Schema.Merge{id: ^id}})
-      assert_received(%{event: "merge:closed", payload: %Mrgr.Schema.Merge{id: ^id}})
-      assert_received(%{event: "merge:reopened", payload: %Mrgr.Schema.Merge{id: ^id}})
+
+      assert_received(%{event: "pull_request:created", payload: %Mrgr.Schema.PullRequest{id: ^id}})
+
+      assert_received(%{event: "pull_request:closed", payload: %Mrgr.Schema.PullRequest{id: ^id}})
+
+      assert_received(%{
+        event: "pull_request:reopened",
+        payload: %Mrgr.Schema.PullRequest{id: ^id}
+      })
     end
   end
 
   describe "pull_request_review_comment created" do
-    setup [:with_install_user, :with_installation, :with_open_merge]
+    setup [:with_install_user, :with_installation, :with_open_pull_request]
 
     test "adds a comment to the PR" do
       payload = read_webhook_data("pull_request_review_comment", "created")
@@ -125,7 +135,7 @@ defmodule Mrgr.Github.WebhookTest do
   end
 
   describe "issue_comment created" do
-    setup [:with_install_user, :with_installation, :with_open_merge]
+    setup [:with_install_user, :with_installation, :with_open_pull_request]
 
     test "adds a comment to the PR" do
       payload = read_webhook_data("issue_comment", "created")
@@ -139,14 +149,14 @@ defmodule Mrgr.Github.WebhookTest do
   end
 
   describe "pull_request_review:submitted" do
-    setup [:with_install_user, :with_installation, :with_open_merge]
+    setup [:with_install_user, :with_installation, :with_open_pull_request]
 
     test "creates a pr_review for approved reviews" do
       payload = read_webhook_data("pull_request_review", "approved")
 
-      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request_review", payload)
+      {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request_review", payload)
 
-      review = hd(merge.pr_reviews)
+      review = hd(pull_request.pr_reviews)
 
       assert review.state == "approved"
     end
@@ -154,9 +164,9 @@ defmodule Mrgr.Github.WebhookTest do
     test "creates a pr_review when changes are requested" do
       payload = read_webhook_data("pull_request_review", "changes_requested")
 
-      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request_review", payload)
+      {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request_review", payload)
 
-      review = hd(merge.pr_reviews)
+      review = hd(pull_request.pr_reviews)
 
       assert review.state == "changes_requested"
     end
@@ -166,36 +176,36 @@ defmodule Mrgr.Github.WebhookTest do
       # "commented" comes in as a "submittted" action.  commented is the state
       payload = read_webhook_data("pull_request_review", "commented")
 
-      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request_review", payload)
+      {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request_review", payload)
 
-      assert merge.pr_reviews == []
+      assert pull_request.pr_reviews == []
     end
   end
 
   describe "pull_request_review:dismissed" do
-    setup [:with_install_user, :with_installation, :with_open_merge]
+    setup [:with_install_user, :with_installation, :with_open_pull_request]
 
     test "changes the state of the review" do
       approved = read_webhook_data("pull_request_review", "approved")
       Mrgr.Github.Webhook.handle("pull_request_review", approved)
 
       dismissed = read_webhook_data("pull_request_review", "dismissed")
-      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request_review", dismissed)
+      {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request_review", dismissed)
 
-      review = hd(merge.pr_reviews)
+      review = hd(pull_request.pr_reviews)
 
       assert review.state == "dismissed"
     end
   end
 
   describe "pull_request:assigned" do
-    setup [:with_install_user, :with_installation, :with_open_merge]
+    setup [:with_install_user, :with_installation, :with_open_pull_request]
 
     test "adds a user to the assignees list" do
       payload = read_webhook_data("pull_request", "assigned")
-      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+      {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
-      assignees = Enum.map(merge.assignees, & &1.login)
+      assignees = Enum.map(pull_request.assignees, & &1.login)
 
       assert assignees == ["crevalleghtest", "desmondmonster"]
     end
@@ -204,51 +214,51 @@ defmodule Mrgr.Github.WebhookTest do
       payload = read_webhook_data("pull_request", "assigned")
 
       Mrgr.Github.Webhook.handle("pull_request", payload)
-      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+      {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
-      assignees = Enum.map(merge.assignees, & &1.login)
+      assignees = Enum.map(pull_request.assignees, & &1.login)
 
       assert assignees == ["crevalleghtest", "desmondmonster"]
     end
   end
 
   describe "pull_request:unassigned" do
-    setup [:with_install_user, :with_installation, :with_open_merge]
+    setup [:with_install_user, :with_installation, :with_open_pull_request]
 
     test "removes the user from the assignees list" do
       payload = read_webhook_data("pull_request", "unassigned")
 
       Mrgr.Github.Webhook.handle("pull_request", payload)
-      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+      {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
-      assignees = Enum.map(merge.assignees, & &1.login)
+      assignees = Enum.map(pull_request.assignees, & &1.login)
       assert assignees == ["desmondmonster"]
     end
   end
 
   describe "pull_request:review_requested" do
-    setup [:with_install_user, :with_installation, :with_open_merge]
+    setup [:with_install_user, :with_installation, :with_open_pull_request]
 
     test "adds a user from the list of requestees" do
       payload = read_webhook_data("pull_request", "review_requested")
 
-      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+      {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
-      requested_reviewers = Enum.map(merge.requested_reviewers, & &1.login)
+      requested_reviewers = Enum.map(pull_request.requested_reviewers, & &1.login)
 
       assert requested_reviewers == ["crevalleghtest", "desmondmonster"]
     end
   end
 
   describe "pull_request:review_request_removed" do
-    setup [:with_install_user, :with_installation, :with_open_merge]
+    setup [:with_install_user, :with_installation, :with_open_pull_request]
 
     test "removes a user from the list of requestees" do
       payload = read_webhook_data("pull_request", "review_request_removed")
 
-      {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+      {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
-      requested_reviewers = Enum.map(merge.requested_reviewers, & &1.login)
+      requested_reviewers = Enum.map(pull_request.requested_reviewers, & &1.login)
       assert requested_reviewers == ["desmondmonster"]
     end
   end
@@ -284,11 +294,11 @@ defmodule Mrgr.Github.WebhookTest do
     %{installation: installation}
   end
 
-  defp with_open_merge(_ctx) do
+  defp with_open_pull_request(_ctx) do
     payload = read_webhook_data("pull_request", "opened")
-    {:ok, merge} = Mrgr.Github.Webhook.handle("pull_request", payload)
+    {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
-    %{merge: merge}
+    %{pull_request: pull_request}
   end
 
   defp read_webhook_data(obj, action) do

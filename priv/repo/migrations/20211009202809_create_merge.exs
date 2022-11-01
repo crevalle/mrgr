@@ -1,4 +1,4 @@
-defmodule Mrgr.Repo.Migrations.CreateMerge do
+defmodule Mrgr.Repo.Migrations.CreatePullRequest do
   use Ecto.Migration
 
   def change do

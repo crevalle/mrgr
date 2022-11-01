@@ -82,8 +82,8 @@ defmodule Mrgr.Installation do
     |> create_members()
     |> broadcast(@installation_loading_repositories)
     |> create_repositories()
-    |> broadcast(@installation_loading_merges)
-    |> hydrate_github_merge_data()
+    |> broadcast(@installation_loading_pull_requests)
+    |> hydrate_github_pull_request_data()
     |> mark_setup_completed()
     |> broadcast(@installation_setup_completed)
   end
@@ -135,13 +135,13 @@ defmodule Mrgr.Installation do
     end
   end
 
-  def refresh_merges!(installation) do
-    Mrgr.Merge.delete_installation_merges(installation)
+  def refresh_pull_requests!(installation) do
+    Mrgr.PullRequest.delete_installation_pull_requests(installation)
 
-    hydrate_github_merge_data(installation)
+    hydrate_github_pull_request_data(installation)
   end
 
-  def hydrate_github_merge_data(installation) do
+  def hydrate_github_pull_request_data(installation) do
     # assumes account and repositories have been preloaded
 
     # we already have the installation here, so we reverse preload it onto its children repositories
@@ -149,12 +149,12 @@ defmodule Mrgr.Installation do
     repositories =
       installation.repositories
       |> Enum.map(fn r -> %{r | installation: installation} end)
-      |> Enum.map(&Mrgr.Repository.fetch_and_store_open_merges!/1)
+      |> Enum.map(&Mrgr.Repository.fetch_and_store_open_pull_requests!/1)
 
     installation = %{installation | repositories: repositories}
 
     # this returns a list, not the installation
-    Mrgr.MergeQueue.regenerate_merge_queue(installation)
+    Mrgr.MergeQueue.regenerate_pull_request_queue(installation)
 
     installation
   end

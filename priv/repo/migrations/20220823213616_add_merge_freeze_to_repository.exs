@@ -1,4 +1,4 @@
-defmodule Mrgr.Repo.Migrations.AddMergeFreezeToRepository do
+defmodule Mrgr.Repo.Migrations.AddPullRequestFreezeToRepository do
   use Ecto.Migration
 
   def change do

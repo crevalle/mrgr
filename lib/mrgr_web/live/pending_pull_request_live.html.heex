@@ -1,10 +1,10 @@
 <div class="flex justify-between">
   <div class="flex flex-col">
-    <.heading title="Pending Merges" />
+    <.heading title="Pending Pull Requests" />
 
     <div :if={Enum.any?(@snoozed)} >
       <p class="text-gray-400 italic">
-        <%= Enum.count(@snoozed) %> merges are snoozed. <.l phx-click="show-snoozed-merges">Show Them</.l>
+        <%= Enum.count(@snoozed) %> pull requests are snoozed. <.l phx-click="show-snoozed-pull-requests">Show Them</.l>
       </p>
     </div>
   </div>
@@ -69,24 +69,24 @@
 </div>
 
 <div class="flex mt-8 space-x-4" phx-hook="Drag" id="drag">
-  <%= if @merges == [] do %>
+  <%= if @pull_requests == [] do %>
     All done!  Yay!  😊
   <% else %>
     <div class="basis-1/2 overflow-hidden">
-      <div role="list" class="flex flex-col space-y-4 dropzone" id="pending-merge-list">
+      <div role="list" class="flex flex-col space-y-4 dropzone" id="pending-pull-request-list">
         <.live_component
-          :for={merge <- @merges}
-          module={MrgrWeb.Components.Live.PendingMergeItem}
-          id={"merge_#{merge.id}"}
-          merge={merge}
-          selected={selected?(merge, @selected_merge)}
-          merge_frozen={merge_frozen?(@frozen_repos, merge)}
+          :for={pull_request <- @pull_requests}
+          module={MrgrWeb.Components.Live.PendingPullRequestItem}
+          id={"pull_request_#{pull_request.id}"}
+          pull_request={pull_request}
+          selected={selected?(pull_request, @selected_pull_request)}
+          merge_frozen={merge_frozen?(@frozen_repos, pull_request)}
           current_user={@current_user}
           timezone={@timezone} />
       </div>
     </div>
   <% end %>
 
-  <.live_component :if={@selected_merge} module={MrgrWeb.Components.Live.MergeDetail} id="merge_detail" merge={@selected_merge} current_user={@current_user} merge_frozen={merge_frozen?(@frozen_repos, @selected_merge)} timezone={@timezone} />
+  <.live_component :if={@selected_pull_request} module={MrgrWeb.Components.Live.PullRequestDetail} id="pull_request_detail" pull_request={@selected_pull_request} current_user={@current_user} merge_frozen={merge_frozen?(@frozen_repos, @selected_pull_request)} timezone={@timezone} />
 </div>
 

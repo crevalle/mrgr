@@ -1,4 +1,4 @@
-defmodule Mrgr.Repo.Migrations.AddNodeIdToMerge do
+defmodule Mrgr.Repo.Migrations.AddNodeIdToPullRequest do
   use Ecto.Migration
 
   def change do

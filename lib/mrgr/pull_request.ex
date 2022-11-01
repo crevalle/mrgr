@@ -1,12 +1,12 @@
-defmodule Mrgr.Merge do
+defmodule Mrgr.PullRequest do
   use Mrgr.PubSub.Event
 
   require Logger
 
   import Mrgr.Tuple
 
-  alias Mrgr.Merge.Query
-  alias Mrgr.Schema.Merge, as: Schema
+  alias Mrgr.PullRequest.Query
+  alias Mrgr.Schema.PullRequest, as: Schema
 
   def create_from_webhook(payload) do
     params = payload_to_params(payload)
@@ -15,15 +15,15 @@ defmodule Mrgr.Merge do
     |> Schema.create_changeset(params)
     |> Mrgr.Repo.insert()
     |> case do
-      {:ok, merge} ->
-        merge
+      {:ok, pull_request} ->
+        pull_request
         |> preload_installation()
         |> ensure_repository_hydrated()
         |> hydrate_github_data()
-        |> append_to_merge_queue()
+        |> append_to_pull_request_queue()
         |> create_checklists()
         |> notify_file_alert_consumers()
-        |> broadcast(@merge_created)
+        |> broadcast(@pull_request_created)
         |> ok()
 
       {:error, _cs} = err ->
@@ -34,14 +34,14 @@ defmodule Mrgr.Merge do
   @spec reopen(map()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def reopen(payload) do
-    with {:ok, merge} <- find_from_payload(payload),
-         cs <- Schema.create_changeset(merge, payload_to_params(payload)),
-         {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
-      updated_merge
+    with {:ok, pull_request} <- find_from_payload(payload),
+         cs <- Schema.create_changeset(pull_request, payload_to_params(payload)),
+         {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
+      updated_pull_request
       |> preload_installation()
       |> hydrate_github_data()
-      |> append_to_merge_queue()
-      |> broadcast(@merge_reopened)
+      |> append_to_pull_request_queue()
+      |> broadcast(@pull_request_reopened)
       |> ok()
     else
       {:error, :not_found} ->
@@ -55,12 +55,12 @@ defmodule Mrgr.Merge do
   @spec edit(map()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def edit(payload) do
-    with {:ok, merge} <- find_from_payload(payload),
-         cs <- Schema.edit_changeset(merge, payload),
-         {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
-      updated_merge
+    with {:ok, pull_request} <- find_from_payload(payload),
+         cs <- Schema.edit_changeset(pull_request, payload),
+         {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
+      updated_pull_request
       |> preload_installation()
-      |> broadcast(@merge_edited)
+      |> broadcast(@pull_request_edited)
       |> ok()
     else
       {:error, :not_found} -> create_from_webhook(payload)
@@ -71,11 +71,11 @@ defmodule Mrgr.Merge do
   @spec synchronize(map()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def synchronize(payload) do
-    with {:ok, merge} <- find_from_payload(payload) do
-      merge
+    with {:ok, pull_request} <- find_from_payload(payload) do
+      pull_request
       |> preload_installation()
       |> hydrate_github_data()
-      |> broadcast(@merge_synchronized)
+      |> broadcast(@pull_request_synchronized)
       |> ok()
     else
       {:error, :not_found} -> create_from_webhook(payload)
@@ -85,13 +85,13 @@ defmodule Mrgr.Merge do
   @spec close(map()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def close(%{"pull_request" => params} = payload) do
-    with {:ok, merge} <- find_from_payload(payload),
-         cs <- Schema.close_changeset(merge, params),
-         {:ok, updated_merge} <- Mrgr.Repo.update(cs) do
-      updated_merge
+    with {:ok, pull_request} <- find_from_payload(payload),
+         cs <- Schema.close_changeset(pull_request, params),
+         {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
+      updated_pull_request
       |> preload_installation()
-      |> remove_from_merge_queue()
-      |> broadcast(@merge_closed)
+      |> remove_from_pull_request_queue()
+      |> broadcast(@pull_request_closed)
       |> ok()
     else
       {:error, :not_found} = error ->
@@ -105,11 +105,11 @@ defmodule Mrgr.Merge do
 
   @spec assign_user(Schema.t(), Mrgr.Github.User.t()) ::
           {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
-  def assign_user(merge, gh_user) do
-    case Mrgr.List.absent?(merge.assignees, gh_user) do
+  def assign_user(pull_request, gh_user) do
+    case Mrgr.List.absent?(pull_request.assignees, gh_user) do
       true ->
-        case set_assignees(merge, [gh_user | merge.assignees]) do
-          {:ok, merge} ->
+        case set_assignees(pull_request, [gh_user | pull_request.assignees]) do
+          {:ok, pull_request} ->
             # we want to unsnooze only if the user has been tagged,
             # but we don't have the concept of per-user snoozing so
             # we can't answer the question "have i been tagged?" because we don't
@@ -119,7 +119,7 @@ defmodule Mrgr.Merge do
             # rather than build out per-user snoozing,
             # just blanket unsnooze whenever anyone is added to tags, which should
             # be infrequent enough not to mess with the benefit of being snoozed.
-            {:ok, unsnooze(merge)}
+            {:ok, unsnooze(pull_request)}
 
           error ->
             error
@@ -127,30 +127,30 @@ defmodule Mrgr.Merge do
 
       false ->
         # no-op
-        {:ok, merge}
+        {:ok, pull_request}
     end
   end
 
   @spec unassign_user(Schema.t(), Mrgr.Github.User.t()) ::
           {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
-  def unassign_user(merge, gh_user) do
-    case Mrgr.List.present?(merge.assignees, gh_user) do
+  def unassign_user(pull_request, gh_user) do
+    case Mrgr.List.present?(pull_request.assignees, gh_user) do
       true ->
-        set_assignees(merge, Mrgr.List.remove(merge.assignees, gh_user))
+        set_assignees(pull_request, Mrgr.List.remove(pull_request.assignees, gh_user))
 
       false ->
-        {:ok, merge}
+        {:ok, pull_request}
     end
   end
 
-  defp set_assignees(merge, assignees) do
-    merge
+  defp set_assignees(pull_request, assignees) do
+    pull_request
     |> Schema.change_assignees(assignees)
     |> Mrgr.Repo.update()
     |> case do
-      {:ok, merge} ->
-        merge
-        |> broadcast(@merge_assignees_updated)
+      {:ok, pull_request} ->
+        pull_request
+        |> broadcast(@pull_request_assignees_updated)
         |> ok()
 
       error ->
@@ -160,11 +160,11 @@ defmodule Mrgr.Merge do
 
   @spec add_reviewer(Schema.t(), Mrgr.Github.User.t()) ::
           {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
-  def add_reviewer(merge, gh_user) do
-    case Mrgr.List.absent?(merge.requested_reviewers, gh_user) do
+  def add_reviewer(pull_request, gh_user) do
+    case Mrgr.List.absent?(pull_request.requested_reviewers, gh_user) do
       true ->
-        case set_reviewers(merge, [gh_user | merge.requested_reviewers]) do
-          {:ok, merge} ->
+        case set_reviewers(pull_request, [gh_user | pull_request.requested_reviewers]) do
+          {:ok, pull_request} ->
             # we want to unsnooze only if the user has been tagged,
             # but we don't have the concept of per-user snoozing so
             # we can't answer the question "have i been tagged?" because we don't
@@ -174,7 +174,7 @@ defmodule Mrgr.Merge do
             # rather than build out per-user snoozing,
             # just blanket unsnooze whenever anyone is added to tags, which should
             # be infrequent enough not to mess with the benefit of being snoozed.
-            {:ok, unsnooze(merge)}
+            {:ok, unsnooze(pull_request)}
 
           error ->
             error
@@ -182,30 +182,30 @@ defmodule Mrgr.Merge do
 
       false ->
         # no-op
-        {:ok, merge}
+        {:ok, pull_request}
     end
   end
 
   @spec remove_reviewer(Schema.t(), Mrgr.Github.User.t()) ::
           {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
-  def remove_reviewer(merge, gh_user) do
-    case Mrgr.List.present?(merge.assignees, gh_user) do
+  def remove_reviewer(pull_request, gh_user) do
+    case Mrgr.List.present?(pull_request.assignees, gh_user) do
       true ->
-        set_reviewers(merge, Mrgr.List.remove(merge.requested_reviewers, gh_user))
+        set_reviewers(pull_request, Mrgr.List.remove(pull_request.requested_reviewers, gh_user))
 
       false ->
-        {:ok, merge}
+        {:ok, pull_request}
     end
   end
 
-  defp set_reviewers(merge, reviewers) do
-    merge
+  defp set_reviewers(pull_request, reviewers) do
+    pull_request
     |> Schema.change_reviewers(reviewers)
     |> Mrgr.Repo.update()
     |> case do
-      {:ok, merge} ->
-        merge
-        |> broadcast(@merge_reviewers_updated)
+      {:ok, pull_request} ->
+        pull_request
+        |> broadcast(@pull_request_reviewers_updated)
         |> ok()
 
       error ->
@@ -213,78 +213,80 @@ defmodule Mrgr.Merge do
     end
   end
 
-  def tagged?(merge, user) do
-    (merge.assignees ++ merge.requested_reviewers)
+  def tagged?(pull_request, user) do
+    (pull_request.assignees ++ pull_request.requested_reviewers)
     |> Enum.any?(&Mrgr.Schema.User.is_github_user?(user, &1))
   end
 
-  def sync_comments(merge) do
-    merge
+  def sync_comments(pull_request) do
+    pull_request
     |> fetch_issue_comments()
     |> Enum.each(fn c ->
-      create_comment("issue_comment", merge, c["created_at"], c)
+      create_comment("issue_comment", pull_request, c["created_at"], c)
     end)
 
-    merge
+    pull_request
     |> fetch_pr_review_comments()
     |> Enum.each(fn c ->
-      create_comment("pull_request_review_comment", merge, c["created_at"], c)
+      create_comment("pull_request_review_comment", pull_request, c["created_at"], c)
     end)
   end
 
-  def fetch_pr_review_comments(merge) do
+  def fetch_pr_review_comments(pull_request) do
     Mrgr.Github.API.fetch_pr_review_comments(
-      merge.repository.installation,
-      merge.repository,
-      merge.number
+      pull_request.repository.installation,
+      pull_request.repository,
+      pull_request.number
     )
   end
 
-  def fetch_issue_comments(merge) do
+  def fetch_issue_comments(pull_request) do
     Mrgr.Github.API.fetch_issue_comments(
-      merge.repository.installation,
-      merge.repository,
-      merge.number
+      pull_request.repository.installation,
+      pull_request.repository,
+      pull_request.number
     )
   end
 
   @spec add_pull_request_review_comment(String.t(), Mrgr.Github.Webhook.t()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def add_pull_request_review_comment(object, params) do
-    with {:ok, merge} <- find_from_payload(params),
-         {:ok, comment} <- create_comment(object, merge, params["comment"]["created_at"], params) do
-      # !!! we broadcast the merge, not the comment,
+    with {:ok, pull_request} <- find_from_payload(params),
+         {:ok, comment} <-
+           create_comment(object, pull_request, params["comment"]["created_at"], params) do
+      # !!! we broadcast the pull_request, not the comment,
       # and let consumers figure out how to reconcile their data,
       # probably by reloading.
       #
       # Later when we know how we want to use comment data that can maybe become
-      # its own data stream.  for now it's easier to just reload the merge
-      # on the one pending_merge screen that uses it
-      merge = %{merge | comments: [comment | merge.comments]}
+      # its own data stream.  for now it's easier to just reload the pull_request
+      # on the one pending_pull_request screen that uses it
+      pull_request = %{pull_request | comments: [comment | pull_request.comments]}
 
-      merge
+      pull_request
       |> preload_installation()
-      |> broadcast(@merge_comment_created)
+      |> broadcast(@pull_request_comment_created)
       |> ok()
     end
   end
 
   def add_issue_comment(object, params) do
-    with {:ok, merge} <- find_from_payload(params["issue"]),
-         {:ok, comment} <- create_comment(object, merge, params["comment"]["created_at"], params) do
-      merge = %{merge | comments: [comment | merge.comments]}
+    with {:ok, pull_request} <- find_from_payload(params["issue"]),
+         {:ok, comment} <-
+           create_comment(object, pull_request, params["comment"]["created_at"], params) do
+      pull_request = %{pull_request | comments: [comment | pull_request.comments]}
 
-      merge
+      pull_request
       |> preload_installation()
-      |> broadcast(@merge_comment_created)
+      |> broadcast(@pull_request_comment_created)
       |> ok()
     end
   end
 
-  defp create_comment(object, merge, posted_at, params) do
+  defp create_comment(object, pull_request, posted_at, params) do
     attrs = %{
       object: object,
-      merge_id: merge.id,
+      pull_request_id: pull_request.id,
       posted_at: posted_at,
       raw: params
     }
@@ -295,7 +297,7 @@ defmodule Mrgr.Merge do
   end
 
   @spec add_pr_review(Schema.t(), map()) :: {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
-  def add_pr_review(merge, %{"state" => "commented"}) do
+  def add_pr_review(pull_request, %{"state" => "commented"}) do
     ### WARNING!  Silently does nothing.
     #
     # Add a review comment will also create a PR review with a state of "commented".
@@ -305,24 +307,24 @@ defmodule Mrgr.Merge do
     # and it's better than double-counting things.
 
     # We still preload the existing pr_reviews to keep parity with the workhorse function below.
-    {:ok, Mrgr.Repo.preload(merge, :pr_reviews)}
+    {:ok, Mrgr.Repo.preload(pull_request, :pr_reviews)}
   end
 
-  def add_pr_review(merge, params) do
-    merge = Mrgr.Repo.preload(merge, :pr_reviews)
+  def add_pr_review(pull_request, params) do
+    pull_request = Mrgr.Repo.preload(pull_request, :pr_reviews)
 
-    merge
+    pull_request
     |> Ecto.build_assoc(:pr_reviews)
     |> Mrgr.Schema.PRReview.create_changeset(params)
     |> Mrgr.Repo.insert()
     |> case do
       {:ok, review} ->
-        merge = %{merge | pr_reviews: [review | merge.pr_reviews]}
+        pull_request = %{pull_request | pr_reviews: [review | pull_request.pr_reviews]}
 
-        merge
-        # see if merge is unblocked
+        pull_request
+        # see if pull_request is unblocked
         |> synchronize_most_stuff()
-        |> broadcast(@merge_reviews_updated)
+        |> broadcast(@pull_request_reviews_updated)
         |> ok()
 
       error ->
@@ -330,38 +332,39 @@ defmodule Mrgr.Merge do
     end
   end
 
-  def dismiss_pr_review(merge, review_node_id) do
-    with %Mrgr.Schema.PRReview{} = review <- Mrgr.PRReview.find_for_merge(merge, review_node_id) do
+  def dismiss_pr_review(pull_request, review_node_id) do
+    with %Mrgr.Schema.PRReview{} = review <-
+           Mrgr.PRReview.find_for_pull_request(pull_request, review_node_id) do
       review
       |> Mrgr.Schema.PRReview.dismiss_changeset()
       |> Mrgr.Repo.update!()
     end
 
-    merge
+    pull_request
     |> Mrgr.Repo.preload(:pr_reviews, force: true)
-    # see if merge is blocked
+    # see if pull_request is blocked
     |> synchronize_most_stuff()
-    |> broadcast(@merge_reviews_updated)
+    |> broadcast(@pull_request_reviews_updated)
     |> ok()
   end
 
-  def notify_file_alert_consumers(merge) do
-    merge
-    |> Mrgr.FileChangeAlert.for_merge()
+  def notify_file_alert_consumers(pull_request) do
+    pull_request
+    |> Mrgr.FileChangeAlert.for_pull_request()
     |> Enum.filter(& &1.notify_user)
-    |> send_file_alert(merge)
+    |> send_file_alert(pull_request)
   end
 
-  def send_file_alert([], merge), do: merge
+  def send_file_alert([], pull_request), do: pull_request
 
-  def send_file_alert(alerts, merge) do
-    installation = Mrgr.Repo.preload(merge.repository.installation, :creator)
+  def send_file_alert(alerts, pull_request) do
+    installation = Mrgr.Repo.preload(pull_request.repository.installation, :creator)
     recipient = installation.creator
-    url = build_url_to(merge)
+    url = build_url_to(pull_request)
 
     file_alerts =
       Enum.map(alerts, fn alert ->
-        filenames = Mrgr.FileChangeAlert.matching_filenames(alert, merge)
+        filenames = Mrgr.FileChangeAlert.matching_filenames(alert, pull_request)
 
         %{
           filenames: filenames,
@@ -369,24 +372,24 @@ defmodule Mrgr.Merge do
         }
       end)
 
-    mail = Mrgr.Notifier.file_alert(recipient, merge.repository, file_alerts, url)
+    mail = Mrgr.Notifier.file_alert(recipient, pull_request.repository, file_alerts, url)
     Mrgr.Mailer.deliver(mail)
 
-    merge
+    pull_request
   end
 
-  defp build_url_to(merge) do
-    MrgrWeb.Router.Helpers.pending_merge_url(MrgrWeb.Endpoint, :show, merge.id)
+  defp build_url_to(pull_request) do
+    MrgrWeb.Router.Helpers.pending_pull_request_url(MrgrWeb.Endpoint, :show, pull_request.id)
   end
 
-  def snooze(merge, until) do
-    merge
+  def snooze(pull_request, until) do
+    pull_request
     |> Schema.snooze_changeset(until)
     |> Mrgr.Repo.update!()
   end
 
-  def unsnooze(merge) do
-    merge
+  def unsnooze(pull_request) do
+    pull_request
     |> Schema.snooze_changeset(nil)
     |> Mrgr.Repo.update!()
   end
@@ -402,7 +405,7 @@ defmodule Mrgr.Merge do
   defp find_from_payload(%{"node_id" => node_id}) do
     case find_by_node_id(node_id) do
       nil -> {:error, :not_found}
-      merge -> {:ok, merge}
+      pull_request -> {:ok, pull_request}
     end
   end
 
@@ -410,22 +413,22 @@ defmodule Mrgr.Merge do
     find_from_payload(params)
   end
 
-  def ensure_repository_hydrated(merge) do
-    definitely_hydrated = Mrgr.Repository.ensure_hydrated(merge.repository)
+  def ensure_repository_hydrated(pull_request) do
+    definitely_hydrated = Mrgr.Repository.ensure_hydrated(pull_request.repository)
 
-    %{merge | repository: definitely_hydrated}
+    %{pull_request | repository: definitely_hydrated}
   end
 
   @spec merge!(Schema.t() | integer(), String.t(), Mrgr.Schema.User.t()) ::
           {:ok, Schema.t()} | {:error, String.t()}
-  def merge!(%Schema{} = merge, message, merger) do
-    # this only makes the API call.  side effects to the %Merge{} are handled in the close callback
-    args = generate_merge_args(merge, message, merger)
+  def merge!(%Schema{} = pull_request, message, merger) do
+    # this only makes the API call.  side effects to the %PullRequest{} are handled in the close callback
+    args = generate_merge_args(pull_request, message, merger)
 
     Mrgr.Github.API.merge_pull_request(args.client, args.owner, args.repo, args.number, args.body)
     |> case do
       {:ok, %{"sha" => _sha}} ->
-        {:ok, merge}
+        {:ok, pull_request}
 
       {:error, %{result: %{"message" => str}}} ->
         {:error, str}
@@ -433,27 +436,27 @@ defmodule Mrgr.Merge do
   end
 
   def merge!(id, message, merger) do
-    case load_merge_for_merging(id) do
+    case load_pull_request_for_merging(id) do
       nil -> {:error, :not_found}
-      merge -> merge!(merge, message, merger)
+      pull_request -> merge!(pull_request, message, merger)
     end
   end
 
-  def broadcast(merge, event) do
-    topic = Mrgr.PubSub.Topic.installation(merge.repository.installation)
+  def broadcast(pull_request, event) do
+    topic = Mrgr.PubSub.Topic.installation(pull_request.repository.installation)
 
-    Mrgr.PubSub.broadcast(merge, topic, event)
-    merge
+    Mrgr.PubSub.broadcast(pull_request, topic, event)
+    pull_request
   end
 
-  def hydrate_github_data(merge) do
-    merge
+  def hydrate_github_data(pull_request) do
+    pull_request
     |> synchronize_most_stuff()
     |> synchronize_commits()
   end
 
-  def synchronize_most_stuff(merge) do
-    %{"node" => node} = Mrgr.Github.API.fetch_most_merge_data(merge)
+  def synchronize_most_stuff(pull_request) do
+    %{"node" => node} = Mrgr.Github.API.fetch_most_pull_request_data(pull_request)
 
     files_changed = Enum.map(node["files"]["nodes"], & &1["path"])
 
@@ -464,38 +467,38 @@ defmodule Mrgr.Merge do
       title: node["title"]
     }
 
-    merge
+    pull_request
     |> Schema.most_changeset(translated)
     |> Mrgr.Repo.update!()
   end
 
-  def synchronize_commits(merge) do
+  def synchronize_commits(pull_request) do
     commits =
-      merge
+      pull_request
       |> fetch_commits()
       # they come in with first commit first, i want most recent first (head)
       |> Enum.reverse()
 
-    merge
+    pull_request
     |> Schema.commits_changeset(%{commits: commits})
     |> Mrgr.Repo.update!()
   end
 
-  def fetch_commits(merge) do
-    Mrgr.Github.API.commits(merge, merge.repository.installation)
+  def fetch_commits(pull_request) do
+    Mrgr.Github.API.commits(pull_request, pull_request.repository.installation)
   end
 
-  def generate_merge_args(merge, message, merger) do
-    installation = merge.repository.installation
+  def generate_merge_args(pull_request, message, merger) do
+    installation = pull_request.repository.installation
 
     client = Mrgr.Github.Client.new(merger)
     owner = installation.account.login
-    repo = merge.repository.name
-    number = merge.number
-    head_commit = Mrgr.Schema.Merge.head(merge)
+    repo = pull_request.repository.name
+    number = pull_request.number
+    head_commit = Mrgr.Schema.PullRequest.head(pull_request)
 
     body = %{
-      "commit_title" => merge.title,
+      "commit_title" => pull_request.title,
       "commit_message" => message,
       "sha" => head_commit.sha,
       "merge_method" => "squash"
@@ -504,7 +507,7 @@ defmodule Mrgr.Merge do
     %{client: client, owner: owner, repo: repo, number: number, body: body}
   end
 
-  def load_merge_for_merging(id) do
+  def load_pull_request_for_merging(id) do
     Schema
     |> Query.by_id(id)
     |> Query.preload_for_merging()
@@ -547,15 +550,15 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.one()
   end
 
-  def pending_merges(%Mrgr.Schema.Installation{id: id}) do
-    pending_merges(id)
+  def pending_pull_requests(%Mrgr.Schema.Installation{id: id}) do
+    pending_pull_requests(id)
   end
 
-  def pending_merges(%Mrgr.Schema.User{current_installation_id: id}) do
-    pending_merges(id)
+  def pending_pull_requests(%Mrgr.Schema.User{current_installation_id: id}) do
+    pending_pull_requests(id)
   end
 
-  def pending_merges(installation_id) do
+  def pending_pull_requests(installation_id) do
     Schema
     |> Query.for_installation(installation_id)
     |> Query.open()
@@ -570,14 +573,14 @@ defmodule Mrgr.Merge do
     |> Mrgr.Repo.all()
   end
 
-  def preload_for_pending_list(merge) do
+  def preload_for_pending_list(pull_request) do
     Schema
-    |> Query.by_id(merge.id)
+    |> Query.by_id(pull_request.id)
     |> Query.with_pending_preloads()
     |> Mrgr.Repo.one()
   end
 
-  def delete_installation_merges(installation) do
+  def delete_installation_pull_requests(installation) do
     Schema
     |> Query.for_installation(installation.id)
     |> Mrgr.Repo.all()
@@ -603,44 +606,46 @@ defmodule Mrgr.Merge do
     end
   end
 
-  defp append_to_merge_queue(merge) do
-    all_pending_merges = pending_merges(merge.repository.installation)
+  defp append_to_pull_request_queue(pull_request) do
+    all_pending_pull_requests = pending_pull_requests(pull_request.repository.installation)
 
-    other_merges = Enum.reject(all_pending_merges, fn m -> m.id == merge.id end)
+    other_pull_requests =
+      Enum.reject(all_pending_pull_requests, fn m -> m.id == pull_request.id end)
 
-    Mrgr.MergeQueue.set_next_merge_queue_index(merge, other_merges)
+    Mrgr.MergeQueue.set_next_pull_request_queue_index(pull_request, other_pull_requests)
   end
 
-  defp remove_from_merge_queue(merge) do
-    all_pending_merges = pending_merges(merge.repository.installation)
+  defp remove_from_pull_request_queue(pull_request) do
+    all_pending_pull_requests = pending_pull_requests(pull_request.repository.installation)
 
-    {_updated_list, updated_merge} = Mrgr.MergeQueue.remove(all_pending_merges, merge)
+    {_updated_list, updated_pull_request} =
+      Mrgr.MergeQueue.remove(all_pending_pull_requests, pull_request)
 
-    updated_merge
+    updated_pull_request
   end
 
-  defp preload_installation(merge) do
-    Mrgr.Repo.preload(merge, repository: [:installation, :file_change_alerts])
+  defp preload_installation(pull_request) do
+    Mrgr.Repo.preload(pull_request, repository: [:installation, :file_change_alerts])
   end
 
-  def create_checklists(merge) do
-    merge
+  def create_checklists(pull_request) do
+    pull_request
     |> fetch_applicable_checklist_templates()
-    |> Enum.map(&Mrgr.ChecklistTemplate.create_checklist(&1, merge))
+    |> Enum.map(&Mrgr.ChecklistTemplate.create_checklist(&1, pull_request))
 
-    merge
+    pull_request
   end
 
-  defp fetch_applicable_checklist_templates(merge) do
-    Mrgr.ChecklistTemplate.for_repository(merge.repository)
+  defp fetch_applicable_checklist_templates(pull_request) do
+    Mrgr.ChecklistTemplate.for_repository(pull_request.repository)
   end
 
-  def fully_approved?(merge) do
-    approving_reviews(merge) >= Schema.required_approvals(merge)
+  def fully_approved?(pull_request) do
+    approving_reviews(pull_request) >= Schema.required_approvals(pull_request)
   end
 
-  def approving_reviews(merge) do
-    merge.pr_reviews
+  def approving_reviews(pull_request) do
+    pull_request.pr_reviews
     |> Enum.filter(&(&1.state == "approved"))
     |> Enum.count()
   end

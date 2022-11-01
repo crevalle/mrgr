@@ -53,7 +53,7 @@ defmodule MrgrWeb.Live.InstallationLoading do
     names = %{
       @installation_loading_members => "Loading Members...",
       @installation_loading_repositories => "Loading Repositories...",
-      @installation_loading_merges => "Loading Merge Data..."
+      @installation_loading_pull_requests => "Loading Pull Request Data..."
     }
 
     # no default, since our handle_info guards against what events it receives
@@ -65,7 +65,7 @@ defmodule MrgrWeb.Live.InstallationLoading do
       true ->
         socket
         |> assign(:dots, "OK!")
-        |> redirect(to: Routes.pending_merge_path(MrgrWeb.Endpoint, :index))
+        |> redirect(to: Routes.pending_pull_request_path(MrgrWeb.Endpoint, :index))
         |> noreply()
 
       false ->
@@ -88,7 +88,7 @@ defmodule MrgrWeb.Live.InstallationLoading do
       when loading_event in [
              @installation_loading_members,
              @installation_loading_repositories,
-             @installation_loading_merges
+             @installation_loading_pull_requests
            ] do
     event = translate_event(loading_event)
 
@@ -103,7 +103,7 @@ defmodule MrgrWeb.Live.InstallationLoading do
   def handle_info(%{event: @installation_setup_completed, payload: _installation}, socket) do
     socket
     |> assign(:dots, "OK!")
-    |> redirect(to: Routes.pending_merge_path(MrgrWeb.Endpoint, :index))
+    |> redirect(to: Routes.pending_pull_request_path(MrgrWeb.Endpoint, :index))
     |> noreply()
   end
 

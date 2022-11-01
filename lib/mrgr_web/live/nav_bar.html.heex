@@ -5,11 +5,11 @@
   <div class="flex-1 px-4 flex justify-between">
     <div class="ml-4 flex items-center space-x-6">
       <.nav_item
-        route={Routes.pending_merge_path(MrgrWeb.Endpoint, :index)}
+        route={Routes.pending_pull_request_path(MrgrWeb.Endpoint, :index)}
         icon="share"
-        label="Pending Merges">
+        label="Pending Pull Requests">
 
-        <span class="bg-gray-100 group-hover:bg-gray-200 ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full"> <%= @pending_merge_count %> </span>
+        <span class="bg-gray-100 group-hover:bg-gray-200 ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full"> <%= @pending_pull_request_count %> </span>
       </.nav_item>
 
       <.nav_item
@@ -21,7 +21,7 @@
       <.nav_item
         route={Routes.checklist_path(MrgrWeb.Endpoint, :index)}
         icon="document-text"
-        label="Merge Checklists"
+        label="Checklists"
       ./>
 
       <!-- Profile dropdown -->

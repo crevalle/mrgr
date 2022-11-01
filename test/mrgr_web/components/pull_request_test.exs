@@ -1,4 +1,4 @@
-defmodule MrgrWeb.Components.MergeTest do
+defmodule MrgrWeb.Components.PullRequestTest do
   use ExUnit.Case
 
   describe "filter_recent_comments/1" do
@@ -11,7 +11,7 @@ defmodule MrgrWeb.Components.MergeTest do
       c2 = %Mrgr.Schema.Comment{id: 2, posted_at: a_few_hours_ago}
       c3 = %Mrgr.Schema.Comment{id: 3, posted_at: over_1_day_ago}
 
-      res = MrgrWeb.Components.Merge.filter_recent_comments([c1, c2, c3])
+      res = MrgrWeb.Components.PullRequest.filter_recent_comments([c1, c2, c3])
 
       assert Enum.map(res, & &1.id) == [1, 2]
     end

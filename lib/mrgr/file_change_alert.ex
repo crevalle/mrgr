@@ -11,18 +11,18 @@ defmodule Mrgr.FileChangeAlert do
     |> Mrgr.Repo.all()
   end
 
-  def for_merge(%{repository: %{file_change_alerts: alerts}} = merge) do
-    Enum.filter(alerts, &applies_to_merge?(&1, merge))
+  def for_pull_request(%{repository: %{file_change_alerts: alerts}} = pull_request) do
+    Enum.filter(alerts, &applies_to_pull_request?(&1, pull_request))
   end
 
-  def applies_to_merge?(alert, merge) do
+  def applies_to_pull_request?(alert, pull_request) do
     alert
-    |> matching_filenames(merge)
+    |> matching_filenames(pull_request)
     |> Enum.any?()
   end
 
-  def matching_filenames(alert, merge) do
-    filenames = merge.files_changed
+  def matching_filenames(alert, pull_request) do
+    filenames = pull_request.files_changed
 
     Enum.filter(filenames, &pattern_matches_filename?(&1, alert))
   end

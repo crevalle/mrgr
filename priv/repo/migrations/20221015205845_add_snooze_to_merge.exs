@@ -1,4 +1,4 @@
-defmodule Mrgr.Repo.Migrations.AddSnoozeToMerge do
+defmodule Mrgr.Repo.Migrations.AddSnoozeToPullRequest do
   use Ecto.Migration
 
   def change do

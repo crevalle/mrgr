@@ -44,13 +44,13 @@ defmodule Mrgr.ChecklistTemplate do
     end
   end
 
-  def create_checklist(template, merge) do
+  def create_checklist(template, pull_request) do
     check_attrs = extract_check_text(template.check_templates)
 
     attrs = %{
       title: template.title,
       checklist_template: template,
-      merge: merge,
+      pull_request: pull_request,
       checks: check_attrs
     }
 

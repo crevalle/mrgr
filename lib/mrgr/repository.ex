@@ -36,7 +36,7 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.one()
   end
 
-  def toggle_merge_freeze(repo) do
+  def toggle_pull_request_freeze(repo) do
     new_value = toggle(repo.merge_freeze_enabled)
 
     repo
@@ -99,20 +99,20 @@ defmodule Mrgr.Repository do
     Mrgr.Github.API.fetch_branch_protection(repository)
   end
 
-  @spec fetch_and_store_open_merges!(Schema.t()) :: Schema.t()
-  def fetch_and_store_open_merges!(repo) do
-    case fetch_open_merges(repo) do
+  @spec fetch_and_store_open_pull_requests!(Schema.t()) :: Schema.t()
+  def fetch_and_store_open_pull_requests!(repo) do
+    case fetch_open_pull_requests(repo) do
       [] ->
         repo
 
       pr_data ->
         repo
-        |> create_merges_from_data(pr_data)
-        |> hydrate_merge_data()
+        |> create_pull_requests_from_data(pr_data)
+        |> hydrate_pull_request_data()
     end
   end
 
-  def fetch_open_merges(repo) do
+  def fetch_open_pull_requests(repo) do
     result = Mrgr.Github.API.fetch_pulls_graphql(repo.installation, repo)
 
     result
@@ -153,23 +153,23 @@ defmodule Mrgr.Repository do
     Map.merge(node, translated)
   end
 
-  defp create_merges_from_data(repo, data) do
+  defp create_pull_requests_from_data(repo, data) do
     repo
-    |> Schema.create_merges_changeset(%{merges: data})
+    |> Schema.create_pull_requests_changeset(%{pull_requests: data})
     |> Mrgr.Repo.update!()
   end
 
-  def hydrate_merge_data(repo) do
-    merges =
-      repo.merges
+  def hydrate_pull_request_data(repo) do
+    pull_requests =
+      repo.pull_requests
       # reverse preloading for API call
       |> Enum.map(fn m -> %{m | repository: repo} end)
-      |> Enum.map(&Mrgr.Merge.hydrate_github_data/1)
+      |> Enum.map(&Mrgr.PullRequest.hydrate_github_data/1)
       # fetch comments outside of `hydrate_github_data` since we only
       # need to hit the API when we're creating the world
-      |> Enum.map(&Mrgr.Merge.sync_comments/1)
+      |> Enum.map(&Mrgr.PullRequest.sync_comments/1)
 
-    %{repo | merges: merges}
+    %{repo | pull_requests: pull_requests}
   end
 
   defmodule Query do

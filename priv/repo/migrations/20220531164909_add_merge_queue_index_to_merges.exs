@@ -1,4 +1,4 @@
-defmodule Mrgr.Repo.Migrations.AddMergeQueueIndexToMerges do
+defmodule Mrgr.Repo.Migrations.AddPullRequestQueueIndexToPullRequests do
   use Ecto.Migration
 
   def change do

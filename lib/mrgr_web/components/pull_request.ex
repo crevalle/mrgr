@@ -1,9 +1,9 @@
-defmodule MrgrWeb.Components.Merge do
+defmodule MrgrWeb.Components.PullRequest do
   use MrgrWeb, :component
 
   import Heroicons.LiveView, only: [icon: 1]
 
-  alias Mrgr.Schema.Merge
+  alias Mrgr.Schema.PullRequest
 
   def changed_file_li(assigns) do
     matching_alert =
@@ -55,7 +55,7 @@ defmodule MrgrWeb.Components.Merge do
   end
 
   def me_tag(assigns) do
-    tagged = Mrgr.Merge.tagged?(assigns.merge, assigns.current_user)
+    tagged = Mrgr.PullRequest.tagged?(assigns.pull_request, assigns.current_user)
 
     assigns =
       assigns
@@ -66,8 +66,8 @@ defmodule MrgrWeb.Components.Merge do
     """
   end
 
-  def merge_approval_badge(assigns) do
-    fully_approved = Mrgr.Merge.fully_approved?(assigns.merge)
+  def pr_approval_badge(assigns) do
+    fully_approved = Mrgr.PullRequest.fully_approved?(assigns.pull_request)
 
     assigns =
       assigns
@@ -88,14 +88,14 @@ defmodule MrgrWeb.Components.Merge do
     """
   end
 
-  def merge_approval_text(assigns) do
+  def pr_approval_text(assigns) do
     text =
-      case Mrgr.Schema.Merge.required_approvals(assigns.merge) do
+      case Mrgr.Schema.PullRequest.required_approvals(assigns.pull_request) do
         0 ->
           "no approvals required for this repo"
 
         num ->
-          "(#{Mrgr.Merge.approving_reviews(assigns.merge)}/#{num}) approvals"
+          "(#{Mrgr.PullRequest.approving_reviews(assigns.pull_request)}/#{num}) approvals"
       end
 
     assigns = assign(assigns, :text, text)
@@ -110,12 +110,12 @@ defmodule MrgrWeb.Components.Merge do
     <li class="p-2">
       <div class="flex flex-col ">
         <div class="flex space-between items-center">
-          <p class="flex-1 truncate"><%= Merge.commit_message(@commit) %></p>
-          <p class="text-sm text-gray-500"><%= ts(Merge.committed_at(@commit)) %></p>
+          <p class="flex-1 truncate"><%= PullRequest.commit_message(@commit) %></p>
+          <p class="text-sm text-gray-500"><%= ts(PullRequest.committed_at(@commit)) %></p>
         </div>
         <div class="flex space-between space-x-2 divide-x divide-gray-500">
-          <p class="text-sm text-gray-500"><%= Merge.author_name(@commit) %></p>
-          <p class="pl-2 text-sm text-gray-500"><%= shorten_sha(Merge.commit_sha(@commit)) %></p>
+          <p class="text-sm text-gray-500"><%= PullRequest.author_name(@commit) %></p>
+          <p class="pl-2 text-sm text-gray-500"><%= shorten_sha(PullRequest.commit_sha(@commit)) %></p>
         </div>
       </div>
     </li>

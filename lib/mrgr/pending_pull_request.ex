@@ -1,4 +1,4 @@
-defmodule Mrgr.PendingMerge do
+defmodule Mrgr.PendingPullRequest do
   def create_first_linky_comment(repo, pr, token) do
     # crevalle/mrgr => ["crevalle", "mrgr"]
     [owner, repo_name] = String.split(repo.full_name, "/")

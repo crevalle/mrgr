@@ -7,7 +7,7 @@ defmodule MrgrWeb.Components.Live.ChecklistFormComponent do
       <div class="flex flex-col space-y-4">
         <div class="flex justify-between">
           <div class="flex items-start items-center">
-            <.h1>Create a Merge Checklist</.h1>
+            <.h1>Create a Pull Request Checklist</.h1>
           </div>
           <button phx-click="close-detail" colors="outline-none">
             <.icon name="x-circle" class="text-gray-400 mr-1 h-5 w-5" />
@@ -46,7 +46,7 @@ defmodule MrgrWeb.Components.Live.ChecklistFormComponent do
             <.subheading title="Apply to Repositories">
               <:description>
                 <div class="flex flex-col">
-                  This checklist will apply to ALL merges in the repos you select.
+                  This checklist will apply to ALL pull requests in the repos you select.
                   <%= link "Toggle All/None", to: "#", phx_click: "toggle-all-repositories", class: "text-teal-700 hover:text-teal-500" %>
                 </div>
               </:description>

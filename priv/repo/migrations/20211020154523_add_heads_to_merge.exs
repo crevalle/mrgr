@@ -1,4 +1,4 @@
-defmodule Mrgr.Repo.Migrations.AddHeadsToMerge do
+defmodule Mrgr.Repo.Migrations.AddHeadsToPullRequest do
   use Ecto.Migration
 
   def change do

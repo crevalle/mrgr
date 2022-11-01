@@ -68,8 +68,8 @@ defmodule Mrgr.Factory do
     }
   end
 
-  def build(:merge) do
-    %Mrgr.Schema.Merge{
+  def build(:pull_request) do
+    %Mrgr.Schema.PullRequest{
       title: Faker.Company.bs(),
       number: System.unique_integer([:positive, :monotonic]),
       status: "open",
@@ -97,7 +97,7 @@ defmodule Mrgr.Factory do
   def build(:checklist) do
     %Mrgr.Schema.Checklist{
       title: Faker.Company.bs(),
-      merge: build(:merge),
+      pull_request: build(:pull_request),
       checklist_template: build(:checklist_template)
     }
   end

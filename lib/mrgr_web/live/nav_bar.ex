@@ -12,14 +12,17 @@ defmodule MrgrWeb.Live.NavBar do
         nil ->
           # onboarding, no current installation
           socket
-          |> assign(:pending_merge_count, 0)
+          |> assign(:pending_pull_request_count, 0)
           |> ok()
 
         _installation ->
           subscribe(current_user)
 
           socket
-          |> assign(:pending_merge_count, Enum.count(Mrgr.Merge.pending_merges(current_user)))
+          |> assign(
+            :pending_pull_request_count,
+            Enum.count(Mrgr.PullRequest.pending_pull_requests(current_user))
+          )
           |> ok()
       end
     else
@@ -32,19 +35,20 @@ defmodule MrgrWeb.Live.NavBar do
     Mrgr.PubSub.subscribe(topic)
   end
 
-  def handle_info(%{event: event}, socket) when event in [@merge_created, @merge_reopened] do
-    count = socket.assigns.pending_merge_count
+  def handle_info(%{event: event}, socket)
+      when event in [@pull_request_created, @pull_request_reopened] do
+    count = socket.assigns.pending_pull_request_count
 
     socket
-    |> assign(:pending_merge_count, count + 1)
+    |> assign(:pending_pull_request_count, count + 1)
     |> noreply()
   end
 
-  def handle_info(%{event: @merge_closed}, socket) do
-    count = socket.assigns.pending_merge_count
+  def handle_info(%{event: @pull_request_closed}, socket) do
+    count = socket.assigns.pending_pull_request_count
 
     socket
-    |> assign(:pending_merge_count, count - 1)
+    |> assign(:pending_pull_request_count, count - 1)
     |> noreply()
   end
 

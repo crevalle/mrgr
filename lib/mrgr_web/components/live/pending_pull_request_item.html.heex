@@ -1,0 +1,82 @@
+<div draggable="true" class={"bg-white border #{highlighted_color(@selected)} shadow rounded-lg draggable"} id={"pull-request-#{@pull_request.id}"}>
+  <div class="p-3">
+
+    <!-- top row -->
+    <div class="flex items-center justify-between items-baseline">
+
+      <!-- title -->
+      <div class="flex items-baseline">
+        <.h3>
+          <.l phx-click="show-preview" phx-value-pull-request-id={"#{@pull_request.id}"} class="text-teal-700 text-xl hover:text-teal-500">
+            <%= @pull_request.title %>
+          </.l>
+        </.h3>
+        <p class={"ml-2 text-sm italic font-light #{repo_text_color(@merge_frozen)}"}>
+          <%= @pull_request.repository.name %>
+        </p>
+      </div>
+      <!-- action button -->
+      <div class="relative">
+        <%= if Mrgr.PullRequest.snoozed?(@pull_request) do %>
+          <p class="text-gray-400 italic">
+          😴 Snoozed until <%= ts(@pull_request.snoozed_until) %>.
+          </p>
+        <% else %>
+            <.l phx-click={JS.toggle(
+                to: "#snooze-menu-#{@pull_request.id}",
+                in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
+                out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
+              )}
+              id={"snooze-menu-button-#{@pull_request.id}"}
+              aria-expanded="false"
+              aria-haspopup="true"
+              class="flex items-baseline px-2 py-1 text-gray-700 border-gray-300 border hover:bg-gray-50 rounded-md font-light text-sm">
+              Snooze
+              <.icon name="chevron-down" class="ml-1 h-3 w-3" />
+            </.l>
+
+            <div style="display: none;" id={"snooze-menu-#{@pull_request.id}"} class="origin-top-right z-50 mt-2 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"snooze-menu-button-#{@pull_request.id}"} tabindex="-1">
+              <div class="mt-2 flex flex-col text-sm text-gray-500 sm:mt-0">
+                <%= for %{title: title, value: value} <- MrgrWeb.PendingPullRequestLive.snooze_options() do %>
+                  <.l phx_click="snooze-pull-request" phx_value_id={@pull_request.id} phx_value_time={value} class="text-teal-700 hover:text-teal-500 font-light p-3 text-sm rounded-md" >
+                    <%= title %>
+                  </.l>
+                <% end %>
+              </div>
+            </div>
+        <% end %>
+      </div>
+    </div>
+
+    <!-- 2nd row -->
+    <div class="mt-2 sm:flex sm:justify-between">
+
+      <div class="sm:flex items-center">
+        <.me_tag pull_request={@pull_request} current_user={@current_user} />
+        <%= MrgrWeb.Components.FileChangeAlert.badges(%{pull_request: @pull_request}) %>
+      </div>
+
+
+      <.live_component module={MrgrWeb.Components.Live.Sparkline} id={"pull_request_#{@pull_request.id}_activity_preview"} comments={@pull_request.comments} commits={@pull_request.commits} />
+    </div>
+
+    <!-- 3rd row -->
+    <div class="mt-2 sm:flex sm:justify-between text-sm text-gray-500 items-start">
+      <div>
+        <.pr_approval_badge pull_request={@pull_request} />
+
+        <p :if={Mrgr.Checklist.complete?(@pull_request.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
+      </div>
+
+      <p>
+      Opened <.timeago
+         datetime={@pull_request.opened_at}
+         uhoh={true}
+         ./>
+      </p>
+
+    </div>
+
+  </div>
+</div>
+

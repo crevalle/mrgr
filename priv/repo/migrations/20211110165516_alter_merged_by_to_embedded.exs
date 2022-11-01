@@ -1,4 +1,4 @@
-defmodule Mrgr.Repo.Migrations.AlterMergedByToEmbedded do
+defmodule Mrgr.Repo.Migrations.AlterPullRequestdByToEmbedded do
   use Ecto.Migration
 
   def change do

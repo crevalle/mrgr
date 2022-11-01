@@ -1,8 +1,8 @@
-defmodule MrgrWeb.Components.Live.PendingMergeItem do
+defmodule MrgrWeb.Components.Live.PendingPullRequestItem do
   use MrgrWeb, :live_component
   use Mrgr.PubSub.Event
 
-  import MrgrWeb.Components.Merge
+  import MrgrWeb.Components.PullRequest
 
   defp highlighted_color(true), do: "border-teal-500"
   defp highlighted_color(false), do: "border-gray-200"

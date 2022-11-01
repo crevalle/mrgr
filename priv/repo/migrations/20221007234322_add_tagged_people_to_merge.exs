@@ -1,4 +1,4 @@
-defmodule Mrgr.Repo.Migrations.AddTaggedPeopleToMerge do
+defmodule Mrgr.Repo.Migrations.AddTaggedPeopleToPullRequest do
   use Ecto.Migration
 
   def change do

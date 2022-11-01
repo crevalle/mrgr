@@ -1,4 +1,4 @@
-defmodule Mrgr.Schema.Merge do
+defmodule Mrgr.Schema.PullRequest do
   use Mrgr.Schema
 
   @mergeable_states ["MERGEABLE", "CONFLICTING", "UNKNOWN"]
@@ -13,7 +13,7 @@ defmodule Mrgr.Schema.Merge do
     "UNSTABLE"
   ]
 
-  schema "merges" do
+  schema "pull_requests" do
     field(:external_id, :integer)
     field(:files_changed, {:array, :string})
     field(:head_commit, :map)
@@ -166,16 +166,16 @@ defmodule Mrgr.Schema.Merge do
     Map.put(params, "opened_at", at)
   end
 
-  def external_merge_url(%{url: url}) when is_bitstring(url), do: url
-  def external_merge_url(%{raw: %{"_links" => %{"html" => %{"href" => url}}}}), do: url
-  def external_merge_url(_merge), do: ""
+  def external_pull_request_url(%{url: url}) when is_bitstring(url), do: url
+  def external_pull_request_url(%{raw: %{"_links" => %{"html" => %{"href" => url}}}}), do: url
+  def external_pull_request_url(_pull_request), do: ""
 
-  def head(merge) do
-    hd(merge.commits)
+  def head(pull_request) do
+    hd(pull_request.commits)
   end
 
-  def branch_name(merge) do
-    merge.raw["head"]["ref"]
+  def branch_name(pull_request) do
+    pull_request.raw["head"]["ref"]
   end
 
   def commit_message(%Mrgr.Github.Commit{commit: commit}) do
@@ -194,7 +194,7 @@ defmodule Mrgr.Schema.Merge do
     commit.sha
   end
 
-  def required_approvals(merge) do
-    merge.repository.required_approving_review_count
+  def required_approvals(pull_request) do
+    pull_request.repository.required_approving_review_count
   end
 end
