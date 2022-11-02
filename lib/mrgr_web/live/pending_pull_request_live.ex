@@ -25,7 +25,7 @@ defmodule MrgrWeb.PendingPullRequestLive do
       |> assign(:selected_pull_request, selected_pull_request)
       |> assign(:repos, repos)
       |> assign(:frozen_repos, frozen_repos)
-      |> put_title("Pending PullRequests")
+      |> put_title("Pending Pull Requests")
       |> ok()
     else
       ok(socket)
