@@ -53,7 +53,7 @@
     <div class="flex flex-col">
       <.h3>Checklist</.h3>
       <%= if @pull_request.checklist do %>
-        <.live_component module={MrgrWeb.Components.Live.PullRequestChecklist} id="pull_request_checklist" checklist={@pull_requestchecklist} current_user={@current_user} timezone={@timezone} />
+        <.live_component module={MrgrWeb.Components.Live.PullRequestChecklist} id="pull_request_checklist" checklist={@pull_request.checklist} current_user={@current_user} timezone={@timezone} />
       <% else %>
         <p class="italic text-gray-300">No checklists for this PR.</p>
       <% end %>
