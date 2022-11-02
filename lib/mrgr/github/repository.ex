@@ -9,18 +9,78 @@ defmodule Mrgr.Github.Repository do
     field(:private, :boolean)
   end
 
-  # def new(params) do
-  # keys =
-  # %__MODULE__{}
-  # |> Map.from_struct()
-  # |> Map.keys()
+  defmodule GraphQL do
+    def basic do
+      """
+      id
+      name
+      """
+    end
 
-  # %__MODULE__{}
-  # |> cast(params, keys)
-  # |> apply_changes()
+    def settings do
+      """
+      mergeCommitAllowed
+      rebaseMergeAllowed
+      squashMergeAllowed
+      isPrivate
+      parent {
+        nameWithOwner
+        name
+        id
+      }
+      defaultBranchRef {
+        name
+        branchProtectionRule {
+          allowsForcePushes
+          allowsDeletions
+          isAdminEnforced
+          requiresApprovingReviews
+          requiredApprovingReviewCount
+          requiresCodeOwnerReviews
+          requiresStatusChecks
+          requiresStrictStatusChecks
+          restrictsPushes
+          matchingRefs(first: 50) {
+            nodes {
+              name
+            }
+          }
+          requiredStatusChecks {
+            app {
+              name
+              description
+            }
+            context
+          }
+        }
+      }
+      labels(first: 99) {
+        nodes {
+          color
+          name
+        }
+      }
+      languages(first: 99) {
+        edges {
+          size
+          node {
+            color
+            name
+          }
+        }
+      }
+      """
+    end
 
-  # params
-  # end
+    def primary_language do
+      """
+      primaryLanguage {
+        color
+        name
+      }
+      """
+    end
+  end
 
   # field(:full_name" => "crevalle/mother_brain",
   # field(:id" => 66312740,

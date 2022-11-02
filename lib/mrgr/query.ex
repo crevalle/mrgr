@@ -24,6 +24,12 @@ defmodule Mrgr.Query do
         )
       end
 
+      def by_node_ids(queryable, list) do
+        from(q in queryable,
+          where: q.node_id in ^list
+        )
+      end
+
       def by_external_id(queryable, id) do
         from(q in queryable,
           where: q.external_id == ^id

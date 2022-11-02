@@ -11,6 +11,9 @@ defmodule Mrgr.Schema.Repository do
     field(:private, :boolean)
     field(:merge_freeze_enabled, :boolean, default: false)
 
+    embeds_one(:settings, Mrgr.Schema.RepositorySecuritySettings, on_replace: :delete)
+    embeds_one(:parent, Mrgr.Schema.Repository.Parent, on_replace: :delete)
+
     field(:dismiss_stale_reviews, :boolean, read_after_writes: true)
     field(:require_code_owner_reviews, :boolean, read_after_writes: true)
     field(:required_approving_review_count, :integer, read_after_writes: true)
@@ -65,6 +68,18 @@ defmodule Mrgr.Schema.Repository do
     ])
   end
 
+  def settings_changeset(schema, attrs) do
+    schema
+    |> cast(attrs, [])
+    |> cast_embed(:settings)
+  end
+
+  def parent_changeset(schema, attrs) do
+    schema
+    |> cast(attrs, [])
+    |> cast_embed(:parent)
+  end
+
   def owner_name(%{full_name: full_name}) do
     full_name
     |> String.split("/")
@@ -81,4 +96,20 @@ defmodule Mrgr.Schema.Repository do
   #   "node_id" => "MDEwOlJlcG9zaXRvcnk4ODI5ODE5",
   #   "private" => false
   # },
+
+  defmodule Parent do
+    use Mrgr.Schema
+
+    @primary_key false
+    embedded_schema do
+      field(:node_id, :string)
+      field(:name, :string)
+      field(:name_with_owner, :string)
+    end
+
+    def changeset(schema, params) do
+      schema
+      |> cast(params, [:node_id, :name, :name_with_owner])
+    end
+  end
 end

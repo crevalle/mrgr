@@ -102,6 +102,43 @@ defmodule Mrgr.Installation do
     installation
   end
 
+  def refresh_security_settings(installation) do
+    # assumes repos already exist locally, WILL NOT create new ones
+    data = fetch_repo_security_settings(installation)
+    repos = Mrgr.Repository.refresh_security_settings(data)
+
+    %{installation | repositories: repos}
+  end
+
+  def fetch_repo_security_settings(_installation, acc, %{
+        "viewer" => %{
+          "repositories" => %{"pageInfo" => %{"hasNextPage" => false}, "nodes" => nodes}
+        }
+      }) do
+    nodes ++ acc
+  end
+
+  def fetch_repo_security_settings(installation, acc, %{
+        "viewer" => %{
+          "repositories" => %{
+            "pageInfo" => %{"hasNextPage" => true, "endCursor" => end_cursor},
+            "nodes" => nodes
+          }
+        }
+      }) do
+    acc = nodes ++ acc
+
+    response = Mrgr.Github.API.Live.repo_security_settings(installation, %{after: end_cursor})
+    fetch_repo_security_settings(installation, acc, response)
+  end
+
+  # initial call
+  def fetch_repo_security_settings(installation) do
+    acc = []
+    response = Mrgr.Github.API.Live.repo_security_settings(installation)
+    fetch_repo_security_settings(installation, acc, response)
+  end
+
   @spec create_repositories(Mrgr.Schema.Installation.t()) :: Mrgr.Schema.Installation.t()
   def create_repositories(installation) do
     # assumes repos have been deleted

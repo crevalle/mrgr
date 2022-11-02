@@ -21,6 +21,8 @@ defmodule Mrgr.Schema.Installation do
 
     belongs_to(:creator, Mrgr.Schema.User)
     has_one(:account, Mrgr.Schema.Account)
+    has_one(:repository_security_profile, Mrgr.Schema.RepositorySecurityProfile)
+
     has_many(:repositories, Mrgr.Schema.Repository)
 
     has_many(:incoming_webhooks, Mrgr.Schema.IncomingWebhook)

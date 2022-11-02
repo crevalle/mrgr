@@ -61,7 +61,7 @@ defmodule MrgrWeb.Router do
 
     live "/checklists", Live.Checklist, :index, as: :checklist
 
-    resources "/repositories", RepositoryController, only: [:index]
+    live "/repositories", RepositoryListLive, :index
   end
 
   scope "/", MrgrWeb.Live do

@@ -1,8 +1,6 @@
 defmodule MrgrWeb.Components.PullRequest do
   use MrgrWeb, :component
 
-  import Heroicons.LiveView, only: [icon: 1]
-
   alias Mrgr.Schema.PullRequest
 
   def changed_file_li(assigns) do

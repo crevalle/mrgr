@@ -22,6 +22,7 @@ defmodule MrgrWeb.Admin.Live.Installation do
                 <.th uppercase={true}>App Slug</.th>
                 <.th uppercase={true}>Creator</.th>
                 <.th uppercase={true}>Account</.th>
+                <.th uppercase={true}>Setup Complete</.th>
                 <.th uppercase={true}>Repositories</.th>
                 <.th uppercase={true}>Updated</.th>
                 <.th uppercase={true}>Created</.th>
@@ -35,6 +36,7 @@ defmodule MrgrWeb.Admin.Live.Installation do
                 <.td><%= i.app_slug %></.td>
                 <.td><%= i.creator.nickname %></.td>
                 <.td><%= i.account.login %></.td>
+                <.td><%= tf(i.setup_completed) %></.td>
                 <.td><%= Enum.count(i.repositories) %></.td>
                 <.td><%= ts(i.updated_at, assigns.timezone) %></.td>
                 <.td><%= ts(i.inserted_at, assigns.timezone) %></.td>
