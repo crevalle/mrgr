@@ -54,16 +54,8 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
       </div>
 
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
-        <div class="px-4 py-5 sm:px-6">
-          <div class="my-1">
-            <.h3>Repositories</.h3>
-          </div>
+        <%= Phoenix.Component.live_render @socket, MrgrWeb.Admin.Live.InstallationRepoTable, id: "repository-table", session: %{"id" => @installation.id} %>
 
-          <div class="mt-1">
-            <.admin_repository_table repositories={@installation.repositories} tz={@timezone} ./>
-          </div>
-
-        </div>
       </div>
     </div>
 

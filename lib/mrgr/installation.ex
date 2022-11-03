@@ -33,7 +33,6 @@ defmodule Mrgr.Installation do
     Schema
     |> Query.by_id(id)
     |> Query.with_account()
-    |> Query.with_repositories()
     |> Query.with_creator()
     |> Query.with_users()
     |> Mrgr.Repo.one()

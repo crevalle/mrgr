@@ -293,36 +293,6 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def admin_repository_table(assigns) do
-    ~H"""
-      <table class="min-w-full">
-        <thead class="bg-white">
-          <tr>
-            <.th uppercase={true}>ID</.th>
-            <.th uppercase={true}>External ID</.th>
-            <.th uppercase={true}>Full Name</.th>
-            <.th uppercase={true}>Private?</.th>
-            <.th uppercase={true}>Merge Freeze Enabled?</.th>
-            <.th uppercase={true}>Updated</.th>
-            <.th uppercase={true}>Created</.th>
-          </tr>
-        </thead>
-
-        <%= for repo <- @repositories do %>
-          <.tr striped={true}>
-            <.td><%= repo.id %></.td>
-            <.td><%= repo.external_id %></.td>
-            <.td><%= repo.full_name %></.td>
-            <.td><%= repo.private %></.td>
-            <.td><%= repo.merge_freeze_enabled %></.td>
-            <.td><%= ts(repo.updated_at, @tz) %></.td>
-            <.td><%= ts(repo.inserted_at, @tz) %></.td>
-          </.tr>
-        <% end %>
-      </table>
-    """
-  end
-
   def link_to_installation(user) do
     title = current_account(user)
     installation_id = user.current_installation_id

@@ -36,6 +36,13 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.one()
   end
 
+  def for_installation(installation_id, page \\ []) do
+    Schema
+    |> Query.for_installation(installation_id)
+    |> Query.order(asc: :name)
+    |> Mrgr.Repo.paginate(page)
+  end
+
   def toggle_pull_request_freeze(repo) do
     new_value = toggle(repo.merge_freeze_enabled)
 
@@ -259,6 +266,12 @@ defmodule Mrgr.Repository do
       from(q in query,
         inner_join: u in assoc(q, :users),
         where: u.id == ^user_id
+      )
+    end
+
+    def for_installation(query, id) do
+      from(q in query,
+        where: q.installation_id == ^id
       )
     end
 

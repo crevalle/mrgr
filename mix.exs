@@ -56,6 +56,7 @@ defmodule Mrgr.MixProject do
       {:plug_cowboy, "~> 2.5"},
       {:postgrex, ">= 0.0.0"},
       {:phoenix_swoosh, "~> 1.0"},
+      {:scrivener_ecto, "~> 2.7"},
       {:tailwind, "~> 0.1", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},

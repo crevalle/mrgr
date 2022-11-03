@@ -3,7 +3,7 @@ defmodule Mrgr.List do
   List Utils
   """
 
-  @spec find(list(), map() | String.t() | integer()) :: list()
+  @spec find(list(), map() | String.t() | integer()) :: any() | nil
   def find(list, %{id: id}) do
     find(list, id)
   end
