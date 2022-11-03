@@ -7,15 +7,25 @@
   <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
     <div class="px-4 py-5 sm:px-6">
 
-      <.form let={f} for={@form.changeset} phx-change="form-change" phx-submit="save" class="space-y-8 divide-y divide-gray-200">
+      <.form let={f} for={@form.changeset} phx-submit="save" class="space-y-8 divide-y divide-gray-200">
 
-        <.check form={f} attr={:apply_to_new_repos} description="Apply this Policy automatically to new Repos" >
-          Yo MOmma
-        </.check>
+        <%= for s <- inputs_for(f, :settings) do %>
+          <.check form={s} attr={:squash_merge_allowed} description="Allow Squash Commits" />
 
-        <.check form={f} attr={:apply_to_new_repos} description="Apply this Policy automatically to new Repos" >
-          Yo MOmma
-        </.check>
+          <.check form={s} attr={:merge_commit_allowed} description="Allow Merge Commits" />
+
+          <.check form={s} attr={:rebase_merge_allowed} description="Allow Rebase Commits" />
+
+          <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-center sm:border-t sm:border-gray-200 sm:pt-5">
+            <%= label(s, :required_approving_review_count, "Required Approvals to Merge", class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
+            <div class="mt-1 sm:mt-0 flex items-center sm:col-span-2">
+              <%= number_input s, :required_approving_review_count, min: "0", max: "10", class: "w-24 shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md" %>
+            </div>
+          </div>
+
+        <% end %>
+
+        <.check form={f} attr={:apply_to_new_repos} description="Apply this Policy automatically to new Repos" />
 
         <div class="pt-5">
           <div class="flex space-x-4 justify-end items-center">
