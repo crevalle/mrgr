@@ -573,6 +573,14 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
+  def open_for_repo_id(repository_id, page \\ []) do
+    Schema
+    |> Query.for_repository(repository_id)
+    |> Query.open()
+    |> Query.with_pending_preloads()
+    |> Mrgr.Repo.paginate(page)
+  end
+
   def preload_for_pending_list(pull_request) do
     Schema
     |> Query.by_id(pull_request.id)
@@ -657,6 +665,12 @@ defmodule Mrgr.PullRequest do
       from([q, repository: r] in with_repository(query),
         join: i in assoc(r, :installation),
         where: i.id == ^installation_id
+      )
+    end
+
+    def for_repository(query, id) do
+      from(q in query,
+        where: q.repository_id == ^id
       )
     end
 

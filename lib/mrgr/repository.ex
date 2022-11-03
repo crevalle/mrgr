@@ -36,6 +36,12 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.one()
   end
 
+  def find(id) do
+    Schema
+    |> Query.by_id(id)
+    |> Mrgr.Repo.one()
+  end
+
   def for_installation(installation_id, page \\ []) do
     Schema
     |> Query.for_installation(installation_id)

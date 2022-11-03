@@ -13,21 +13,7 @@ defmodule MrgrWeb.Admin.Live.InstallationRepoTable do
         </div>
 
         <div class="mt-1">
-          <nav class="border-t border-gray-200">
-            <ul class="flex my-2">
-              <li class="">
-                <a class={"px-2 py-2 #{if @page.page_number <= 1, do: "pointer-events-none text-gray-600", else: "text-teal-400"}"} href="#" phx-click="nav" phx-value-page={@page.page_number + 1}>Previous</a>
-              </li>
-              <%= for idx <-  Enum.to_list(1..@page.total_pages) do %>
-                <li class="">
-                  <a class={"px-2 py-2 #{if @page.page_number == idx, do: "pointer-events-none text-gray-600", else: "text-teal-400"}"} href="#" phx-click="nav" phx-value-page={idx}><%= idx %></a>
-                </li>
-              <% end %>
-              <li class="">
-                <a class={"px-2 py-2 #{if @page.page_number >= @page.total_pages, do: "pointer-events-none text-gray-600", else: "text-teal-400"}"} href="#" phx-click="nav" phx-value-page={@page.page_number + 1}>Next</a>
-              </li>
-            </ul>
-          </nav>
+          <.page_nav page={@page} />
 
           <table class="min-w-full">
             <thead class="bg-white">
@@ -46,7 +32,7 @@ defmodule MrgrWeb.Admin.Live.InstallationRepoTable do
               <.tr striped={true}>
                 <.td><%= repo.id %></.td>
                 <.td><%= repo.node_id %></.td>
-                <.td><%= repo.name %></.td>
+                <.td><.l href={Routes.admin_pull_request_path(@socket, :index, repo.id)} ><%= repo.name %></.l></.td>
                 <.td><MrgrWeb.Components.Repository.lock bool={repo.private} /></.td>
                 <.td><.language_icon language={repo.language} /></.td>
                 <.td><%= ts(repo.updated_at, @timezone) %></.td>
@@ -76,8 +62,6 @@ defmodule MrgrWeb.Admin.Live.InstallationRepoTable do
 
   def handle_event("nav", params, socket) do
     page = Mrgr.Repository.for_installation(socket.assigns.installation_id, params)
-
-    IO.inspect(params)
 
     socket
     |> assign(:page, page)
