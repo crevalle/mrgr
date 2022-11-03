@@ -36,7 +36,7 @@ defmodule MrgrWeb.Admin.Live.InstallationRepoTable do
                 <.th uppercase={true}>Node ID</.th>
                 <.th uppercase={true}>Name</.th>
                 <.th uppercase={true}>Private?</.th>
-                <.th uppercase={true}>Merge Freeze Enabled?</.th>
+                <.th uppercase={true}>Language</.th>
                 <.th uppercase={true}>Updated</.th>
                 <.th uppercase={true}>Created</.th>
               </tr>
@@ -48,7 +48,7 @@ defmodule MrgrWeb.Admin.Live.InstallationRepoTable do
                 <.td><%= repo.node_id %></.td>
                 <.td><%= repo.name %></.td>
                 <.td><MrgrWeb.Components.Repository.lock bool={repo.private} /></.td>
-                <.td><%= repo.merge_freeze_enabled %></.td>
+                <.td><.language_icon language={repo.language} /></.td>
                 <.td><%= ts(repo.updated_at, @timezone) %></.td>
                 <.td><%= ts(repo.inserted_at, @timezone) %></.td>
               </.tr>
