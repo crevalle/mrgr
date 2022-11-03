@@ -1,0 +1,35 @@
+<div class="detail-pane basis-1/3">
+  <div class="flex justify-between items-start">
+    <.heading title={"Update your Security Profile"} description="This can be used to push out a policy across your repos." />
+    <.close_form_button />
+  </div>
+
+  <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+    <div class="px-4 py-5 sm:px-6">
+
+      <.form let={f} for={@form.changeset} phx-change="form-change" phx-submit="save" class="space-y-8 divide-y divide-gray-200">
+
+        <.check form={f} attr={:apply_to_new_repos} description="Apply this Policy automatically to new Repos" >
+          Yo MOmma
+        </.check>
+
+        <.check form={f} attr={:apply_to_new_repos} description="Apply this Policy automatically to new Repos" >
+          Yo MOmma
+        </.check>
+
+        <div class="pt-5">
+          <div class="flex space-x-4 justify-end items-center">
+            <%= if @form.action == :edit do %>
+              <%= link "Delete", to: "#", phx_click: "delete-alert", data: [confirm: "Sure about that?"], class: "mr-2 text-rose-600 hover:text-rose-500 sm:text-sm" %>
+            <% end %>
+            <.button type="submit" colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">Save</.button>
+          </div>
+        </div>
+
+      </.form>
+    </div>
+  </div>
+</div>
+
+
+

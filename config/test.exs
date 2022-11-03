@@ -21,6 +21,7 @@ config :mrgr, MrgrWeb.Endpoint,
 
 # In test we don't send emails.
 config :mrgr, Mrgr.Mailer, adapter: Swoosh.Adapters.Test
+config :swoosh, :api_client, false
 
 config :mrgr, :github, implementation: Mrgr.Github.API.Fake
 
@@ -31,6 +32,3 @@ config :logger, level: :warn
 config :phoenix, :plug_init_mode, :runtime
 
 config :mrgr, Oban, testing: :inline
-
-config :mrgr, Mrgr.Mailer, adapter: Swoosh.Adapters.Local
-config :swoosh, :api_client, false

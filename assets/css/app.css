@@ -96,6 +96,14 @@
   @apply basis-1/2 px-4 py-3 bg-white overflow-hidden shadow rounded-lg
 }
 
+.major-pane {
+  @apply basis-1/2
+}
+
+.two-pane-layout {
+  @apply mt-8 flex space-x-4
+}
+
 .tooltip {
   position: relative;
   display: inline-block;

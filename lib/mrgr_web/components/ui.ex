@@ -401,6 +401,14 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def close_form_button(assigns) do
+    ~H"""
+    <button phx-click="close-form" colors="outline-none">
+      <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
+    </button>
+    """
+  end
+
   defp language_icon_url("html" = name) do
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{name}5/#{name}5-original.svg"
   end

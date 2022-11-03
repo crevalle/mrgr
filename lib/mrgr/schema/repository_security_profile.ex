@@ -11,4 +11,11 @@ defmodule Mrgr.Schema.RepositorySecurityProfile do
 
     timestamps()
   end
+
+  def changeset(schema, params \\ %{}) do
+    schema
+    |> cast(params, [:apply_to_new_repos, :installation_id])
+    |> cast_embed(:settings)
+    |> foreign_key_constraint(:installation_id)
+  end
 end

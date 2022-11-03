@@ -25,6 +25,20 @@ defmodule MrgrWeb.Components.Form do
     """
   end
 
+  def check(assigns) do
+    ~H"""
+      <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-center sm:border-t sm:border-gray-200 sm:pt-5">
+        <%= label(@form, @attr, @description, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
+        <div class="mt-1 sm:mt-0 flex items-center sm:col-span-2">
+          <%= checkbox @form, @attr, class: "shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md" %>
+          <p class="ml-1 text-sm text-gray-500">
+            <%= render_slot(@inner_block) %>
+          </p>
+        </div>
+      </div>
+    """
+  end
+
   def toggle_block(assigns) do
     bg_color =
       case assigns.selected do
