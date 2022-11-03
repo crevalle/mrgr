@@ -5,7 +5,7 @@ defmodule MrgrWeb.RepositoryListLive do
 
   on_mount MrgrWeb.Plug.Auth
 
-  def mount(params, _session, socket) do
+  def mount(_params, _session, socket) do
     if connected?(socket) do
       current_user = socket.assigns.current_user
 
