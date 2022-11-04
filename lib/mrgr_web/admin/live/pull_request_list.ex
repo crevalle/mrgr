@@ -22,7 +22,7 @@ defmodule MrgrWeb.Admin.Live.PullRequestList do
   end
 
   def handle_event("nav", params, socket) do
-    params = page = Mrgr.PullRequest.open_for_repo_id(socket.assigns.repository.id, params)
+    page = Mrgr.PullRequest.open_for_repo_id(socket.assigns.repository.id, params)
 
     socket
     |> assign(:page, page)
