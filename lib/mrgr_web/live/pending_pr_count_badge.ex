@@ -1,4 +1,4 @@
-defmodule MrgrWeb.Live.NavBar do
+defmodule MrgrWeb.Live.PendingPRCountBadge do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
@@ -28,6 +28,12 @@ defmodule MrgrWeb.Live.NavBar do
     else
       ok(socket)
     end
+  end
+
+  def render(assigns) do
+    ~H"""
+      <span class="bg-gray-100 group-hover:bg-gray-200 ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full"> <%= @pending_pull_request_count %> </span>
+    """
   end
 
   def subscribe(user) do
