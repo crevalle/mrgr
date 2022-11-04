@@ -8,7 +8,7 @@ defmodule MrgrWeb.Admin.Live.PullRequestList do
   def mount(%{"repository_id" => id}, _session, socket) do
     if connected?(socket) do
       repository = Mrgr.Repository.find(id)
-      page = Mrgr.PullRequest.open_for_repo_id(id, page_size: 1)
+      page = Mrgr.PullRequest.open_for_repo_id(id)
 
       socket
       |> put_title("[Admin] #{repository.name}")
@@ -22,13 +22,7 @@ defmodule MrgrWeb.Admin.Live.PullRequestList do
   end
 
   def handle_event("nav", params, socket) do
-    params =
-      Map.put(params, "page_size", 1)
-      |> IO.inspect()
-
-    page =
-      Mrgr.PullRequest.open_for_repo_id(socket.assigns.repository.id, params)
-      |> IO.inspect()
+    params = page = Mrgr.PullRequest.open_for_repo_id(socket.assigns.repository.id, params)
 
     socket
     |> assign(:page, page)
