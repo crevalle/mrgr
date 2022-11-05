@@ -11,9 +11,13 @@ defmodule MrgrWeb.RepositoryListLive do
 
       repos = Mrgr.Repository.for_user_with_rules(current_user)
 
+      profiles =
+        Mrgr.RepositorySecurityProfile.for_installation(current_user.current_installation)
+
       socket
       |> assign(:repos, repos)
       |> assign(:form, nil)
+      |> assign(:profiles, profiles)
       |> put_title("Repositories")
       |> ok()
     else
@@ -22,8 +26,8 @@ defmodule MrgrWeb.RepositoryListLive do
   end
 
   def handle_event("open-form", _params, socket) do
-    changeset = build_changeset() |> IO.inspect()
-    form = %{action: :create, changeset: changeset}
+    changeset = build_changeset()
+    form = Form.create(changeset)
 
     socket
     |> assign(:form, form)
@@ -36,17 +40,56 @@ defmodule MrgrWeb.RepositoryListLive do
     |> noreply()
   end
 
-  def handle_event("save", params, socket) do
-    IO.inspect(params)
+  def handle_event("save", %{"repository_security_profile" => params}, socket) do
+    form = socket.assigns.form
+
+    res =
+      case Form.creating?(form) do
+        true ->
+          params
+          |> Map.put("installation_id", socket.assigns.current_user.current_installation.id)
+          |> Mrgr.RepositorySecurityProfile.create()
+
+        false ->
+          Mrgr.RepositorySecurityProfile.update(Form.object(form), params)
+      end
+
+    case res do
+      {:ok, profile} ->
+        socket
+        |> assign(:form, nil)
+        |> Flash.put(:info, "Profile Saved!")
+        |> noreply()
+
+      {:error, changeset} ->
+        form = Form.update_changeset(form, changeset)
+
+        socket
+        |> assign(:form, form)
+        |> noreply()
+    end
+  end
+
+  def handle_event("delete-profile", _params, socket) do
+    profile = Form.object(socket.assigns.form)
+    Mrgr.Repo.delete(profile)
 
     socket
     |> assign(:form, nil)
-    |> Flash.put(:info, "Policy Saved!")
+    |> Flash.put(:info, "Profile Deleted 🗑")
     |> noreply()
   end
 
-  defp build_changeset do
-    %Mrgr.Schema.RepositorySecurityProfile{}
-    |> Mrgr.Schema.RepositorySecurityProfile.changeset()
+  def handle_event("edit-profile", %{"id" => id}, socket) do
+    profile = Mrgr.List.find(socket.assigns.profiles, id)
+    form = Form.edit(build_changeset(profile))
+
+    socket
+    |> assign(:form, form)
+    |> noreply()
+  end
+
+  defp build_changeset(schema \\ %Mrgr.Schema.RepositorySecurityProfile{}) do
+    Mrgr.Schema.RepositorySecurityProfile.changeset(schema)
   end
 end

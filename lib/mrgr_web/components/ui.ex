@@ -1,6 +1,26 @@
 defmodule MrgrWeb.Components.UI do
   use MrgrWeb, :component
 
+  def inline_link(assigns) do
+    default_class = "text-teal-700 hover:text-teal-500"
+    class = Map.get(assigns, :class, default_class)
+    href = Map.get(assigns, :href, "#")
+
+    extra = assigns_to_attributes(assigns, [:href, :class])
+
+    assigns =
+      assigns
+      |> assign(:href, href)
+      |> assign(:class, class)
+      |> assign(:extra, extra)
+
+    ~H"""
+    <a href={@href} class={@class} {@extra}>
+      <%= render_slot(@inner_block) %>
+    </a>
+    """
+  end
+
   def l(assigns) do
     default_class = "text-teal-700 hover:text-teal-500 font-light px-2 py-2 text-sm"
     class = Map.get(assigns, :class, default_class)

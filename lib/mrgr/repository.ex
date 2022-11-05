@@ -287,11 +287,5 @@ defmodule Mrgr.Repository do
         preload: [file_change_alerts: f]
       )
     end
-
-    def order(query, binding) do
-      from(q in query,
-        order_by: ^binding
-      )
-    end
   end
 end

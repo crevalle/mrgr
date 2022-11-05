@@ -29,9 +29,9 @@ defmodule MrgrWeb.Components.Form do
     assigns = assign_new(assigns, :detail_text, fn -> nil end)
 
     ~H"""
-      <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-center sm:border-t sm:border-gray-200 sm:pt-5">
-        <%= label(@form, @attr, @description, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
-        <div class="mt-1 sm:mt-0 flex items-center sm:col-span-2">
+      <div class="grid grid-cols-3 gap-4 items-center border-t border-gray-200 pt-5">
+        <%= label(@form, @attr, @description, class: "block text-sm font-medium text-gray-700 mt-px pt-2") %>
+        <div class="mt-1 mt-0 flex items-center col-span-2">
           <%= checkbox @form, @attr, class: "shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md" %>
           <p :if={@detail_text} class="ml-1 text-sm text-gray-500">
             <%= @detail_text %>
@@ -81,14 +81,13 @@ defmodule MrgrWeb.Components.Form do
       end)
 
     ~H"""
-
-    <%= label @f, @field, class: ["block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"] %>
-    <div class="my-1 sm:mt-0 sm:col-span-2 relative rounded-md">
-      <div class="flex items-center">
+    <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start">
+      <%= label(@f, @field, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
+      <div class="mt-1 sm:mt-0 sm:col-span-2">
         <%= text_input @f, @field, required: @required, autocomplete: @autocomplete, value: @value, placeholder: @placeholder, class: [@common_styles] ++ [(if Keyword.get(@f.errors, @field), do: @error_styles, else: @success_styles)] %>
-        <%= render_slot(@secondary) %>
+        <.error form={@f} attr={@field}/>
+        <p class="mt-2 text-sm text-gray-500"><%= render_slot(@secondary) %></p>
       </div>
-      <.error form={@f} attr={@field} />
     </div>
     """
   end

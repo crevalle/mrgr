@@ -100,8 +100,12 @@
   @apply basis-1/2
 }
 
+.section {
+  @apply mt-8
+}
+
 .two-pane-layout {
-  @apply mt-8 flex space-x-4
+  @apply mt-4 flex space-x-4
 }
 
 .tooltip {

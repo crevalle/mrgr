@@ -25,6 +25,12 @@
             label="Checklists"
           ./>
 
+          <.nav_item
+            route={Routes.repository_list_path(MrgrWeb.Endpoint, :index)}
+            icon="newspaper"
+            label="Repository Policies"
+          ./>
+
           <!-- Profile dropdown -->
           <div class="ml-3 relative">
             <div>
@@ -48,13 +54,6 @@
             </div>
 
             <div id="user-menu" style="display: none;" class="origin-top-right absolute right-0 mt-2 w-48 rounded-md shadow-lg py-1 bg-white ring-1 ring-black ring-opacity-5 focus:outline-none divide-y divide-gray-100" role="menu" aria-orientation="vertical" aria-labelledby="user-menu-button" tabindex="-1">
-              <div class="py-1">
-                <.nav_item
-                  route={Routes.repository_list_path(MrgrWeb.Endpoint, :index)}
-                  icon="newspaper"
-                  label="Repositories"
-                ./>
-              </div>
 
               <%= if admin?(@conn.assigns.current_user) do %>
                 <div class="py-1">

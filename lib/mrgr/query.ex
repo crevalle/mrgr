@@ -49,13 +49,16 @@ defmodule Mrgr.Query do
       end
 
       def rev_cron(queryable) do
-        queryable
-        |> order_by(desc: :inserted_at)
+        order(queryable, desc: :inserted_at)
       end
 
       def cron(queryable) do
+        order(queryable, asc: :inserted_at)
+      end
+
+      def order(queryable, opts) do
         queryable
-        |> order_by(asc: :inserted_at)
+        |> order_by(^opts)
       end
     end
   end

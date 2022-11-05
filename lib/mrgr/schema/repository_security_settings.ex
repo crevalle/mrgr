@@ -5,7 +5,7 @@ defmodule Mrgr.Schema.RepositorySecuritySettings do
   embedded_schema do
     field(:dismiss_stale_reviews, :boolean)
     field(:require_code_owner_reviews, :boolean)
-    field(:required_approving_review_count, :integer)
+    field(:required_approving_review_count, :integer, default: 0)
 
     field(:merge_commit_allowed, :boolean)
     field(:rebase_merge_allowed, :boolean)
@@ -18,7 +18,6 @@ defmodule Mrgr.Schema.RepositorySecuritySettings do
     field(:allows_deletions, :boolean)
     field(:is_admin_enforced, :boolean)
     field(:requires_approving_reviews, :boolean)
-    field(:required_approving_reviewCount, :boolean)
     field(:requires_code_owner_reviews, :boolean)
     field(:requires_status_checks, :boolean)
     field(:requires_strict_status_checks, :boolean)
@@ -37,7 +36,6 @@ defmodule Mrgr.Schema.RepositorySecuritySettings do
     allows_deletions
     is_admin_enforced
     requires_approving_reviews
-    required_approving_reviewCount
     requires_code_owner_reviews
     requires_status_checks
     requires_strict_status_checks
@@ -47,5 +45,6 @@ defmodule Mrgr.Schema.RepositorySecuritySettings do
   def changeset(schema, params) do
     schema
     |> cast(params, @fields)
+    |> validate_inclusion(:required_approving_review_count, 0..10)
   end
 end
