@@ -1,4 +1,6 @@
 defmodule Mrgr.RepositorySecurityProfile do
+  use Mrgr.PubSub.Event
+
   alias Mrgr.Schema.RepositorySecurityProfile, as: Schema
   alias __MODULE__.Query
 
@@ -15,12 +17,34 @@ defmodule Mrgr.RepositorySecurityProfile do
     %Schema{}
     |> Schema.changeset(params)
     |> Mrgr.Repo.insert()
+    |> broadcast_if_successful(@security_profile_created)
   end
 
   def update(schema, params) do
     schema
     |> Schema.changeset(params)
     |> Mrgr.Repo.update()
+    |> broadcast_if_successful(@security_profile_updated)
+  end
+
+  def delete(profile) do
+    Mrgr.Repo.delete(profile)
+    broadcast(profile, @security_profile_deleted)
+
+    profile
+  end
+
+  def broadcast_if_successful({:ok, profile}, event) do
+    broadcast(profile, event)
+
+    {:ok, profile}
+  end
+
+  def broadcast_if_successful(error, _event), do: error
+
+  def broadcast(profile, event) do
+    topic = Mrgr.PubSub.Topic.installation(profile)
+    Mrgr.PubSub.broadcast(profile, topic, event)
   end
 
   defmodule Query do

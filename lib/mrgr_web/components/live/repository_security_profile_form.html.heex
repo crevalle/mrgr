@@ -1,11 +1,11 @@
 <div class="detail-pane basis-1/3">
   <div class="flex justify-between items-start">
-    <.heading title={"#{if Form.creating?(@form), do: "Add Settings Profile", else: "Edit Settings Profile"}"} description="Profiles can enforce consistent rules across repos." />
-    <.close_form_button />
+    <.heading title={"#{if creating?(@object), do: "Add Settings Profile", else: "Edit Settings Profile"}"} description="Profiles can enforce consistent rules across repos." />
+    <.close_form_button_myself target={@myself} />
   </div>
 
   <div class="mt-8 bg-white overflow-hidden ">
-    <.form let={f} for={@form.changeset} phx-submit="save" class="space-y-8 divide-y divide-gray-200">
+    <.form let={f} for={@changeset} phx-submit="save" phx-target={@myself} class="space-y-8 divide-y divide-gray-200">
 
       <.input type="text" f={f} field={:title} />
 
@@ -32,8 +32,8 @@
 
       <div class="pt-5">
         <div class="flex space-x-4 justify-end items-center">
-          <%= if Form.editing?(@form) do %>
-            <%= link "Delete", to: "#", phx_click: "delete-profile", data: [confirm: "Sure about that?"], class: "mr-2 text-rose-600 hover:text-rose-500 sm:text-sm" %>
+          <%= if editing?(@object) do %>
+            <%= link "Delete", to: "#", phx_click: "delete-profile", phx_target: @myself, data: [confirm: "Sure about that?"], class: "mr-2 text-rose-600 hover:text-rose-500 sm:text-sm" %>
           <% end %>
           <.button type="submit" colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">Save</.button>
         </div>

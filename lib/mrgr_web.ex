@@ -137,7 +137,6 @@ defmodule MrgrWeb do
       import MrgrWeb.Plug.Auth, only: [admin?: 1, signed_in?: 1]
 
       alias MrgrWeb.Router.Helpers, as: Routes
-      alias MrgrWeb.Form
     end
   end
 

@@ -46,7 +46,7 @@
       <% end %>
     </div>
 
-    <.live_component :if={@form} module={MrgrWeb.Components.Live.RepositorySecurityProfileForm} id="security-profile-form" form={@form} current_user={@current_user} timezone={@timezone} />
+    <.live_component :if={@form_subject} module={MrgrWeb.Components.Live.RepositorySecurityProfileForm} id="security-profile-form" object={@form_subject} current_user={@current_user} timezone={@timezone} />
   </div>
 </div>
 

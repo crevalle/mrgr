@@ -1,5 +1,6 @@
 defmodule MrgrWeb.RepositoryListLive do
   use MrgrWeb, :live_view
+  use Mrgr.PubSub.Event
 
   import MrgrWeb.Components.Repository
 
@@ -9,6 +10,8 @@ defmodule MrgrWeb.RepositoryListLive do
     if connected?(socket) do
       current_user = socket.assigns.current_user
 
+      Mrgr.PubSub.subscribe_to_installation(current_user)
+
       repos = Mrgr.Repository.for_user_with_rules(current_user)
 
       profiles =
@@ -16,7 +19,7 @@ defmodule MrgrWeb.RepositoryListLive do
 
       socket
       |> assign(:repos, repos)
-      |> assign(:form, nil)
+      |> assign(:form_subject, nil)
       |> assign(:profiles, profiles)
       |> put_title("Repositories")
       |> ok()
@@ -26,70 +29,54 @@ defmodule MrgrWeb.RepositoryListLive do
   end
 
   def handle_event("open-form", _params, socket) do
-    changeset = build_changeset()
-    form = Form.create(changeset)
-
     socket
-    |> assign(:form, form)
-    |> noreply()
-  end
-
-  def handle_event("close-form", _params, socket) do
-    socket
-    |> assign(:form, nil)
-    |> noreply()
-  end
-
-  def handle_event("save", %{"repository_security_profile" => params}, socket) do
-    form = socket.assigns.form
-
-    res =
-      case Form.creating?(form) do
-        true ->
-          params
-          |> Map.put("installation_id", socket.assigns.current_user.current_installation.id)
-          |> Mrgr.RepositorySecurityProfile.create()
-
-        false ->
-          Mrgr.RepositorySecurityProfile.update(Form.object(form), params)
-      end
-
-    case res do
-      {:ok, profile} ->
-        socket
-        |> assign(:form, nil)
-        |> Flash.put(:info, "Profile Saved!")
-        |> noreply()
-
-      {:error, changeset} ->
-        form = Form.update_changeset(form, changeset)
-
-        socket
-        |> assign(:form, form)
-        |> noreply()
-    end
-  end
-
-  def handle_event("delete-profile", _params, socket) do
-    profile = Form.object(socket.assigns.form)
-    Mrgr.Repo.delete(profile)
-
-    socket
-    |> assign(:form, nil)
-    |> Flash.put(:info, "Profile Deleted 🗑")
+    |> assign(:form_subject, %Mrgr.Schema.RepositorySecurityProfile{})
     |> noreply()
   end
 
   def handle_event("edit-profile", %{"id" => id}, socket) do
-    profile = Mrgr.List.find(socket.assigns.profiles, id)
-    form = Form.edit(build_changeset(profile))
+    profile =
+      socket.assigns.profiles
+      |> Mrgr.List.find(id)
 
     socket
-    |> assign(:form, form)
+    |> assign(:form_subject, profile)
     |> noreply()
   end
 
-  defp build_changeset(schema \\ %Mrgr.Schema.RepositorySecurityProfile{}) do
-    Mrgr.Schema.RepositorySecurityProfile.changeset(schema)
+  def handle_info(:close_form, socket) do
+    socket
+    |> assign(:form_subject, nil)
+    |> noreply()
   end
+
+  def handle_info(%{event: @security_profile_created, payload: profile}, socket) do
+    profiles = [profile | socket.assigns.profiles]
+    profiles = Enum.sort_by(profiles, & &1.title)
+
+    socket
+    |> Flash.put(:info, "Security Profile #{profile.title} was added.")
+    |> assign(:profiles, profiles)
+    |> noreply()
+  end
+
+  def handle_info(%{event: @security_profile_updated, payload: profile}, socket) do
+    profiles = Mrgr.List.replace(socket.assigns.profiles, profile)
+
+    socket
+    |> Flash.put(:info, "Security Profile #{profile.title} was updated.")
+    |> assign(:profiles, profiles)
+    |> noreply()
+  end
+
+  def handle_info(%{event: @security_profile_deleted, payload: profile}, socket) do
+    profiles = Mrgr.List.remove(socket.assigns.profiles, profile)
+
+    socket
+    |> Flash.put(:info, "Security Profile #{profile.title} was deleted.")
+    |> assign(:profiles, profiles)
+    |> noreply()
+  end
+
+  def handle_info(%{event: _whatevs}, socket), do: noreply(socket)
 end

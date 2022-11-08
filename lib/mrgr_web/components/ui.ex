@@ -391,6 +391,15 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  # separate component until we align on forms-as-states-of-truth
+  def close_form_button_myself(assigns) do
+    ~H"""
+    <button phx-click="close-form" phx-target={@target} colors="outline-none">
+      <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
+    </button>
+    """
+  end
+
   def close_form_button(assigns) do
     ~H"""
     <button phx-click="close-form" colors="outline-none">
