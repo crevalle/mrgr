@@ -68,7 +68,11 @@ defmodule MrgrWeb.RepositoryListLive do
   def handle_info(%{event: @repository_settings_policy_updated, payload: policy}, socket) do
     policies = Mrgr.List.replace(socket.assigns.policies, policy)
 
-    repo_counts = Mrgr.Repository.id_counts_for_policies(Enum.map(policies, & &1.id))
+    # this will run a bunch of times when apply_to_new_repo is triggered,
+    # since we publish several _updated messages for each other policy.
+    # don't worry about it for now, there won't be a lot of policies
+    policy_ids = Enum.map(policies, & &1.id)
+    repo_counts = Mrgr.Repository.id_counts_for_policies(policy_ids)
 
     socket
     |> Flash.put(:info, "Policy #{policy.title} was updated.")

@@ -19,6 +19,7 @@ defmodule Mrgr.RepositorySettingsPolicy do
 
     with cs <- Schema.changeset(%Schema{}, params),
          {:ok, policy} <- Mrgr.Repo.insert(cs),
+         policy <- ensure_apply_to_new_repo_singleton(policy),
          _updated <-
            Mrgr.Repository.set_settings_policy_id(repo_ids, policy.installation_id, policy.id) do
       broadcast(policy, @repository_settings_policy_created)
@@ -31,6 +32,7 @@ defmodule Mrgr.RepositorySettingsPolicy do
 
     with cs <- Schema.changeset(schema, params),
          {:ok, policy} <- Mrgr.Repo.update(cs),
+         policy <- ensure_apply_to_new_repo_singleton(policy),
          _updated <-
            Mrgr.Repository.unset_policy_id(policy.id),
          _updated <-
@@ -46,6 +48,24 @@ defmodule Mrgr.RepositorySettingsPolicy do
     broadcast(policy, @repository_settings_policy_deleted)
 
     policy
+  end
+
+  def ensure_apply_to_new_repo_singleton(%{apply_to_new_repos: false} = policy), do: policy
+
+  def ensure_apply_to_new_repo_singleton(%{apply_to_new_repos: true} = policy) do
+    policy.installation_id
+    |> for_installation()
+    |> Mrgr.List.remove(policy)
+    |> Enum.map(&dont_apply_to_new_repos/1)
+    |> Enum.map(&broadcast(&1, @repository_settings_policy_updated))
+
+    policy
+  end
+
+  def dont_apply_to_new_repos(policy) do
+    policy
+    |> Ecto.Changeset.change(%{apply_to_new_repos: false})
+    |> Mrgr.Repo.update!()
   end
 
   def broadcast(policy, event) do
