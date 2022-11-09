@@ -8,7 +8,7 @@
 
   <div class="two-pane-layout">
     <div class="basis-1/2">
-      <%= if @profiles == [] do %>
+      <%= if @policies == [] do %>
         <div class="p-4 border border-solid rounded-md bg-blue-50 flex flex-col items-center">
           <p><strong>None Yet!</strong> Why don't you <.inline_link phx-click="open-form">Add One</.inline_link>?</p>
         </div>
@@ -23,16 +23,16 @@
             <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500"></th>
           </thead>
           <tbody class="divide-y divide-gray-200 bg-white">
-            <tr :for={profile <- @profiles} >
-              <td class="py-4 pl-4 text-sm font-medium text-gray-900"><%= profile.title %></td>
-              <td class="p-3 text-center"><%= repo_count(@repo_counts, profile) %></td>
-              <td class="p-3 text-center"><%= tf(profile.apply_to_new_repos) %></td>
-              <td class="p-3 text-center"><%= profile.settings.required_approving_review_count %></td>
-              <td class="p-3"><div class="flex justify-center space-x-4"><.possible_merge_badges settings={profile.settings} /></div></td>
+            <tr :for={policy <- @policies} >
+              <td class="py-4 pl-4 text-sm font-medium text-gray-900"><%= policy.title %></td>
+              <td class="p-3 text-center"><%= repo_count(@repo_counts, policy) %></td>
+              <td class="p-3 text-center"><%= tf(policy.apply_to_new_repos) %></td>
+              <td class="p-3 text-center"><%= policy.settings.required_approving_review_count %></td>
+              <td class="p-3"><div class="flex justify-center space-x-4"><.possible_merge_badges settings={policy.settings} /></div></td>
               <td class="p-3">
                 <.l
-                  phx_click="edit-profile"
-                  phx_value_id={profile.id}
+                  phx_click="edit-policy"
+                  phx_value_id={policy.id}
                   >
                   Edit
                 </.l>
@@ -44,7 +44,7 @@
       <% end %>
     </div>
 
-    <.live_component :if={@form_subject} module={MrgrWeb.Components.Live.RepositorySecurityProfileForm} id="security-profile-form" object={@form_subject} repos={@repos} selected_repository_ids={Map.get(@repo_counts, @form_subject.id)} current_user={@current_user} timezone={@timezone} />
+    <.live_component :if={@form_subject} module={MrgrWeb.Components.Live.RepositorySettingsPolicyForm} id="security-policy-form" object={@form_subject} repos={@repos} selected_repository_ids={Map.get(@repo_counts, @form_subject.id)} current_user={@current_user} timezone={@timezone} />
   </div>
 </div>
 

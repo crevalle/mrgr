@@ -1,4 +1,4 @@
-defmodule Mrgr.Schema.RepositorySecuritySettings do
+defmodule Mrgr.Schema.RepositorySettings do
   use Mrgr.Schema
 
   @primary_key false

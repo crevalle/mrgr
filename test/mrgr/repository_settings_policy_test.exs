@@ -1,4 +1,4 @@
-defmodule Mrgr.RepositorySecurityProfileTest do
+defmodule Mrgr.RepositorySettingsPolicyTest do
   use Mrgr.DataCase
 
   describe "create/1" do
@@ -17,7 +17,7 @@ defmodule Mrgr.RepositorySecurityProfileTest do
         }
       }
 
-      {:ok, profile} = Mrgr.RepositorySecurityProfile.create(params)
+      {:ok, profile} = Mrgr.RepositorySettingsPolicy.create(params)
 
       assert profile.title == "hot pants"
       assert profile.installation_id == ctx.installation.id
@@ -44,7 +44,7 @@ defmodule Mrgr.RepositorySecurityProfileTest do
         }
       }
 
-      {:ok, profile} = Mrgr.RepositorySecurityProfile.create(params)
+      {:ok, profile} = Mrgr.RepositorySettingsPolicy.create(params)
 
       profile = Mrgr.Repo.preload(profile, :repositories, force: true)
       assert Enum.map(profile.repositories, & &1.id) == Enum.map([repo_1, repo_3], & &1.id)
@@ -55,10 +55,10 @@ defmodule Mrgr.RepositorySecurityProfileTest do
 
   describe "update/2" do
     test "updates attrs and repos" do
-      profile = insert!(:repository_security_profile)
+      profile = insert!(:repository_settings_policy)
 
       from(r in Mrgr.Schema.Repository,
-        where: r.repository_security_profile_id == ^profile.id
+        where: r.repository_settings_policy_id == ^profile.id
       )
       |> Mrgr.Repo.all()
 
@@ -68,7 +68,7 @@ defmodule Mrgr.RepositorySecurityProfileTest do
 
       repo_1 =
         insert!(:repository,
-          repository_security_profile_id: profile.id,
+          repository_settings_policy_id: profile.id,
           installation: profile.installation
         )
 
@@ -76,7 +76,7 @@ defmodule Mrgr.RepositorySecurityProfileTest do
       repo_3 = insert!(:repository)
 
       {:ok, updated} =
-        Mrgr.RepositorySecurityProfile.update(profile, %{
+        Mrgr.RepositorySettingsPolicy.update(profile, %{
           "title" => "yo momma",
           "repository_ids" => [repo_2.id, repo_3.id]
         })
@@ -84,7 +84,7 @@ defmodule Mrgr.RepositorySecurityProfileTest do
       updated = Mrgr.Repo.preload(updated, :repositories, force: true)
 
       old_repo = Mrgr.Repo.get(Mrgr.Schema.Repository, repo_1.id)
-      assert is_nil(old_repo.repository_security_profile_id)
+      assert is_nil(old_repo.repository_settings_policy_id)
 
       assert updated.title == "yo momma"
 

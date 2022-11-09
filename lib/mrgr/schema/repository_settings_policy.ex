@@ -1,7 +1,7 @@
-defmodule Mrgr.Schema.RepositorySecurityProfile do
+defmodule Mrgr.Schema.RepositorySettingsPolicy do
   use Mrgr.Schema
 
-  schema "repository_security_profiles" do
+  schema "repository_settings_policies" do
     field(:title, :string)
     field(:apply_to_new_repos, :boolean)
 
@@ -9,7 +9,7 @@ defmodule Mrgr.Schema.RepositorySecurityProfile do
 
     has_many(:repositories, Mrgr.Schema.Repository)
 
-    embeds_one(:settings, Mrgr.Schema.RepositorySecuritySettings, on_replace: :delete)
+    embeds_one(:settings, Mrgr.Schema.RepositorySettings, on_replace: :delete)
 
     timestamps()
   end

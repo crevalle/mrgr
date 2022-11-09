@@ -22,7 +22,7 @@ defmodule Mrgr.Schema.Installation do
     belongs_to(:creator, Mrgr.Schema.User)
     has_one(:account, Mrgr.Schema.Account)
 
-    has_many(:repository_security_profile, Mrgr.Schema.RepositorySecurityProfile)
+    has_many(:repository_settings_policies, Mrgr.Schema.RepositorySettingsPolicy)
 
     has_many(:repositories, Mrgr.Schema.Repository)
 

@@ -1,10 +1,12 @@
-defmodule MrgrWeb.Components.Live.RepositorySecurityProfileForm do
+defmodule MrgrWeb.Components.Live.RepositorySettingsPolicyForm do
   use MrgrWeb, :live_component
 
   def update(assigns, socket) do
+    selected_ids = assigns.selected_repository_ids || []
+
     socket
     |> assign(assigns)
-    |> assign(:selected_repository_ids, MapSet.new(assigns.selected_repository_ids))
+    |> assign(:selected_repository_ids, MapSet.new(selected_ids))
     |> assign(:changeset, build_changeset(assigns.object))
     |> ok()
   end
@@ -39,7 +41,20 @@ defmodule MrgrWeb.Components.Live.RepositorySecurityProfileForm do
     |> noreply()
   end
 
-  def handle_event("save", %{"repository_security_profile" => params}, socket) do
+  # if I don't save the params here they get wiped when i toggle the repos.
+  # not sure why
+  def handle_event("validate", %{"repository_settings_policy" => params}, socket) do
+    changeset =
+      socket.assigns.object
+      |> build_changeset(params)
+      |> Map.put(:action, :validate)
+
+    socket
+    |> assign(:changeset, changeset)
+    |> noreply()
+  end
+
+  def handle_event("save", %{"repository_settings_policy" => params}, socket) do
     object = socket.assigns.object
 
     params =
@@ -50,14 +65,14 @@ defmodule MrgrWeb.Components.Live.RepositorySecurityProfileForm do
         true ->
           params
           |> Map.put("installation_id", socket.assigns.current_user.current_installation.id)
-          |> Mrgr.RepositorySecurityProfile.create()
+          |> Mrgr.RepositorySettingsPolicy.create()
 
         false ->
-          Mrgr.RepositorySecurityProfile.update(object, params)
+          Mrgr.RepositorySettingsPolicy.update(object, params)
       end
 
     case res do
-      {:ok, _profile} ->
+      {:ok, _policy} ->
         close_me()
 
         socket
@@ -70,9 +85,9 @@ defmodule MrgrWeb.Components.Live.RepositorySecurityProfileForm do
     end
   end
 
-  def handle_event("delete-profile", _params, socket) do
-    profile = socket.assigns.object
-    Mrgr.RepositorySecurityProfile.delete(profile)
+  def handle_event("delete-policy", _params, socket) do
+    policy = socket.assigns.object
+    Mrgr.RepositorySettingsPolicy.delete(policy)
 
     close_me()
 
@@ -90,8 +105,8 @@ defmodule MrgrWeb.Components.Live.RepositorySecurityProfileForm do
     send(self(), :close_form)
   end
 
-  defp build_changeset(schema \\ %Mrgr.Schema.RepositorySecurityProfile{}) do
-    Mrgr.Schema.RepositorySecurityProfile.changeset(schema)
+  defp build_changeset(schema, params \\ %{}) do
+    Mrgr.Schema.RepositorySettingsPolicy.changeset(schema, params)
   end
 
   defp creating?(%{id: nil}), do: true

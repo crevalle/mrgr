@@ -74,9 +74,9 @@ defmodule Mrgr.PubSub do
         @pull_request_reviewers_updated "pull_request:reviewers_updated"
         @pull_request_reviews_updated "pull_request:reviews_updated"
 
-        @security_profile_created "security_profile:created"
-        @security_profile_updated "security_profile:updated"
-        @security_profile_deleted "security_profile:deleted"
+        @repository_settings_policy_created "repository_settings_policy:created"
+        @repository_settings_policy_updated "repository_settings_policy:updated"
+        @repository_settings_policy_deleted "repository_settings_policy:deleted"
       end
     end
   end

@@ -11,7 +11,7 @@ defmodule Mrgr.Schema.Repository do
     field(:private, :boolean)
     field(:merge_freeze_enabled, :boolean, default: false)
 
-    embeds_one(:settings, Mrgr.Schema.RepositorySecuritySettings, on_replace: :delete)
+    embeds_one(:settings, Mrgr.Schema.RepositorySettings, on_replace: :delete)
     embeds_one(:parent, Mrgr.Schema.Repository.Parent, on_replace: :delete)
 
     field(:dismiss_stale_reviews, :boolean, read_after_writes: true)
@@ -20,8 +20,8 @@ defmodule Mrgr.Schema.Repository do
 
     belongs_to(:installation, Mrgr.Schema.Installation)
 
-    belongs_to(:security_profile, Mrgr.Schema.RepositorySecurityProfile,
-      foreign_key: :repository_security_profile_id
+    belongs_to(:settings_policy, Mrgr.Schema.RepositorySettingsPolicy,
+      foreign_key: :repository_settings_policy_id
     )
 
     has_many(:members, through: [:installation, :member])

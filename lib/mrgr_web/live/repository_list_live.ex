@@ -14,18 +14,15 @@ defmodule MrgrWeb.RepositoryListLive do
 
       repos = Mrgr.Repository.for_user_with_rules(current_user)
 
-      profiles =
-        Mrgr.RepositorySecurityProfile.for_installation(current_user.current_installation)
+      policies = Mrgr.RepositorySettingsPolicy.for_installation(current_user.current_installation)
 
-      repo_counts =
-        Mrgr.Repository.id_counts_for_profiles(Enum.map(profiles, & &1.id))
-        |> IO.inspect()
+      repo_counts = Mrgr.Repository.id_counts_for_policies(Enum.map(policies, & &1.id))
 
       socket
       |> assign(:repos, repos)
       |> assign(:repo_counts, repo_counts)
       |> assign(:form_subject, nil)
-      |> assign(:profiles, profiles)
+      |> assign(:policies, policies)
       |> put_title("Repositories")
       |> ok()
     else
@@ -35,17 +32,17 @@ defmodule MrgrWeb.RepositoryListLive do
 
   def handle_event("open-form", _params, socket) do
     socket
-    |> assign(:form_subject, %Mrgr.Schema.RepositorySecurityProfile{})
+    |> assign(:form_subject, %Mrgr.Schema.RepositorySettingsPolicy{})
     |> noreply()
   end
 
-  def handle_event("edit-profile", %{"id" => id}, socket) do
-    profile =
-      socket.assigns.profiles
+  def handle_event("edit-policy", %{"id" => id}, socket) do
+    policy =
+      socket.assigns.policies
       |> Mrgr.List.find(id)
 
     socket
-    |> assign(:form_subject, profile)
+    |> assign(:form_subject, policy)
     |> noreply()
   end
 
@@ -55,37 +52,37 @@ defmodule MrgrWeb.RepositoryListLive do
     |> noreply()
   end
 
-  def handle_info(%{event: @security_profile_created, payload: profile}, socket) do
-    profiles = [profile | socket.assigns.profiles]
-    profiles = Enum.sort_by(profiles, & &1.title)
+  def handle_info(%{event: @repository_settings_policy_created, payload: policy}, socket) do
+    policies = [policy | socket.assigns.policies]
+    policies = Enum.sort_by(policies, & &1.title)
 
-    repo_counts = Mrgr.Repository.id_counts_for_profiles(Enum.map(profiles, & &1.id))
+    repo_counts = Mrgr.Repository.id_counts_for_policies(Enum.map(policies, & &1.id))
 
     socket
-    |> Flash.put(:info, "Security Profile #{profile.title} was added.")
-    |> assign(:profiles, profiles)
+    |> Flash.put(:info, "Policy #{policy.title} was added.")
+    |> assign(:policies, policies)
     |> assign(:repo_counts, repo_counts)
     |> noreply()
   end
 
-  def handle_info(%{event: @security_profile_updated, payload: profile}, socket) do
-    profiles = Mrgr.List.replace(socket.assigns.profiles, profile)
+  def handle_info(%{event: @repository_settings_policy_updated, payload: policy}, socket) do
+    policies = Mrgr.List.replace(socket.assigns.policies, policy)
 
-    repo_counts = Mrgr.Repository.id_counts_for_profiles(Enum.map(profiles, & &1.id))
+    repo_counts = Mrgr.Repository.id_counts_for_policies(Enum.map(policies, & &1.id))
 
     socket
-    |> Flash.put(:info, "Security Profile #{profile.title} was updated.")
-    |> assign(:profiles, profiles)
+    |> Flash.put(:info, "Policy #{policy.title} was updated.")
+    |> assign(:policies, policies)
     |> assign(:repo_counts, repo_counts)
     |> noreply()
   end
 
-  def handle_info(%{event: @security_profile_deleted, payload: profile}, socket) do
-    profiles = Mrgr.List.remove(socket.assigns.profiles, profile)
+  def handle_info(%{event: @repository_settings_policy_deleted, payload: policy}, socket) do
+    policies = Mrgr.List.remove(socket.assigns.policies, policy)
 
     socket
-    |> Flash.put(:info, "Security Profile #{profile.title} was deleted.")
-    |> assign(:profiles, profiles)
+    |> Flash.put(:info, "Policy #{policy.title} was deleted.")
+    |> assign(:policies, policies)
     |> noreply()
   end
 

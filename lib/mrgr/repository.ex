@@ -51,30 +51,30 @@ defmodule Mrgr.Repository do
     |> fix_case_sensitive_sort()
   end
 
-  def unset_profile_id(profile_id) do
+  def unset_policy_id(policy_id) do
     Schema
-    |> Query.for_profile(profile_id)
-    |> Query.set_security_profile_id(nil)
+    |> Query.for_policy(policy_id)
+    |> Query.set_settings_policy_id(nil)
     |> Mrgr.Repo.update_all([])
   end
 
-  def set_security_profile_id(ids, installation_id, profile_id) do
+  def set_settings_policy_id(ids, installation_id, policy_id) do
     Schema
     |> Query.scoped_ids_for_installation(ids, installation_id)
-    |> Query.set_security_profile_id(profile_id)
+    |> Query.set_settings_policy_id(policy_id)
     |> Mrgr.Repo.update_all([])
   end
 
-  def id_counts_for_profiles(profile_ids) do
-    Enum.reduce(profile_ids, %{}, fn id, acc ->
-      ids = ids_for_profile(id)
+  def id_counts_for_policies(policy_ids) do
+    Enum.reduce(policy_ids, %{}, fn id, acc ->
+      ids = ids_for_policy(id)
       Map.put(acc, id, ids)
     end)
   end
 
-  def ids_for_profile(profile_id) do
+  def ids_for_policy(policy_id) do
     Schema
-    |> Query.for_profile(profile_id)
+    |> Query.for_policy(policy_id)
     |> Query.select_ids()
     |> Mrgr.Repo.all()
   end
@@ -329,15 +329,15 @@ defmodule Mrgr.Repository do
       )
     end
 
-    def for_profile(query, id) do
+    def for_policy(query, id) do
       from(q in query,
-        where: q.repository_security_profile_id == ^id
+        where: q.repository_settings_policy_id == ^id
       )
     end
 
-    def set_security_profile_id(query, id) do
+    def set_settings_policy_id(query, id) do
       from(q in query,
-        update: [set: [repository_security_profile_id: ^id]]
+        update: [set: [repository_settings_policy_id: ^id]]
       )
     end
 
