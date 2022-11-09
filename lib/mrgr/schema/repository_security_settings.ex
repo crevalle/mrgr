@@ -7,9 +7,9 @@ defmodule Mrgr.Schema.RepositorySecuritySettings do
     field(:require_code_owner_reviews, :boolean)
     field(:required_approving_review_count, :integer, default: 0)
 
-    field(:merge_commit_allowed, :boolean)
-    field(:rebase_merge_allowed, :boolean)
-    field(:squash_merge_allowed, :boolean)
+    field(:merge_commit_allowed, :boolean, default: true)
+    field(:rebase_merge_allowed, :boolean, default: true)
+    field(:squash_merge_allowed, :boolean, default: true)
 
     field(:default_branch_name, :string)
 

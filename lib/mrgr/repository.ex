@@ -259,6 +259,13 @@ defmodule Mrgr.Repository do
     %{repo | pull_requests: pull_requests}
   end
 
+  def apply_policy?(%{name: "postfactor"}), do: true
+  def apply_policy?(%{name: "mother_brain"}), do: true
+  def apply_policy?(%{name: "evidence_server"}), do: true
+  def apply_policy?(%{name: "MoodTrackerClient"}), do: true
+  def apply_policy?(%{name: "black-book-client"}), do: true
+  def apply_policy?(_repo), do: false
+
   defmodule Query do
     use Mrgr.Query
 

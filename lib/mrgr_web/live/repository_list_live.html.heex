@@ -1,15 +1,9 @@
 <div>
-  <div class="flex justify-between">
+  <div class="flex items-center">
     <.heading title="Security Policies" />
 
-    <div class="relative inline-block text-left">
-        <.secondary_button 
-          phx-click="open-form"
-          colors="text-teal-700 border-teal-600 hover:bg-teal-700">
-          Add New
-        </.secondary_button>
+    <.l phx-click="open-form">Add New</.l>
 
-    </div>
   </div>
 
   <div class="two-pane-layout">
@@ -20,28 +14,30 @@
         </div>
       <% else %>
         <table class="min-w-full shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
-          <th>id</th>
-          <th>title</th>
-          <th>apply to new</th>
-          <th>Required Approvals</th>
-          <th>settings</th>
-          <th>Edit</th>
+          <thead class="bg-gray-100">
+            <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">title</th>
+            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">apply to new repos</th>
+            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Required Approvals</th>
+            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">allowed merge types</th>
+            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500"></th>
+          </thead>
+          <tbody class="divide-y divide-gray-200 bg-white">
+            <tr :for={profile <- @profiles} >
+              <td class="py-4 pl-4 text-sm font-medium text-gray-900"><%= profile.title %></td>
+              <td class="p-3 text-center"><%= tf(profile.apply_to_new_repos) %></td>
+              <td class="p-3 text-center"><%= profile.settings.required_approving_review_count %></td>
+              <td class="p-3"><div class="flex justify-center space-x-4"><.possible_merge_badges settings={profile.settings} /></div></td>
+              <td class="p-3">
+                <.l
+                  phx_click="edit-profile"
+                  phx_value_id={profile.id}
+                  >
+                  Edit
+                </.l>
+              </td>
+            </tr>
+          </tbody>
 
-          <tr :for={profile <- @profiles}>
-            <td><%= profile.id %></td>
-            <td><%= profile.title %></td>
-            <td><%= profile.apply_to_new_repos %></td>
-            <td><%= profile.settings.required_approving_review_count %></td>
-            <td><div class="flex justify-center space-x-4"><.possible_merge_badges settings={profile.settings} /></div></td>
-            <td>
-              <.l
-                phx_click="edit-profile"
-                phx_value_id={profile.id}
-                >
-                Edit
-              </.l>
-            </td>
-          </tr>
         </table>
       <% end %>
     </div>
@@ -58,28 +54,28 @@
       <table class="min-w-full shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
         <thead class="bg-gray-100">
           <th class="py-3 pl-4 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Name</th>
-          <th class="px-3 py-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Language</th>
-          <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Private?</th>
-          <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Required Reviews</th>
-          <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Allowed Merge Types</th>
-          <th class="px-3 py-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Compliant?</th>
+          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Language</th>
+          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Private?</th>
+          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Required Approvals</th>
+          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Allowed Merge Types</th>
+          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Compliant?</th>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
           <tr :for={repo <- @repos} >
             <td class="py-4 pl-4 text-sm font-medium text-gray-900"><div class="flex"><%= repo.name %> <.repo_forked_badge parent={repo.parent} /></div></td>
-            <td class="py-4 text-sm text-left text-gray-500"><div class="flex"><.language_icon language={repo.language} /></div></td>
+            <td class="py-4 text-sm flex justify-center text-gray-500"><div class="flex"><.language_icon language={repo.language} /></div></td>
             <td class="px-3 py-4 text-sm text-center text-gray-500"><.lock bool={repo.private} /></td>
             <td class="text-center"><.approving_review_count count={repo.settings.required_approving_review_count} /></td>
             <td><div class="flex justify-center space-x-4"><.possible_merge_badges settings={repo.settings} /></div></td>
             <td class="pl-3">
-              <%= if repo.name == "postfactor" || repo.name == "mother_brain" || repo.name == "evidence_server" do %>
-                <div class="flex items-center space-around">
+              <div class="flex items-center justify-center space-around">
+                <%= if Mrgr.Repository.apply_policy?(repo) do %>
                   <.icon name="exclamation-circle" class="text-red-700 mr-1 h-5 w-5" />
                   <.l >Apply Policy</.l>
-                </div>
-              <% else %>
-                <.icon name="check" class="text-emerald-500 mr-1 h-5 w-5" />
-              <% end %>
+                <% else %>
+                  <.icon name="check" class="text-emerald-500 mr-1 h-5 w-5" />
+                <% end %>
+              </div>
             </td>
           </tr>
         </tbody>
