@@ -120,6 +120,24 @@ defmodule Mrgr.Factory do
     }
   end
 
+  def build(:repository_security_profile) do
+    %Mrgr.Schema.RepositorySecurityProfile{
+      installation: build(:installation),
+      title: Faker.Company.bs(),
+      apply_to_new_repos: false,
+      settings: build(:repository_security_settings)
+    }
+  end
+
+  def build(:repository_security_settings) do
+    %Mrgr.Schema.RepositorySecuritySettings{
+      merge_commit_allowed: true,
+      rebase_merge_allowed: false,
+      squash_merge_allowed: true,
+      required_approving_review_count: 1
+    }
+  end
+
   # Convenience API
 
   def build(factory_name, attributes) do

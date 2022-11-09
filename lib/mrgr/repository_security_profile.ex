@@ -13,18 +13,31 @@ defmodule Mrgr.RepositorySecurityProfile do
     |> Mrgr.Repo.all()
   end
 
+  @spec create(map()) :: {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
   def create(params) do
-    %Schema{}
-    |> Schema.changeset(params)
-    |> Mrgr.Repo.insert()
-    |> broadcast_if_successful(@security_profile_created)
+    repo_ids = Map.get(params, "repository_ids", [])
+
+    with cs <- Schema.changeset(%Schema{}, params),
+         {:ok, profile} <- Mrgr.Repo.insert(cs),
+         _updated <-
+           Mrgr.Repository.set_security_profile_id(repo_ids, profile.installation_id, profile.id) do
+      broadcast(profile, @security_profile_created)
+      {:ok, profile}
+    end
   end
 
   def update(schema, params) do
-    schema
-    |> Schema.changeset(params)
-    |> Mrgr.Repo.update()
-    |> broadcast_if_successful(@security_profile_updated)
+    repo_ids = Map.get(params, "repository_ids", [])
+
+    with cs <- Schema.changeset(schema, params),
+         {:ok, profile} <- Mrgr.Repo.update(cs),
+         _updated <-
+           Mrgr.Repository.unset_profile_id(profile.id),
+         _updated <-
+           Mrgr.Repository.set_security_profile_id(repo_ids, profile.installation_id, profile.id) do
+      broadcast(profile, @security_profile_updated)
+      {:ok, profile}
+    end
   end
 
   def delete(profile) do
@@ -32,6 +45,12 @@ defmodule Mrgr.RepositorySecurityProfile do
     broadcast(profile, @security_profile_deleted)
 
     profile
+  end
+
+  def broadcast_if_successful({:ok, %{profile: profile}}, event) do
+    broadcast(profile, event)
+
+    {:ok, profile}
   end
 
   def broadcast_if_successful({:ok, profile}, event) do

@@ -30,6 +30,26 @@
         Only one policy may be applied to new repos.
       </.check>
 
+
+      <div class="flex flex-col pt-5">
+        <.subheading title="Apply to Repositories">
+          <:description>
+            <div class="flex flex-col">
+              This policy will apply to the repos you select.
+              <.inline_link phx-click="toggle-all-repositories" phx-target={@myself}>Toggle All/None</.inline_link>
+            </div>
+          </:description>
+        </.subheading>
+
+        <div class="my-4">
+          <div class="grid grid-cols-3 gap-3">
+            <%= for repo <- @repos do %>
+              <.repo_toggle_item repo={repo} target={@myself} selected={Enum.member?(@selected_repository_ids, repo.id)} />
+            <% end %>
+          </div>
+        </div>
+      </div>
+
       <div class="pt-5">
         <div class="flex space-x-4 justify-end items-center">
           <%= if editing?(@object) do %>

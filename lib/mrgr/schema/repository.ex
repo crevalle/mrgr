@@ -19,6 +19,11 @@ defmodule Mrgr.Schema.Repository do
     field(:required_approving_review_count, :integer, read_after_writes: true)
 
     belongs_to(:installation, Mrgr.Schema.Installation)
+
+    belongs_to(:security_profile, Mrgr.Schema.RepositorySecurityProfile,
+      foreign_key: :repository_security_profile_id
+    )
+
     has_many(:members, through: [:installation, :member])
     has_many(:users, through: [:installation, :users])
 

@@ -7,6 +7,8 @@ defmodule Mrgr.Schema.RepositorySecurityProfile do
 
     belongs_to(:installation, Mrgr.Schema.Installation)
 
+    has_many(:repositories, Mrgr.Schema.Repository)
+
     embeds_one(:settings, Mrgr.Schema.RepositorySecuritySettings, on_replace: :delete)
 
     timestamps()

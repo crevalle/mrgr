@@ -4,12 +4,46 @@ defmodule MrgrWeb.Components.Live.RepositorySecurityProfileForm do
   def update(assigns, socket) do
     socket
     |> assign(assigns)
+    |> assign(:selected_repository_ids, MapSet.new(assigns.selected_repository_ids))
     |> assign(:changeset, build_changeset(assigns.object))
     |> ok()
   end
 
+  def handle_event("toggle-all-repositories", _params, socket) do
+    selected = socket.assigns.selected_repository_ids
+    all_repos = socket.assigns.repos
+
+    selected =
+      case all_repos_selected?(all_repos, selected) do
+        true -> MapSet.new()
+        false -> MapSet.new(Enum.map(all_repos, & &1.id))
+      end
+
+    socket
+    |> assign(:selected_repository_ids, selected)
+    |> noreply()
+  end
+
+  def handle_event("toggle-selected-repository", %{"id" => id}, socket) do
+    selected = socket.assigns.selected_repository_ids
+    id = String.to_integer(id)
+
+    selected =
+      case MapSet.member?(selected, id) do
+        true -> MapSet.delete(selected, id)
+        false -> MapSet.put(selected, id)
+      end
+
+    socket
+    |> assign(:selected_repository_ids, selected)
+    |> noreply()
+  end
+
   def handle_event("save", %{"repository_security_profile" => params}, socket) do
     object = socket.assigns.object
+
+    params =
+      Map.put(params, "repository_ids", MapSet.to_list(socket.assigns.selected_repository_ids))
 
     res =
       case creating?(object) do
@@ -64,4 +98,8 @@ defmodule MrgrWeb.Components.Live.RepositorySecurityProfileForm do
   defp creating?(_), do: false
 
   defp editing?(obj), do: !creating?(obj)
+
+  defp all_repos_selected?(all, selected) do
+    Enum.count(all) == Enum.count(selected)
+  end
 end

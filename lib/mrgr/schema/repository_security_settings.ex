@@ -5,10 +5,10 @@ defmodule Mrgr.Schema.RepositorySecuritySettings do
   embedded_schema do
     field(:dismiss_stale_reviews, :boolean)
     field(:require_code_owner_reviews, :boolean)
-    field(:required_approving_review_count, :integer, default: 0)
+    field(:required_approving_review_count, :integer, default: 1)
 
-    field(:merge_commit_allowed, :boolean, default: true)
-    field(:rebase_merge_allowed, :boolean, default: true)
+    field(:merge_commit_allowed, :boolean, default: false)
+    field(:rebase_merge_allowed, :boolean, default: false)
     field(:squash_merge_allowed, :boolean, default: true)
 
     field(:default_branch_name, :string)

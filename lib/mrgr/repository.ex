@@ -21,6 +21,7 @@ defmodule Mrgr.Repository do
     |> Query.order(asc: :name)
     |> Query.with_alert_rules()
     |> Mrgr.Repo.all()
+    |> fix_case_sensitive_sort()
   end
 
   def find_for_user(user, ids) do
@@ -47,6 +48,40 @@ defmodule Mrgr.Repository do
     |> Query.for_installation(installation_id)
     |> Query.order(asc: :name)
     |> Mrgr.Repo.paginate(page)
+    |> fix_case_sensitive_sort()
+  end
+
+  def unset_profile_id(profile_id) do
+    Schema
+    |> Query.for_profile(profile_id)
+    |> Query.set_security_profile_id(nil)
+    |> Mrgr.Repo.update_all([])
+  end
+
+  def set_security_profile_id(ids, installation_id, profile_id) do
+    Schema
+    |> Query.scoped_ids_for_installation(ids, installation_id)
+    |> Query.set_security_profile_id(profile_id)
+    |> Mrgr.Repo.update_all([])
+  end
+
+  def id_counts_for_profiles(profile_ids) do
+    Enum.reduce(profile_ids, %{}, fn id, acc ->
+      ids = ids_for_profile(id)
+      Map.put(acc, id, ids)
+    end)
+  end
+
+  def ids_for_profile(profile_id) do
+    Schema
+    |> Query.for_profile(profile_id)
+    |> Query.select_ids()
+    |> Mrgr.Repo.all()
+  end
+
+  # sql is always case sensitive.  i don't care about that here.
+  defp fix_case_sensitive_sort(repos) do
+    Enum.sort_by(repos, &String.downcase(&1.name))
   end
 
   def toggle_pull_request_freeze(repo) do
@@ -269,6 +304,12 @@ defmodule Mrgr.Repository do
   defmodule Query do
     use Mrgr.Query
 
+    def scoped_ids_for_installation(query, ids, installation_id) do
+      query
+      |> by_ids(ids)
+      |> for_installation(installation_id)
+    end
+
     def by_name(query, name) do
       from(q in query,
         where: q.name == ^name
@@ -285,6 +326,24 @@ defmodule Mrgr.Repository do
     def for_installation(query, id) do
       from(q in query,
         where: q.installation_id == ^id
+      )
+    end
+
+    def for_profile(query, id) do
+      from(q in query,
+        where: q.repository_security_profile_id == ^id
+      )
+    end
+
+    def set_security_profile_id(query, id) do
+      from(q in query,
+        update: [set: [repository_security_profile_id: ^id]]
+      )
+    end
+
+    def select_ids(query) do
+      from(q in query,
+        select: q.id
       )
     end
 

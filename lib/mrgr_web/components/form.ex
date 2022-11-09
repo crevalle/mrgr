@@ -41,6 +41,30 @@ defmodule MrgrWeb.Components.Form do
     """
   end
 
+  # like hte one below, but sends the click event to myself
+  # ie, goes into a form component that handles its own events.
+  # one below is from checklists, which isn't really fleshed out anyway
+  # TODO: flesh it out
+  def repo_toggle_item(assigns) do
+    bg_color =
+      case assigns.selected do
+        true -> "bg-emerald-50"
+        false -> ""
+      end
+
+    assigns =
+      assigns
+      |> assign(:bg_color, bg_color)
+
+    ~H"""
+    <%= link to: "#", phx_click: "toggle-selected-repository", phx_target: @target, phx_value_id: @repo.id, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@bg_color}", id: "repo-#{@repo.id}" do %>
+      <div>
+        <%= @repo.name %>
+      </div>
+    <% end %>
+    """
+  end
+
   def toggle_block(assigns) do
     bg_color =
       case assigns.selected do
