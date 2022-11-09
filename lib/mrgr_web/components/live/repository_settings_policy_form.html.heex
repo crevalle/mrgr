@@ -7,7 +7,7 @@
   <div class="mt-8 bg-white overflow-hidden ">
     <.form let={f} for={@changeset} phx-submit="save" phx-change="validate" phx-target={@myself} class="space-y-8 divide-y divide-gray-200">
 
-      <.input type="text" f={f} field={:title} />
+      <.input type="text" f={f} field={:title} placeholder="eg. 'default', 'sensitive'"/>
 
       <%= for s <- inputs_for(f, :settings) do %>
 
@@ -26,17 +26,20 @@
 
       <% end %>
 
-      <.check form={f} attr={:apply_to_new_repos} description="Apply this Policy automatically to new Repos" >
-        Only one policy may be applied to new repos.
-      </.check>
+      <.check form={f} attr={:apply_to_new_repos} description="Apply to new repos" detail_text="Newly created repositories will have this policy applied automatically.  Only one policy may be applied to new repos." />
 
 
       <div class="flex flex-col pt-5">
         <.subheading title="Apply to Repositories">
           <:description>
             <div class="flex flex-col">
-              This policy will apply to the repos you select.
-              <.inline_link phx-click="toggle-all-repositories" phx-target={@myself}>Toggle All/None</.inline_link>
+              <p>
+              Choose which repos to associate with this policy.  Repositories may only have <strong>1 policy</strong>, so choosing a repo here will overwrite the repo's existing policy.
+              </p>
+
+              <p class="mt-2">
+                <.inline_link phx-click="toggle-all-repositories" phx-target={@myself}>Toggle All/None</.inline_link>
+              </p>
             </div>
           </:description>
         </.subheading>

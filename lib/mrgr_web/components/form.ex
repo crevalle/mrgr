@@ -33,7 +33,7 @@ defmodule MrgrWeb.Components.Form do
         <%= label(@form, @attr, @description, class: "block text-sm font-medium text-gray-700 mt-px pt-2") %>
         <div class="mt-1 mt-0 flex items-center col-span-2">
           <%= checkbox @form, @attr, class: "shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md" %>
-          <p :if={@detail_text} class="ml-1 text-sm text-gray-500">
+          <p :if={@detail_text} class="ml-4 text-sm text-gray-500">
             <%= @detail_text %>
           </p>
         </div>
