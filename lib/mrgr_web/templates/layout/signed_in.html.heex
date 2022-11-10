@@ -39,6 +39,10 @@
                   in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
                   out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
                 )}
+                 phx-click-away={Phoenix.LiveView.JS.hide(
+                  to: "#user-menu",
+                  transition: {"ease-in duration-75", "opacity-100 scale-100", "opacity-0 scale-95"}
+                )}
                 class =
                   "inline-flex items-center py-2 px-4 border border-transparent text-sm font-medium rounded-md text-gray-500 hover:bg-stone-50 focus:outline-none focus:ring-2 focus:ring-offset-2 bg-white focus:ring-indigo-500"
                 id="user-menu-button"

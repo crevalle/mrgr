@@ -1,4 +1,6 @@
 defmodule Mrgr.Repository do
+  use Mrgr.PubSub.Event
+
   alias Mrgr.Repository.Query
   alias Mrgr.Schema.Repository, as: Schema
 
@@ -13,6 +15,15 @@ defmodule Mrgr.Repository do
     |> Query.by_name(name)
     |> Query.for_user(user)
     |> Mrgr.Repo.one()
+  end
+
+  def for_user_with_policy(user) do
+    Schema
+    |> Query.for_user(user)
+    |> Query.order(asc: :name)
+    |> Query.with_policy()
+    |> Mrgr.Repo.all()
+    |> fix_case_sensitive_sort()
   end
 
   def for_user_with_rules(user) do
@@ -148,7 +159,7 @@ defmodule Mrgr.Repository do
   end
 
   # receives node list
-  def refresh_security_settings(graphql_data) do
+  def refresh_all_security_settings(graphql_data) do
     # get all local repos at once, then look them up in memory
     # not all optimization is premature
     IO.inspect(graphql_data)
@@ -161,23 +172,70 @@ defmodule Mrgr.Repository do
           nil
 
         repo ->
-          # do this here cause that's when I have the data,
-          # until I can do it somewhere else
-          parent_params = %{parent: translate_parent_params(d["parent"])}
-
-          repo =
-            repo
-            |> Schema.parent_changeset(parent_params)
-            |> Mrgr.Repo.update!()
-
-          params = %{settings: translate_settings_params(d)}
-
-          repo
-          |> Schema.settings_changeset(params)
-          |> Mrgr.Repo.update!()
+          update_security_setting_data(repo, d)
       end
     end)
     |> Enum.reject(&is_nil/1)
+  end
+
+  def update_security_setting_data(repo, data) do
+    # do this here cause that's when I have the data,
+    # until I can do it somewhere else
+    parent_params = %{parent: translate_parent_params(data["parent"])}
+
+    repo =
+      repo
+      |> Schema.parent_changeset(parent_params)
+      |> Mrgr.Repo.update!()
+
+    params =
+      %{settings: translate_settings_params(data)}
+      |> IO.inspect()
+
+    repo
+    |> Schema.settings_changeset(params)
+    |> IO.inspect()
+    |> Mrgr.Repo.update!()
+  end
+
+  def hydrate_security_settings(repo) do
+    data = Mrgr.Github.API.fetch_repository_settings_graphql(repo)
+
+    update_security_setting_data(repo, data["node"])
+  end
+
+  def apply_policy_to_repo(repository, policy) do
+    repository
+    |> apply_merge_settings(policy)
+    |> apply_branch_protection(policy)
+    |> broadcast(@repository_updated)
+  end
+
+  def apply_merge_settings(repository, policy) do
+    params = Mrgr.Schema.RepositorySettings.translate_names_to_rest_api(policy.settings)
+
+    attrs =
+      repository
+      |> Mrgr.Github.API.update_repo_settings(params)
+      |> Mrgr.Schema.RepositorySettings.translate_names_from_rest_api()
+
+    repository
+    |> Schema.settings_changeset(%{settings: attrs})
+    |> Mrgr.Repo.update!()
+  end
+
+  def apply_branch_protection(repository, policy) do
+    params =
+      Mrgr.Schema.RepositorySettings.translate_branch_protection_to_rest_api(policy.settings)
+
+    attrs =
+      repository
+      |> Mrgr.Github.API.update_branch_protection(params)
+      |> Mrgr.Schema.RepositorySettings.translate_branch_protection_from_rest_api()
+
+    repository
+    |> Schema.settings_changeset(%{settings: attrs})
+    |> Mrgr.Repo.update!()
   end
 
   defp fetch_local_repos(graphql_data) do
@@ -294,12 +352,28 @@ defmodule Mrgr.Repository do
     %{repo | pull_requests: pull_requests}
   end
 
+  # expects that you've preloaded it
+  def has_policy?(%{policy: nil}), do: false
+  def has_policy?(_repo), do: true
+
+  # expects there to be a policy
+  def settings_match_policy?(%{settings: settings, policy: %{settings: settings_policy}}) do
+    Mrgr.Schema.RepositorySettings.match?(settings, settings_policy)
+  end
+
   def apply_policy?(%{name: "postfactor"}), do: true
   def apply_policy?(%{name: "mother_brain"}), do: true
   def apply_policy?(%{name: "evidence_server"}), do: true
   def apply_policy?(%{name: "MoodTrackerClient"}), do: true
   def apply_policy?(%{name: "black-book-client"}), do: true
   def apply_policy?(_repo), do: false
+
+  def broadcast(repository, event) do
+    topic = Mrgr.PubSub.Topic.installation(repository)
+    Mrgr.PubSub.broadcast(repository, topic, event)
+
+    repository
+  end
 
   defmodule Query do
     use Mrgr.Query
@@ -344,6 +418,13 @@ defmodule Mrgr.Repository do
     def select_ids(query) do
       from(q in query,
         select: q.id
+      )
+    end
+
+    def with_policy(query) do
+      from(q in query,
+        left_join: p in assoc(q, :policy),
+        preload: [policy: p]
       )
     end
 

@@ -6,6 +6,7 @@ defmodule Mrgr.Github.API do
   defdelegate commits(pull_request, installation), to: @mod
   defdelegate fetch_filtered_pulls(installation, repo, opts), to: @mod
   defdelegate fetch_pulls_graphql(installation, repo), to: @mod
+  defdelegate fetch_repository_settings_graphql(repo), to: @mod
   defdelegate fetch_mergeable_statuses_on_open_pull_requests(repository), to: @mod
   defdelegate fetch_issue_comments(installation, repo, number), to: @mod
   defdelegate fetch_pr_review_comments(installation, repo, number), to: @mod
@@ -17,6 +18,8 @@ defmodule Mrgr.Github.API do
   defdelegate get_new_installation_token(installation), to: @mod
   defdelegate head_commit(pull_request, installation), to: @mod
   defdelegate merge_pull_request(client, owner, repo, number, message), to: @mod
+  defdelegate update_repo_settings(repo, params), to: @mod
+  defdelegate update_branch_protection(repo, params), to: @mod
 
   def list_requests do
     Mrgr.Schema.GithubAPIRequest

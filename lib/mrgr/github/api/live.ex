@@ -114,7 +114,7 @@ defmodule Mrgr.Github.API.Live do
     neuron_request!(installation.id, query)
   end
 
-  def fetch_repository_graphql(repository) do
+  def fetch_repository_settings_graphql(repository) do
     query = """
       query {
         node(id:"#{repository.node_id}") {
@@ -167,6 +167,24 @@ defmodule Mrgr.Github.API.Live do
     """
 
     neuron_request!(installation, query)
+  end
+
+  def update_repo_settings(repo, params) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
+
+    request!(&Tentacat.Repositories.update/4, repo.installation_id, [owner, name, params])
+  end
+
+  def update_branch_protection(repo, params) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
+    branch_name = repo.settings.default_branch_name
+
+    request!(&Tentacat.Repositories.Branches.update_protection/5, repo.installation_id, [
+      owner,
+      name,
+      branch_name,
+      params
+    ])
   end
 
   def fetch_filtered_pulls(installation, repo, opts) do

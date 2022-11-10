@@ -1,6 +1,10 @@
 defmodule MrgrWeb.Components.Repository do
   use MrgrWeb, :component
 
+  import MrgrWeb.Components.UI
+
+  alias Phoenix.LiveView.JS
+
   def possible_merge_badges(assigns) do
     shape = "px-2 inline-flex text-xs leading-5 font-semibold rounded-full"
 
@@ -38,7 +42,6 @@ defmodule MrgrWeb.Components.Repository do
 
   def lock(%{bool: true} = assigns) do
     ~H"""
-
       <div class="flex items-center tooltip">
         <.icon name="lock-closed" class="text-emerald-400 hover:text-emerald-500 mr-1 h-5 w-5" />
         <span class="tooltiptext">Private</span>
@@ -52,6 +55,15 @@ defmodule MrgrWeb.Components.Repository do
         <.icon name="lock-open" class="tooltip text-gray-400 hover:text-gray-500 mr-1 h-5 w-5" />
         <span class="tooltiptext">Public</span>
       </div>
+    """
+  end
+
+  def apply_policy_link(assigns) do
+    ~H"""
+    <.l phx_click={JS.push("apply-policy", value: %{policy_id: @policy_id, repo_id: @repo_id})}
+          class="text-teal-700 hover:text-teal-500 hover:bg-stone-50 font-light p-3 text-sm rounded-md" >
+      <%= render_slot(@inner_block) %>
+    </.l>
     """
   end
 end

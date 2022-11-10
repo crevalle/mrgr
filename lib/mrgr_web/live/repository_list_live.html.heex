@@ -27,7 +27,7 @@
               <td class="py-4 pl-4 text-sm font-medium text-gray-900"><%= policy.title %></td>
               <td class="p-3 text-center"><%= repo_count(@repo_counts, policy) %></td>
               <td class="p-3 text-center"><%= tf(policy.apply_to_new_repos) %></td>
-              <td class="p-3 text-center"><%= policy.settings.required_approving_review_count %></td>
+              <td class="p-3 text-center"><.approving_review_count count={policy.settings.required_approving_review_count } /></td>
               <td class="p-3"><div class="flex justify-center space-x-4"><.possible_merge_badges settings={policy.settings} /></div></td>
               <td class="p-3">
                 <.l
@@ -70,13 +70,60 @@
             <td class="text-center"><.approving_review_count count={repo.settings.required_approving_review_count} /></td>
             <td><div class="flex justify-center space-x-4"><.possible_merge_badges settings={repo.settings} /></div></td>
             <td class="pl-3">
-              <div class="flex items-center justify-center space-around">
-                <%= if Mrgr.Repository.apply_policy?(repo) do %>
-                  <.icon name="exclamation-circle" class="text-red-700 mr-1 h-5 w-5" />
-                  <.l >Apply Policy</.l>
-                <% else %>
-                  <.icon name="check" class="text-emerald-500 mr-1 h-5 w-5" />
-                <% end %>
+              <.spinner id={"spinner-#{repo.id}"} />
+
+              <div id={"apply-policy-#{repo.id}"} data-hide={JS.hide()} data-show={JS.show(transition: {"ease-out duration-300", "opacity-0", "opacity-100"}) } class="relative">
+
+                <.l phx-click={JS.toggle(
+                    to: "#apply-policy-menu-#{repo.id}",
+                    in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
+                    out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
+                  )}
+                   phx-click-away={JS.hide(
+                    to: "#apply-policy-menu-#{repo.id}",
+                    transition: {"ease-in duration-75", "opacity-100 scale-100", "opacity-0 scale-95"}
+                  )}
+                  id={"apply-policy-menu-button-#{repo.id}"}
+                  aria-expanded="false"
+                  aria-haspopup="true"
+                  class="flex items-center px-2 py-1 text-gray-700 hover:bg-gray-50 rounded-md font-light text-sm">
+
+                    <%= if Mrgr.Repository.has_policy?(repo) do %>
+                      <%= if Mrgr.Repository.settings_match_policy?(repo) do %>
+                        <.icon name="check" class="text-emerald-500 mr-1 h-5 w-5" />
+                      <% else %>
+                        <.icon name="exclamation-circle" class="text-red-700 mr-1 h-5 w-5" />
+                      <% end %>
+                      <span class="text-gray-500 font-light"><%= Mrgr.Schema.Repository.policy_name(repo) %></span>
+                    <% else %>
+                      <p class="text-gray-500 font-light italic">no policy</p>
+                    <% end %>
+
+                  <.icon name="chevron-down" class="ml-1 h-3 w-3" />
+                </.l>
+
+                <div style="display: none;" id={"apply-policy-menu-#{repo.id}"} class="origin-top-right z-50 mt-2 w-64 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"apply-policy-menu-button-#{repo.id}"} tabindex="-1">
+                  <div class="mt-2 flex flex-col text-sm text-gray-500 sm:mt-0">
+                    <!-- title -->
+                    <div class="flex justify-center">
+                      <p class="px-3 pt-3 text-gray-900">Apply Policy</p>
+                    </div>
+                    <p class="p-3 text-center border-b">Select a policy to push its settings to your repository on Github.</p>
+
+                    <!-- current policy default action -->
+                    <.apply_policy_link :if={Mrgr.Repository.has_policy?(repo)} policy_id={repo.policy.id} repo_id={repo.id}>
+                      <div class="flex items-center justify-between">
+                        <%= repo.policy.title %>
+                        <p class="text-gray-500 hover:text-gray-500 font-light italic">current policy</p>
+                      </div>
+                    </.apply_policy_link>
+
+                    <.apply_policy_link :for={policy <- Mrgr.List.remove(@policies, repo.policy)} policy_id={policy.id} repo_id={repo.id}>
+                      <%= policy.title %>
+                    </.apply_policy_link>
+                  </div>
+                </div>
+
               </div>
             </td>
           </tr>

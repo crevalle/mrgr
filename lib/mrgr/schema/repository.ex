@@ -11,7 +11,7 @@ defmodule Mrgr.Schema.Repository do
     field(:private, :boolean)
     field(:merge_freeze_enabled, :boolean, default: false)
 
-    embeds_one(:settings, Mrgr.Schema.RepositorySettings, on_replace: :delete)
+    embeds_one(:settings, Mrgr.Schema.RepositorySettings, on_replace: :update)
     embeds_one(:parent, Mrgr.Schema.Repository.Parent, on_replace: :delete)
 
     field(:dismiss_stale_reviews, :boolean, read_after_writes: true)
@@ -20,7 +20,7 @@ defmodule Mrgr.Schema.Repository do
 
     belongs_to(:installation, Mrgr.Schema.Installation)
 
-    belongs_to(:settings_policy, Mrgr.Schema.RepositorySettingsPolicy,
+    belongs_to(:policy, Mrgr.Schema.RepositorySettingsPolicy,
       foreign_key: :repository_settings_policy_id
     )
 
@@ -93,6 +93,9 @@ defmodule Mrgr.Schema.Repository do
 
   def main_branch(%{data: %{"default_branch" => branch}}), do: branch
   def main_branch(_repo), do: "master"
+
+  def policy_name(%{policy: %{title: title}}), do: title
+  def policy_name(_repo), do: nil
 
   # %{
   #   "full_name" => "crevalle/node-cql-binary",

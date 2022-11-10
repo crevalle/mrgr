@@ -1,6 +1,8 @@
 defmodule MrgrWeb.Components.UI do
   use MrgrWeb, :component
 
+  alias Phoenix.LiveView.JS
+
   def inline_link(assigns) do
     default_class = "text-teal-700 hover:text-teal-500"
     class = Map.get(assigns, :class, default_class)
@@ -426,6 +428,31 @@ defmodule MrgrWeb.Components.UI do
       </ul>
     </nav>
     """
+  end
+
+  def spinner(assigns) do
+    ~H"""
+      <div id={@id}
+        class="hidden spinner"
+        data-spinning={show_spinner(@id)}
+        data-done={hide_spinner(@id)}
+      >
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
+    """
+  end
+
+  def show_spinner(js \\ %JS{}, id) do
+    JS.show(js,
+      to: "##{id}",
+      transition: {"ease-out duration-300", "opacity-0", "opacity-100"}
+    )
+  end
+
+  def hide_spinner(js \\ %JS{}, id) do
+    JS.hide(js, to: "##{id}")
   end
 
   defp language_icon_url("html" = name) do

@@ -71,3 +71,4 @@ window.addEventListener("phx:js-exec", ({detail}) => {
     liveSocket.execJS(el, el.getAttribute(detail.attr))
   })
 })
+

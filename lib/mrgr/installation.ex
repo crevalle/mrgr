@@ -104,7 +104,7 @@ defmodule Mrgr.Installation do
   def refresh_security_settings(installation) do
     # assumes repos already exist locally, WILL NOT create new ones
     data = fetch_repo_security_settings(installation)
-    repos = Mrgr.Repository.refresh_security_settings(data)
+    repos = Mrgr.Repository.refresh_all_security_settings(data)
 
     %{installation | repositories: repos}
   end

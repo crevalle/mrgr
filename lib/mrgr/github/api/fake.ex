@@ -1,4 +1,16 @@
 defmodule Mrgr.Github.API.Fake do
+  def update_repo_settings(_repo, _params) do
+    %{}
+  end
+
+  def update_branch_protection(_repo, _params) do
+    %{}
+  end
+
+  def fetch_repository_settings_graphql(_repo) do
+    %{"node" => %{}}
+  end
+
   def get_new_installation_token(_installation) do
     []
   end
