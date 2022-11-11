@@ -94,7 +94,7 @@ defmodule Mrgr.Schema.Repository do
   def main_branch(%{data: %{"default_branch" => branch}}), do: branch
   def main_branch(_repo), do: "master"
 
-  def policy_name(%{policy: %{title: title}}), do: title
+  def policy_name(%{policy: %{name: name}}), do: name
   def policy_name(_repo), do: nil
 
   # %{

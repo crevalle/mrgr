@@ -65,12 +65,12 @@ defmodule MrgrWeb.RepositoryListLive do
 
   def handle_info(%{event: @repository_settings_policy_created, payload: policy}, socket) do
     policies = [policy | socket.assigns.policies]
-    policies = Enum.sort_by(policies, & &1.title)
+    policies = Enum.sort_by(policies, & &1.name)
 
     repo_counts = Mrgr.Repository.id_counts_for_policies(Enum.map(policies, & &1.id))
 
     socket
-    |> Flash.put(:info, "Policy #{policy.title} was added.")
+    |> Flash.put(:info, "Policy #{policy.name} was added.")
     |> assign(:policies, policies)
     |> assign(:repo_counts, repo_counts)
     |> noreply()
@@ -86,7 +86,7 @@ defmodule MrgrWeb.RepositoryListLive do
     repo_counts = Mrgr.Repository.id_counts_for_policies(policy_ids)
 
     socket
-    |> Flash.put(:info, "Policy #{policy.title} was updated.")
+    |> Flash.put(:info, "Policy #{policy.name} was updated.")
     |> assign(:policies, policies)
     |> assign(:repo_counts, repo_counts)
     |> noreply()
@@ -96,7 +96,7 @@ defmodule MrgrWeb.RepositoryListLive do
     policies = Mrgr.List.remove(socket.assigns.policies, policy)
 
     socket
-    |> Flash.put(:info, "Policy #{policy.title} was deleted.")
+    |> Flash.put(:info, "Policy #{policy.name} was deleted.")
     |> assign(:policies, policies)
     |> noreply()
   end

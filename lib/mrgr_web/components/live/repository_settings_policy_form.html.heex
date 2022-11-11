@@ -7,7 +7,7 @@
   <div class="mt-8 bg-white overflow-hidden ">
     <.form let={f} for={@changeset} phx-submit="save" phx-change="validate" phx-target={@myself} class="space-y-8 divide-y divide-gray-200">
 
-      <.input type="text" f={f} field={:title} placeholder="eg. 'default', 'sensitive'"/>
+      <.input type="text" f={f} field={:name} placeholder="eg. 'default', 'sensitive'"/>
 
       <%= for s <- inputs_for(f, :settings) do %>
 

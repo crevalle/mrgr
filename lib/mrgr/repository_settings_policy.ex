@@ -9,7 +9,7 @@ defmodule Mrgr.RepositorySettingsPolicy do
   def for_installation(installation_id) do
     Schema
     |> Query.for_installation(installation_id)
-    |> Query.order(asc: :title)
+    |> Query.order(asc: :name)
     |> Mrgr.Repo.all()
   end
 
