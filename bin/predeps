@@ -1,0 +1,4 @@
+mix hex.repo add oban https://getoban.pro/repo \
+  --fetch-public-key SHA256:4/OSKi0NRF91QVVXlGAhb/BIMLnK8NHcx/EWs+aIWPc \
+  --auth-key 3a3uskj6g2sf23g5oictfnpqdno4htjd
+

@@ -1,5 +1,6 @@
 defmodule MrgrWeb.Router do
   use MrgrWeb, :router
+  import Oban.Web.Router
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -77,6 +78,8 @@ defmodule MrgrWeb.Router do
 
   scope "/admin", MrgrWeb.Admin, as: :admin do
     pipe_through [:browser, :authenticate, :admin]
+
+    oban_dashboard("/oban")
 
     live "/incoming-webhooks", Live.IncomingWebhook, :index, as: :incoming_webhook
     live "/incoming-webhooks/:id", Live.IncomingWebhookShow, :show, as: :incoming_webhook
