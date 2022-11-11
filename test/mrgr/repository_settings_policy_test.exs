@@ -4,10 +4,10 @@ defmodule Mrgr.RepositorySettingsPolicyTest do
   describe "create/1" do
     setup [:with_installation]
 
-    test "creates a new profile", ctx do
+    test "creates a new policy", ctx do
       params = %{
         "installation_id" => ctx.installation.id,
-        "title" => "hot pants",
+        "name" => "hot pants",
         "apply_to_new_repos" => false,
         "settings" => %{
           "merge_commit_allowed" => true,
@@ -17,15 +17,15 @@ defmodule Mrgr.RepositorySettingsPolicyTest do
         }
       }
 
-      {:ok, profile} = Mrgr.RepositorySettingsPolicy.create(params)
+      {:ok, policy} = Mrgr.RepositorySettingsPolicy.create(params)
 
-      assert profile.title == "hot pants"
-      assert profile.installation_id == ctx.installation.id
-      assert profile.settings.required_approving_review_count == 1
-      assert profile.settings.merge_commit_allowed == true
+      assert policy.name == "hot pants"
+      assert policy.installation_id == ctx.installation.id
+      assert policy.settings.required_approving_review_count == 1
+      assert policy.settings.merge_commit_allowed == true
     end
 
-    test "associates the profile with one or more repos scoped to the installation", ctx do
+    test "associates the policy with one or more repos scoped to the installation", ctx do
       repo_1 = insert!(:repository, installation: ctx.installation)
       _repo_2 = insert!(:repository, installation: ctx.installation)
       repo_3 = insert!(:repository, installation: ctx.installation)
@@ -34,7 +34,7 @@ defmodule Mrgr.RepositorySettingsPolicyTest do
       params = %{
         "repository_ids" => [repo_1.id, repo_3.id, repo_4.id],
         "installation_id" => ctx.installation.id,
-        "title" => "hot pants",
+        "name" => "hot pants",
         "apply_to_new_repos" => false,
         "settings" => %{
           "merge_commit_allowed" => true,
@@ -44,10 +44,10 @@ defmodule Mrgr.RepositorySettingsPolicyTest do
         }
       }
 
-      {:ok, profile} = Mrgr.RepositorySettingsPolicy.create(params)
+      {:ok, policy} = Mrgr.RepositorySettingsPolicy.create(params)
 
-      profile = Mrgr.Repo.preload(profile, :repositories, force: true)
-      assert Enum.map(profile.repositories, & &1.id) == Enum.map([repo_1, repo_3], & &1.id)
+      policy = Mrgr.Repo.preload(policy, :repositories, force: true)
+      assert Enum.map(policy.repositories, & &1.id) == Enum.map([repo_1, repo_3], & &1.id)
     end
   end
 
@@ -55,29 +55,29 @@ defmodule Mrgr.RepositorySettingsPolicyTest do
 
   describe "update/2" do
     test "updates attrs and repos" do
-      profile = insert!(:repository_settings_policy)
+      policy = insert!(:repository_settings_policy)
 
       from(r in Mrgr.Schema.Repository,
-        where: r.repository_settings_policy_id == ^profile.id
+        where: r.repository_settings_policy_id == ^policy.id
       )
       |> Mrgr.Repo.all()
 
-      profile
+      policy
       |> Mrgr.Repo.preload(:repositories, force: true)
       |> Map.get(:repositories)
 
       repo_1 =
         insert!(:repository,
-          repository_settings_policy_id: profile.id,
-          installation: profile.installation
+          repository_settings_policy_id: policy.id,
+          installation: policy.installation
         )
 
-      repo_2 = insert!(:repository, installation: profile.installation)
+      repo_2 = insert!(:repository, installation: policy.installation)
       repo_3 = insert!(:repository)
 
       {:ok, updated} =
-        Mrgr.RepositorySettingsPolicy.update(profile, %{
-          "title" => "yo momma",
+        Mrgr.RepositorySettingsPolicy.update(policy, %{
+          "name" => "yo momma",
           "repository_ids" => [repo_2.id, repo_3.id]
         })
 
@@ -86,7 +86,7 @@ defmodule Mrgr.RepositorySettingsPolicyTest do
       old_repo = Mrgr.Repo.get(Mrgr.Schema.Repository, repo_1.id)
       assert is_nil(old_repo.repository_settings_policy_id)
 
-      assert updated.title == "yo momma"
+      assert updated.name == "yo momma"
 
       assert Enum.map(updated.repositories, & &1.id) == Enum.map([repo_2], & &1.id)
     end
