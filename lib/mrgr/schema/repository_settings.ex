@@ -11,7 +11,7 @@ defmodule Mrgr.Schema.RepositorySettings do
     field(:rebase_merge_allowed, :boolean, default: false)
     field(:squash_merge_allowed, :boolean, default: true)
 
-    field(:default_branch_name, :string)
+    field(:default_branch_name, :string, default: "main")
 
     # primary branch protection
     field(:allows_force_pushes, :boolean)

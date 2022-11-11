@@ -5,9 +5,11 @@ defmodule Mrgr.Repository do
   alias Mrgr.Schema.Repository, as: Schema
 
   def create(params) do
-    %Schema{}
-    |> Schema.changeset(params)
-    |> Mrgr.Repo.insert()
+    with cs <- Schema.changeset(%Schema{}, params),
+         {:ok, repository} <- Mrgr.Repo.insert(cs) do
+      repository = set_and_apply_default_policy(repository)
+      {:ok, repository}
+    end
   end
 
   def find_by_name_for_user(user, name) do
@@ -67,6 +69,22 @@ defmodule Mrgr.Repository do
     |> Query.for_policy(policy_id)
     |> Query.set_settings_policy_id(nil)
     |> Mrgr.Repo.update_all([])
+  end
+
+  def set_and_apply_default_policy(repository) do
+    default_policy = Mrgr.RepositorySettingsPolicy.default(repository.installation_id)
+
+    case default_policy do
+      nil ->
+        repository
+
+      policy ->
+        repository
+        |> Ecto.Changeset.change(%{repository_settings_policy_id: policy.id})
+        |> Mrgr.Repo.update!()
+
+        apply_policy_to_repo(repository, policy)
+    end
   end
 
   def set_settings_policy_id(ids, installation_id, policy_id) do

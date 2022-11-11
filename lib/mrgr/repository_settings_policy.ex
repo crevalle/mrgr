@@ -13,6 +13,13 @@ defmodule Mrgr.RepositorySettingsPolicy do
     |> Mrgr.Repo.all()
   end
 
+  def default(installation_id) do
+    Schema
+    |> Query.for_installation(installation_id)
+    |> Query.default()
+    |> Mrgr.Repo.one()
+  end
+
   def find(id) do
     Schema
     |> Query.by_id(id)
@@ -99,6 +106,12 @@ defmodule Mrgr.RepositorySettingsPolicy do
       from(q in query,
         left_join: r in assoc(q, :repositories),
         preload: [repositories: r]
+      )
+    end
+
+    def default(query) do
+      from(q in query,
+        where: q.apply_to_new_repos == true
       )
     end
   end
