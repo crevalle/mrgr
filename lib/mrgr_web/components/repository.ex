@@ -40,6 +40,15 @@ defmodule MrgrWeb.Components.Repository do
     """
   end
 
+  def apply_to_new_repo_badge(assigns) do
+    ~H"""
+      <div :if={@policy.apply_to_new_repos} class="tooltip pl-2">
+        <.icon name="light-bulb" class="text-emerald-400 hover:text-emerald-500 mr-1 h-5 w-5" />
+        <span class="tooltiptext">applies to new repos</span>
+      </div>
+    """
+  end
+
   def lock(%{bool: true} = assigns) do
     ~H"""
       <div class="flex items-center tooltip">

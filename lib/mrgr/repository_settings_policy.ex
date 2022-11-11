@@ -13,6 +13,19 @@ defmodule Mrgr.RepositorySettingsPolicy do
     |> Mrgr.Repo.all()
   end
 
+  def find(id) do
+    Schema
+    |> Query.by_id(id)
+    |> Mrgr.Repo.one()
+  end
+
+  def find_with_repos(id) do
+    Schema
+    |> Query.by_id(id)
+    |> Query.with_repositories()
+    |> Mrgr.Repo.one()
+  end
+
   @spec create(map()) :: {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
   def create(params) do
     repo_ids = Map.get(params, "repository_ids", [])
@@ -79,6 +92,13 @@ defmodule Mrgr.RepositorySettingsPolicy do
     def for_installation(query, id) do
       from(q in query,
         where: q.installation_id == ^id
+      )
+    end
+
+    def with_repositories(query) do
+      from(q in query,
+        left_join: r in assoc(q, :repositories),
+        preload: [repositories: r]
       )
     end
   end

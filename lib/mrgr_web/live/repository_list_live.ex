@@ -50,16 +50,26 @@ defmodule MrgrWeb.RepositoryListLive do
     policy = Mrgr.List.find(socket.assigns.policies, policy_id)
     repository = Mrgr.List.find(socket.assigns.repos, repo_id)
 
-    Mrgr.Repository.apply_policy_to_repo(repository, policy)
+    %{policy_id: policy.id, repo_id: repository.id}
+    |> Mrgr.Worker.RepoSettingsSync.new()
+    |> Oban.insert()
 
     socket
     |> start_apply_policy_spinner(repo_id)
     |> noreply()
   end
 
-  def handle_info(:close_form, socket) do
-    socket
-    |> assign(:form_subject, nil)
+  def handle_event("apply-policy-to-all", %{"policy_id" => policy_id}, socket) do
+    policy = Mrgr.List.find(socket.assigns.policies, policy_id)
+    repo_ids = Map.get(socket.assigns.repo_counts, policy_id)
+
+    %{policy_id: policy.id}
+    |> Mrgr.Worker.RepoSettingsSync.new()
+    |> Oban.insert()
+
+    Enum.reduce(repo_ids, socket, fn repo_id, s ->
+      start_apply_policy_spinner(s, repo_id)
+    end)
     |> noreply()
   end
 
