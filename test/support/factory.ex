@@ -123,7 +123,7 @@ defmodule Mrgr.Factory do
   def build(:repository_settings_policy) do
     %Mrgr.Schema.RepositorySettingsPolicy{
       installation: build(:installation),
-      title: Faker.Company.bs(),
+      name: Faker.Company.bs(),
       apply_to_new_repos: false,
       settings: build(:repository_settings)
     }
