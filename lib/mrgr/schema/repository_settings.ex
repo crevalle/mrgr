@@ -56,10 +56,16 @@ defmodule Mrgr.Schema.RepositorySettings do
   end
 
   def match?(one, two) do
-    @matching_fields
-    |> Enum.all?(fn field ->
-      Map.get(one, field) == Map.get(two, field)
-    end)
+    Enum.all?(@matching_fields, fn field -> match?(one, two, field) end)
+  end
+
+  def match?(one, two, :required_approving_review_count = field) do
+    # nils and 0s are equal
+    Map.get(one, field, 0) == Map.get(two, field, 0)
+  end
+
+  def match?(one, two, field) do
+    Map.get(one, field) == Map.get(two, field)
   end
 
   def translate_branch_protection_to_rest_api(settings) do
