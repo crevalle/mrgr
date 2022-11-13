@@ -1,6 +1,8 @@
 defmodule Mrgr.RepositorySettingsPolicy do
   use Mrgr.PubSub.Event
 
+  import Mrgr.Tuple
+
   alias Mrgr.Schema.RepositorySettingsPolicy, as: Schema
   alias __MODULE__.Query
 
@@ -43,8 +45,10 @@ defmodule Mrgr.RepositorySettingsPolicy do
          policy <- ensure_apply_to_new_repo_singleton(policy),
          _updated <-
            Mrgr.Repository.set_settings_policy_id(repo_ids, policy.installation_id, policy.id) do
-      broadcast(policy, @repository_settings_policy_created)
-      {:ok, policy}
+      policy
+      |> Mrgr.Repo.preload(:repositories)
+      |> broadcast(@repository_settings_policy_created)
+      |> ok()
     end
   end
 

@@ -72,3 +72,7 @@ window.addEventListener("phx:js-exec", ({detail}) => {
   })
 })
 
+window.addEventListener(
+  "phx:remove-element",
+  e => document.getElementById(e.detail.id).remove()
+)

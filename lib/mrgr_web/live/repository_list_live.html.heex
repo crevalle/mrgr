@@ -4,7 +4,12 @@
     <div class="section">
       <div class="flex justify-between mb-2">
         <.h1>Security Policies</.h1>
-        <.l phx-click="open-form">Add New</.l>
+        <.l phx-click={
+           JS.push("add-policy")
+           |> show_detail()
+           }>
+         Add New
+        </.l>
       </div>
       <%= if @policies == [] do %>
         <div class="p-4 border border-solid rounded-md bg-blue-50 flex flex-col items-center">
@@ -39,7 +44,10 @@
               <td class="p-3"><.possible_merge_badges settings={policy.settings} /></td>
               <td class="p-3">
                 <.l
-                  phx_click="edit-policy"
+                  phx_click={
+                  JS.push("edit-policy")
+                  |> show_detail()
+                  }
                   phx_value_id={policy.id}
                   >
                   Edit
@@ -155,15 +163,16 @@
 
   </div>
 
-  <.live_component
-    :if={@form_object}
-    module={MrgrWeb.Components.Live.RepositorySettingsPolicyForm}
-    id="security-policy-form"
-    object={@form_object}
-    repos={@all_repos}
-    selected_repository_ids={Enum.map(repos_for_policy(@all_repos, @form_object), & &1.id)}
-    current_user={@current_user}
-    timezone={@timezone} />
+  <div id="detail-pane">
+    <.live_component
+      module={MrgrWeb.Components.Live.RepositorySettingsPolicyForm}
+      id="security-policy-form"
+      object={@form_object}
+      repos={@all_repos}
+      selected_repository_ids={Enum.map(repos_for_policy(@all_repos, @form_object), & &1.id)}
+      current_user={@current_user}
+      timezone={@timezone} />
+  </div>
 </div>
 
 

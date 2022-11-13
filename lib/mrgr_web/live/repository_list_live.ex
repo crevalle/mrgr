@@ -19,7 +19,7 @@ defmodule MrgrWeb.RepositoryListLive do
       socket
       |> assign(:all_repos, repos)
       |> assign(:repo_list, repos)
-      |> assign(:form_object, nil)
+      |> assign(:form_object, %Mrgr.Schema.RepositorySettingsPolicy{})
       |> assign(:selected_policy, nil)
       |> assign(:policies, policies)
       |> put_title("Repositories")
@@ -33,7 +33,7 @@ defmodule MrgrWeb.RepositoryListLive do
     policy = Mrgr.List.find(socket.assigns.policies, id)
 
     # unselect if selected
-    {selected, repos} =
+    {selected, repos_for_policy} =
       if selected?(policy, socket.assigns.selected_policy) do
         {nil, socket.assigns.all_repos}
       else
@@ -42,21 +42,13 @@ defmodule MrgrWeb.RepositoryListLive do
 
     socket
     |> assign(:selected_policy, selected)
-    # close the form to avoid confusion
-    |> assign(:form_object, nil)
-    |> assign(:repo_list, repos)
+    |> assign(:repo_list, repos_for_policy)
     |> noreply()
   end
 
-  def handle_event("open-form", _params, socket) do
+  def handle_event("add-policy", _params, socket) do
     socket
     |> assign(:form_object, %Mrgr.Schema.RepositorySettingsPolicy{})
-    |> noreply()
-  end
-
-  def handle_event("close-form", _params, socket) do
-    socket
-    |> close_form()
     |> noreply()
   end
 
@@ -101,12 +93,6 @@ defmodule MrgrWeb.RepositoryListLive do
     |> noreply()
   end
 
-  def handle_info(:close_form, socket) do
-    socket
-    |> close_form()
-    |> noreply()
-  end
-
   def handle_info(%{event: @repository_settings_policy_created, payload: policy}, socket) do
     policies = [policy | socket.assigns.policies]
     policies = Enum.sort_by(policies, & &1.name)
@@ -140,23 +126,19 @@ defmodule MrgrWeb.RepositoryListLive do
   end
 
   def handle_info(%{event: @repository_updated, payload: repository}, socket) do
-    repos = Mrgr.List.replace(socket.assigns.repos, repository)
+    all_repos = Mrgr.List.replace(socket.assigns.all_repos, repository)
+    repo_list = Mrgr.List.replace(socket.assigns.repo_list, repository)
     policies = replace_repo_in_policy(repository, socket.assigns.policies)
 
     socket
     |> stop_apply_policy_spinner(repository.id)
-    |> assign(:repo_list, repos)
+    |> assign(:all_repos, all_repos)
+    |> assign(:repo_list, repo_list)
     |> assign(:policies, policies)
     |> noreply()
   end
 
   def handle_info(%{event: _whatevs}, socket), do: noreply(socket)
-
-  def close_form(socket) do
-    socket
-    |> assign(:form_object, nil)
-    |> assign(:selected_policy, nil)
-  end
 
   def start_apply_policy_spinner(socket, repo_id) do
     socket

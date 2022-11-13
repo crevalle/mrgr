@@ -84,8 +84,12 @@ defmodule MrgrWeb.Components.Repository do
 
     color = if compliant_count == repo_count, do: "text-emerald-500", else: "text-red-700"
 
+    assigns =
+      assigns
+      |> assign(:color, color)
+
     ~H"""
-    <span class={"#{color}"}>
+    <span class={@color}>
       <%= Enum.count(@compliant) %> / <%= Enum.count(@repos) %>
     </span>
     """

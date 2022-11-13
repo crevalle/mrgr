@@ -1,7 +1,7 @@
 defmodule MrgrWeb.Components.UI do
   use MrgrWeb, :component
 
-  alias Phoenix.LiveView.JS
+  import MrgrWeb.JS
 
   def inline_link(assigns) do
     default_class = "text-teal-700 hover:text-teal-500"
@@ -402,18 +402,11 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  # separate component until we align on forms-as-states-of-truth
-  def close_form_button_myself(assigns) do
-    ~H"""
-    <button phx-click="close-form" phx-target={@target} colors="outline-none">
-      <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
-    </button>
-    """
-  end
-
   def close_form_button(assigns) do
     ~H"""
-    <button phx-click="close-form" colors="outline-none">
+    <button
+      phx-click={hide_detail()}
+      colors="outline-none">
       <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
     </button>
     """
@@ -451,17 +444,6 @@ defmodule MrgrWeb.Components.UI do
         <div class="bounce3"></div>
       </div>
     """
-  end
-
-  def show_spinner(js \\ %JS{}, id) do
-    JS.show(js,
-      to: "##{id}",
-      transition: {"ease-out duration-300", "opacity-0", "opacity-100"}
-    )
-  end
-
-  def hide_spinner(js \\ %JS{}, id) do
-    JS.hide(js, to: "##{id}")
   end
 
   defp language_icon_url("html" = name) do

@@ -73,9 +73,8 @@ defmodule MrgrWeb.Components.Live.RepositorySettingsPolicyForm do
 
     case res do
       {:ok, _policy} ->
-        close_me()
-
         socket
+        |> hide_detail()
         |> noreply()
 
       {:error, changeset} ->
@@ -89,20 +88,9 @@ defmodule MrgrWeb.Components.Live.RepositorySettingsPolicyForm do
     policy = socket.assigns.object
     Mrgr.RepositorySettingsPolicy.delete(policy)
 
-    close_me()
-
     socket
+    |> hide_detail()
     |> noreply()
-  end
-
-  def handle_event("close-form", _params, socket) do
-    close_me()
-
-    noreply(socket)
-  end
-
-  defp close_me do
-    send(self(), :close_form)
   end
 
   defp build_changeset(schema, params \\ %{}) do
