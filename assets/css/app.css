@@ -100,8 +100,11 @@
   @apply basis-1/2
 }
 
+.main-pane {
+  @apply flex flex-col space-y-8 basis-1/2
+}
+
 .section {
-  @apply mt-8
 }
 
 .two-pane-layout {

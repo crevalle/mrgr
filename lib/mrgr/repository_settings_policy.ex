@@ -9,6 +9,7 @@ defmodule Mrgr.RepositorySettingsPolicy do
   def for_installation(installation_id) do
     Schema
     |> Query.for_installation(installation_id)
+    |> Query.with_repositories()
     |> Query.order(asc: :name)
     |> Mrgr.Repo.all()
   end
@@ -86,6 +87,13 @@ defmodule Mrgr.RepositorySettingsPolicy do
     policy
     |> Ecto.Changeset.change(%{apply_to_new_repos: false})
     |> Mrgr.Repo.update!()
+  end
+
+  def compliant_repos(policy) do
+    Enum.filter(
+      policy.repositories,
+      &Mrgr.Schema.RepositorySettings.match?(&1.settings, policy.settings)
+    )
   end
 
   def broadcast(policy, event) do

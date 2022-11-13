@@ -13,9 +13,11 @@ defmodule MrgrWeb.Components.Repository do
       |> assign(:shape, shape)
 
     ~H"""
+    <div class="flex justify-center space-x-2">
       <span :if={@settings.merge_commit_allowed} class={"#{@shape} bg-pink-100"}>merge</span>
       <span :if={@settings.rebase_merge_allowed} class={"#{@shape} bg-blue-100"}>rebase</span>
       <span :if={@settings.squash_merge_allowed} class={"#{@shape} bg-green-100"}>squash</span>
+    </div>
     """
   end
 
@@ -73,6 +75,19 @@ defmodule MrgrWeb.Components.Repository do
           class="text-teal-700 hover:text-teal-500 hover:bg-stone-50 font-light p-3 text-sm rounded-md" >
       <%= render_slot(@inner_block) %>
     </.l>
+    """
+  end
+
+  def compliant_repos_count(assigns) do
+    compliant_count = Enum.count(assigns.compliant)
+    repo_count = Enum.count(assigns.repos)
+
+    color = if compliant_count == repo_count, do: "text-emerald-500", else: "text-red-700"
+
+    ~H"""
+    <span class={"#{color}"}>
+      <%= Enum.count(@compliant) %> / <%= Enum.count(@repos) %>
+    </span>
     """
   end
 end

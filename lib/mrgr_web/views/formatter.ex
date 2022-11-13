@@ -99,4 +99,11 @@ defmodule MrgrWeb.Formatter do
   def shorten(text, length \\ 50) do
     "#{String.slice(text, 1..length)}..."
   end
+
+  def selected_border(true), do: "border-teal-500"
+  def selected_border(false), do: "border-gray-200"
+
+  # used on trs to prevent overlapping borders
+  def selected_outline(true), do: "outline outline-1 outline-teal-500"
+  def selected_outline(false), do: "border border-gray-200"
 end

@@ -1,36 +1,42 @@
-<div>
-  <div class="flex items-center">
-    <.heading title="Security Policies" />
+<div class="two-pane-layout" >
+  <div class="main-pane">
 
-    <.l phx-click="open-form">Add New</.l>
-
-  </div>
-
-  <div class="two-pane-layout">
-    <div class="basis-1/2">
+    <div class="section">
+      <div class="flex justify-between mb-2">
+        <.h1>Security Policies</.h1>
+        <.l phx-click="open-form">Add New</.l>
+      </div>
       <%= if @policies == [] do %>
         <div class="p-4 border border-solid rounded-md bg-blue-50 flex flex-col items-center">
           <p><strong>None Yet!</strong> Why don't you <.inline_link phx-click="open-form">Add One</.inline_link>?</p>
         </div>
       <% else %>
-        <table class="min-w-full shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+        <table class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
           <thead class="bg-gray-100">
             <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Name</th>
             <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Repos</th>
+            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Compliance</th>
             <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Required Approvals</th>
             <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">allowed merge types</th>
             <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500"></th>
-            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500"></th>
           </thead>
-          <tbody class="divide-y divide-gray-200 bg-white">
-            <tr :for={policy <- @policies} >
+          <tbody class="bg-white">
+            <tr :for={policy <- @policies} class={"#{selected_outline(selected?(policy, @selected_policy))}"} >
               <td class="py-4 pl-4 flex items-center text-sm font-medium text-gray-900">
                 <%= policy.name %>
                 <.apply_to_new_repo_badge policy={policy} />
               </td>
-              <td class="p-3 text-gray-500 text-center"><%= repo_count(@repo_counts, policy) %></td>
+              <td class="p-3 text-gray-500 text-right text-nowrap">
+                <.compliant_repos_count compliant={Mrgr.RepositorySettingsPolicy.compliant_repos(policy)} repos={repos_for_policy(@all_repos, policy)} />
+              </td>
+              <td class="p-3">
+                <.l phx-click={JS.push("select-policy", value: %{policy_id: policy.id})} >
+                Remediate
+                </.l>
+
+              </td>
               <td class="p-3 text-center"><.approving_review_count count={policy.settings.required_approving_review_count } /></td>
-              <td class="p-3"><div class="flex justify-center space-x-4"><.possible_merge_badges settings={policy.settings} /></div></td>
+              <td class="p-3"><.possible_merge_badges settings={policy.settings} /></td>
               <td class="p-3">
                 <.l
                   phx_click="edit-policy"
@@ -39,12 +45,6 @@
                   Edit
                 </.l>
               </td>
-              <td class="p-3">
-                <.l phx-click={JS.push("apply-policy-to-all", value: %{policy_id: policy.id})} data_confirm="This will update the settings on all the policy's repositories.  Are you sure?" colors="text-red-700 hover:text-red-900" >
-                Apply Policy
-                </.l>
-
-              </td>
             </tr>
           </tbody>
 
@@ -52,31 +52,39 @@
       <% end %>
     </div>
 
-    <.live_component :if={@form_subject} module={MrgrWeb.Components.Live.RepositorySettingsPolicyForm} id="security-policy-form" object={@form_subject} repos={@repos} selected_repository_ids={Map.get(@repo_counts, @form_subject.id)} current_user={@current_user} timezone={@timezone} />
-  </div>
-</div>
+    <div class="section">
+      <%= if @selected_policy do %>
+        <div class="flex justify-between basis-1/2">
+          <.heading title={"Repositories assigned to policy #{@selected_policy.name}"}/>
 
-<div class="section">
-  <.h1>Repositories for <%= @current_user.current_installation.account.login %></.h1>
+          <.inline_link phx-click={JS.push("apply-policy-to-repos", value: %{policy_id: @selected_policy.id})} data_confirm="This will update the settings on all the policy's repositories.  Are you sure?" colors="text-red-700 hover:text-red-900" >
+          Apply Policy to These Repos
+          </.inline_link>
 
-  <div class="two-pane-layout">
-    <div class="basis-2/3">
-      <table class="min-w-full shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
+        </div>
+      <% else %>
+        <.heading title={"All Repositories for #{ @current_user.current_installation.account.login }"} />
+      <% end %>
+
+      <table class="mt-4 min-w-full shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
         <thead class="bg-gray-100">
-          <th class="py-3 pl-4 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Name</th>
-          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Language</th>
-          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Private?</th>
+          <th class="py-3 pl-20 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Name</th>
           <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Required Approvals</th>
           <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Allowed Merge Types</th>
           <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Compliant?</th>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
-          <tr :for={repo <- @repos} >
-            <td class="py-4 pl-4 text-sm font-medium text-gray-900"><div class="flex"><%= repo.name %> <.repo_forked_badge parent={repo.parent} /></div></td>
-            <td class="py-4 text-sm flex justify-center text-gray-500"><div class="flex"><.language_icon language={repo.language} /></div></td>
-            <td class="px-3 py-4 text-sm text-center text-gray-500"><.lock bool={repo.private} /></td>
+          <tr :for={repo <- @repo_list} >
+            <td class="py-4 pl-4 text-sm font-medium text-gray-900">
+              <div class="flex space-x-2">
+                <.language_icon language={repo.language} />
+                <.lock bool={repo.private} />
+                <span><%= repo.name %> </span>
+                <.repo_forked_badge parent={repo.parent} />
+              </div>
+            </td>
             <td class="text-center"><.approving_review_count count={repo.settings.required_approving_review_count} /></td>
-            <td><div class="flex justify-center space-x-4"><.possible_merge_badges settings={repo.settings} /></div></td>
+            <td><.possible_merge_badges settings={repo.settings} /></td>
             <td class="pl-3">
               <.spinner id={"spinner-#{repo.id}"} />
 
@@ -137,9 +145,25 @@
           </tr>
         </tbody>
       </table>
+
+      <div :if={@repo_list == []} class="mt-2 p-4 border border-solid rounded-md bg-blue-50 flex flex-col items-center">
+        <p><strong>None!</strong> </p>
+      </div>
+
+
     </div>
 
   </div>
+
+  <.live_component
+    :if={@form_object}
+    module={MrgrWeb.Components.Live.RepositorySettingsPolicyForm}
+    id="security-policy-form"
+    object={@form_object}
+    repos={@all_repos}
+    selected_repository_ids={Enum.map(repos_for_policy(@all_repos, @form_object), & &1.id)}
+    current_user={@current_user}
+    timezone={@timezone} />
 </div>
 
 

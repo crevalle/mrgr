@@ -174,14 +174,18 @@ defmodule MrgrWeb.Components.UI do
     assigns = assign_new(assigns, :description, fn -> nil end)
 
     ~H"""
-    <div class="sm:flex sm:items-center">
-      <div class="sm:flex-auto">
-        <.h1><%= @title %></.h1>
-        <%= if @description do %>
-          <p class="mt-2 text-sm text-gray-700"><%= @description %></p>
-        <% end %>
-      </div>
+    <div class="sm:flex-auto">
+      <.h1><%= @title %></.h1>
+      <%= if @description do %>
+        <p class="mt-2 text-sm text-gray-700"><%= @description %></p>
+      <% end %>
     </div>
+    """
+  end
+
+  def heading_description(assigns) do
+    ~H"""
+      <p class="mt-2 text-sm text-gray-700"><%= render_slot(@inner_block) %></p>
     """
   end
 
@@ -376,7 +380,9 @@ defmodule MrgrWeb.Components.UI do
   end
 
   def language_icon(%{language: nil} = assigns) do
-    ~H()
+    ~H"""
+      <span class="mr-5"></span>
+    """
   end
 
   def language_icon(assigns) do
@@ -390,7 +396,9 @@ defmodule MrgrWeb.Components.UI do
     assigns = assign(assigns, :src, src)
 
     ~H"""
-      <img src={@src} class="ml-1 h-5 w-5"/>
+    <span>
+      <img src={@src} class="h-5 w-5"/>
+    </span>
     """
   end
 
