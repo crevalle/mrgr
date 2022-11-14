@@ -20,19 +20,11 @@ defmodule MrgrWeb.FileChangeAlertLive do
     end
   end
 
-  def handle_event("open-add-form", %{"id" => repo_id}, socket) do
+  def handle_event("add-alert", %{"id" => repo_id}, socket) do
     repo = Mrgr.List.find(socket.assigns.repos, repo_id)
     changeset = empty_changeset()
 
-    form = %{
-      action: :create,
-      repo: repo,
-      changeset: changeset,
-      badge_preview: %{
-        bg_color: changeset.data.bg_color,
-        badge_text: nil
-      }
-    }
+    form = build_form(:create, repo, changeset)
 
     socket
     |> assign(:form, form)
@@ -44,24 +36,10 @@ defmodule MrgrWeb.FileChangeAlertLive do
     alert = Mrgr.List.find(repo.file_change_alerts, alert_id)
     changeset = %{build_changeset(alert) | action: :update}
 
-    form = %{
-      action: :edit,
-      repo: repo,
-      changeset: changeset,
-      badge_preview: %{
-        bg_color: alert.bg_color,
-        badge_text: alert.badge_text
-      }
-    }
+    form = build_form(:edit, repo, changeset, alert)
 
     socket
     |> assign(:form, form)
-    |> noreply()
-  end
-
-  def handle_event("close-form", _params, socket) do
-    socket
-    |> assign(:form, nil)
     |> noreply()
   end
 
@@ -107,6 +85,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
       {:ok, _alert} ->
         socket
         |> assign(:form, nil)
+        |> hide_detail()
         |> Flash.put(:info, "Alert saved ✌️")
         |> noreply()
 
@@ -129,6 +108,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
         socket
         |> assign(:repos, repos)
         |> assign(:form, nil)
+        |> hide_detail()
         |> Flash.put(:info, "Alert deleted ✌️")
         |> noreply()
 
@@ -198,5 +178,29 @@ defmodule MrgrWeb.FileChangeAlertLive do
   defp empty_changeset do
     %Mrgr.Schema.FileChangeAlert{}
     |> build_changeset()
+  end
+
+  def build_form(:create, repo, changeset) do
+    %{
+      action: :create,
+      repo: repo,
+      changeset: changeset,
+      badge_preview: %{
+        bg_color: changeset.data.bg_color,
+        badge_text: nil
+      }
+    }
+  end
+
+  def build_form(:edit, repo, changeset, alert) do
+    %{
+      action: :edit,
+      repo: repo,
+      changeset: changeset,
+      badge_preview: %{
+        bg_color: alert.bg_color,
+        badge_text: alert.badge_text
+      }
+    }
   end
 end

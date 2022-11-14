@@ -87,6 +87,8 @@
     </div>
   <% end %>
 
-  <.live_component :if={@selected_pull_request} module={MrgrWeb.Components.Live.PullRequestDetail} id="pull_request_detail" pull_request={@selected_pull_request} current_user={@current_user} merge_frozen={merge_frozen?(@frozen_repos, @selected_pull_request)} timezone={@timezone} />
+  <div id="detail-pane">
+    <.live_component :if={@selected_pull_request} module={MrgrWeb.Components.Live.PullRequestDetail} id="pull_request_detail" pull_request={@selected_pull_request} current_user={@current_user} merge_frozen={merge_frozen?(@frozen_repos, @selected_pull_request)} timezone={@timezone} />
+  </div>
 </div>
 

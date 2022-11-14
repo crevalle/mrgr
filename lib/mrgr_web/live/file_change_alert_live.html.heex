@@ -1,9 +1,11 @@
 <.heading title="File Change Alerts" description="Add alerts based on custom file or folder names." />
 
 <div class="two-pane-layout">
-  <div class="major-pane flex flex-col space-y-4">
+  <div class="main-pane">
     <.live_component :for={repo <- @repos} module={MrgrWeb.Components.Live.FileChangeAlertComponent} id={"repo_#{repo.id}"} repo={repo} timezone={@timezone} />
   </div>
-  <.live_component :if={@form} module={MrgrWeb.Components.Live.FileChangeAlertFormComponent} id="fca_form" form={@form} current_user={@current_user} timezone={@timezone} />
+  <div id="detail-pane">
+    <.live_component :if={@form} module={MrgrWeb.Components.Live.FileChangeAlertFormComponent} id="fca_form" form={@form} current_user={@current_user} timezone={@timezone} />
+  </div>
 </div>
 

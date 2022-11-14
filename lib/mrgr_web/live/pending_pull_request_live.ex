@@ -46,12 +46,6 @@ defmodule MrgrWeb.PendingPullRequestLive do
     |> noreply()
   end
 
-  def handle_event("close-detail", _params, socket) do
-    socket
-    |> assign(:selected_pull_request, nil)
-    |> noreply()
-  end
-
   def handle_event("dropped", %{"draggedId" => id, "draggableIndex" => index}, socket) do
     dragged = find_dragged(socket.assigns.pull_requests, get_id(id))
 
@@ -64,13 +58,19 @@ defmodule MrgrWeb.PendingPullRequestLive do
     |> noreply()
   end
 
-  def handle_event("show-preview", %{"pull-request-id" => id}, socket) do
+  def handle_event("select-pull-request", %{"pull-request-id" => id}, socket) do
     selected =
       Mrgr.List.find(socket.assigns.pull_requests, id) ||
         Mrgr.List.find(socket.assigns.snoozed, id)
 
     socket
     |> assign(:selected_pull_request, selected)
+    |> noreply()
+  end
+
+  def handle_event("unselect-pull-request", _params, socket) do
+    socket
+    |> assign(:selected_pull_request, nil)
     |> noreply()
   end
 
@@ -134,16 +134,18 @@ defmodule MrgrWeb.PendingPullRequestLive do
     pull_requests = Mrgr.List.remove(pull_requests, updated)
     snoozed = Mrgr.List.add(socket.assigns.snoozed, updated)
 
-    selected =
+    socket =
       case previewing_pull_request?(socket.assigns.selected_pull_request, updated) do
-        true -> updated
-        false -> nil
+        true ->
+          hide_detail(socket)
+
+        false ->
+          socket
       end
 
     socket
     |> assign(:pull_requests, pull_requests)
     |> assign(:snoozed, snoozed)
-    |> assign(:selected_pull_request, selected)
     |> noreply()
   end
 
@@ -158,16 +160,9 @@ defmodule MrgrWeb.PendingPullRequestLive do
     snoozed = Mrgr.List.remove(snoozed, updated)
     pull_requests = Mrgr.List.replace!(socket.assigns.pull_requests, updated)
 
-    selected =
-      case previewing_pull_request?(socket.assigns.selected_pull_request, updated) do
-        true -> updated
-        false -> nil
-      end
-
     socket
     |> assign(:pull_requests, pull_requests)
     |> assign(:snoozed, snoozed)
-    |> assign(:selected_pull_request, selected)
     |> noreply()
   end
 
@@ -206,16 +201,9 @@ defmodule MrgrWeb.PendingPullRequestLive do
   def handle_info(%{event: @pull_request_closed, payload: payload}, socket) do
     pull_requests = Mrgr.List.remove(socket.assigns.pull_requests, payload.id)
 
-    selected =
-      case previewing_pull_request?(socket.assigns.selected_pull_request, payload) do
-        true -> nil
-        false -> socket.assigns.selected_pull_request
-      end
-
     socket
     |> put_closed_flash_message(payload)
     |> assign(:pull_requests, pull_requests)
-    |> assign(:selected_pull_request, selected)
     |> noreply()
   end
 

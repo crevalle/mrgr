@@ -1,9 +1,7 @@
-<div class="detail-pane">
+<div class="">
   <div class="flex justify-between items-start">
     <.heading title={"#{if @form.action == :create, do: "Add new alert", else: "Edit alert"} for #{@form.repo.name}"} description="Add alerts based on custom file or folder names.  Alerts will appear as labels on the Pull Request, and you can optionally get notified when a new Pull Request matches." />
-    <button phx-click="close-form" colors="outline-none">
-      <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
-    </button>
+    <.close_detail_pane />
   </div>
 
   <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">

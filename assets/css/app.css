@@ -97,13 +97,13 @@
 
   visibility: hidden;
   opacity: 0;
-  transition: opacity 150ms ease-in, visibility 0ms ease-in 150ms;
+  transition: opacity 100ms ease-in, visibility 0ms ease-in 100ms;
 }
 
 #detail-pane.show {
   visibility: visible;
   opacity: 1;
-  transition: opacity 150ms ease-in, visibility 0ms ease-in 0ms;
+  transition: opacity 100ms ease-in, visibility 0ms ease-in 0ms;
 }
 
 .major-pane {

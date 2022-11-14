@@ -7,8 +7,13 @@
       <!-- title -->
       <div class="flex items-baseline">
         <.h3>
-          <.l phx-click="show-preview" phx-value-pull-request-id={"#{@pull_request.id}"} class="text-teal-700 text-xl hover:text-teal-500">
-            <%= @pull_request.title %>
+          <.l phx-click={
+               JS.push("select-pull-request")
+               |> show_detail()
+             }
+           phx-value-pull-request-id={"#{@pull_request.id}"}
+           class="text-teal-700 text-xl hover:text-teal-500">
+           <%= @pull_request.title %>
           </.l>
         </.h3>
         <p class={"ml-2 text-sm italic font-light #{repo_text_color(@merge_frozen)}"}>

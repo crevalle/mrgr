@@ -2,15 +2,18 @@
   <!-- header row with Add New -->
   <div class="flex items-center justify-between bg-gray-100 py-3.5 pl-6 pr-4 text-left text-sm font-semibold text-gray-900">
     <div class="flex">
-      <span><%= @repo.name %></span>
+      <span class="pr-2"><%= @repo.name %></span>
       <.language_icon language={@repo.language} />
     </div>
-    <div class="pr-2">
-      <%= link to: "#", phx_click: "open-add-form", phx_value_id: @repo.id, class: "flex items-center font-light text-teal-700 hover:text-teal-500" do %>
-        <.icon name="plus-circle" class="mr-1 flex-shrink-0 h-6 w-6" />
-        Add Alert
-      <% end %>
-    </div>
+    <.l phx-click={
+       JS.push("add-alert", value: %{id: @repo.id})
+         |> show_detail()
+         }>
+         <div class="flex items-center">
+          <.icon name="plus-circle" class="mr-1 flex-shrink-0 h-6 w-6" />
+          Add Alert
+         </div>
+      </.l>
   </div>
 
   <table class="min-w-full">
@@ -38,9 +41,10 @@
         </td>
         <td class="whitespace-nowrap pr-4 py-2 text-right text-sm font-medium">
           <.l
-            phx_click="edit-alert"
-            phx_value_repo={@repo.id}
-            phx_value_alert={alert.id}
+            phx_click={
+            JS.push("edit-alert", value: %{repo: @repo.id, alert: alert.id})
+            |> show_detail()
+            }
             >
             Edit
           </.l>

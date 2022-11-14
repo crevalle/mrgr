@@ -25,7 +25,7 @@ defmodule MrgrWeb.Components.UI do
 
   def l(assigns) do
     default_colors = "text-teal-700 hover:text-teal-500"
-    default_class = "#{Map.get(assigns, :colors, default_colors)} font-light px-2 py-2 text-sm"
+    default_class = "#{Map.get(assigns, :colors, default_colors)} font-light text-sm"
     class = Map.get(assigns, :class, default_class)
     href = Map.get(assigns, :href, "#")
 
@@ -402,10 +402,12 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def close_form_button(assigns) do
+  def close_detail_pane(assigns) do
+    assigns = assign_new(assigns, :phx_click, fn -> %Phoenix.LiveView.JS{} end)
+
     ~H"""
     <button
-      phx-click={hide_detail()}
+      phx-click={hide_detail(@phx_click)}
       colors="outline-none">
       <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
     </button>
