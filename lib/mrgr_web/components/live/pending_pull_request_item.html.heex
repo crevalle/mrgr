@@ -69,8 +69,6 @@
     <div class="mt-2 sm:flex sm:justify-between text-sm text-gray-500 items-start">
       <div>
         <.pr_approval_badge pull_request={@pull_request} />
-
-        <p :if={Mrgr.Checklist.complete?(@pull_request.checklist)} class="text-emerald-500">Checklist Completed!  Yay 🎉</p>
       </div>
 
       <p>

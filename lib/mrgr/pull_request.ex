@@ -751,7 +751,6 @@ defmodule Mrgr.PullRequest do
     def with_pending_preloads(query) do
       query
       |> with_file_alert_rules()
-      |> with_checklist()
       |> with_comments()
       |> with_pr_reviews()
     end
