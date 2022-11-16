@@ -33,7 +33,17 @@ defmodule Mrgr.Github.Repository do
         branchProtectionRule {
           allowsForcePushes
           allowsDeletions
+          dismissesStaleReviews
           isAdminEnforced
+          pushAllowances(first: 50) {
+            nodes {
+              actor  {
+                ... on User #{Mrgr.Github.User.GraphQL.user()}
+                ... on App #{Mrgr.Github.User.GraphQL.app()}
+                ... on Team #{Mrgr.Github.User.GraphQL.team()}
+              }
+            }
+          }
           requiresApprovingReviews
           requiredApprovingReviewCount
           requiresCodeOwnerReviews

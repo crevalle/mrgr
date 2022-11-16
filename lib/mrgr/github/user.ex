@@ -95,10 +95,33 @@ defmodule Mrgr.Github.User do
       """
       {
         avatarUrl
-        login
         databaseId
         id
+        login
         name
+      }
+      """
+    end
+
+    def app do
+      """
+      {
+        databaseId
+        description
+        name
+        slug
+      }
+      """
+    end
+
+    def team do
+      """
+      {
+        databaseId
+        description
+        membersUrl
+        name
+        slug
       }
       """
     end

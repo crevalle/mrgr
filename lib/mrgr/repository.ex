@@ -56,6 +56,11 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.one()
   end
 
+  def find_by_name(name) do
+    Schema
+    |> Mrgr.Repo.get_by(name: name)
+  end
+
   def for_installation(installation_id, page \\ []) do
     Schema
     |> Query.for_installation(installation_id)
@@ -176,11 +181,17 @@ defmodule Mrgr.Repository do
     Mrgr.Github.API.fetch_branch_protection(repository)
   end
 
+  def sync_all_settings_graphql(repository) do
+    data =
+      Mrgr.Github.API.fetch_repository_settings_graphql(repository)
+
+    update_security_setting_data(repository, data)
+  end
+
   # receives node list
   def refresh_all_security_settings(graphql_data) do
     # get all local repos at once, then look them up in memory
     # not all optimization is premature
-    IO.inspect(graphql_data)
     repos = fetch_local_repos(graphql_data)
 
     Enum.map(graphql_data, fn d ->
@@ -196,6 +207,10 @@ defmodule Mrgr.Repository do
     |> Enum.reject(&is_nil/1)
   end
 
+  def update_security_setting_data(repo, %{"node" => data}) do
+    update_security_setting_data(repo, data)
+  end
+
   def update_security_setting_data(repo, data) do
     # do this here cause that's when I have the data,
     # until I can do it somewhere else
@@ -207,19 +222,11 @@ defmodule Mrgr.Repository do
       |> Mrgr.Repo.update!()
 
     params =
-      %{settings: translate_settings_params(data)}
-      |> IO.inspect()
+      %{settings: Mrgr.Schema.RepositorySettings.translate_graphql_params(data)}
 
     repo
     |> Schema.settings_changeset(params)
-    |> IO.inspect()
     |> Mrgr.Repo.update!()
-  end
-
-  def hydrate_security_settings(repo) do
-    data = Mrgr.Github.API.fetch_repository_settings_graphql(repo)
-
-    update_security_setting_data(repo, data["node"])
   end
 
   def apply_policy_to_repo(repository, policy) do
@@ -230,7 +237,8 @@ defmodule Mrgr.Repository do
   end
 
   def apply_merge_settings(repository, policy) do
-    params = Mrgr.Schema.RepositorySettings.translate_names_to_rest_api(policy.settings)
+    params =
+      Mrgr.Schema.RepositorySettings.translate_names_to_rest_api(policy.settings)
 
     attrs =
       repository
@@ -244,7 +252,10 @@ defmodule Mrgr.Repository do
 
   def apply_branch_protection(repository, policy) do
     params =
-      Mrgr.Schema.RepositorySettings.translate_branch_protection_to_rest_api(policy.settings)
+      Mrgr.Schema.RepositorySettings.translate_branch_protection_to_rest_api(
+        policy.settings,
+        repository.settings
+      )
 
     attrs =
       repository
@@ -274,27 +285,6 @@ defmodule Mrgr.Repository do
 
   defp translate_parent_params(data) do
     %{node_id: data["id"], name: data["name"], name_with_owner: data["nameWithOwner"]}
-  end
-
-  defp translate_settings_params(data) do
-    main = %{
-      merge_commit_allowed: data["mergeCommitAllowed"],
-      rebase_merge_allowed: data["rebaseMergeAllowed"],
-      squash_merge_allowed: data["squashMergeAllowed"],
-      default_branch_name: data["defaultBranchRef"]["name"]
-    }
-
-    protection = branch_protection_params(data["defaultBranchRef"]["branchProtectionRule"])
-
-    Map.merge(main, protection)
-  end
-
-  def branch_protection_params(nil), do: %{}
-
-  def branch_protection_params(map) do
-    %{
-      required_approving_review_count: map["requiredApprovingReviewCount"]
-    }
   end
 
   @spec fetch_and_store_open_pull_requests!(Schema.t()) :: Schema.t()
