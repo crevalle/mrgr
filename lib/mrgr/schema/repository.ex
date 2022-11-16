@@ -15,10 +15,6 @@ defmodule Mrgr.Schema.Repository do
     embeds_one(:settings, Mrgr.Schema.RepositorySettings, on_replace: :update)
     embeds_one(:parent, Mrgr.Schema.Repository.Parent, on_replace: :delete)
 
-    field(:dismiss_stale_reviews, :boolean, read_after_writes: true)
-    field(:require_code_owner_reviews, :boolean, read_after_writes: true)
-    field(:required_approving_review_count, :integer, read_after_writes: true)
-
     belongs_to(:installation, Mrgr.Schema.Installation)
 
     belongs_to(:policy, Mrgr.Schema.RepositorySettingsPolicy,
@@ -61,15 +57,6 @@ defmodule Mrgr.Schema.Repository do
   def merge_freeze_changeset(schema, attrs) do
     schema
     |> cast(attrs, [:merge_freeze_enabled])
-  end
-
-  def branch_protection_changeset(schema, attrs) do
-    schema
-    |> cast(attrs, [
-      :dismiss_stale_reviews,
-      :require_code_owner_reviews,
-      :required_approving_review_count
-    ])
   end
 
   def changeset(schema, params) do

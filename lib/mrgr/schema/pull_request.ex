@@ -195,6 +195,6 @@ defmodule Mrgr.Schema.PullRequest do
   end
 
   def required_approvals(pull_request) do
-    pull_request.repository.required_approving_review_count
+    pull_request.repository.settings.required_approving_review_count
   end
 end
