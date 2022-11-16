@@ -101,8 +101,8 @@ defmodule Mrgr.RepositorySettingsPolicy do
   end
 
   def broadcast(policy, event) do
-    topic = Mrgr.PubSub.Topic.installation(policy)
-    Mrgr.PubSub.broadcast(policy, topic, event)
+    Mrgr.PubSub.broadcast_to_installation(policy, event)
+    policy
   end
 
   defmodule Query do

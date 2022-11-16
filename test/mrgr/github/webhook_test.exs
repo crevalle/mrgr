@@ -33,8 +33,10 @@ defmodule Mrgr.Github.WebhookTest do
   describe "pull_request opened" do
     setup [:with_install_user, :with_installation]
 
-    test "creates a new PR" do
+    test "creates a new PR", ctx do
       payload = read_webhook_data("pull_request", "opened")
+
+      insert!(:repository, installation: ctx.installation, node_id: "R_kgDOGGc3xQ")
 
       {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
       assert pull_request.merge_queue_index == 0
@@ -45,7 +47,7 @@ defmodule Mrgr.Github.WebhookTest do
     test "enqueues in the merge queue", ctx do
       subscribe_to_installation(ctx.installation)
 
-      repo = build(:repository, installation: ctx.installation)
+      repo = build(:repository, installation: ctx.installation, node_id: "R_kgDOGGc3xQ")
       first_pull_request = insert!(:pull_request, repository: repo, merge_queue_index: 0)
 
       payload = read_webhook_data("pull_request", "opened")
@@ -95,6 +97,8 @@ defmodule Mrgr.Github.WebhookTest do
     test "changes the status of the PR", ctx do
       # to test all the messages, don't create the pull_request in the setup block
       subscribe_to_installation(ctx.installation)
+
+      insert!(:repository, installation: ctx.installation, node_id: "R_kgDOGGc3xQ")
 
       payload = read_webhook_data("pull_request", "opened")
       {:ok, _pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
@@ -294,11 +298,14 @@ defmodule Mrgr.Github.WebhookTest do
     %{installation: installation}
   end
 
-  defp with_open_pull_request(_ctx) do
+  defp with_open_pull_request(ctx) do
+    # that special node_id mentioned in the PR webhook json
+    repository = insert!(:repository, installation: ctx.installation, node_id: "R_kgDOGGc3xQ")
+
     payload = read_webhook_data("pull_request", "opened")
     {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
 
-    %{pull_request: pull_request}
+    %{repository: repository, pull_request: pull_request}
   end
 
   defp read_webhook_data(obj, action) do

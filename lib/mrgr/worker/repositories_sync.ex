@@ -17,7 +17,7 @@ defmodule Mrgr.Worker.RepositoriesSync do
   def perform(%{args: %{"installation_id" => id}}) do
     id
     |> Mrgr.Installation.find()
-    |> Mrgr.Installation.sync_repository_data()
+    |> Mrgr.Installation.sync_repositories()
 
     :ok
   end

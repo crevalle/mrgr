@@ -42,23 +42,4 @@ defmodule Mrgr.RepositoryTest do
       assert fcas == []
     end
   end
-
-  describe "hydrate_branch_protection/1" do
-    test "adds branch approval &c details to the repo" do
-      r = insert!(:repository)
-
-      updated = Mrgr.Repository.hydrate_branch_protection(r)
-
-      assert updated.dismiss_stale_reviews
-      refute updated.require_code_owner_reviews
-      assert updated.required_approving_review_count == 2
-    end
-
-    test "gracefully handles unprotected branches" do
-      r = insert!(:repository, name: "no-branch-protection")
-
-      updated = Mrgr.Repository.hydrate_branch_protection(r)
-      assert updated.required_approving_review_count == 0
-    end
-  end
 end

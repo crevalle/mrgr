@@ -15,6 +15,11 @@ defmodule Mrgr.PubSub do
     Phoenix.PubSub.subscribe(__MODULE__, topic)
   end
 
+  def broadcast_to_installation(item, event) do
+    topic = Mrgr.PubSub.Topic.installation(item)
+    Mrgr.PubSub.broadcast(item, topic, event)
+  end
+
   def broadcast_flash(user, key, message) do
     topic = Mrgr.PubSub.Topic.flash(user)
 

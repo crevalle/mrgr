@@ -87,7 +87,7 @@ defmodule Mrgr.Installation do
     |> broadcast(@installation_loading_members)
     |> create_members()
     |> broadcast(@installation_loading_repositories)
-    |> create_repositories()
+    |> sync_repositories()
     |> broadcast(@installation_loading_pull_requests)
     |> hydrate_github_pull_request_data()
     |> mark_setup_completed()
@@ -108,7 +108,8 @@ defmodule Mrgr.Installation do
     installation
   end
 
-  def sync_repository_data(installation) do
+  def sync_repositories(installation) do
+    # DOES NOT create PRs, just repo data
     data = fetch_all_repository_data(installation)
 
     # look them all up at once, save possibly hundreds of db calls
@@ -167,20 +168,10 @@ defmodule Mrgr.Installation do
   # Mrgr.Repository.apply_policy_to_repo(repository, policy)
   # end
 
-  @spec create_repositories(Mrgr.Schema.Installation.t()) :: Mrgr.Schema.Installation.t()
-  def create_repositories(installation) do
-    # assumes repos have been deleted
-    data = fetch_all_repository_data(installation)
-
-    repositories = Enum.map(data, &Mrgr.Repository.create_from_graphql(installation, &1))
-
-    %{installation | repositories: repositories}
-  end
-
   def recreate_repositories(installation) do
     # does not load PR data, just repo data
     Mrgr.Repository.delete_all_for_installation(installation)
-    create_repositories(installation)
+    sync_repositories(installation)
   end
 
   def fetch_all_repository_data(_installation, acc, %{
@@ -201,14 +192,14 @@ defmodule Mrgr.Installation do
       }) do
     acc = nodes ++ acc
 
-    response = Mrgr.Github.API.Live.fetch_all_repository_data(installation, %{after: end_cursor})
+    response = Mrgr.Github.API.fetch_all_repository_data(installation, %{after: end_cursor})
     fetch_all_repository_data(installation, acc, response)
   end
 
   # initial call
   def fetch_all_repository_data(installation) do
     acc = []
-    response = Mrgr.Github.API.Live.fetch_all_repository_data(installation)
+    response = Mrgr.Github.API.fetch_all_repository_data(installation)
     fetch_all_repository_data(installation, acc, response)
   end
 

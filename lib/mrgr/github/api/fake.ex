@@ -11,8 +11,295 @@ defmodule Mrgr.Github.API.Fake do
     %{"node" => %{}}
   end
 
+  def fetch_repository_data(repo) do
+    %{
+      "node" => %{
+        "defaultBranchRef" => %{
+          "branchProtectionRule" => %{
+            "allowsDeletions" => false,
+            "allowsForcePushes" => false,
+            "isAdminEnforced" => false,
+            "matchingRefs" => %{
+              "nodes" => [
+                %{
+                  "name" => "master"
+                }
+              ]
+            },
+            "pushAllowances" => %{
+              "nodes" => [
+                %{
+                  "actor" => %{
+                    "avatarUrl" =>
+                      "https://avatars.githubusercontent.com/u/572921?u=f5f4a514e7ebb859f83945d2cbd3c0ea549cda60&v=4",
+                    "databaseId" => 572_921,
+                    "id" => "MDQ6VXNlcjU3MjkyMQ==",
+                    "login" => "desmondmonster",
+                    "name" => "Desmond Bowe"
+                  }
+                }
+              ]
+            },
+            "requiredApprovingReviewCount" => 1,
+            "requiredStatusChecks" => [
+              %{
+                "app" => %{
+                  "description" => "",
+                  "name" => "GitHub Code Scanning"
+                },
+                "context" => "CodeQL"
+              }
+            ],
+            "requiresApprovingReviews" => true,
+            "requiresCodeOwnerReviews" => false,
+            "requiresStatusChecks" => true,
+            "requiresStrictStatusChecks" => true,
+            "restrictsPushes" => true
+          },
+          "name" => "master"
+        },
+        "isPrivate" => repo.private,
+        "labels" => %{
+          "nodes" => [
+            %{
+              "color" => "fc2929",
+              "name" => "bug"
+            },
+            %{
+              "color" => "cccccc",
+              "name" => "duplicate"
+            },
+            %{
+              "color" => "84b6eb",
+              "name" => "enhancement"
+            },
+            %{
+              "color" => "159818",
+              "name" => "help wanted"
+            },
+            %{
+              "color" => "e6e6e6",
+              "name" => "invalid"
+            },
+            %{
+              "color" => "cc317c",
+              "name" => "question"
+            },
+            %{
+              "color" => "ffffff",
+              "name" => "wontfix"
+            }
+          ]
+        },
+        "languages" => %{
+          "edges" => [
+            %{
+              "node" => %{
+                "color" => "#701516",
+                "name" => "Ruby"
+              },
+              "size" => 32997
+            },
+            %{
+              "node" => %{
+                "color" => "#f1e05a",
+                "name" => "JavaScript"
+              },
+              "size" => 768
+            },
+            %{
+              "node" => %{
+                "color" => "#e34c26",
+                "name" => "HTML"
+              },
+              "size" => 4588
+            },
+            %{
+              "node" => %{
+                "color" => "#244776",
+                "name" => "CoffeeScript"
+              },
+              "size" => 2153
+            },
+            %{
+              "node" => %{
+                "color" => "#3B2F63",
+                "name" => "Procfile"
+              },
+              "size" => 58
+            },
+            %{
+              "node" => %{
+                "color" => "#c6538c",
+                "name" => "SCSS"
+              },
+              "size" => 4134
+            },
+            %{
+              "node" => %{
+                "color" => "#ece2a9",
+                "name" => "Haml"
+              },
+              "size" => 4191
+            }
+          ]
+        },
+        "mergeCommitAllowed" => true,
+        "parent" => nil,
+        "name" => repo.name,
+        "rebaseMergeAllowed" => true,
+        "squashMergeAllowed" => true
+      }
+    }
+  end
+
+  def fetch_all_repository_data(_repo, _opts \\ %{}) do
+    %{
+      "viewer" => %{
+        "repositories" => %{
+          "pageInfo" => %{"hasNextPage" => false, "endCursor" => "socks"},
+          "nodes" => [
+            %{
+              "defaultBranchRef" => %{
+                "branchProtectionRule" => nil,
+                "name" => "master"
+              },
+              "id" => "MDEwklJlcG9zaTRvcnk4ODI5ODE5",
+              "isPrivate" => false,
+              "labels" => %{
+                "nodes" => [
+                  %{
+                    "color" => "fc2929",
+                    "name" => "bug"
+                  }
+                ]
+              },
+              "languages" => %{
+                "edges" => [
+                  %{
+                    "node" => %{
+                      "color" => "#f1e05a",
+                      "name" => "Elixir"
+                    },
+                    "size" => 16989
+                  }
+                ]
+              },
+              "mergeCommitAllowed" => true,
+              "name" => "elixir-repo",
+              "parent" => nil,
+              "primaryLanguage" => %{
+                "color" => "#f1e05a",
+                "name" => "Elixir"
+              },
+              "rebaseMergeAllowed" => true,
+              "squashMergeAllowed" => true
+            },
+            %{
+              "defaultBranchRef" => %{
+                "branchProtectionRule" => nil,
+                "name" => "master"
+              },
+              "id" => "MDEwklJlcG9zaXRvcnk4ODI5ODE5",
+              "isPrivate" => false,
+              "labels" => %{
+                "nodes" => [
+                  %{
+                    "color" => "fc2929",
+                    "name" => "bug"
+                  }
+                ]
+              },
+              "languages" => %{
+                "edges" => [
+                  %{
+                    "node" => %{
+                      "color" => "#f1e05a",
+                      "name" => "Ruby"
+                    },
+                    "size" => 16989
+                  }
+                ]
+              },
+              "mergeCommitAllowed" => true,
+              "name" => "some-ruby-repo",
+              "parent" => nil,
+              "primaryLanguage" => %{
+                "color" => "#f1e05a",
+                "name" => "Ruby"
+              },
+              "rebaseMergeAllowed" => true,
+              "squashMergeAllowed" => true
+            },
+            %{
+              "defaultBranchRef" => %{
+                "branchProtectionRule" => nil,
+                "name" => "master"
+              },
+              "id" => "MDEwOlJlcG9zaXRvcnk4ODI5ODE5",
+              "isPrivate" => false,
+              "labels" => %{
+                "nodes" => [
+                  %{
+                    "color" => "fc2929",
+                    "name" => "bug"
+                  },
+                  %{
+                    "color" => "cccccc",
+                    "name" => "duplicate"
+                  },
+                  %{
+                    "color" => "84b6eb",
+                    "name" => "enhancement"
+                  },
+                  %{
+                    "color" => "e6e6e6",
+                    "name" => "invalid"
+                  },
+                  %{
+                    "color" => "cc317c",
+                    "name" => "question"
+                  },
+                  %{
+                    "color" => "ffffff",
+                    "name" => "wontfix"
+                  }
+                ]
+              },
+              "languages" => %{
+                "edges" => [
+                  %{
+                    "node" => %{
+                      "color" => "#f1e05a",
+                      "name" => "JavaScript"
+                    },
+                    "size" => 16989
+                  }
+                ]
+              },
+              "mergeCommitAllowed" => true,
+              "name" => "node-cql-binary",
+              "parent" => nil,
+              "primaryLanguage" => %{
+                "color" => "#f1e05a",
+                "name" => "JavaScript"
+              },
+              "rebaseMergeAllowed" => true,
+              "squashMergeAllowed" => true
+            }
+          ]
+        }
+      }
+    }
+  end
+
   def get_new_installation_token(_installation) do
-    []
+    expires_at = Mrgr.DateTime.safe_truncate(DateTime.add(Mrgr.DateTime.now(), 10_000))
+
+    %Mrgr.Github.AccessToken{
+      expires_at: expires_at,
+      token: "i am a token"
+    }
   end
 
   def merge_pull_request(_client, _owner, _repo, _number, _message) do
