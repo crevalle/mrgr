@@ -448,6 +448,12 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def installation_synced_at(assigns) do
+    ~H"""
+      <p class="text-sm italic text-gray-500">Data last synced at <%= if @dt, do: ts(@dt, @timezone), else: "--" %></p>
+    """
+  end
+
   defp language_icon_url("html" = name) do
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{name}5/#{name}5-original.svg"
   end

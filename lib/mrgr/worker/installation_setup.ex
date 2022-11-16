@@ -1,5 +1,5 @@
 defmodule Mrgr.Worker.InstallationSetup do
-  use Oban.Worker, queue: :default
+  use Oban.Worker, max_attempts: 3
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"id" => id}}) do

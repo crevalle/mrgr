@@ -63,6 +63,7 @@ defmodule Mrgr.PubSub do
         @installation_loading_members "installation:loading_members"
         @installation_loading_repositories "installation:loading_repositories"
         @installation_loading_pull_requests "installation:loading_pull_requests"
+        @installation_repositories_synced "installation:repositories_synced"
 
         @pull_request_created "pull_request:created"
         @pull_request_edited "pull_request:edited"

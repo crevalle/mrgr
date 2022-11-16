@@ -78,7 +78,15 @@ config :ex_heroicons, type: "outline"
 
 config :mrgr, Oban,
   repo: Mrgr.Repo,
-  plugins: [Oban.Plugins.Pruner, Oban.Plugins.Gossip, Oban.Web.Plugins.Stats],
+  plugins: [
+    Oban.Plugins.Pruner,
+    Oban.Plugins.Gossip,
+    Oban.Web.Plugins.Stats,
+    {
+      Oban.Plugins.Cron,
+      crontab: [{"0 0 * * *", Mrgr.Worker.RepositoriesSync, args: %{"type" => "all"}}]
+    }
+  ],
   queues: [default: 10]
 
 import_config "#{config_env()}.exs"

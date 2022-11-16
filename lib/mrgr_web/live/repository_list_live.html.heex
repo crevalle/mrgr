@@ -71,8 +71,9 @@
 
         </div>
       <% else %>
-        <.heading title={"All Repositories for #{ @current_user.current_installation.account.login }"} />
+        <.heading title={"All Repositories for #{ @installation.account.login }"} />
       <% end %>
+      <.installation_synced_at dt={@installation.repos_last_synced_at} timezone={@timezone} />
 
       <table class="mt-4 min-w-full shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
         <thead class="bg-gray-100">

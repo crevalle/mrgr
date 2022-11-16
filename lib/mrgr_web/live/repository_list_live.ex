@@ -22,6 +22,7 @@ defmodule MrgrWeb.RepositoryListLive do
       |> assign(:form_object, %Mrgr.Schema.RepositorySettingsPolicy{})
       |> assign(:selected_policy, nil)
       |> assign(:policies, policies)
+      |> assign(:installation, current_user.current_installation)
       |> put_title("Repositories")
       |> ok()
     else
@@ -135,6 +136,12 @@ defmodule MrgrWeb.RepositoryListLive do
     |> assign(:all_repos, all_repos)
     |> assign(:repo_list, repo_list)
     |> assign(:policies, policies)
+    |> noreply()
+  end
+
+  def handle_info(%{event: @installation_repositories_synced, payload: installation}, socket) do
+    socket
+    |> assign(:installation, installation)
     |> noreply()
   end
 

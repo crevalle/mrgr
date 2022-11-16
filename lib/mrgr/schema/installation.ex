@@ -13,6 +13,7 @@ defmodule Mrgr.Schema.Installation do
     field(:permissions, :map)
     field(:repositories_url, :string)
     field(:repository_selection, :string)
+    field(:repos_last_synced_at, :utc_datetime)
     field(:setup_completed, :boolean)
     field(:target_id, :integer)
     field(:target_type, :string)

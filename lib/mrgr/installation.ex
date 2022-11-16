@@ -4,6 +4,13 @@ defmodule Mrgr.Installation do
   alias Mrgr.Schema.Installation, as: Schema
   alias Mrgr.Installation.Query
 
+  def find(id) do
+    Schema
+    |> Query.by_id(id)
+    |> Query.with_account()
+    |> Mrgr.Repo.one()
+  end
+
   def all do
     Schema
     |> Query.all()
@@ -122,6 +129,11 @@ defmodule Mrgr.Installation do
         &create_or_update_repository(repos_by_node_id, installation, default_policy, &1)
       )
 
+    installation =
+      installation
+      |> mark_last_synced_at()
+      |> broadcast(@installation_repositories_synced)
+
     %{installation | repositories: repos}
   end
 
@@ -150,11 +162,11 @@ defmodule Mrgr.Installation do
   defp safe_policy_id(%{id: id}), do: id
   defp safe_policy_id(_), do: nil
 
-  defp maybe_apply_policy(repository, nil), do: repository
+  # defp maybe_apply_policy(repository, nil), do: repository
 
-  defp maybe_apply_policy(repository, policy) do
-    Mrgr.Repository.apply_policy_to_repo(repository, policy)
-  end
+  # defp maybe_apply_policy(repository, policy) do
+  # Mrgr.Repository.apply_policy_to_repo(repository, policy)
+  # end
 
   @spec create_repositories(Mrgr.Schema.Installation.t()) :: Mrgr.Schema.Installation.t()
   def create_repositories(installation) do
@@ -302,6 +314,14 @@ defmodule Mrgr.Installation do
     Schema
     |> Query.by_external_id(external_id)
     |> Mrgr.Repo.one()
+  end
+
+  def mark_last_synced_at(installation) do
+    installation
+    |> Ecto.Changeset.change(%{
+      repos_last_synced_at: Mrgr.DateTime.safe_truncate(Mrgr.DateTime.now())
+    })
+    |> Mrgr.Repo.update!()
   end
 
   def installation_url do

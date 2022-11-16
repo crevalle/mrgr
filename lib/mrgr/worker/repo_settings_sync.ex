@@ -1,5 +1,5 @@
 defmodule Mrgr.Worker.RepoSettingsSync do
-  use Oban.Worker, queue: :default
+  use Oban.Worker, max_attempts: 3
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"policy_id" => id, "repo_id" => repo_id}}) do
