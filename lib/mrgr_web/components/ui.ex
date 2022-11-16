@@ -419,15 +419,15 @@ defmodule MrgrWeb.Components.UI do
     <nav class="border-t border-gray-200">
       <ul class="flex my-2">
         <li class="">
-          <a class={"px-2 py-2 #{if @page.page_number <= 1, do: "pointer-events-none text-gray-600", else: "text-teal-400"}"} href="#" phx-click="nav" phx-value-page={@page.page_number - 1}>Previous</a>
+          <a class={"px-2 py-2 #{if @page.page_number <= 1, do: "pointer-events-none text-gray-600", else: "text-teal-700 hover:text-teal-500"}"} href="#" phx-click="nav" phx-value-page={@page.page_number - 1}>Previous</a>
         </li>
         <%= for idx <-  Enum.to_list(1..@page.total_pages) do %>
           <li class="">
-            <a class={"px-2 py-2 #{if @page.page_number == idx, do: "pointer-events-none text-gray-600", else: "text-teal-400"}"} href="#" phx-click="nav" phx-value-page={idx}><%= idx %></a>
+            <a class={"px-2 py-2 #{if @page.page_number == idx, do: "pointer-events-none text-teal-300", else: "text-teal-700 hover:text-teal-500"}"} href="#" phx-click="nav" phx-value-page={idx}><%= idx %></a>
           </li>
         <% end %>
         <li class="">
-          <a class={"px-2 py-2 #{if @page.page_number >= @page.total_pages, do: "pointer-events-none text-gray-600", else: "text-teal-400"}"} href="#" phx-click="nav" phx-value-page={@page.page_number + 1}>Next</a>
+          <a class={"px-2 py-2 #{if @page.page_number >= @page.total_pages, do: "pointer-events-none text-gray-600", else: "text-teal-700 hover:text-teal-500"}"} href="#" phx-click="nav" phx-value-page={@page.page_number + 1}>Next</a>
         </li>
       </ul>
     </nav>

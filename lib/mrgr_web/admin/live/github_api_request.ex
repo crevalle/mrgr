@@ -1,7 +1,6 @@
 defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
-
   on_mount MrgrWeb.Plug.Auth
   on_mount {MrgrWeb.Plug.Auth, :admin}
 
@@ -13,6 +12,7 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
       <div class="px-4 py-5 sm:px-6">
 
         <div class="mt-1">
+          <.page_nav page={@page} />
 
           <table class="min-w-full">
             <thead class="bg-white">
@@ -29,7 +29,7 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
               </tr>
             </thead>
 
-            <%= for r <- @requests do %>
+            <%= for r <- @page.entries do %>
               <.tr striped={true}>
                 <.td><%= r.id %></.td>
                 <.td><%= link r.installation.account.login, to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, r.installation_id), class: "text-teal-700 hover:text-teal-500" %></.td>
@@ -67,14 +67,22 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
     {:noreply, socket}
   end
 
+  def handle_event("nav", params, socket) do
+    page = Mrgr.Github.API.paged_requests(params)
+
+    socket
+    |> assign(:page, page)
+    |> noreply()
+  end
+
   def mount(_params, _session, socket) do
     if connected?(socket) do
       subscribe()
 
-      requests = Mrgr.Github.API.list_requests()
+      page = Mrgr.Github.API.paged_requests()
 
       socket
-      |> assign(:requests, requests)
+      |> assign(:page, page)
       |> put_title("API Requests")
       |> ok()
     else

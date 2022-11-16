@@ -13,6 +13,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
       <div class="px-4 py-5 sm:px-6">
 
         <div class="mt-1">
+          <.page_nav page={@page} />
 
           <table class="min-w-full">
             <thead class="bg-white">
@@ -27,7 +28,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
               </tr>
             </thead>
 
-            <%= for hook <- @incoming_webhooks do %>
+            <%= for hook <- @page.entries do %>
               <.tr striped={true}>
                 <.td><%= hook.id %></.td>
                 <.td><%= hook.installation_id %></.td>
@@ -54,15 +55,23 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
     if connected?(socket) do
       subscribe()
 
-      hooks = Mrgr.IncomingWebhook.all()
+      page = Mrgr.IncomingWebhook.paged()
 
       socket
-      |> assign(:incoming_webhooks, hooks)
+      |> assign(:page, page)
       |> put_title("Webhooks")
       |> ok()
     else
       {:ok, socket}
     end
+  end
+
+  def handle_event("nav", params, socket) do
+    page = Mrgr.IncomingWebhook.paged(params)
+
+    socket
+    |> assign(:page, page)
+    |> noreply()
   end
 
   def handle_event("fire", %{"id" => id}, socket) do

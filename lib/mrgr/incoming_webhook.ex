@@ -30,6 +30,12 @@ defmodule Mrgr.IncomingWebhook do
     |> Repo.all()
   end
 
+  def paged(page \\ []) do
+    Schema
+    |> Query.rev_cron()
+    |> Mrgr.Repo.paginate(page)
+  end
+
   @spec get(integer() | String.t()) :: Schema.t() | nil
   def get(id) do
     Schema

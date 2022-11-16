@@ -21,11 +21,11 @@ defmodule Mrgr.Github.API do
   defdelegate update_repo_settings(repo, params), to: @mod
   defdelegate update_branch_protection(repo, params), to: @mod
 
-  def list_requests do
+  def paged_requests(page \\ []) do
     Mrgr.Schema.GithubAPIRequest
     |> Query.all()
     |> Query.with_installation()
-    |> Mrgr.Repo.all()
+    |> Mrgr.Repo.paginate(page)
   end
 
   def preload_account(api_request) do
