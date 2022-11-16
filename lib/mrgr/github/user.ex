@@ -46,6 +46,8 @@ defmodule Mrgr.Github.User do
     url
   ]a
 
+  def new(nil), do: nil
+
   def new(params) do
     %__MODULE__{}
     |> changeset(params)

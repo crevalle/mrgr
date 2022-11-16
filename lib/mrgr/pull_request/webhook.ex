@@ -28,15 +28,37 @@ defmodule Mrgr.PullRequest.Webhook do
   @spec add_reviewer(webhook()) :: success() | change_error() | not_found()
   def add_reviewer(payload) do
     with {:ok, pull_request} <- find_pull_request(payload),
-         gh_user <- Mrgr.Github.User.new(payload["requested_reviewer"]) do
+         # TODO this can be a team
+         %Mrgr.Github.User{} = gh_user <- Mrgr.Github.User.new(payload["requested_reviewer"]) do
       Mrgr.PullRequest.add_reviewer(pull_request, gh_user)
     end
   end
 
+  # "requested_team" => %{
+  # "description" => "Engineers who review infrastructure PRs",
+  # "html_url" => "https://github.com/orgs/Shimmur/teams/infrastructure-reviewers",
+  # "id" => 5028639,
+  # "members_url" => "https://api.github.com/organizations/8060280/team/5028639/members{/member}",
+  # "name" => "Infrastructure Reviewers",
+  # "node_id" => "T_kwDOAHr9eM4ATLsf",
+  # "parent" => %{
+  # "description" => "Platform pod developers.",
+  # "html_url" => "https://github.com/orgs/Shimmur/teams/platform-pod",
+  # "id" => 3640092,
+  # "members_url" => "https://api.github.com/organizations/8060280/team/3640092/members{/member}",
+  # "name" => "Platform Pod",
+  # "node_id" => "MDQ6VGVhbTM2NDAwOTI=",
+  # "permission" => "pull",
+  # "privacy" => "closed",
+  # "repositories_url" => "https://api.github.com/organizations/8060280/team/3640092/repos",
+  # "slug" => "platform-pod",
+  # "url" => "https://api.github.com/organizations/8060280/team/3640092"
+  # },
+
   @spec remove_reviewer(webhook()) :: success() | change_error() | not_found()
   def remove_reviewer(payload) do
     with {:ok, pull_request} <- find_pull_request(payload),
-         gh_user <- Mrgr.Github.User.new(payload["requested_reviewer"]) do
+         %Mrgr.Github.User{} = gh_user <- Mrgr.Github.User.new(payload["requested_reviewer"]) do
       Mrgr.PullRequest.remove_reviewer(pull_request, gh_user)
     end
   end
