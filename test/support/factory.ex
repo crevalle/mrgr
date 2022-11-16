@@ -64,17 +64,36 @@ defmodule Mrgr.Factory do
   def build(:repository) do
     %Mrgr.Schema.Repository{
       name: Faker.Company.bullshit(),
+      node_id: Ecto.UUID.generate(),
+      private: true,
+      language: "Elixir",
       installation: build(:installation)
     }
   end
 
   def build(:pull_request) do
+    opened_at =
+      DateTime.truncate(DateTime.add(Mrgr.DateTime.now(), 1 - :rand.uniform(100_000)), :second)
+
     %Mrgr.Schema.PullRequest{
       title: Faker.Company.bs(),
       number: System.unique_integer([:positive, :monotonic]),
+      node_id: Ecto.UUID.generate(),
+      opened_at: opened_at,
       status: "open",
       head: build(:head),
       repository: build(:repository)
+    }
+  end
+
+  def build(:comment) do
+    posted_at =
+      DateTime.truncate(DateTime.add(Mrgr.DateTime.now(), 1 - :rand.uniform(386_000)), :second)
+
+    %Mrgr.Schema.Comment{
+      object: :issue_comment,
+      posted_at: posted_at,
+      pull_request: build(:pull_request)
     }
   end
 
@@ -84,6 +103,16 @@ defmodule Mrgr.Factory do
       ref: "Where are the ants?",
       # not really a sha, should be fine :)
       sha: Faker.UUID.v4()
+    }
+  end
+
+  def build(:file_change_alert) do
+    %Mrgr.Schema.FileChangeAlert{
+      repository: build(:repository),
+      badge_text: "socks",
+      notify_user: false,
+      pattern: "*",
+      source: :user
     }
   end
 
@@ -138,6 +167,63 @@ defmodule Mrgr.Factory do
     }
   end
 
+  def build(:commit) do
+    %Mrgr.Github.Commit{
+      node_id: Ecto.UUID.generate(),
+      # whatevs!
+      sha: Ecto.UUID.generate(),
+      author: build(:github_user),
+      committer: build(:github_user),
+      commit: build(:commit_commit)
+    }
+  end
+
+  def build(:github_user) do
+    %Mrgr.Github.User{
+      avatar_url: Faker.Internet.url(),
+      events_url: Faker.Internet.url(),
+      followers_url: Faker.Internet.url(),
+      following_url: Faker.Internet.url(),
+      gists_url: Faker.Internet.url(),
+      gravatar_id: Faker.Internet.user_name(),
+      html_url: Faker.Internet.url(),
+      id: :rand.uniform(100_000),
+      login: Faker.Internet.user_name(),
+      name: Faker.Person.name(),
+      node_id: Ecto.UUID.generate(),
+      organizations_url: Faker.Internet.url(),
+      received_events_url: Faker.Internet.url(),
+      repos_url: Faker.Internet.url(),
+      site_admin: true,
+      starred_url: Faker.Internet.url(),
+      subscriptions_url: Faker.Internet.url(),
+      type: "User",
+      url: Faker.Internet.url()
+    }
+  end
+
+  def build(:commit_commit) do
+    %Mrgr.Github.Commit.Commit{
+      author: build(:short_user),
+      committer: build(:short_user),
+      comment_count: :rand.uniform(5),
+      message: Faker.Company.bs(),
+      url: Faker.Internet.url(),
+      verification: %{}
+    }
+  end
+
+  def build(:short_user) do
+    date =
+      DateTime.truncate(DateTime.add(Mrgr.DateTime.now(), 1 - :rand.uniform(386_000)), :second)
+
+    %Mrgr.Github.Commit.ShortUser{
+      date: date,
+      email: Faker.Internet.email(),
+      name: Faker.Person.name()
+    }
+  end
+
   # Convenience API
 
   def build(factory_name, attributes) do
@@ -147,4 +233,9 @@ defmodule Mrgr.Factory do
   def insert!(factory_name, attributes \\ []) do
     factory_name |> build(attributes) |> Repo.insert!()
   end
+
+  def insert_list(factory_name, num, attributes) do
+    Enum.map(1..num, fn _i -> insert!(factory_name, attributes) end)
+  end
+
 end
