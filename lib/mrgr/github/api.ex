@@ -13,7 +13,7 @@ defmodule Mrgr.Github.API do
   defdelegate fetch_members(installation), to: @mod
   defdelegate fetch_repositories(installation), to: @mod
   defdelegate fetch_repository(installation, repository), to: @mod
-  defdelegate fetch_branch_protection(repository), to: @mod
+  defdelegate fetch_repository_data(repository), to: @mod
   defdelegate fetch_most_pull_request_data(pull_request), to: @mod
   defdelegate get_new_installation_token(installation), to: @mod
   defdelegate head_commit(pull_request, installation), to: @mod

@@ -18,7 +18,7 @@ defmodule Mrgr.PullRequest do
       {:ok, pull_request} ->
         pull_request
         |> preload_installation()
-        |> ensure_repository_hydrated()
+        |> sync_repo_if_first_pr()
         |> hydrate_github_data()
         |> append_to_pull_request_queue()
         |> create_checklists()
@@ -413,10 +413,10 @@ defmodule Mrgr.PullRequest do
     find_from_payload(params)
   end
 
-  def ensure_repository_hydrated(pull_request) do
-    definitely_hydrated = Mrgr.Repository.ensure_hydrated(pull_request.repository)
+  def sync_repo_if_first_pr(pull_request) do
+    definitely_synced = Mrgr.Repository.sync_if_first_pr(pull_request.repository)
 
-    %{pull_request | repository: definitely_hydrated}
+    %{pull_request | repository: definitely_synced}
   end
 
   @spec merge!(Schema.t() | integer(), String.t(), Mrgr.Schema.User.t()) ::

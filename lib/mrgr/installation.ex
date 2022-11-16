@@ -101,15 +101,78 @@ defmodule Mrgr.Installation do
     installation
   end
 
-  def refresh_security_settings(installation) do
+  def sync_repository_data(installation) do
     # assumes repos already exist locally, WILL NOT create new ones
-    data = fetch_repo_security_settings(installation)
-    repos = Mrgr.Repository.refresh_all_security_settings(data)
+    data = fetch_all_repository_data(installation)
+
+    # look them all up at once, save possibly hundreds of db calls
+    repos_by_node_id =
+      installation
+      |> Mrgr.Repository.all_for_installation()
+      |> Enum.reduce(%{}, fn repo, acc ->
+        # %{"<node_id>" => %Repository{}}
+        Map.put(acc, repo.node_id, repo)
+      end)
+
+    default_policy = Mrgr.RepositorySettingsPolicy.default(installation.id)
+
+    repos =
+      Enum.map(
+        data,
+        &create_or_update_repository(repos_by_node_id, installation, default_policy, &1)
+      )
 
     %{installation | repositories: repos}
   end
 
-  def fetch_repo_security_settings(_installation, acc, %{
+  # works on our cached list.
+  defp create_or_update_repository(repos, installation, policy, node) do
+    case Map.get(repos, node["id"]) do
+      nil ->
+        # cheat a bit
+        other_params = %{
+          installation_id: installation.id,
+          repository_settings_policy_id: safe_policy_id(policy),
+          full_name: "#{installation.account.login}/#{node["name"]}"
+        }
+
+        other_params
+        |> Mrgr.Repository.create_from_graphql(node)
+
+      # TODO think about this tomorrow
+      # |> maybe_apply_policy(policy)
+
+      repo ->
+        Mrgr.Repository.update_from_graphql(repo, node)
+    end
+  end
+
+  defp safe_policy_id(%{id: id}), do: id
+  defp safe_policy_id(_), do: nil
+
+  defp maybe_apply_policy(repository, nil), do: repository
+
+  defp maybe_apply_policy(repository, policy) do
+    Mrgr.Repository.apply_policy_to_repo(repository, policy)
+  end
+
+  @spec create_repositories(Mrgr.Schema.Installation.t()) :: Mrgr.Schema.Installation.t()
+  def create_repositories(installation) do
+    # assumes repos have been deleted
+    data = fetch_all_repository_data(installation)
+
+    repositories = Enum.map(data, &Mrgr.Repository.create_from_graphql(installation, &1))
+
+    %{installation | repositories: repositories}
+  end
+
+  def recreate_repositories(installation) do
+    # does not load PR data, just repo data
+    Mrgr.Repository.delete_all_for_installation(installation)
+    create_repositories(installation)
+  end
+
+  def fetch_all_repository_data(_installation, acc, %{
         "viewer" => %{
           "repositories" => %{"pageInfo" => %{"hasNextPage" => false}, "nodes" => nodes}
         }
@@ -117,7 +180,7 @@ defmodule Mrgr.Installation do
     nodes ++ acc
   end
 
-  def fetch_repo_security_settings(installation, acc, %{
+  def fetch_all_repository_data(installation, acc, %{
         "viewer" => %{
           "repositories" => %{
             "pageInfo" => %{"hasNextPage" => true, "endCursor" => end_cursor},
@@ -127,34 +190,15 @@ defmodule Mrgr.Installation do
       }) do
     acc = nodes ++ acc
 
-    response = Mrgr.Github.API.Live.repo_security_settings(installation, %{after: end_cursor})
-    fetch_repo_security_settings(installation, acc, response)
+    response = Mrgr.Github.API.Live.fetch_all_repository_data(installation, %{after: end_cursor})
+    fetch_all_repository_data(installation, acc, response)
   end
 
   # initial call
-  def fetch_repo_security_settings(installation) do
+  def fetch_all_repository_data(installation) do
     acc = []
-    response = Mrgr.Github.API.Live.repo_security_settings(installation)
-    fetch_repo_security_settings(installation, acc, response)
-  end
-
-  @spec create_repositories(Mrgr.Schema.Installation.t()) :: Mrgr.Schema.Installation.t()
-  def create_repositories(installation) do
-    # assumes repos have been deleted
-    repositories = fetch_repositories(installation)
-
-    installation =
-      installation
-      |> Mrgr.Schema.Installation.repositories_changeset(%{"repositories" => repositories})
-      |> Mrgr.Repo.update!()
-
-    repositories = Enum.map(installation.repositories, &Mrgr.Repository.hydrate_ancillary_data/1)
-
-    %{installation | repositories: repositories}
-  end
-
-  def fetch_repositories(installation) do
-    Mrgr.Github.API.fetch_repositories(installation)
+    response = Mrgr.Github.API.Live.fetch_all_repository_data(installation)
+    fetch_all_repository_data(installation, acc, response)
   end
 
   def delete_from_webhook(payload) do

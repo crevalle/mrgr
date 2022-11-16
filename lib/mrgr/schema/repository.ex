@@ -3,6 +3,7 @@ defmodule Mrgr.Schema.Repository do
 
   schema "repositories" do
     field(:data, :map)
+    # this can go vvv
     field(:external_id, :integer)
     field(:full_name, :string)
     field(:language, :string)
@@ -40,16 +41,14 @@ defmodule Mrgr.Schema.Repository do
     name
     node_id
     private
-    external_id
     installation_id
+    repository_settings_policy_id
   ]a
 
-  def changeset(schema, params) do
+  def basic_changeset(schema, params) do
     schema
     |> cast(params, @allowed)
     |> foreign_key_constraint(:installation_id)
-    |> put_external_id()
-    |> put_data_map()
   end
 
   def create_pull_requests_changeset(schema, params) do
@@ -71,6 +70,15 @@ defmodule Mrgr.Schema.Repository do
       :require_code_owner_reviews,
       :required_approving_review_count
     ])
+  end
+
+  def changeset(schema, params) do
+    schema
+    |> cast(params, @allowed)
+    |> foreign_key_constraint(:installation_id)
+    |> foreign_key_constraint(:repository_settings_policy_id)
+    |> cast_embed(:settings)
+    |> cast_embed(:parent)
   end
 
   def settings_changeset(schema, attrs) do

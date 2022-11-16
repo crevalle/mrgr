@@ -237,5 +237,4 @@ defmodule Mrgr.Factory do
   def insert_list(factory_name, num, attributes) do
     Enum.map(1..num, fn _i -> insert!(factory_name, attributes) end)
   end
-
 end

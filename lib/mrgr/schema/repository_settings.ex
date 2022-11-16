@@ -189,13 +189,17 @@ defmodule Mrgr.Schema.RepositorySettings do
       merge_commit_allowed: data["mergeCommitAllowed"],
       rebase_merge_allowed: data["rebaseMergeAllowed"],
       squash_merge_allowed: data["squashMergeAllowed"],
-      default_branch_name: data["defaultBranchRef"]["name"]
+      default_branch_name: parse_default_branch_name(data)
     }
 
     protection = branch_protection_params(data["defaultBranchRef"]["branchProtectionRule"])
 
     Map.merge(main, protection)
   end
+
+  # if no code has been pushed
+  def parse_default_branch_name(%{"defaultBranchRef" => %{"name" => name}}), do: name
+  def parse_default_branch_name(_), do: nil
 
   def branch_protection_params(nil), do: %{}
 

@@ -70,14 +70,7 @@ defmodule Mrgr.Github.API.Live do
     neuron_request!(repository.installation_id, query)
   end
 
-  # when installation is created
-  # or when we get a "new repo" webhook -> **find one repo** (no language until first PR)
-  # security settings will supersede fetching branch protection
-  # def full_repo_info(installation, opts \\ %{}) do
-  # end
-
-  # refreshing
-  def repo_security_settings(installation, opts \\ %{}) do
+  def fetch_all_repository_data(installation, opts \\ %{}) do
     # this pagination is garbage
     per_page = Map.get(opts, :per_page, 50)
     start_at = Map.get(opts, :after)
@@ -112,6 +105,22 @@ defmodule Mrgr.Github.API.Live do
     """
 
     neuron_request!(installation.id, query)
+  end
+
+  def fetch_repository_data(repository) do
+    query = """
+      query {
+        node(id:"#{repository.node_id}") {
+          ... on Repository {
+            #{Mrgr.Github.Repository.GraphQL.basic()}
+            #{Mrgr.Github.Repository.GraphQL.settings()}
+            #{Mrgr.Github.Repository.GraphQL.primary_language()}
+          }
+        }
+      }
+    """
+
+    neuron_request!(repository.installation_id, query)
   end
 
   def fetch_repository_settings_graphql(repository) do
@@ -221,17 +230,6 @@ defmodule Mrgr.Github.API.Live do
       &Tentacat.Repositories.list_orgs/2,
       installation,
       [installation.account.login]
-    )
-  end
-
-  def fetch_branch_protection(repository) do
-    {owner, name} = Mrgr.Schema.Repository.owner_name(repository)
-    branch = Mrgr.Schema.Repository.main_branch(repository)
-
-    request!(
-      &Tentacat.Repositories.Branches.protection/4,
-      repository.installation_id,
-      [owner, name, branch]
     )
   end
 

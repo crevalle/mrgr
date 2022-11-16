@@ -5,11 +5,62 @@ defmodule Mrgr.Repository do
   alias Mrgr.Schema.Repository, as: Schema
 
   def create(params) do
-    with cs <- Schema.changeset(%Schema{}, params),
+    with cs <- Schema.basic_changeset(%Schema{}, params),
          {:ok, repository} <- Mrgr.Repo.insert(cs) do
-      repository = set_and_apply_default_policy(repository)
-      {:ok, repository}
+      repository
+      |> sync_data()
+      |> generate_default_file_change_alerts()
+      |> set_and_apply_default_policy()
+      |> Mrgr.Tuple.ok()
     end
+  end
+
+  def create_from_graphql(installation_params, node) do
+    params =
+      node
+      |> node_to_params()
+      |> Map.merge(installation_params)
+
+    ### default policy is not applied here, it's done by caller
+    # assuming that the installation is creating a bunch of these
+    # and has that info
+
+    %Schema{}
+    |> Schema.changeset(params)
+    |> Mrgr.Repo.insert!()
+    |> generate_default_file_change_alerts()
+  end
+
+  def sync_data(repository) do
+    data = Mrgr.Github.API.fetch_repository_data(repository)
+
+    update_from_graphql(repository, data)
+  end
+
+  def node_to_params(attrs) do
+    %{
+      node_id: attrs["id"],
+      private: attrs["isPrivate"],
+      name: attrs["name"],
+      language: parse_primary_language(attrs),
+      parent: parse_parent_params(attrs["parent"]),
+      settings: Mrgr.Schema.RepositorySettings.translate_graphql_params(attrs)
+    }
+  end
+
+  defp parse_primary_language(%{"primaryLanguage" => %{"name" => name}}), do: name
+  defp parse_primary_language(_), do: nil
+
+  def update_from_graphql(repo, %{"node" => data}) do
+    update_from_graphql(repo, data)
+  end
+
+  def update_from_graphql(repo, node) do
+    params = node_to_params(node)
+
+    repo
+    |> Schema.changeset(params)
+    |> Mrgr.Repo.update!()
   end
 
   def find_by_name_for_user(user, name) do
@@ -69,11 +120,25 @@ defmodule Mrgr.Repository do
     |> fix_case_sensitive_sort()
   end
 
+  def all_for_installation(%{id: id}), do: all_for_installation(id)
+
+  def all_for_installation(installation_id) do
+    Schema
+    |> Query.for_installation(installation_id)
+    |> Mrgr.Repo.all()
+  end
+
   def unset_policy_id(policy_id) do
     Schema
     |> Query.for_policy(policy_id)
     |> Query.set_settings_policy_id(nil)
     |> Mrgr.Repo.update_all([])
+  end
+
+  def set_policy(repository, policy) do
+    repository
+    |> Ecto.Changeset.change(%{repository_settings_policy_id: policy.id})
+    |> Mrgr.Repo.update!()
   end
 
   def set_and_apply_default_policy(repository) do
@@ -85,10 +150,8 @@ defmodule Mrgr.Repository do
 
       policy ->
         repository
-        |> Ecto.Changeset.change(%{repository_settings_policy_id: policy.id})
-        |> Mrgr.Repo.update!()
-
-        apply_policy_to_repo(repository, policy)
+        |> set_policy(policy)
+        |> apply_policy_to_repo(policy)
     end
   end
 
@@ -130,26 +193,17 @@ defmodule Mrgr.Repository do
   defp toggle(false), do: true
 
   # when we get a new repo hook it only has minimal data
-  # check to see if we need to gather the rest
-  def ensure_hydrated(%{language: nil} = repository) do
-    data = fetch_repository_data(repository)
-
+  # because no code has been pushed. check to see if we need to gather the rest
+  def sync_if_first_pr(%{language: nil} = repository) do
     repository
-    |> Schema.changeset(data)
-    |> Mrgr.Repo.update!()
-    |> hydrate_ancillary_data()
+    |> sync_data()
+    |> generate_default_file_change_alerts()
   end
 
-  def ensure_hydrated(repository), do: repository
+  def sync_if_first_pr(repository), do: repository
 
   def fetch_repository_data(repository) do
     Mrgr.Github.API.fetch_repository(repository.installation, repository)
-  end
-
-  def hydrate_ancillary_data(repository) do
-    repository
-    |> generate_default_file_change_alerts()
-    |> hydrate_branch_protection()
   end
 
   @spec generate_default_file_change_alerts(Schema.t()) :: Schema.t()
@@ -164,69 +218,11 @@ defmodule Mrgr.Repository do
     %{repository | file_change_alerts: alerts}
   end
 
-  @spec hydrate_branch_protection(Schema.t()) :: Schema.t()
-  def hydrate_branch_protection(repository) do
-    case fetch_branch_data(repository) do
-      %{"required_pull_request_reviews" => attrs} ->
-        repository
-        |> Schema.branch_protection_changeset(attrs)
-        |> Mrgr.Repo.update!()
-
-      _branch_not_protected ->
-        repository
-    end
-  end
-
-  def fetch_branch_data(repository) do
-    Mrgr.Github.API.fetch_branch_protection(repository)
-  end
-
-  def sync_all_settings_graphql(repository) do
-    data =
-      Mrgr.Github.API.fetch_repository_settings_graphql(repository)
-
-    update_security_setting_data(repository, data)
-  end
-
-  # receives node list
-  def refresh_all_security_settings(graphql_data) do
-    # get all local repos at once, then look them up in memory
-    # not all optimization is premature
-    repos = fetch_local_repos(graphql_data)
-
-    Enum.map(graphql_data, fn d ->
-      case Map.get(repos, d["id"]) do
-        # i guess
-        nil ->
-          nil
-
-        repo ->
-          update_security_setting_data(repo, d)
-      end
-    end)
-    |> Enum.reject(&is_nil/1)
-  end
-
-  def update_security_setting_data(repo, %{"node" => data}) do
-    update_security_setting_data(repo, data)
-  end
-
-  def update_security_setting_data(repo, data) do
-    # do this here cause that's when I have the data,
-    # until I can do it somewhere else
-    parent_params = %{parent: translate_parent_params(data["parent"])}
-
-    repo =
-      repo
-      |> Schema.parent_changeset(parent_params)
-      |> Mrgr.Repo.update!()
-
-    params =
-      %{settings: Mrgr.Schema.RepositorySettings.translate_graphql_params(data)}
-
-    repo
-    |> Schema.settings_changeset(params)
-    |> Mrgr.Repo.update!()
+  def delete_all_for_installation(installation) do
+    Schema
+    |> Query.for_installation(installation.id)
+    |> Mrgr.Repo.all()
+    |> Enum.map(&Mrgr.Repo.delete/1)
   end
 
   def apply_policy_to_repo(repository, policy) do
@@ -237,8 +233,7 @@ defmodule Mrgr.Repository do
   end
 
   def apply_merge_settings(repository, policy) do
-    params =
-      Mrgr.Schema.RepositorySettings.translate_names_to_rest_api(policy.settings)
+    params = Mrgr.Schema.RepositorySettings.translate_names_to_rest_api(policy.settings)
 
     attrs =
       repository
@@ -267,23 +262,9 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.update!()
   end
 
-  defp fetch_local_repos(graphql_data) do
-    node_ids = Enum.map(graphql_data, & &1["id"])
+  defp parse_parent_params(nil), do: %{}
 
-    repos =
-      Schema
-      |> Query.by_node_ids(node_ids)
-      |> Mrgr.Repo.all()
-
-    # %{"<node_id>" => %Repository{}}
-    Enum.reduce(repos, %{}, fn repo, acc ->
-      Map.put(acc, repo.node_id, repo)
-    end)
-  end
-
-  defp translate_parent_params(nil), do: %{}
-
-  defp translate_parent_params(data) do
+  defp parse_parent_params(data) do
     %{node_id: data["id"], name: data["name"], name_with_owner: data["nameWithOwner"]}
   end
 
@@ -304,23 +285,23 @@ defmodule Mrgr.Repository do
     result = Mrgr.Github.API.fetch_pulls_graphql(repo.installation, repo)
 
     result
-    |> translate_graphql_attrs()
+    |> parse_graphql_attrs()
   end
 
-  def translate_graphql_attrs(attrs) do
+  def parse_graphql_attrs(attrs) do
     attrs["repository"]["pullRequests"]["edges"]
     |> Enum.map(fn %{"node" => node} ->
-      translate_node(node)
+      parse_node(node)
     end)
   end
 
-  defp translate_node(node) do
+  defp parse_node(node) do
     requested_reviewers =
       node["reviewRequests"]["nodes"]
       |> Enum.map(fn node -> node["requestedReviewer"] end)
       |> Enum.map(&Mrgr.Github.User.graphql_to_attrs/1)
 
-    translated = %{
+    parsed = %{
       "assignees" => Mrgr.Github.User.graphql_to_attrs(node["assignees"]["nodes"]),
       "created_at" => node["createdAt"],
       "head" => %{
@@ -338,7 +319,7 @@ defmodule Mrgr.Repository do
       }
     }
 
-    Map.merge(node, translated)
+    Map.merge(node, parsed)
   end
 
   defp create_pull_requests_from_data(repo, data) do
