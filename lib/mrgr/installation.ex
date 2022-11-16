@@ -109,7 +109,6 @@ defmodule Mrgr.Installation do
   end
 
   def sync_repository_data(installation) do
-    # assumes repos already exist locally, WILL NOT create new ones
     data = fetch_all_repository_data(installation)
 
     # look them all up at once, save possibly hundreds of db calls
