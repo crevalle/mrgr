@@ -22,7 +22,8 @@ defmodule MrgrWeb.Endpoint do
     at: "/",
     from: :mrgr,
     gzip: false,
-    only: ~w(assets fonts images favicon.ico robots.txt)
+    only:
+      ~w(assets fonts images favicon.ico manifest.json apple-touch-icon.png android-chrome-192x192.png android-chrome-512x512.png favicon-16x16.png favicon-132x32.png robots.txt)
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.
