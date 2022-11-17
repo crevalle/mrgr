@@ -65,7 +65,7 @@ defmodule MrgrWeb.Live.InstallationLoading do
       true ->
         socket
         |> assign(:dots, "OK!")
-        |> redirect(to: Routes.pending_pull_request_path(MrgrWeb.Endpoint, :index))
+        |> redirect(to: Routes.pull_request_path(MrgrWeb.Endpoint, :index))
         |> noreply()
 
       false ->
@@ -103,7 +103,7 @@ defmodule MrgrWeb.Live.InstallationLoading do
   def handle_info(%{event: @installation_setup_completed, payload: _installation}, socket) do
     socket
     |> assign(:dots, "OK!")
-    |> redirect(to: Routes.pending_pull_request_path(MrgrWeb.Endpoint, :index))
+    |> redirect(to: Routes.pull_request_path(MrgrWeb.Endpoint, :index))
     |> noreply()
   end
 

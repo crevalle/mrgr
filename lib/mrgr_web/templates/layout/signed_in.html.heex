@@ -7,7 +7,7 @@
       <div class="flex-1 px-4 flex justify-between">
         <div class="ml-4 flex items-center space-x-6">
           <.nav_item
-            route={Routes.pending_pull_request_path(MrgrWeb.Endpoint, :index)}
+            route={Routes.pull_request_path(MrgrWeb.Endpoint, :index)}
             icon="share"
             label="Open Pull Requests">
             <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.OpenPRCountBadge, session: %{"installation_id" => @conn.assigns.current_user.current_installation_id} %>

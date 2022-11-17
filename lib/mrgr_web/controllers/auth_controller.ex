@@ -49,6 +49,6 @@ defmodule MrgrWeb.AuthController do
   end
 
   def post_sign_in_path(conn, _user) do
-    Routes.pending_pull_request_path(conn, :index)
+    Routes.pull_request_path(conn, :index)
   end
 end

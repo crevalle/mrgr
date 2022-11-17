@@ -12,7 +12,7 @@ defmodule MrgrWeb.PageController do
 
     case MrgrWeb.Plug.Auth.signed_in?(conn) do
       true ->
-        redirect(conn, to: Routes.pending_pull_request_path(conn, :index))
+        redirect(conn, to: Routes.pull_request_path(conn, :index))
 
       false ->
         conn

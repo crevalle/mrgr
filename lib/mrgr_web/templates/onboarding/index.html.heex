@@ -5,7 +5,7 @@
     <div class="mt-8 space-y-4">
 
       <%= if Mrgr.User.installed_github_app?(@current_user) do %>
-        <p>Looks like you're all set!  <%= link "Click here to continue", to: Routes.pending_pull_request_path(@conn, :index), class: "text-teal-700 hover:text-teal-500 text-sm" %>.</p>
+        <p>Looks like you're all set!  <%= link "Click here to continue", to: Routes.pull_request_path(@conn, :index), class: "text-teal-700 hover:text-teal-500 text-sm" %>.</p>
       <% else %>
 
         <p>We need to install the Mrgr Github App to load your data.</p>
