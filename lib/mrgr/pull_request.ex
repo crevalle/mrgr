@@ -379,7 +379,7 @@ defmodule Mrgr.PullRequest do
   end
 
   defp build_url_to(pull_request) do
-    MrgrWeb.Router.Helpers.pending_pull_request_url(MrgrWeb.Endpoint, :show, pull_request.id)
+    MrgrWeb.Router.Helpers.pull_request_url(MrgrWeb.Endpoint, :show, pull_request.id)
   end
 
   def snooze(pull_request, until) do

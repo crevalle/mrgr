@@ -16,7 +16,7 @@ defmodule MrgrWeb.AuthControllerTest do
       new_user = build(:user, current_installation_id: 1)
 
       path = MrgrWeb.AuthController.post_sign_in_path(conn, new_user)
-      assert path == "/pending-pull-requests"
+      assert path == "/pull-requests"
     end
   end
 end
