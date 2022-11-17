@@ -68,7 +68,7 @@ defmodule Mrgr.Factory do
 
     %Mrgr.Schema.Repository{
       name: name,
-      full_name: full_name
+      full_name: full_name,
       node_id: Ecto.UUID.generate(),
       private: true,
       language: "Elixir",
