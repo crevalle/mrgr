@@ -24,7 +24,7 @@ defmodule Mrgr.Schema.Repository do
     has_many(:members, through: [:installation, :member])
     has_many(:users, through: [:installation, :users])
 
-    has_many(:pull_requests, Mrgr.Schema.PullRequest)
+    has_many(:pull_requests, Mrgr.Schema.PullRequest, on_delete: :delete_all)
 
     has_many(:file_change_alerts, Mrgr.Schema.FileChangeAlert, on_delete: :delete_all)
 

@@ -46,8 +46,8 @@ defmodule Mrgr.Schema.PullRequest do
     has_one(:checklist, Mrgr.Schema.Checklist, on_delete: :delete_all)
     has_many(:checks, through: [:checklist, :checks])
 
-    has_many(:comments, Mrgr.Schema.Comment)
-    has_many(:pr_reviews, Mrgr.Schema.PRReview)
+    has_many(:comments, Mrgr.Schema.Comment, on_delete: :delete_all)
+    has_many(:pr_reviews, Mrgr.Schema.PRReview, on_delete: :delete_all)
 
     timestamps()
   end
