@@ -2,19 +2,19 @@ defmodule MrgrWeb.Live.Flash do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  on_mount MrgrWeb.Plug.Auth
-
   def put(socket, key, message) do
-    Mrgr.PubSub.broadcast_flash(socket.assigns.current_user, key, message)
+    # assumes you've got a current user, bub
+    Mrgr.PubSub.broadcast_flash(socket.assigns.user, key, message)
 
     socket
   end
 
-  def mount(_params, _session, socket) do
-    Mrgr.PubSub.subscribe_to_flash(socket.assigns.current_user)
+  def mount(_params, %{"user_id" => id}, socket) do
+    Mrgr.PubSub.subscribe_to_flash(id)
 
     socket
-    |> ok
+    |> assign(:user_id, id)
+    |> ok()
   end
 
   def render(assigns) do

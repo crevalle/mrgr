@@ -2,24 +2,22 @@ defmodule MrgrWeb.Live.OpenPRCountBadge do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  on_mount MrgrWeb.Plug.Auth
-
-  def mount(_params, _session, socket) do
+  def mount(_params, %{"installation_id" => id}, socket) do
     if connected?(socket) do
-      current_user = socket.assigns.current_user
-
-      case current_user.current_installation do
+      case id do
         nil ->
           # onboarding, no current installation
           socket
+          |> assign(:id, id)
           |> assign(:count, 0)
           |> ok()
 
         _installation ->
-          subscribe(current_user)
+          subscribe(id)
 
           socket
-          |> assign(:count, Mrgr.PullRequest.open_pr_count(current_user))
+          |> assign(:id, id)
+          |> assign(:count, Mrgr.PullRequest.open_pr_count(id))
           |> ok()
       end
     else
@@ -33,9 +31,8 @@ defmodule MrgrWeb.Live.OpenPRCountBadge do
     """
   end
 
-  def subscribe(user) do
-    topic = Mrgr.PubSub.Topic.installation(user.current_installation)
-    Mrgr.PubSub.subscribe(topic)
+  def subscribe(installation_id) do
+    Mrgr.PubSub.subscribe_to_installation(installation_id)
   end
 
   def handle_info(%{event: event}, socket)

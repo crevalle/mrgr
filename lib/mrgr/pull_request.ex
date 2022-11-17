@@ -550,9 +550,9 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
-  def open_pr_count(%{current_installation_id: id}) do
+  def open_pr_count(installation_id) do
     Schema
-    |> Query.count_open(id)
+    |> Query.count_open(installation_id)
     |> Mrgr.Repo.one()
   end
 

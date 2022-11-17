@@ -32,8 +32,10 @@ defmodule Mrgr.PubSub do
   end
 
   defmodule Topic do
-    def flash(user) do
-      "user:#{user.id}"
+    def flash(%{id: id}), do: flash(id)
+
+    def flash(user_id) do
+      "user:#{user_id}"
     end
 
     def installation(%Mrgr.Schema.Installation{id: id}), do: installation(id)
