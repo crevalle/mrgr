@@ -528,13 +528,6 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
-  def find_for_activity_feed(external_id) do
-    Schema
-    |> Query.by_external_id(external_id)
-    |> Query.with_file_alert_rules()
-    |> Mrgr.Repo.one()
-  end
-
   def find(id) do
     Schema
     |> Query.by_id(id)
