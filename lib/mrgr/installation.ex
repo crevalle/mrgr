@@ -89,7 +89,7 @@ defmodule Mrgr.Installation do
     |> broadcast(@installation_loading_repositories)
     |> sync_repositories()
     |> broadcast(@installation_loading_pull_requests)
-    |> hydrate_github_pull_request_data()
+    |> sync_pull_request_data()
     |> mark_setup_completed()
     |> broadcast(@installation_setup_completed)
   end
@@ -220,10 +220,10 @@ defmodule Mrgr.Installation do
   def refresh_pull_requests!(installation) do
     Mrgr.PullRequest.delete_installation_pull_requests(installation)
 
-    hydrate_github_pull_request_data(installation)
+    sync_pull_request_data(installation)
   end
 
-  def hydrate_github_pull_request_data(installation) do
+  def sync_pull_request_data(installation) do
     # assumes account and repositories have been preloaded
 
     # we already have the installation here, so we reverse preload it onto its children repositories
