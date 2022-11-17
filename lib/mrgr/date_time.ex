@@ -42,6 +42,12 @@ defmodule Mrgr.DateTime do
     DateTime.truncate(dt, :second)
   end
 
+  def shift_from_now(amount, unit \\ :second) do
+    now()
+    |> DateTime.add(amount, unit)
+    |> safe_truncate()
+  end
+
   ### PROTOCOL ALERT ###
   def happened_at(%Mrgr.Schema.Comment{} = comment) do
     comment.posted_at

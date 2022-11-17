@@ -78,7 +78,7 @@ defmodule Mrgr.Factory do
 
   def build(:pull_request) do
     opened_at =
-      DateTime.truncate(DateTime.add(Mrgr.DateTime.now(), 1 - :rand.uniform(45)), :day)
+      Mrgr.DateTime.safe_truncate(DateTime.add(Mrgr.DateTime.now(), 1 - :rand.uniform(45), :day))
 
     %Mrgr.Schema.PullRequest{
       title: Faker.Company.bs(),
@@ -93,7 +93,9 @@ defmodule Mrgr.Factory do
 
   def build(:comment) do
     posted_at =
-      DateTime.truncate(DateTime.add(Mrgr.DateTime.now(), 1 - :rand.uniform(386_000)), :second)
+      Mrgr.DateTime.safe_truncate(
+        DateTime.add(Mrgr.DateTime.now(), 1 - :rand.uniform(386_000), :second)
+      )
 
     %Mrgr.Schema.Comment{
       object: :issue_comment,

@@ -3,6 +3,8 @@ defmodule MrgrWeb.Components.UI do
 
   import MrgrWeb.JS
 
+  alias Phoenix.LiveView.JS
+
   def inline_link(assigns) do
     default_class = "text-teal-700 hover:text-teal-500"
     class = Map.get(assigns, :class, default_class)
@@ -416,7 +418,7 @@ defmodule MrgrWeb.Components.UI do
 
   def page_nav(assigns) do
     ~H"""
-    <nav class="border-t border-gray-200">
+    <nav class="">
       <ul class="flex my-2">
         <li class="">
           <a class={"px-2 py-2 #{if @page.page_number <= 1, do: "pointer-events-none text-gray-600", else: "text-teal-700 hover:text-teal-500"}"} href="#" phx-click="nav" phx-value-page={@page.page_number - 1}>Previous</a>
@@ -451,6 +453,37 @@ defmodule MrgrWeb.Components.UI do
   def installation_synced_at(assigns) do
     ~H"""
       <p class="text-sm italic text-gray-500">Data last synced at <%= if @dt, do: ts(@dt, @timezone), else: "--" %></p>
+    """
+  end
+
+  def tab_select_button(assigns) do
+    colors =
+      case assigns.selected_tab == assigns.name do
+        true -> "border-teal-700"
+        false -> ""
+      end
+
+    assigns =
+      assigns
+      |> assign(:colors, colors)
+
+    ~H"""
+      <button
+        class={"inline-block #{@colors} text-gray-600 hover:text-gray-900 hover:bg-gray-50 p-4 rounded-t-lg border-b-2"}
+        phx-click={JS.push("select-tab", value: %{name: @name})}
+        id={"#{@name}-tab"}
+        type="button"
+        role="tab"
+        aria-selected="false">
+        <%= render_slot(@inner_block) %>
+        <.pr_count_badge count={@count} />
+      </button>
+    """
+  end
+
+  def pr_count_badge(assigns) do
+    ~H"""
+    <span class="bg-gray-100 group-hover:bg-gray-200 ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full"> <%= @count %> </span>
     """
   end
 

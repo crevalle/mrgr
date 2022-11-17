@@ -25,6 +25,7 @@ defmodule Mrgr.DataCase do
       import Ecto.Query
       import Mrgr.DataCase
       import Mrgr.Factory
+      import Mrgr.Assertions
     end
   end
 

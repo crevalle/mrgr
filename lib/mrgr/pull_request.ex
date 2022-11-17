@@ -549,6 +549,30 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
+  def paged_pending_pull_requests(user_or_id, opts \\ %{})
+
+  def paged_pending_pull_requests(%{current_installation_id: id}, opts) do
+    paged_pending_pull_requests(id, opts)
+  end
+
+  def paged_pending_pull_requests(installation_id, opts) do
+    before = Map.get(opts, :before)
+    since = Map.get(opts, :since)
+
+    # load in two passes because adding the joins messes up my LIMITs
+
+    page =
+      Schema
+      |> Query.for_installation(installation_id)
+      |> Query.open()
+      |> Query.order_by_opened()
+      |> Query.opened_between(before, since)
+      |> Mrgr.Repo.paginate(opts)
+
+    entries_with_preloads = Mrgr.Repo.preload(page.entries, Query.pending_preloads())
+    %{page | entries: entries_with_preloads}
+  end
+
   def pending_pull_requests(%Mrgr.Schema.Installation{id: id}) do
     pending_pull_requests(id)
   end
@@ -662,8 +686,7 @@ defmodule Mrgr.PullRequest do
 
     def for_installation(query, installation_id) do
       from([q, repository: r] in with_repository(query),
-        join: i in assoc(r, :installation),
-        where: i.id == ^installation_id
+        where: r.installation_id == ^installation_id
       )
     end
 
@@ -747,11 +770,43 @@ defmodule Mrgr.PullRequest do
       )
     end
 
+    def pending_preloads do
+      [
+        :comments,
+        :pr_reviews,
+        repository: [:file_change_alerts]
+      ]
+    end
+
     def with_pending_preloads(query) do
       query
       |> with_file_alert_rules()
       |> with_comments()
       |> with_pr_reviews()
+    end
+
+    def order_by_opened(query) do
+      from(q in query,
+        order_by: [desc: q.opened_at]
+      )
+    end
+
+    def opened_between(query, before, since) do
+      query
+      |> opened_before(before)
+      |> opened_since(since)
+    end
+
+    def opened_before(query, nil), do: query
+
+    def opened_before(query, before) do
+      from(q in query, where: q.opened_at <= ^before)
+    end
+
+    def opened_since(query, nil), do: query
+
+    def opened_since(query, since) do
+      from(q in query, where: q.opened_at >= ^since)
     end
 
     def count_open(query, installation_id) do

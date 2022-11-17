@@ -119,4 +119,22 @@ defmodule MrgrWeb.Components.PullRequest do
     </li>
     """
   end
+
+  def tab_detail_content(%{tab: "recent"} = assigns) do
+    ~H"""
+    you've chosen the recent tab
+    """
+  end
+
+  def tab_detail_content(%{tab: "two-weeks"} = assigns) do
+    ~H"""
+    you've chosen the two weeks tab
+    """
+  end
+
+  def tab_detail_content(assigns) do
+    ~H"""
+    I have ants in my pants
+    """
+  end
 end

@@ -69,23 +69,49 @@
 </div>
 
 <div class="flex mt-8 space-x-4" phx-hook="Drag" id="drag">
-  <%= if @pull_requests == [] do %>
-    All done!  Yay!  😊
-  <% else %>
-    <div class="basis-1/2 overflow-hidden">
-      <div role="list" class="flex flex-col space-y-4 dropzone" id="pending-pull-request-list">
-        <.live_component
-          :for={pull_request <- @pull_requests}
-          module={MrgrWeb.Components.Live.PendingPullRequestItem}
-          id={"pull_request_#{pull_request.id}"}
-          pull_request={pull_request}
-          selected={selected?(pull_request, @selected_pull_request)}
-          merge_frozen={merge_frozen?(@frozen_repos, pull_request)}
-          current_user={@current_user}
-          timezone={@timezone} />
+  <div class="basis-1/2">
+
+    <div class="mb-4 ">
+      <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="myTab" data-tabs-toggle="#myTabContent" role="tablist">
+        <li :for={pr_type <- @all_prs} class="mr-2" role="presentation">
+          <.tab_select_button
+            name={pr_type.id}
+            count={pr_type.prs.total_entries}
+            selected_tab={@selected_tab} >
+            <%= pr_type.title %>
+          </.tab_select_button>
+        </li>
+      </ul>
+    </div>
+    <div id="myTabContent">
+      <.page_nav page={@pull_requests} />
+      <div :if={false} class="p-4 bg-gray-50 rounded-lg dark:bg-gray-800" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+        <p class="text-sm text-gray-500 dark:text-gray-400">
+          <.tab_detail_content tab={@selected_tab} />
+        </p>
       </div>
     </div>
-  <% end %>
+        
+
+
+    <%= if @pull_requests == [] do %>
+      All done!  Yay!  😊
+    <% else %>
+      <div class="overflow-hidden">
+        <div role="list" class="flex flex-col space-y-4 dropzone" id="pending-pull-request-list">
+          <.live_component
+            :for={pull_request <- @pull_requests}
+            module={MrgrWeb.Components.Live.PullRequestListItem}
+            id={"pull_request_#{pull_request.id}"}
+            pull_request={pull_request}
+            selected={selected?(pull_request, @selected_pull_request)}
+            merge_frozen={merge_frozen?(@frozen_repos, pull_request)}
+            current_user={@current_user}
+            timezone={@timezone} />
+        </div>
+      </div>
+    <% end %>
+  </div>
 
   <div id="detail-pane">
     <.live_component :if={@selected_pull_request} module={MrgrWeb.Components.Live.PullRequestDetail} id="pull_request_detail" pull_request={@selected_pull_request} current_user={@current_user} merge_frozen={merge_frozen?(@frozen_repos, @selected_pull_request)} timezone={@timezone} />
