@@ -550,6 +550,12 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
+  def open_pr_count(%{current_installation_id: id}) do
+    Schema
+    |> Query.count_open(id)
+    |> Mrgr.Repo.one()
+  end
+
   def pending_pull_requests(%Mrgr.Schema.Installation{id: id}) do
     pending_pull_requests(id)
   end
@@ -753,6 +759,15 @@ defmodule Mrgr.PullRequest do
       |> with_file_alert_rules()
       |> with_comments()
       |> with_pr_reviews()
+    end
+
+    def count_open(query, installation_id) do
+      from(q in query,
+        join: r in assoc(q, :repository),
+        where: r.installation_id == ^installation_id,
+        where: q.status == "open",
+        select: count(q.id)
+      )
     end
   end
 end
