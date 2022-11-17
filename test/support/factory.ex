@@ -62,18 +62,23 @@ defmodule Mrgr.Factory do
   end
 
   def build(:repository) do
+    installation = build(:installation)
+    name = Faker.Company.bullshit()
+    full_name = "#{installation.account.login}/#{name}"
+
     %Mrgr.Schema.Repository{
-      name: Faker.Company.bullshit(),
+      name: name,
+      full_name: full_name
       node_id: Ecto.UUID.generate(),
       private: true,
       language: "Elixir",
-      installation: build(:installation)
+      installation: installation
     }
   end
 
   def build(:pull_request) do
     opened_at =
-      DateTime.truncate(DateTime.add(Mrgr.DateTime.now(), 1 - :rand.uniform(100_000)), :second)
+      DateTime.truncate(DateTime.add(Mrgr.DateTime.now(), 1 - :rand.uniform(45)), :day)
 
     %Mrgr.Schema.PullRequest{
       title: Faker.Company.bs(),
