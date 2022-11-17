@@ -14,6 +14,8 @@ defmodule MrgrWeb.Endpoint do
   socket "/live", Phoenix.LiveView.Socket,
     websocket: [timeout: 45_000, connect_info: [session: @session_options]]
 
+  plug :redirect_pending_pr_route
+
   # Serve at "/" the static files from "priv/static" directory.
   #
   # You should set gzip to true if you are running phx.digest
@@ -50,4 +52,12 @@ defmodule MrgrWeb.Endpoint do
   plug Plug.Head
   plug Plug.Session, @session_options
   plug MrgrWeb.Router
+
+  defp redirect_pending_pr_route(%{request_path: "/pending-pull-requests"} = conn, _opts) do
+    conn
+    |> Phoenix.Controller.redirect(to: "/pull-requests")
+    |> Plug.Conn.halt()
+  end
+
+  defp redirect_pending_pr_route(conn, _opts), do: conn
 end

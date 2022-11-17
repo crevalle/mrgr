@@ -9,7 +9,7 @@
           <.nav_item
             route={Routes.pending_pull_request_path(MrgrWeb.Endpoint, :index)}
             icon="share"
-            label="Pending Pull Requests">
+            label="Open Pull Requests">
             <%= Phoenix.Component.live_render @conn, MrgrWeb.Live.PendingPRCountBadge, session: %{"user_id" => @conn.assigns.current_user.id} %>
           </.nav_item>
 
