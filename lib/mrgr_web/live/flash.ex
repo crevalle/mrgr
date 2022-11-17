@@ -4,7 +4,7 @@ defmodule MrgrWeb.Live.Flash do
 
   def put(socket, key, message) do
     # assumes you've got a current user, bub
-    Mrgr.PubSub.broadcast_flash(socket.assigns.user, key, message)
+    Mrgr.PubSub.broadcast_flash(socket.assigns.current_user, key, message)
 
     socket
   end
