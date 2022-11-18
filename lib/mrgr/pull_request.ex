@@ -722,14 +722,18 @@ defmodule Mrgr.PullRequest do
     end
 
     def unsnoozed(query) do
+      now = Mrgr.DateTime.safe_truncate(Mrgr.DateTime.now())
+
       from(q in query,
-        where: is_nil(q.snoozed_until)
+        where: is_nil(q.snoozed_until) or q.snoozed_until < ^now
       )
     end
 
     def snoozed(query) do
+      now = Mrgr.DateTime.safe_truncate(Mrgr.DateTime.now())
+
       from(q in query,
-        where: not is_nil(q.snoozed_until)
+        where: not is_nil(q.snoozed_until) and q.snoozed_until > ^now
       )
     end
 
