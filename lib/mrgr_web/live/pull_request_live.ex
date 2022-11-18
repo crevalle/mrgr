@@ -2,12 +2,11 @@ defmodule MrgrWeb.PullRequestLive do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  import MrgrWeb.Components.PullRequest
   alias __MODULE__.Tabs
 
   on_mount MrgrWeb.Plug.Auth
 
-  def mount(params, _session, socket) do
+  def mount(_params, _session, socket) do
     if connected?(socket) do
       current_user = socket.assigns.current_user
 
