@@ -566,6 +566,7 @@ defmodule Mrgr.PullRequest do
       |> Query.for_installation(installation_id)
       |> Query.open()
       |> Query.order_by_opened()
+      |> Query.unsnoozed()
       |> Query.opened_between(before, since)
       |> Mrgr.Repo.paginate(opts)
 
@@ -706,6 +707,18 @@ defmodule Mrgr.PullRequest do
     def open(query) do
       from(q in query,
         where: q.status == "open"
+      )
+    end
+
+    def unsnoozed(query) do
+      from(q in query,
+        where: is_nil(q.snoozed_until)
+      )
+    end
+
+    def snoozed(query) do
+      from(q in query,
+        where: not is_nil(q.snoozed_until)
       )
     end
 

@@ -441,8 +441,7 @@ defmodule MrgrWeb.Components.UI do
       <div id={@id}
         class="hidden spinner"
         data-spinning={show_spinner(@id)}
-        data-done={hide_spinner(@id)}
-      >
+        data-done={hide_spinner(@id)} >
         <div class="bounce1"></div>
         <div class="bounce2"></div>
         <div class="bounce3"></div>
@@ -459,8 +458,8 @@ defmodule MrgrWeb.Components.UI do
   def tab_select_button(assigns) do
     colors =
       case assigns.selected_tab == assigns.name do
-        true -> "border-teal-700"
-        false -> ""
+        true -> "border-teal-700 border-b-2 text-teal-700"
+        false -> "text-gray-500 hover:text-gray-900"
       end
 
     assigns =
@@ -469,7 +468,7 @@ defmodule MrgrWeb.Components.UI do
 
     ~H"""
       <button
-        class={"inline-block #{@colors} text-gray-600 hover:text-gray-900 hover:bg-gray-50 p-4 rounded-t-lg border-b-2"}
+        class={"inline-block #{@colors} hover:bg-gray-50 p-4 rounded-t-lg border-b-2"}
         phx-click={JS.push("select-tab", value: %{name: @name})}
         id={"#{@name}-tab"}
         type="button"

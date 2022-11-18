@@ -71,9 +71,9 @@
 <div class="flex mt-8 space-x-4" phx-hook="Drag" id="drag">
   <div class="basis-1/2">
 
-    <div class="mb-4 ">
+    <div class="mb-4">
       <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="myTab" data-tabs-toggle="#myTabContent" role="tablist">
-        <li :for={pr_type <- @all_prs} class="mr-2" role="presentation">
+        <li :for={pr_type <- @tabs} class="mr-2" role="presentation">
           <.tab_select_button
             name={pr_type.id}
             count={pr_type.prs.total_entries}
@@ -83,6 +83,7 @@
         </li>
       </ul>
     </div>
+
     <div id="myTabContent">
       <.page_nav page={@pull_requests} />
       <div :if={false} class="p-4 bg-gray-50 rounded-lg dark:bg-gray-800" id="profile" role="tabpanel" aria-labelledby="profile-tab">

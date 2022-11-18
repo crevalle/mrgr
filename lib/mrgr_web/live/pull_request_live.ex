@@ -3,6 +3,7 @@ defmodule MrgrWeb.PullRequestLive do
   use Mrgr.PubSub.Event
 
   import MrgrWeb.Components.PullRequest
+  alias __MODULE__.Tabs
 
   on_mount MrgrWeb.Plug.Auth
 
@@ -13,13 +14,7 @@ defmodule MrgrWeb.PullRequestLive do
       {snoozed, pull_requests} = {[], []}
       # fetch_pending_pull_requests(current_user) |> partition_snoozed_pull_requests()
 
-      recently_opened_prs = load_pull_requests("recently-opened", current_user)
-
-      all_prs = [
-        %{id: "recently-opened", title: "Recently Opened", prs: recently_opened_prs},
-        %{id: "socks", title: "Socks", prs: load_pull_requests("socks", current_user)},
-        %{id: "stale", title: "Stale", prs: load_pull_requests("stale", current_user)}
-      ]
+      tabs = Tabs.new(current_user)
 
       repos = Mrgr.Repository.for_user_with_rules(current_user)
       frozen_repos = filter_frozen_repos(repos)
@@ -30,9 +25,9 @@ defmodule MrgrWeb.PullRequestLive do
       selected_pull_request = Mrgr.List.find(pull_requests, params["id"])
 
       socket
-      |> assign(:all_prs, all_prs)
-      |> assign(:selected_tab, "recently-opened")
-      |> assign(:pull_requests, recently_opened_prs)
+      |> assign(:tabs, tabs)
+      |> assign(:selected_tab, hd(tabs))
+      |> assign(:pull_requests, Map.get(hd(tabs), :prs))
       |> assign(:snoozed, snoozed)
       |> assign(:selected_pull_request, selected_pull_request)
       |> assign(:repos, repos)
@@ -44,62 +39,21 @@ defmodule MrgrWeb.PullRequestLive do
     end
   end
 
-  defp select_pull_requests(all_prs, name, current_user) do
-    item = Enum.find(all_prs, fn i -> i.id == name end)
-
-    case item.prs do
-      :not_loaded ->
-        prs = load_pull_requests(name, current_user)
-
-        new_item = Map.put(item, :prs, prs)
-        all_prs = Mrgr.List.replace(all_prs, new_item)
-
-        {all_prs, prs}
-
-      prs ->
-        {all_prs, prs}
-    end
-  end
-
-  defp load_pull_requests(key, user, page \\ %{})
-
-  defp load_pull_requests("recently-opened", user, page) do
-    opts = Map.merge(page, %{since: two_weeks_ago()})
-
-    page = Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
-    page
-  end
-
-  defp load_pull_requests("socks", user, page) do
-    opts = Map.merge(page, %{before: two_weeks_ago(), since: four_weeks_ago()})
-    Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
-  end
-
-  defp load_pull_requests("stale", user, page) do
-    opts = Map.merge(page, %{before: four_weeks_ago()})
-    Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
-  end
-
   def handle_event("nav", params, socket) do
-    IO.inspect(params)
-    IO.inspect(socket.assigns.selected_tab)
-    page = load_pull_requests(socket.assigns.selected_tab, socket.assigns.current_user, params)
+    {tabs, page} = Tabs.nav(params, socket)
 
     socket
-    # |> assign(:page, page)
+    |> assign(:tabs, tabs)
     |> assign(:pull_requests, page)
     |> noreply()
   end
 
   def handle_event("select-tab", %{"name" => name}, socket) do
-    {all_prs, selected_prs} =
-      select_pull_requests(socket.assigns.all_prs, name, socket.assigns.current_user)
-
-    IO.inspect(selected_prs)
+    {tabs, selected_prs} = Tabs.select(name, socket)
 
     socket
     |> assign(:selected_tab, name)
-    |> assign(:all_prs, all_prs)
+    |> assign(:tabs, tabs)
     |> assign(:pull_requests, selected_prs)
     |> noreply()
   end
@@ -365,11 +319,79 @@ defmodule MrgrWeb.PullRequestLive do
     Enum.split_with(pull_requests, &Mrgr.PullRequest.snoozed?/1)
   end
 
-  defp two_weeks_ago do
-    Mrgr.DateTime.shift_from_now(-14, :day)
-  end
+  defmodule Tabs do
+    def new(user) do
+      [
+        %{
+          id: "recently-opened",
+          title: "Recent",
+          prs: load_pull_requests("recently-opened", user)
+        },
+        %{id: "socks", title: "Socks", prs: load_pull_requests("socks", user)},
+        %{id: "stale", title: "Stale", prs: load_pull_requests("stale", user)}
+      ]
+    end
 
-  defp four_weeks_ago do
-    Mrgr.DateTime.shift_from_now(-28, :day)
+    def nav(params, %{assigns: %{tabs: tabs, selected_tab: selected_tab, current_user: user}}) do
+      page = load_pull_requests(selected_tab, user, params)
+
+      tabs = set_page(tabs, selected_tab, page)
+
+      {tabs, page}
+    end
+
+    def select(name, %{assigns: %{tabs: tabs, current_user: user}}) do
+      select_pull_requests(tabs, name, user)
+    end
+
+    def select_pull_requests(tabs, name, user) do
+      item = Enum.find(tabs, fn i -> i.id == name end)
+
+      case item.prs do
+        :not_loaded ->
+          prs = load_pull_requests(name, user)
+
+          new_item = Map.put(item, :prs, prs)
+          tabs = Mrgr.List.replace(tabs, new_item)
+
+          {tabs, prs}
+
+        prs ->
+          {tabs, prs}
+      end
+    end
+
+    def load_pull_requests(key, user, page_params \\ %{})
+
+    def load_pull_requests("recently-opened", user, page_params) do
+      opts = Map.merge(page_params, %{since: two_weeks_ago()})
+
+      Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
+    end
+
+    def load_pull_requests("socks", user, page_params) do
+      opts = Map.merge(page_params, %{before: two_weeks_ago(), since: four_weeks_ago()})
+      Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
+    end
+
+    def load_pull_requests("stale", user, page_params) do
+      opts = Map.merge(page_params, %{before: four_weeks_ago()})
+      Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
+    end
+
+    def set_page(all, id, page) do
+      item = Enum.find(all, fn i -> i.id == id end)
+
+      new_item = Map.put(item, :prs, page)
+      all = Mrgr.List.replace(all, new_item)
+    end
+
+    defp two_weeks_ago do
+      Mrgr.DateTime.shift_from_now(-14, :day)
+    end
+
+    defp four_weeks_ago do
+      Mrgr.DateTime.shift_from_now(-28, :day)
+    end
   end
 end
