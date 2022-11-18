@@ -3,5 +3,5 @@ defmodule Mrgr.Repo do
     otp_app: :mrgr,
     adapter: Ecto.Adapters.Postgres
 
-  use Scrivener, page_size: 3
+  use Scrivener, page_size: 20
 end

@@ -2,11 +2,6 @@
   <div class="flex flex-col">
     <.heading title="Open Pull Requests" />
 
-    <div :if={Enum.any?(@snoozed)} >
-      <p class="text-gray-400 italic">
-        <%= Enum.count(@snoozed) %> pull requests are snoozed. <.l phx-click="show-snoozed-pull-requests">Show Them</.l>
-      </p>
-    </div>
   </div>
 
   <div class="relative inline-block text-left">
@@ -75,8 +70,8 @@
       <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="myTab" data-tabs-toggle="#myTabContent" role="tablist">
         <li :for={pr_type <- @tabs} class="mr-2" role="presentation">
           <.tab_select_button
-            name={pr_type.id}
-            count={pr_type.prs.total_entries}
+            id={pr_type.id}
+            count={pr_type.unsnoozed.total_entries}
             selected_tab={@selected_tab} >
             <%= pr_type.title %>
           </.tab_select_button>
@@ -84,34 +79,35 @@
       </ul>
     </div>
 
-    <div id="myTabContent">
-      <.page_nav page={@pull_requests} />
-      <div :if={false} class="p-4 bg-gray-50 rounded-lg dark:bg-gray-800" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-        <p class="text-sm text-gray-500 dark:text-gray-400">
-          <.tab_detail_content tab={@selected_tab} />
-        </p>
-      </div>
+    <div >
+      <.snooze_blurb tab={@selected_tab} />
+      <.page_nav page={pull_requests(@selected_tab)} />
     </div>
-        
 
-
-    <%= if @pull_requests == [] do %>
-      All done!  Yay!  😊
-    <% else %>
-      <div class="overflow-hidden">
-        <div role="list" class="flex flex-col space-y-4 dropzone" id="pending-pull-request-list">
-          <.live_component
-            :for={pull_request <- @pull_requests}
-            module={MrgrWeb.Components.Live.PullRequestListItem}
-            id={"pull_request_#{pull_request.id}"}
-            pull_request={pull_request}
-            selected={selected?(pull_request, @selected_pull_request)}
-            merge_frozen={merge_frozen?(@frozen_repos, pull_request)}
-            current_user={@current_user}
-            timezone={@timezone} />
+    <div class="mt-4">
+      <%= if Enum.empty?(pull_requests(@selected_tab)) do %>
+        <div class="flex justify-center max-w-xl">
+          <div class="flex flex-col space-y-4">
+            <%= img_tag Routes.static_path(MrgrWeb.Endpoint, "/images/gorbypuff.jpeg") %>
+            <p class="text-center">All done!  Yay!  😊</p>
+          </div>
         </div>
-      </div>
-    <% end %>
+      <% else %>
+        <div class="overflow-hidden">
+          <div role="list" class="flex flex-col space-y-4 dropzone" id="pending-pull-request-list">
+            <.live_component
+              :for={pull_request <- pull_requests(@selected_tab)}
+              module={MrgrWeb.Components.Live.PullRequestListItem}
+              id={"pull_request_#{pull_request.id}"}
+              pull_request={pull_request}
+              selected={selected?(pull_request, @selected_pull_request)}
+              merge_frozen={merge_frozen?(@frozen_repos, pull_request)}
+              current_user={@current_user}
+              timezone={@timezone} />
+          </div>
+        </div>
+      <% end %>
+    </div>
   </div>
 
   <div id="detail-pane">

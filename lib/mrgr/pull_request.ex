@@ -558,6 +558,7 @@ defmodule Mrgr.PullRequest do
   def paged_pending_pull_requests(installation_id, opts) do
     before = Map.get(opts, :before)
     since = Map.get(opts, :since)
+    with_snoozed = Map.get(opts, :snoozed)
 
     # load in two passes because adding the joins messes up my LIMITs
 
@@ -566,7 +567,7 @@ defmodule Mrgr.PullRequest do
       |> Query.for_installation(installation_id)
       |> Query.open()
       |> Query.order_by_opened()
-      |> Query.unsnoozed()
+      |> Query.maybe_snooze(with_snoozed)
       |> Query.opened_between(before, since)
       |> Mrgr.Repo.paginate(opts)
 
@@ -708,6 +709,16 @@ defmodule Mrgr.PullRequest do
       from(q in query,
         where: q.status == "open"
       )
+    end
+
+    def maybe_snooze(query, :all), do: query
+
+    def maybe_snooze(query, should_i) do
+      if should_i do
+        snoozed(query)
+      else
+        unsnoozed(query)
+      end
     end
 
     def unsnoozed(query) do

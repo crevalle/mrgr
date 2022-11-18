@@ -140,6 +140,15 @@
   z-index: 1;
 }
 
+.tab-select-button {
+  @apply text-gray-500 hover:text-gray-700;
+  transition: border-color 150ms ease-out;
+}
+
+.tab-select-button.selected {
+  @apply border-teal-700 border-b-2 text-teal-700;
+}
+
 /* Show the tooltip text when you mouse over the tooltip container */
 .tooltip:hover .tooltiptext {
   visibility: visible;

@@ -1,4 +1,4 @@
-<div draggable="true" class={"bg-white border #{selected_border(@selected)} shadow rounded-lg draggable"} id={"pull-request-#{@pull_request.id}"}>
+<div draggable="true" class={"bg-white border #{item_border_color(@pull_request, @selected)} shadow rounded-lg draggable"} id={"pull-request-#{@pull_request.id}"}>
   <div class="p-3">
 
     <!-- top row -->
@@ -8,10 +8,9 @@
       <div class="flex items-baseline">
         <.h3>
           <.l phx-click={
-               JS.push("select-pull-request")
+           JS.push("select-pull-request", value: %{id: @pull_request.id})
                |> show_detail()
              }
-           phx-value-pull-request-id={"#{@pull_request.id}"}
            class="text-teal-700 text-xl hover:text-teal-500">
            <%= @pull_request.title %>
           </.l>
@@ -43,7 +42,9 @@
             <div style="display: none;" id={"snooze-menu-#{@pull_request.id}"} class="origin-top-right z-50 mt-2 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"snooze-menu-button-#{@pull_request.id}"} tabindex="-1">
               <div class="mt-2 flex flex-col text-sm text-gray-500 sm:mt-0">
                 <%= for %{title: title, value: value} <- MrgrWeb.PullRequestLive.snooze_options() do %>
-                  <.l phx_click="snooze-pull-request" phx_value_id={@pull_request.id} phx_value_time={value} class="text-teal-700 hover:text-teal-500 font-light p-3 text-sm rounded-md" >
+                  <.l phx_click={
+                   JS.push("snooze-pull-request", value: %{id: @pull_request.id, time: value})
+                   } class="text-teal-700 hover:text-teal-500 font-light p-3 text-sm rounded-md" >
                     <%= title %>
                   </.l>
                 <% end %>

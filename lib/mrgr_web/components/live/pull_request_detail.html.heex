@@ -29,7 +29,7 @@
 
     <div :if={Mrgr.PullRequest.snoozed?(@pull_request)} >
       <p class="text-gray-400 italic">
-      😴 Snoozed until <%= ts(@pull_request.snoozed_until) %>. <.l phx_click="unsnooze-pull-request" phx_value_id={@pull_request.id}>Unsnooze</.l>
+      😴 Snoozed until <%= ts(@pull_request.snoozed_until) %>. <.l phx_click={JS.push("unsnooze-pull-request", value: %{id: @pull_request.id})}>Unsnooze</.l>
       </p>
     </div>
   </div>

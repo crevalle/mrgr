@@ -3,6 +3,5 @@ defmodule Mrgr.Repo.Migrations.AddIndexToSnoozed do
 
   def change do
     create index(:pull_requests, :snoozed_until)
-
   end
 end

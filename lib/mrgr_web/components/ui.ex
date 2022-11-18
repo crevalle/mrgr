@@ -416,6 +416,11 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def page_nav(%{page: %{total_pages: 1}} = assigns) do
+    ~H"""
+    """
+  end
+
   def page_nav(assigns) do
     ~H"""
     <nav class="">
@@ -425,7 +430,7 @@ defmodule MrgrWeb.Components.UI do
         </li>
         <%= for idx <-  Enum.to_list(1..@page.total_pages) do %>
           <li class="">
-            <a class={"px-2 py-2 #{if @page.page_number == idx, do: "pointer-events-none text-teal-300", else: "text-teal-700 hover:text-teal-500"}"} href="#" phx-click="nav" phx-value-page={idx}><%= idx %></a>
+            <a class={"px-2 py-2 #{if @page.page_number == idx, do: "pointer-events-none text-teal-400", else: "text-teal-700 hover:text-teal-500"}"} href="#" phx-click="nav" phx-value-page={idx}><%= idx %></a>
           </li>
         <% end %>
         <li class="">
@@ -456,27 +461,52 @@ defmodule MrgrWeb.Components.UI do
   end
 
   def tab_select_button(assigns) do
-    colors =
-      case assigns.selected_tab == assigns.name do
-        true -> "border-teal-700 border-b-2 text-teal-700"
-        false -> "text-gray-500 hover:text-gray-900"
+    selected =
+      case assigns.selected_tab.id == assigns.id do
+        true -> "selected"
+        false -> ""
       end
 
     assigns =
       assigns
-      |> assign(:colors, colors)
+      |> assign(:selected, selected)
 
     ~H"""
       <button
-        class={"inline-block #{@colors} hover:bg-gray-50 p-4 rounded-t-lg border-b-2"}
-        phx-click={JS.push("select-tab", value: %{name: @name})}
-        id={"#{@name}-tab"}
+        class={"flex items-center tab-select-button #{@selected} hover:bg-gray-50 p-4 rounded-t-lg border-b-2"}
+        phx-click={JS.push("select-tab", value: %{id: @id})}
+        id={"#{@id}-tab"}
         type="button"
         role="tab"
         aria-selected="false">
         <%= render_slot(@inner_block) %>
         <.pr_count_badge count={@count} />
       </button>
+    """
+  end
+
+  def snooze_blurb(%{tab: %{viewing_snoozed: true}} = assigns) do
+    ~H"""
+    <div class="p-4 max-w-xl bg-blue-100 rounded-md border border-1">
+      <p class="text-gray-400 italic">
+        😴 You're viewing snoozed PRs. <.l phx-click="toggle-viewing-snoozed">Show Unsnoozed</.l>
+      </p>
+    </div>
+    """
+  end
+
+  def snooze_blurb(%{tab: %{snoozed: %{total_entries: e}}} = assigns) when e > 0 do
+    ~H"""
+    <div  class="p-4 max-w-xl bg-blue-100 rounded-md border border-1">
+      <p class="text-gray-400 italic">
+        <%= @tab.snoozed.total_entries %> pull requests are snoozed. <.l phx-click="toggle-viewing-snoozed">Show Them</.l>
+      </p>
+    </div>
+    """
+  end
+
+  def snooze_blurb(assigns) do
+    ~H"""
     """
   end
 

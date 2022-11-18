@@ -11,9 +11,6 @@ defmodule MrgrWeb.PullRequestLive do
     if connected?(socket) do
       current_user = socket.assigns.current_user
 
-      {snoozed, pull_requests} = {[], []}
-      # fetch_pending_pull_requests(current_user) |> partition_snoozed_pull_requests()
-
       tabs = Tabs.new(current_user)
 
       repos = Mrgr.Repository.for_user_with_rules(current_user)
@@ -22,14 +19,13 @@ defmodule MrgrWeb.PullRequestLive do
 
       # id will be `nil` for the index action
       # but present for the show action
-      selected_pull_request = Mrgr.List.find(pull_requests, params["id"])
+      # selected_pull_request = Mrgr.List.find(pull_requests, params["id"])
+      # not sure how to do this anymore
 
       socket
       |> assign(:tabs, tabs)
       |> assign(:selected_tab, hd(tabs))
-      |> assign(:pull_requests, Map.get(hd(tabs), :prs))
-      |> assign(:snoozed, snoozed)
-      |> assign(:selected_pull_request, selected_pull_request)
+      |> assign(:selected_pull_request, nil)
       |> assign(:repos, repos)
       |> assign(:frozen_repos, frozen_repos)
       |> put_title("Open Pull Requests")
@@ -40,21 +36,19 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   def handle_event("nav", params, socket) do
-    {tabs, page} = Tabs.nav(params, socket)
+    {tabs, selected_tab} = Tabs.nav(params, socket)
 
     socket
     |> assign(:tabs, tabs)
-    |> assign(:pull_requests, page)
+    |> assign(:selected_tab, selected_tab)
     |> noreply()
   end
 
-  def handle_event("select-tab", %{"name" => name}, socket) do
-    {tabs, selected_prs} = Tabs.select(name, socket)
+  def handle_event("select-tab", %{"id" => id}, socket) do
+    selected = Tabs.select(id, socket)
 
     socket
-    |> assign(:selected_tab, name)
-    |> assign(:tabs, tabs)
-    |> assign(:pull_requests, selected_prs)
+    |> assign(:selected_tab, selected)
     |> noreply()
   end
 
@@ -84,10 +78,8 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
-  def handle_event("select-pull-request", %{"pull-request-id" => id}, socket) do
-    selected =
-      Mrgr.List.find(socket.assigns.pull_requests, id) ||
-        Mrgr.List.find(socket.assigns.snoozed, id)
+  def handle_event("select-pull-request", %{"id" => id}, socket) do
+    selected = Tabs.select_pull_request(socket.assigns.selected_tab, id)
 
     socket
     |> assign(:selected_pull_request, selected)
@@ -139,29 +131,29 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply
   end
 
-  def handle_event("show-snoozed-pull-requests", _params, socket) do
-    pull_requests =
-      (socket.assigns.snoozed ++ socket.assigns.pull_requests)
-      |> Enum.sort_by(& &1.merge_queue_index)
+  def handle_event("toggle-viewing-snoozed", _params, socket) do
+    {tabs, selected_tab} = Tabs.toggle_snoozed(socket)
 
     socket
-    |> assign(:pull_requests, pull_requests)
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected_tab)
     |> noreply()
   end
 
   def handle_event("snooze-pull-request", %{"id" => id, "time" => time}, socket) do
-    pull_requests = socket.assigns.pull_requests
+    pull_request = Tabs.select_pull_request(socket.assigns.selected_tab, id)
 
-    updated =
-      pull_requests
-      |> Mrgr.List.find(id)
-      |> Mrgr.PullRequest.snooze(translate_snooze(time))
+    Mrgr.PullRequest.snooze(pull_request, translate_snooze(time))
 
-    pull_requests = Mrgr.List.remove(pull_requests, updated)
-    snoozed = Mrgr.List.add(socket.assigns.snoozed, updated)
+    {tabs, selected} =
+      Tabs.reload_prs(
+        socket.assigns.tabs,
+        socket.assigns.selected_tab,
+        socket.assigns.current_user
+      )
 
     socket =
-      case previewing_pull_request?(socket.assigns.selected_pull_request, updated) do
+      case previewing_pull_request?(socket.assigns.selected_pull_request, pull_request) do
         true ->
           hide_detail(socket)
 
@@ -170,25 +162,36 @@ defmodule MrgrWeb.PullRequestLive do
       end
 
     socket
-    |> assign(:pull_requests, pull_requests)
-    |> assign(:snoozed, snoozed)
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected)
     |> noreply()
   end
 
   def handle_event("unsnooze-pull-request", %{"id" => id}, socket) do
-    snoozed = socket.assigns.snoozed
+    pull_request = Tabs.select_pull_request(socket.assigns.selected_tab, id)
 
-    updated =
-      snoozed
-      |> Mrgr.List.find(id)
-      |> Mrgr.PullRequest.unsnooze()
+    pull_request = Mrgr.PullRequest.unsnooze(pull_request)
 
-    snoozed = Mrgr.List.remove(snoozed, updated)
-    pull_requests = Mrgr.List.replace!(socket.assigns.pull_requests, updated)
+    {tabs, selected} =
+      Tabs.reload_prs(
+        socket.assigns.tabs,
+        socket.assigns.selected_tab,
+        socket.assigns.current_user
+      )
+
+    # update in place to reflect new status
+    socket =
+      case previewing_pull_request?(socket.assigns.selected_pull_request, pull_request) do
+        true ->
+          assign(socket, :selected_pull_request, pull_request)
+
+        false ->
+          socket
+      end
 
     socket
-    |> assign(:pull_requests, pull_requests)
-    |> assign(:snoozed, snoozed)
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected)
     |> noreply()
   end
 
@@ -315,61 +318,109 @@ defmodule MrgrWeb.PullRequestLive do
     Mrgr.DateTime.now() |> DateTime.add(3650, :day)
   end
 
-  defp partition_snoozed_pull_requests(pull_requests) do
-    Enum.split_with(pull_requests, &Mrgr.PullRequest.snoozed?/1)
+  def pull_requests(selected) do
+    Tabs.get_page(selected)
   end
 
   defmodule Tabs do
     def new(user) do
       [
         %{
-          id: "recently-opened",
-          title: "Recent",
-          prs: load_pull_requests("recently-opened", user)
+          id: "this-week",
+          title: "This Week",
+          viewing_snoozed: false,
+          unsnoozed: load_pull_requests("this-week", user, %{snoozed: false}),
+          snoozed: load_pull_requests("this-week", user, %{snoozed: true})
         },
-        %{id: "socks", title: "Socks", prs: load_pull_requests("socks", user)},
-        %{id: "stale", title: "Stale", prs: load_pull_requests("stale", user)}
+        %{
+          id: "last-week",
+          title: "Last Week",
+          viewing_snoozed: false,
+          unsnoozed: load_pull_requests("last-week", user, %{snoozed: false}),
+          snoozed: load_pull_requests("last-week", user, %{snoozed: true})
+        },
+        %{
+          id: "this-month",
+          title: "This Month",
+          viewing_snoozed: false,
+          unsnoozed: load_pull_requests("this-month", user, %{snoozed: false}),
+          snoozed: load_pull_requests("this-month", user, %{snoozed: true})
+        },
+        %{
+          id: "stale",
+          title: "Stale (> 4 weeks)",
+          viewing_snoozed: false,
+          unsnoozed: load_pull_requests("stale", user, %{snoozed: false}),
+          snoozed: load_pull_requests("stale", user, %{snoozed: true})
+        }
       ]
     end
 
+    def reload_prs(all, selected, user) do
+      {snoozed, unsnoozed} = load_prs(selected, user)
+      updated = %{selected | snoozed: snoozed, unsnoozed: unsnoozed}
+
+      {Mrgr.List.replace(all, updated), updated}
+    end
+
     def nav(params, %{assigns: %{tabs: tabs, selected_tab: selected_tab, current_user: user}}) do
-      page = load_pull_requests(selected_tab, user, params)
+      params = Map.merge(params, %{snoozed: selected_tab.viewing_snoozed})
+
+      page = load_pull_requests(selected_tab.id, user, params)
 
       tabs = set_page(tabs, selected_tab, page)
 
-      {tabs, page}
+      selected = select(tabs, selected_tab.id)
+
+      {tabs, selected}
     end
 
-    def select(name, %{assigns: %{tabs: tabs, current_user: user}}) do
-      select_pull_requests(tabs, name, user)
+    def select(id, %{assigns: %{tabs: tabs}}) do
+      select(tabs, id)
     end
 
-    def select_pull_requests(tabs, name, user) do
-      item = Enum.find(tabs, fn i -> i.id == name end)
+    def select(tabs, id) do
+      Enum.find(tabs, fn i -> i.id == id end)
+    end
 
-      case item.prs do
-        :not_loaded ->
-          prs = load_pull_requests(name, user)
+    def select_pull_request(tab, id) do
+      tab
+      |> viewing_page()
+      |> Map.get(:entries)
+      |> select(id)
+    end
 
-          new_item = Map.put(item, :prs, prs)
-          tabs = Mrgr.List.replace(tabs, new_item)
-
-          {tabs, prs}
-
-        prs ->
-          {tabs, prs}
+    def viewing_page(tab) do
+      case tab.viewing_snoozed do
+        true -> tab.snoozed
+        false -> tab.unsnoozed
       end
+    end
+
+    def load_prs(tab, user) do
+      snoozed =
+        load_pull_requests(tab.id, user, %{snoozed: true, page_number: tab.snoozed.page_number})
+
+      unsnoozed =
+        load_pull_requests(tab.id, user, %{snoozed: false, page_number: tab.unsnoozed.page_number})
+
+      {snoozed, unsnoozed}
     end
 
     def load_pull_requests(key, user, page_params \\ %{})
 
-    def load_pull_requests("recently-opened", user, page_params) do
-      opts = Map.merge(page_params, %{since: two_weeks_ago()})
+    def load_pull_requests("this-week", user, page_params) do
+      opts = Map.merge(page_params, %{since: this_week()})
 
       Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
     end
 
-    def load_pull_requests("socks", user, page_params) do
+    def load_pull_requests("last-week", user, page_params) do
+      opts = Map.merge(page_params, %{before: this_week(), since: two_weeks_ago()})
+      Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
+    end
+
+    def load_pull_requests("this-month", user, page_params) do
       opts = Map.merge(page_params, %{before: two_weeks_ago(), since: four_weeks_ago()})
       Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
     end
@@ -379,11 +430,31 @@ defmodule MrgrWeb.PullRequestLive do
       Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
     end
 
-    def set_page(all, id, page) do
-      item = Enum.find(all, fn i -> i.id == id end)
+    def set_page(all, selected, page) do
+      updated =
+        case selected.viewing_snoozed do
+          true -> Map.put(selected, :snoozed, page)
+          false -> Map.put(selected, :unsnoozed, page)
+        end
 
-      new_item = Map.put(item, :prs, page)
-      all = Mrgr.List.replace(all, new_item)
+      Mrgr.List.replace(all, updated)
+    end
+
+    def toggle_snoozed(%{assigns: %{tabs: tabs, selected_tab: tab}}) do
+      tab = toggle_snoozed(tab)
+      tabs = Mrgr.List.replace(tabs, tab)
+      {tabs, tab}
+    end
+
+    def toggle_snoozed(%{viewing_snoozed: true} = tab), do: %{tab | viewing_snoozed: false}
+    def toggle_snoozed(%{viewing_snoozed: false} = tab), do: %{tab | viewing_snoozed: true}
+
+    def get_page(%{viewing_snoozed: true, snoozed: prs}), do: prs
+    def get_page(%{viewing_snoozed: false, unsnoozed: prs}), do: prs
+
+    defp this_week do
+      # last 7 days
+      Mrgr.DateTime.shift_from_now(-7, :day)
     end
 
     defp two_weeks_ago do
