@@ -63,7 +63,7 @@ defmodule MrgrWeb.RepositoryListLive do
     |> noreply()
   end
 
-  def handle_event("apply-policy", %{"policy_id" => policy_id, "repo_id" => repo_id}, socket) do
+  def handle_event("enforce-policy", %{"policy_id" => policy_id, "repo_id" => repo_id}, socket) do
     policy = Mrgr.List.find(socket.assigns.policies, policy_id)
     repository = Mrgr.List.find(socket.assigns.all_repos, repo_id)
 
@@ -76,7 +76,7 @@ defmodule MrgrWeb.RepositoryListLive do
     |> noreply()
   end
 
-  def handle_event("apply-policy-to-repos", %{"policy_id" => policy_id}, socket) do
+  def handle_event("enforce-policy-to-repos", %{"policy_id" => policy_id}, socket) do
     policy = Mrgr.List.find(socket.assigns.policies, policy_id)
 
     repo_ids =
@@ -149,14 +149,14 @@ defmodule MrgrWeb.RepositoryListLive do
 
   def start_apply_policy_spinner(socket, repo_id) do
     socket
-    |> push_event("js-exec", %{to: "#apply-policy-#{repo_id}", attr: "data-hide"})
+    |> push_event("js-exec", %{to: "#enforce-policy-#{repo_id}", attr: "data-hide"})
     |> push_event("js-exec", %{to: "#spinner-#{repo_id}", attr: "data-spinning"})
   end
 
   def stop_apply_policy_spinner(socket, repo_id) do
     socket
     |> push_event("js-exec", %{to: "#spinner-#{repo_id}", attr: "data-done"})
-    |> push_event("js-exec", %{to: "#apply-policy-#{repo_id}", attr: "data-show"})
+    |> push_event("js-exec", %{to: "#enforce-policy-#{repo_id}", attr: "data-show"})
   end
 
   def repo_count(counts, %{id: id}) do

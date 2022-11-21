@@ -161,6 +161,7 @@ defmodule Mrgr.Factory do
       installation: build(:installation),
       name: Faker.Company.bs(),
       default: false,
+      enforce_automatically: true,
       settings: build(:repository_settings)
     }
   end

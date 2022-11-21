@@ -4,6 +4,7 @@ defmodule Mrgr.Schema.RepositorySettingsPolicy do
   schema "repository_settings_policies" do
     field(:name, :string)
     field(:default, :boolean)
+    field(:enforce_automatically, :boolean, default: true)
 
     belongs_to(:installation, Mrgr.Schema.Installation)
 
@@ -14,10 +15,11 @@ defmodule Mrgr.Schema.RepositorySettingsPolicy do
     timestamps()
   end
 
+  @attrs [:name, :default, :enforce_automatically, :installation_id]
   def changeset(schema, params \\ %{}) do
     schema
-    |> cast(params, [:name, :default, :installation_id])
-    |> validate_required([:name, :default, :installation_id])
+    |> cast(params, @attrs)
+    |> validate_required(@attrs)
     |> cast_embed(:settings)
     |> foreign_key_constraint(:installation_id)
   end

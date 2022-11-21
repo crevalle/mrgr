@@ -33,6 +33,13 @@ defmodule MrgrWeb.Components.Repository do
     """
   end
 
+  def policy_badges(assigns) do
+    ~H"""
+      <.enforce_automatically_badge policy={@policy} />
+      <.default_policy_badge policy={@policy} />
+    """
+  end
+
   def repo_forked_badge(assigns) do
     ~H"""
       <div :if={@parent.name} class="tooltip pl-2">
@@ -42,10 +49,24 @@ defmodule MrgrWeb.Components.Repository do
     """
   end
 
-  def apply_to_new_repo_badge(assigns) do
+  def enforce_automatically_badge(assigns) do
+    ~H"""
+      <div :if={@policy.enforce_automatically} class="tooltip pl-2">
+        <.icon name="check-circle" class="text-emerald-400 hover:text-emerald-500 mr-1 h-5 w-5" />
+        <span class="tooltiptext">enforce automatically</span>
+      </div>
+
+      <div :if={!@policy.enforce_automatically} class="tooltip pl-2">
+        <.icon name="check-circle" class="text-gray-500 hover:text-emerald-500 mr-1 h-5 w-5" />
+        <span class="tooltiptext">do not enforce automatically</span>
+      </div>
+    """
+  end
+
+  def default_policy_badge(assigns) do
     ~H"""
       <div :if={@policy.default} class="tooltip pl-2">
-        <.icon name="check-badge" class="text-emerald-400 hover:text-emerald-500 mr-1 h-5 w-5" />
+        <.icon name="star" class="text-emerald-400 hover:text-emerald-500 mr-1 h-5 w-5" />
         <span class="tooltiptext">default policy</span>
       </div>
     """
@@ -71,7 +92,7 @@ defmodule MrgrWeb.Components.Repository do
 
   def apply_policy_link(assigns) do
     ~H"""
-    <.l phx_click={JS.push("apply-policy", value: %{policy_id: @policy_id, repo_id: @repo_id})}
+    <.l phx_click={JS.push("enforce-policy", value: %{policy_id: @policy_id, repo_id: @repo_id})}
           class="text-teal-700 hover:text-teal-500 hover:bg-stone-50 font-light p-3 text-sm rounded-md" >
       <%= render_slot(@inner_block) %>
     </.l>
