@@ -73,19 +73,17 @@ defmodule Mrgr.Repository do
   def for_user_with_policy(user) do
     Schema
     |> Query.for_user(user)
-    |> Query.order(asc: :name)
+    |> Query.order_by_insensitive(asc: :name)
     |> Query.with_policy()
     |> Mrgr.Repo.all()
-    |> fix_case_sensitive_sort()
   end
 
   def for_user_with_rules(user) do
     Schema
     |> Query.for_user(user)
-    |> Query.order(asc: :name)
+    |> Query.order_by_insensitive(asc: :name)
     |> Query.with_alert_rules()
     |> Mrgr.Repo.all()
-    |> fix_case_sensitive_sort()
   end
 
   def find_for_user(user, ids) do
@@ -115,9 +113,8 @@ defmodule Mrgr.Repository do
   def for_installation(installation_id, page \\ []) do
     Schema
     |> Query.for_installation(installation_id)
-    |> Query.order(asc: :name)
+    |> Query.order_by_insensitive(asc: :name)
     |> Mrgr.Repo.paginate(page)
-    |> fix_case_sensitive_sort()
   end
 
   def all_for_installation(%{id: id}), do: all_for_installation(id)
@@ -180,11 +177,6 @@ defmodule Mrgr.Repository do
     |> Query.for_policy(policy_id)
     |> Query.select_ids()
     |> Mrgr.Repo.all()
-  end
-
-  # sql is always case sensitive.  i don't care about that here.
-  defp fix_case_sensitive_sort(repos) do
-    Enum.sort_by(repos, &String.downcase(&1.name))
   end
 
   def toggle_pull_request_freeze(repo) do

@@ -60,6 +60,12 @@ defmodule Mrgr.Query do
         queryable
         |> order_by(^opts)
       end
+
+      def order_by_insensitive(query, [{direction, field}]) do
+        from(q in query,
+          order_by: {^direction, fragment("lower(?)", field(q, ^field))}
+        )
+      end
     end
   end
 end
