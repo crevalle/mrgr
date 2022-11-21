@@ -121,13 +121,15 @@ defmodule Mrgr.Installation do
         Map.put(acc, repo.node_id, repo)
       end)
 
+    # only look it up once
     default_policy = Mrgr.RepositorySettingsPolicy.default(installation.id)
 
     repos =
-      Enum.map(
-        data,
+      data
+      |> Enum.map(
         &create_or_update_repository(repos_by_node_id, installation, default_policy, &1)
       )
+      |> Enum.map(&Mrgr.Repository.auto_enforce_policy/1)
 
     installation =
       installation
@@ -151,9 +153,6 @@ defmodule Mrgr.Installation do
         other_params
         |> Mrgr.Repository.create_from_graphql(node)
 
-      # TODO think about this tomorrow
-      # |> maybe_apply_policy(policy)
-
       repo ->
         Mrgr.Repository.update_from_graphql(repo, node)
     end
@@ -161,12 +160,6 @@ defmodule Mrgr.Installation do
 
   defp safe_policy_id(%{id: id}), do: id
   defp safe_policy_id(_), do: nil
-
-  # defp maybe_apply_policy(repository, nil), do: repository
-
-  # defp maybe_apply_policy(repository, policy) do
-  # Mrgr.Repository.apply_policy_to_repo(repository, policy)
-  # end
 
   def recreate_repositories(installation) do
     # does not load PR data, just repo data

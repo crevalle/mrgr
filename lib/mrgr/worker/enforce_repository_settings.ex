@@ -1,4 +1,4 @@
-defmodule Mrgr.Worker.RepoSettingsSync do
+defmodule Mrgr.Worker.EnforceRepositorySettings do
   use Oban.Worker, max_attempts: 3
 
   @impl Oban.Worker
@@ -7,7 +7,7 @@ defmodule Mrgr.Worker.RepoSettingsSync do
     # see below.  need this for broadcasting to the live view
     repository = %{Mrgr.Repository.find(repo_id) | policy: policy}
 
-    Mrgr.Repository.apply_policy_to_repo(repository, policy)
+    Mrgr.Repository.enforce_repo_policy(repository, policy)
 
     :ok
   end
@@ -23,7 +23,7 @@ defmodule Mrgr.Worker.RepoSettingsSync do
       # expects policy to be preloaded
       repo = %{repo | policy: policy}
 
-      Mrgr.Repository.apply_policy_to_repo(repo, policy)
+      Mrgr.Repository.enforce_repo_policy(repo, policy)
     end)
 
     :ok

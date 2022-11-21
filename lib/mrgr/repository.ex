@@ -10,7 +10,7 @@ defmodule Mrgr.Repository do
       repository
       |> sync_data()
       |> generate_default_file_change_alerts()
-      |> set_and_apply_default_policy()
+      |> set_and_enforce_default_policy()
       |> Mrgr.Tuple.ok()
     end
   end
@@ -141,7 +141,13 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.update!()
   end
 
-  def set_and_apply_default_policy(repository) do
+  def auto_enforce_policy(%{policy: %{enforce_automatically: true}} = repository) do
+    enforce_repo_policy(repository)
+  end
+
+  def auto_enforce_policy(repository), do: repository
+
+  def set_and_enforce_default_policy(repository) do
     default_policy = Mrgr.RepositorySettingsPolicy.default(repository.installation_id)
 
     case default_policy do
@@ -151,7 +157,7 @@ defmodule Mrgr.Repository do
       policy ->
         repository
         |> set_policy(policy)
-        |> apply_policy_to_repo(policy)
+        |> enforce_repo_policy()
     end
   end
 
@@ -225,7 +231,7 @@ defmodule Mrgr.Repository do
     |> Enum.map(&Mrgr.Repo.delete/1)
   end
 
-  def apply_policy_to_repo(repository, policy) do
+  def enforce_repo_policy(%{policy: policy} = repository) do
     repository
     |> apply_merge_settings(policy)
     |> apply_branch_protection(policy)
@@ -349,13 +355,6 @@ defmodule Mrgr.Repository do
   def settings_match_policy?(%{settings: settings, policy: %{settings: settings_policy}}) do
     Mrgr.Schema.RepositorySettings.match?(settings, settings_policy)
   end
-
-  def apply_policy?(%{name: "postfactor"}), do: true
-  def apply_policy?(%{name: "mother_brain"}), do: true
-  def apply_policy?(%{name: "evidence_server"}), do: true
-  def apply_policy?(%{name: "MoodTrackerClient"}), do: true
-  def apply_policy?(%{name: "black-book-client"}), do: true
-  def apply_policy?(_repo), do: false
 
   def broadcast(repository, event) do
     topic = Mrgr.PubSub.Topic.installation(repository)

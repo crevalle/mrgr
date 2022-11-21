@@ -68,11 +68,11 @@ defmodule MrgrWeb.RepositoryListLive do
     repository = Mrgr.List.find(socket.assigns.all_repos, repo_id)
 
     %{policy_id: policy.id, repo_id: repository.id}
-    |> Mrgr.Worker.RepoSettingsSync.new()
+    |> Mrgr.Worker.EnforceRepositorySettings.new()
     |> Oban.insert()
 
     socket
-    |> start_apply_policy_spinner(repo_id)
+    |> start_enforce_policy_spinner(repo_id)
     |> noreply()
   end
 
@@ -85,11 +85,11 @@ defmodule MrgrWeb.RepositoryListLive do
       |> Enum.map(& &1.id)
 
     %{policy_id: policy.id}
-    |> Mrgr.Worker.RepoSettingsSync.new()
+    |> Mrgr.Worker.EnforceRepositorySettings.new()
     |> Oban.insert()
 
     Enum.reduce(repo_ids, socket, fn repo_id, s ->
-      start_apply_policy_spinner(s, repo_id)
+      start_enforce_policy_spinner(s, repo_id)
     end)
     |> noreply()
   end
@@ -107,7 +107,7 @@ defmodule MrgrWeb.RepositoryListLive do
   def handle_info(%{event: @repository_settings_policy_updated, payload: policy}, socket) do
     policies = Mrgr.List.replace(socket.assigns.policies, policy)
 
-    # this will run a bunch of times when apply_to_new_repo is triggered,
+    # this will run a bunch of times when enforce_to_new_repo is triggered,
     # since we publish several _updated messages for each other policy.
     # don't worry about it for now, there won't be a lot of policies
 
@@ -132,7 +132,7 @@ defmodule MrgrWeb.RepositoryListLive do
     policies = replace_repo_in_policy(repository, socket.assigns.policies)
 
     socket
-    |> stop_apply_policy_spinner(repository.id)
+    |> stop_enforce_policy_spinner(repository.id)
     |> assign(:all_repos, all_repos)
     |> assign(:repo_list, repo_list)
     |> assign(:policies, policies)
@@ -147,13 +147,13 @@ defmodule MrgrWeb.RepositoryListLive do
 
   def handle_info(%{event: _whatevs}, socket), do: noreply(socket)
 
-  def start_apply_policy_spinner(socket, repo_id) do
+  def start_enforce_policy_spinner(socket, repo_id) do
     socket
     |> push_event("js-exec", %{to: "#enforce-policy-#{repo_id}", attr: "data-hide"})
     |> push_event("js-exec", %{to: "#spinner-#{repo_id}", attr: "data-spinning"})
   end
 
-  def stop_apply_policy_spinner(socket, repo_id) do
+  def stop_enforce_policy_spinner(socket, repo_id) do
     socket
     |> push_event("js-exec", %{to: "#spinner-#{repo_id}", attr: "data-done"})
     |> push_event("js-exec", %{to: "#enforce-policy-#{repo_id}", attr: "data-show"})

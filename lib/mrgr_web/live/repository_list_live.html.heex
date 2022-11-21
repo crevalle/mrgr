@@ -133,16 +133,16 @@
                     <p class="p-3 text-center border-b">Select a policy to push its settings to your repository on Github.</p>
 
                     <!-- current policy default action -->
-                    <.apply_policy_link :if={Mrgr.Repository.has_policy?(repo)} policy_id={repo.policy.id} repo_id={repo.id}>
+                    <.enforce_policy_link :if={Mrgr.Repository.has_policy?(repo)} policy_id={repo.policy.id} repo_id={repo.id}>
                       <div class="flex items-center justify-between">
                         <%= repo.policy.name %>
                         <p class="text-gray-500 hover:text-gray-500 font-light italic">current policy</p>
                       </div>
-                    </.apply_policy_link>
+                    </.enforce_policy_link>
 
-                    <.apply_policy_link :for={policy <- Mrgr.List.remove(@policies, repo.policy)} policy_id={policy.id} repo_id={repo.id}>
+                    <.enforce_policy_link :for={policy <- Mrgr.List.remove(@policies, repo.policy)} policy_id={policy.id} repo_id={repo.id}>
                       <%= policy.name %>
-                    </.apply_policy_link>
+                    </.enforce_policy_link>
                   </div>
                 </div>
 
