@@ -8,7 +8,7 @@ defmodule Mrgr.RepositorySettingsPolicyTest do
       params = %{
         "installation_id" => ctx.installation.id,
         "name" => "hot pants",
-        "apply_to_new_repos" => false,
+        "default" => false,
         "settings" => %{
           "merge_commit_allowed" => true,
           "rebase_merge_allowed" => false,
@@ -35,7 +35,7 @@ defmodule Mrgr.RepositorySettingsPolicyTest do
         "repository_ids" => [repo_1.id, repo_3.id, repo_4.id],
         "installation_id" => ctx.installation.id,
         "name" => "hot pants",
-        "apply_to_new_repos" => false,
+        "default" => false,
         "settings" => %{
           "merge_commit_allowed" => true,
           "rebase_merge_allowed" => false,

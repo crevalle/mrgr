@@ -3,7 +3,7 @@ defmodule Mrgr.Schema.RepositorySettingsPolicy do
 
   schema "repository_settings_policies" do
     field(:name, :string)
-    field(:apply_to_new_repos, :boolean)
+    field(:default, :boolean)
 
     belongs_to(:installation, Mrgr.Schema.Installation)
 
@@ -16,8 +16,8 @@ defmodule Mrgr.Schema.RepositorySettingsPolicy do
 
   def changeset(schema, params \\ %{}) do
     schema
-    |> cast(params, [:name, :apply_to_new_repos, :installation_id])
-    |> validate_required([:name, :apply_to_new_repos, :installation_id])
+    |> cast(params, [:name, :default, :installation_id])
+    |> validate_required([:name, :default, :installation_id])
     |> cast_embed(:settings)
     |> foreign_key_constraint(:installation_id)
   end

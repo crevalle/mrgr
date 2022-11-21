@@ -75,9 +75,9 @@ defmodule Mrgr.RepositorySettingsPolicy do
     policy
   end
 
-  def ensure_apply_to_new_repo_singleton(%{apply_to_new_repos: false} = policy), do: policy
+  def ensure_apply_to_new_repo_singleton(%{default: false} = policy), do: policy
 
-  def ensure_apply_to_new_repo_singleton(%{apply_to_new_repos: true} = policy) do
+  def ensure_apply_to_new_repo_singleton(%{default: true} = policy) do
     policy.installation_id
     |> for_installation()
     |> Mrgr.List.remove(policy)
@@ -89,7 +89,7 @@ defmodule Mrgr.RepositorySettingsPolicy do
 
   def dont_apply_to_new_repos(policy) do
     policy
-    |> Ecto.Changeset.change(%{apply_to_new_repos: false})
+    |> Ecto.Changeset.change(%{default: false})
     |> Mrgr.Repo.update!()
   end
 
@@ -123,7 +123,7 @@ defmodule Mrgr.RepositorySettingsPolicy do
 
     def default(query) do
       from(q in query,
-        where: q.apply_to_new_repos == true
+        where: q.default == true
       )
     end
   end
