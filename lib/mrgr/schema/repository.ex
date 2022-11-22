@@ -3,8 +3,6 @@ defmodule Mrgr.Schema.Repository do
 
   schema "repositories" do
     field(:data, :map)
-    # this can go vvv
-    field(:external_id, :integer)
     field(:full_name, :string)
     field(:language, :string)
     field(:name, :string)
