@@ -6,7 +6,7 @@
   <ul>
     <%= for file_alert <- @file_alerts, filename <- file_alert.filenames do %>
       <li>
-        <strong>[<%= file_alert.badge_text %>]</strong> <%= filename %>
+        <strong>[<%= file_alert.name %>]</strong> <%= filename %>
       </li>
     <% end %>
   </ul>

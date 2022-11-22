@@ -109,6 +109,7 @@ defmodule MrgrWeb.Components.Form do
       <%= label(@f, @field, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
       <div class="mt-1 sm:mt-0 sm:col-span-2">
         <%= text_input @f, @field, required: @required, autocomplete: @autocomplete, value: @value, placeholder: @placeholder, class: [@common_styles] ++ [(if Keyword.get(@f.errors, @field), do: @error_styles, else: @success_styles)] %>
+        <p :if={@required} class="pt-1 text-gray-500 text-xs italic">required</p>
         <.error form={@f} attr={@field}/>
         <p class="mt-2 text-sm text-gray-500"><%= render_slot(@secondary) %></p>
       </div>

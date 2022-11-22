@@ -18,11 +18,11 @@
         </div>
 
         <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-          <%= label(f, :badge_text, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
+          <%= label(f, :name, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
           <div class="mt-1 sm:mt-0 sm:col-span-2">
-            <%= text_input f, :badge_text, placeholder: "example: 'user model'", class: "max-w-lg block w-full shadow-inner focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
-            <.error form={f} attr={:badge_text}/>
-            <p class="mt-2 text-sm text-gray-500" id="badge_text-description">The text of the alert badge.</p>
+            <%= text_input f, :name, placeholder: "example: 'user model'", class: "max-w-lg block w-full shadow-inner focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
+            <.error form={f} attr={:name}/>
+            <p class="mt-2 text-sm text-gray-500" id="name-description">The text of the alert badge.</p>
           </div>
         </div>
 
@@ -33,7 +33,7 @@
             <p class="mt-2 text-sm text-gray-500" id="bg_color-description">Background Color for the Badge</p>
             <p class="flex items-center mt-2 text-sm text-gray-500">
               <span class="mr-1">Preview: </span>
-              <.badge bg={@form.badge_preview.bg_color} text="text-gray-800"><%= @form.badge_preview.badge_text %></.badge>
+              <.badge item={@form.badge_preview} text="text-gray-800" />
             </p>
           </div>
         </div>

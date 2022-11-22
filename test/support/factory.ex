@@ -116,7 +116,7 @@ defmodule Mrgr.Factory do
   def build(:file_change_alert) do
     %Mrgr.Schema.FileChangeAlert{
       repository: build(:repository),
-      badge_text: "socks",
+      name: "socks",
       notify_user: false,
       pattern: "*",
       source: :user

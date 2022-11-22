@@ -13,7 +13,12 @@
       </div>
       <%= if @policies == [] do %>
         <div class="p-4 border border-solid rounded-md bg-blue-50 flex flex-col items-center">
-          <p><strong>None Yet!</strong> Why don't you <.inline_link phx-click="open-form">Add One</.inline_link>?</p>
+          <p><strong>None Yet!</strong> Why don't you <.inline_link phx-click={
+           JS.push("add-policy")
+             |> show_detail()
+             }>
+             Add One
+          </.inline_link>?</p>
         </div>
       <% else %>
         <table class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">

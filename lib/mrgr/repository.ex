@@ -122,6 +122,7 @@ defmodule Mrgr.Repository do
   def all_for_installation(installation_id) do
     Schema
     |> Query.for_installation(installation_id)
+    |> Query.order_by_insensitive(asc: :name)
     |> Mrgr.Repo.all()
   end
 

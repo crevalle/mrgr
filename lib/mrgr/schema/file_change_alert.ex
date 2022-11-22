@@ -2,7 +2,7 @@ defmodule Mrgr.Schema.FileChangeAlert do
   use Mrgr.Schema
 
   schema "file_change_alerts" do
-    field(:badge_text, :string)
+    field(:name, :string)
     field(:bg_color, :string, default: "#f1e5d1")
     field(:notify_user, :boolean)
     field(:pattern, :string)
@@ -14,7 +14,7 @@ defmodule Mrgr.Schema.FileChangeAlert do
 
   @create_params [
     :bg_color,
-    :badge_text,
+    :name,
     :notify_user,
     :pattern,
     :repository_id,
@@ -24,7 +24,7 @@ defmodule Mrgr.Schema.FileChangeAlert do
   @update_params [
     :bg_color,
     :pattern,
-    :badge_text,
+    :name,
     :notify_user
   ]
 
