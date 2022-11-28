@@ -54,12 +54,74 @@ defmodule Mrgr.Label do
     Mrgr.PubSub.broadcast_to_installation(label, @label_deleted)
   end
 
+  def find_or_create_for_repo(params, repo) do
+    case find_by_name_for_repo(params["name"], repo) do
+      %Schema{} = label ->
+        label
+
+      nil ->
+        case find_by_name_for_installation(params["name"], repo.installation_id) do
+          nil -> create_for_repo(params, repo)
+          label -> associate_with_repo(label, repo)
+        end
+    end
+
+    # "color" => "0075ca",
+    # "description" => "Improvements or additions to documentation",
+    # "name" => "documentation"
+    # },
+  end
+
+  def create_for_repo(params, repo) do
+    params = Map.put(params, "installation_id", repo.installation_id)
+
+    with cs <- Schema.simple_changeset(%Schema{}, params),
+         {:ok, label} <- Mrgr.Repo.insert(cs),
+         {:ok, _label_repository} <- associate_with_repo(label, repo) do
+      {:ok, label}
+    end
+  end
+
+  def associate_with_repo(label, repo) do
+    %Mrgr.Schema.LabelRepository{}
+    |> Mrgr.Schema.LabelRepository.changeset(%{label_id: label.id, repository_id: repo.id})
+    |> Mrgr.Repo.insert()
+  end
+
+  def find_by_name_for_repo(name, repo) do
+    Schema
+    |> Query.by_name(name)
+    |> Query.for_repository(repo)
+    |> Mrgr.Repo.one()
+  end
+
+  def find_by_name_for_installation(name, installation_id) do
+    Schema
+    |> Query.by_name(name)
+    |> Query.for_installation(installation_id)
+    |> Mrgr.Repo.one()
+  end
+
   defmodule Query do
     use Mrgr.Query
 
     def for_installation(query, id) do
       from(q in query,
         where: q.installation_id == ^id
+      )
+    end
+
+    # case sensitive
+    def by_name(query, name) do
+      from(q in query,
+        where: q.name == ^name
+      )
+    end
+
+    def for_repository(query, repo) do
+      from(q in query,
+        join: lr in assoc(q, :label_repositories),
+        where: lr.repository_id == ^repo.id
       )
     end
 

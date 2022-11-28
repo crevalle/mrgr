@@ -25,10 +25,15 @@ defmodule Mrgr.Schema.Label do
 
   def changeset(schema, params) do
     schema
+    |> simple_changeset(params)
+    |> cast_assoc(:label_repositories)
+  end
+
+  def simple_changeset(schema, params) do
+    schema
     |> cast(params, @allowed)
     |> validate_required([:name, :color])
     |> strip_hashie_color_tag()
-    |> cast_assoc(:label_repositories)
     |> foreign_key_constraint(:installation_id)
   end
 
