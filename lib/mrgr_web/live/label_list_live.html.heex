@@ -29,7 +29,7 @@
             <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500"></th>
           </thead>
           <tbody class="bg-white">
-            <tr :for={label <- @labels} id={"label-#{label.id}"} class={"#{selected?(label, nil)}"} >
+            <tr :for={label <- @labels} id={"label-#{label.id}"}  >
               <td class="py-4 pl-4 flex items-center text-sm font-medium text-gray-900">
                 <.badge item={label} />
               </td>

@@ -2,8 +2,6 @@ defmodule MrgrWeb.LabelListLive do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  import MrgrWeb.Components.Repository
-
   on_mount MrgrWeb.Plug.Auth
 
   def mount(_params, _session, socket) do
@@ -72,8 +70,6 @@ defmodule MrgrWeb.LabelListLive do
 
   def handle_info(%{event: _whatevs}, socket), do: noreply(socket)
 
-  def selected?(label, nil), do: false
-  #
   # new label form.  everything is selected
   def selected_repository_ids(repos, %{id: nil}), do: Enum.map(repos, & &1.id)
 
