@@ -13,7 +13,7 @@ defmodule MrgrWeb.Components.PullRequest do
     color =
       case matching_alert do
         nil -> "transparent"
-        alert -> alert.bg_color
+        alert -> alert.color
       end
 
     assigns =

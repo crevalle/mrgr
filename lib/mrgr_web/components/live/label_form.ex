@@ -1,4 +1,4 @@
-defmodule MrgrWeb.Components.Live.RepositorySettingsPolicyForm do
+defmodule MrgrWeb.Components.Live.LabelForm do
   use MrgrWeb, :live_component
 
   def update(assigns, socket) do
@@ -42,7 +42,7 @@ defmodule MrgrWeb.Components.Live.RepositorySettingsPolicyForm do
 
   # if I don't save the params here they get wiped when i toggle the repos.
   # not sure why
-  def handle_event("validate", %{"repository_settings_policy" => params}, socket) do
+  def handle_event("validate", %{"label" => params}, socket) do
     changeset =
       socket.assigns.object
       |> build_changeset(params)
@@ -53,25 +53,29 @@ defmodule MrgrWeb.Components.Live.RepositorySettingsPolicyForm do
     |> noreply()
   end
 
-  def handle_event("save", %{"repository_settings_policy" => params}, socket) do
+  def handle_event("save", %{"label" => params}, socket) do
     object = socket.assigns.object
 
     params =
-      Map.put(params, "repository_ids", MapSet.to_list(socket.assigns.selected_repository_ids))
+      params
+      |> Map.put(
+        "label_repositories",
+        Enum.map(socket.assigns.selected_repository_ids, fn id -> %{"repository_id" => id} end)
+      )
 
     res =
       case creating?(object) do
         true ->
           params
-          |> Map.put("installation_id", socket.assigns.current_user.current_installation.id)
-          |> Mrgr.RepositorySettingsPolicy.create()
+          |> Map.put("installation_id", socket.assigns.current_user.current_installation_id)
+          |> Mrgr.Label.create()
 
         false ->
-          Mrgr.RepositorySettingsPolicy.update(object, params)
+          Mrgr.Label.update(object, params)
       end
 
     case res do
-      {:ok, _policy} ->
+      {:ok, _label} ->
         socket
         |> hide_detail()
         |> noreply()
@@ -83,9 +87,9 @@ defmodule MrgrWeb.Components.Live.RepositorySettingsPolicyForm do
     end
   end
 
-  def handle_event("delete-policy", _params, socket) do
-    policy = socket.assigns.object
-    Mrgr.RepositorySettingsPolicy.delete(policy)
+  def handle_event("delete", _params, socket) do
+    label = socket.assigns.object
+    Mrgr.Label.delete(label)
 
     socket
     |> hide_detail()
@@ -93,7 +97,7 @@ defmodule MrgrWeb.Components.Live.RepositorySettingsPolicyForm do
   end
 
   defp build_changeset(schema, params \\ %{}) do
-    Mrgr.Schema.RepositorySettingsPolicy.changeset(schema, params)
+    Mrgr.Schema.Label.changeset(schema, params)
   end
 
   defp creating?(%{id: nil}), do: true

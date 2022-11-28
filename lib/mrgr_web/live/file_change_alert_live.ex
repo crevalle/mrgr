@@ -48,13 +48,13 @@ defmodule MrgrWeb.FileChangeAlertLive do
     form = socket.assigns.form
 
     badge_preview = %{
-      bg_color: params["bg_color"],
-      badge_text: params["badge_text"]
+      color: params["color"],
+      name: params["name"]
     }
 
     # i'm only interested in the badge preview, but i need to set changeset
     # data here otherwise an unknown bug will clear out my :pattern field when
-    # :badge_text is changed (but only when adding a new alert).
+    # :name is changed (but only when adding a new alert).
     form = %{
       form
       | badge_preview: badge_preview,
@@ -186,8 +186,8 @@ defmodule MrgrWeb.FileChangeAlertLive do
       repo: repo,
       changeset: changeset,
       badge_preview: %{
-        bg_color: changeset.data.bg_color,
-        badge_text: nil
+        color: changeset.data.color,
+        name: nil
       }
     }
   end
@@ -198,8 +198,8 @@ defmodule MrgrWeb.FileChangeAlertLive do
       repo: repo,
       changeset: changeset,
       badge_preview: %{
-        bg_color: alert.bg_color,
-        badge_text: alert.badge_text
+        color: alert.color,
+        name: alert.name
       }
     }
   end

@@ -368,7 +368,7 @@ defmodule Mrgr.PullRequest do
 
         %{
           filenames: filenames,
-          badge_text: alert.badge_text
+          name: alert.name
         }
       end)
 

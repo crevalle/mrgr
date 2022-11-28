@@ -2,8 +2,8 @@ defmodule Mrgr.Schema.FileChangeAlert do
   use Mrgr.Schema
 
   schema "file_change_alerts" do
-    field(:badge_text, :string)
-    field(:bg_color, :string, default: "#f1e5d1")
+    field(:name, :string)
+    field(:color, :string, default: "#f1e5d1")
     field(:notify_user, :boolean)
     field(:pattern, :string)
     field(:source, Ecto.Enum, values: [:user, :system])
@@ -13,8 +13,8 @@ defmodule Mrgr.Schema.FileChangeAlert do
   end
 
   @create_params [
-    :bg_color,
-    :badge_text,
+    :color,
+    :name,
     :notify_user,
     :pattern,
     :repository_id,
@@ -22,9 +22,9 @@ defmodule Mrgr.Schema.FileChangeAlert do
   ]
 
   @update_params [
-    :bg_color,
+    :color,
     :pattern,
-    :badge_text,
+    :name,
     :notify_user
   ]
 
@@ -32,6 +32,7 @@ defmodule Mrgr.Schema.FileChangeAlert do
     schema
     |> cast(params, @create_params)
     |> validate_required(@create_params)
+    |> strip_hashie_color_tag()
     |> foreign_key_constraint(:repository_id)
   end
 
@@ -39,5 +40,16 @@ defmodule Mrgr.Schema.FileChangeAlert do
     schema
     |> cast(params, @update_params)
     |> validate_required(@update_params)
+    |> strip_hashie_color_tag()
+  end
+
+  def strip_hashie_color_tag(changeset) do
+    case get_change(changeset, :color) do
+      color when is_bitstring(color) ->
+        put_change(changeset, :color, String.replace(color, "#", ""))
+
+      _ ->
+        changeset
+    end
   end
 end

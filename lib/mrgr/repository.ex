@@ -56,12 +56,20 @@ defmodule Mrgr.Repository do
   end
 
   def update_from_graphql(repo, node) do
+    update_labels_from_graphql(repo, node)
+
     params = node_to_params(node)
 
     repo
     |> Schema.changeset(params)
     |> Mrgr.Repo.update!()
   end
+
+  def update_labels_from_graphql(repo, %{"labels" => %{"nodes" => nodes}}) do
+    Enum.map(nodes, &Mrgr.Label.find_or_create_for_repo(&1, repo))
+  end
+
+  def update_labels_from_graphql(repo, _some_data), do: repo
 
   def find_by_name_for_user(user, name) do
     Schema
@@ -122,6 +130,7 @@ defmodule Mrgr.Repository do
   def all_for_installation(installation_id) do
     Schema
     |> Query.for_installation(installation_id)
+    |> Query.order_by_insensitive(asc: :name)
     |> Mrgr.Repo.all()
   end
 

@@ -2,6 +2,7 @@ defmodule MrgrWeb.Components.Form do
   use MrgrWeb, :component
 
   import Phoenix.HTML.Form
+  alias Phoenix.LiveView.JS
 
   def error(assigns) do
     ~H"""
@@ -46,7 +47,7 @@ defmodule MrgrWeb.Components.Form do
   # one below is from checklists, which isn't really fleshed out anyway
   # TODO: flesh it out
   def repo_toggle_item(assigns) do
-    bg_color =
+    color =
       case assigns.selected do
         true -> "bg-emerald-50"
         false -> ""
@@ -54,10 +55,10 @@ defmodule MrgrWeb.Components.Form do
 
     assigns =
       assigns
-      |> assign(:bg_color, bg_color)
+      |> assign(:color, color)
 
     ~H"""
-    <%= link to: "#", phx_click: "toggle-selected-repository", phx_target: @target, phx_value_id: @repo.id, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@bg_color}", id: "repo-#{@repo.id}" do %>
+    <%= link to: "#", phx_click: JS.push("toggle-selected-repository", value: %{id: @repo.id}), phx_target: @target, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@color}", id: "repo-#{@repo.id}" do %>
       <div>
         <%= @repo.name %>
       </div>
@@ -66,7 +67,7 @@ defmodule MrgrWeb.Components.Form do
   end
 
   def toggle_block(assigns) do
-    bg_color =
+    color =
       case assigns.selected do
         true -> "bg-emerald-50"
         false -> ""
@@ -74,10 +75,10 @@ defmodule MrgrWeb.Components.Form do
 
     assigns =
       assigns
-      |> assign(:bg_color, bg_color)
+      |> assign(:color, color)
 
     ~H"""
-    <%= link to: "#", phx_click: "toggle-selected-repository", phx_value_repo_id: @repo.id, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@bg_color}", id: "repo-#{@repo.id}" do %>
+    <%= link to: "#", phx_click: "toggle-selected-repository", phx_value_repo_id: @repo.id, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@color}", id: "repo-#{@repo.id}" do %>
       <div>
         <%= @repo.name %>
       </div>
@@ -109,6 +110,7 @@ defmodule MrgrWeb.Components.Form do
       <%= label(@f, @field, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
       <div class="mt-1 sm:mt-0 sm:col-span-2">
         <%= text_input @f, @field, required: @required, autocomplete: @autocomplete, value: @value, placeholder: @placeholder, class: [@common_styles] ++ [(if Keyword.get(@f.errors, @field), do: @error_styles, else: @success_styles)] %>
+        <p :if={@required} class="pt-1 text-gray-500 text-xs italic">required</p>
         <.error form={@f} attr={@field}/>
         <p class="mt-2 text-sm text-gray-500"><%= render_slot(@secondary) %></p>
       </div>

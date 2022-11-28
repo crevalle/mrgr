@@ -65,25 +65,25 @@ defmodule Mrgr.FileChangeAlert do
   def defaults_for_repo(%{language: "Elixir"} = repository) do
     [
       %{
-        badge_text: "migration",
+        name: "migration",
         pattern: "priv/repo/migrations/*",
-        bg_color: "#dcfce7",
+        color: "#dcfce7",
         notify_user: true,
         repository_id: repository.id,
         source: :system
       },
       %{
-        badge_text: "router",
+        name: "router",
         pattern: "lib/**/router.ex",
-        bg_color: "#dbeafe",
+        color: "#dbeafe",
         notify_user: true,
         repository_id: repository.id,
         source: :system
       },
       %{
-        badge_text: "dependencies",
+        name: "dependencies",
         pattern: "mix.lock",
-        bg_color: "#fef9c3",
+        color: "#fef9c3",
         notify_user: true,
         repository_id: repository.id,
         source: :system
