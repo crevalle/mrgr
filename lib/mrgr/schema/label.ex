@@ -2,7 +2,7 @@ defmodule Mrgr.Schema.Label do
   use Mrgr.Schema
 
   schema "labels" do
-    field(:bg_color, :string, default: "#f1e5d1")
+    field(:color, :string, default: "#f1e5d1")
     field(:description, :string)
     field(:name, :string)
 
@@ -17,7 +17,7 @@ defmodule Mrgr.Schema.Label do
   end
 
   @allowed ~w[
-    bg_color
+    color
     description
     installation_id
     name
@@ -26,7 +26,7 @@ defmodule Mrgr.Schema.Label do
   def changeset(schema, params) do
     schema
     |> cast(params, @allowed)
-    |> validate_required([:name, :bg_color])
+    |> validate_required([:name, :color])
     |> cast_assoc(:label_repositories)
     |> foreign_key_constraint(:installation_id)
   end

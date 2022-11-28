@@ -3,7 +3,7 @@ defmodule Mrgr.Schema.FileChangeAlert do
 
   schema "file_change_alerts" do
     field(:name, :string)
-    field(:bg_color, :string, default: "#f1e5d1")
+    field(:color, :string, default: "#f1e5d1")
     field(:notify_user, :boolean)
     field(:pattern, :string)
     field(:source, Ecto.Enum, values: [:user, :system])
@@ -13,7 +13,7 @@ defmodule Mrgr.Schema.FileChangeAlert do
   end
 
   @create_params [
-    :bg_color,
+    :color,
     :name,
     :notify_user,
     :pattern,
@@ -22,7 +22,7 @@ defmodule Mrgr.Schema.FileChangeAlert do
   ]
 
   @update_params [
-    :bg_color,
+    :color,
     :pattern,
     :name,
     :notify_user

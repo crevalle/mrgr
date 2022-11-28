@@ -67,7 +67,7 @@ defmodule Mrgr.FileChangeAlert do
       %{
         name: "migration",
         pattern: "priv/repo/migrations/*",
-        bg_color: "#dcfce7",
+        color: "#dcfce7",
         notify_user: true,
         repository_id: repository.id,
         source: :system
@@ -75,7 +75,7 @@ defmodule Mrgr.FileChangeAlert do
       %{
         name: "router",
         pattern: "lib/**/router.ex",
-        bg_color: "#dbeafe",
+        color: "#dbeafe",
         notify_user: true,
         repository_id: repository.id,
         source: :system
@@ -83,7 +83,7 @@ defmodule Mrgr.FileChangeAlert do
       %{
         name: "dependencies",
         pattern: "mix.lock",
-        bg_color: "#fef9c3",
+        color: "#fef9c3",
         notify_user: true,
         repository_id: repository.id,
         source: :system

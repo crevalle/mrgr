@@ -526,7 +526,7 @@ defmodule MrgrWeb.Components.UI do
 
   def badge(assigns) do
     ~H"""
-      <span style={"background-color: #{@item.bg_color}; color: rgb(75 85 99);"} class={"px-2 inline-flex text-xs leading-5 font-semibold rounded-full"}>
+      <span style={"background-color: #{@item.color}; color: rgb(75 85 99);"} class={"px-2 inline-flex text-xs leading-5 font-semibold rounded-full"}>
         <%= @item.name %>
       </span>
     """

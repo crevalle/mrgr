@@ -47,7 +47,7 @@ defmodule MrgrWeb.Components.Form do
   # one below is from checklists, which isn't really fleshed out anyway
   # TODO: flesh it out
   def repo_toggle_item(assigns) do
-    bg_color =
+    color =
       case assigns.selected do
         true -> "bg-emerald-50"
         false -> ""
@@ -55,10 +55,10 @@ defmodule MrgrWeb.Components.Form do
 
     assigns =
       assigns
-      |> assign(:bg_color, bg_color)
+      |> assign(:color, color)
 
     ~H"""
-    <%= link to: "#", phx_click: JS.push("toggle-selected-repository", value: %{id: @repo.id}), phx_target: @target, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@bg_color}", id: "repo-#{@repo.id}" do %>
+    <%= link to: "#", phx_click: JS.push("toggle-selected-repository", value: %{id: @repo.id}), phx_target: @target, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@color}", id: "repo-#{@repo.id}" do %>
       <div>
         <%= @repo.name %>
       </div>
@@ -67,7 +67,7 @@ defmodule MrgrWeb.Components.Form do
   end
 
   def toggle_block(assigns) do
-    bg_color =
+    color =
       case assigns.selected do
         true -> "bg-emerald-50"
         false -> ""
@@ -75,10 +75,10 @@ defmodule MrgrWeb.Components.Form do
 
     assigns =
       assigns
-      |> assign(:bg_color, bg_color)
+      |> assign(:color, color)
 
     ~H"""
-    <%= link to: "#", phx_click: "toggle-selected-repository", phx_value_repo_id: @repo.id, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@bg_color}", id: "repo-#{@repo.id}" do %>
+    <%= link to: "#", phx_click: "toggle-selected-repository", phx_value_repo_id: @repo.id, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@color}", id: "repo-#{@repo.id}" do %>
       <div>
         <%= @repo.name %>
       </div>

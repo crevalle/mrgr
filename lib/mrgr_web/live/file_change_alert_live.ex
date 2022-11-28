@@ -48,7 +48,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
     form = socket.assigns.form
 
     badge_preview = %{
-      bg_color: params["bg_color"],
+      color: params["color"],
       name: params["name"]
     }
 
@@ -186,7 +186,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
       repo: repo,
       changeset: changeset,
       badge_preview: %{
-        bg_color: changeset.data.bg_color,
+        color: changeset.data.color,
         name: nil
       }
     }
@@ -198,7 +198,7 @@ defmodule MrgrWeb.FileChangeAlertLive do
       repo: repo,
       changeset: changeset,
       badge_preview: %{
-        bg_color: alert.bg_color,
+        color: alert.color,
         name: alert.name
       }
     }
