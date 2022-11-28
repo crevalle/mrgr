@@ -519,9 +519,7 @@ defmodule MrgrWeb.Components.UI do
   def badges(assigns) do
     ~H"""
       <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
-        <%= for alert <- Mrgr.FileChangeAlert.for_pull_request(@pull_request) do %>
-          <.badge item={alert} />
-        <% end %>
+        <.badge :for={alert <- Mrgr.FileChangeAlert.for_pull_request(@pull_request)} item={alert} />
       </div>
     """
   end

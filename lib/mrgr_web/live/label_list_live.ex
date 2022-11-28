@@ -70,19 +70,7 @@ defmodule MrgrWeb.LabelListLive do
     |> noreply()
   end
 
-  # def handle_info(%{event: @installation_repositories_synced, payload: installation}, socket) do
-  # socket
-  # |> assign(:installation, installation)
-  # |> noreply()
-  # end
-
   def handle_info(%{event: _whatevs}, socket), do: noreply(socket)
-
-  # def repo_count(counts, %{id: id}) do
-  # counts
-  # |> Map.get(id)
-  # |> Enum.count()
-  # end
 
   def selected?(label, nil), do: false
   #

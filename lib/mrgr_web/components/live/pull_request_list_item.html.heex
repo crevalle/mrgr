@@ -59,7 +59,7 @@
 
       <div class="sm:flex items-center">
         <.me_tag pull_request={@pull_request} current_user={@current_user} />
-        <%= MrgrWeb.Components.FileChangeAlert.badges(%{pull_request: @pull_request}) %>
+        <.badges pull_request={@pull_request} />
       </div>
 
 

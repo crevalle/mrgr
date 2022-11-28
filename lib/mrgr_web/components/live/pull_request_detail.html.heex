@@ -18,7 +18,7 @@
       </p>
       <p class="text-gray-500">on branch <span class="italic"><%= Mrgr.Schema.PullRequest.branch_name(@pull_request) %></span></p>
       <p :if={Mrgr.PullRequest.tagged?(@pull_request, @current_user)} class="text-emerald-600">You've been tagged in this Pull Request</p>
-      <p class="mt-1"><%= MrgrWeb.Components.FileChangeAlert.badges(%{pull_request: @pull_request}) %></p>
+      <p class="mt-1"><.badges pull_request={@pull_request} /></p>
     </div>
 
     <div class="flex items-center space-x-2 mt-2 text-gray-500">
