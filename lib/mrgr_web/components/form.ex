@@ -2,6 +2,7 @@ defmodule MrgrWeb.Components.Form do
   use MrgrWeb, :component
 
   import Phoenix.HTML.Form
+  alias Phoenix.LiveView.JS
 
   def error(assigns) do
     ~H"""
@@ -57,7 +58,7 @@ defmodule MrgrWeb.Components.Form do
       |> assign(:bg_color, bg_color)
 
     ~H"""
-    <%= link to: "#", phx_click: "toggle-selected-repository", phx_target: @target, phx_value_id: @repo.id, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@bg_color}", id: "repo-#{@repo.id}" do %>
+    <%= link to: "#", phx_click: JS.push("toggle-selected-repository", value: %{id: @repo.id}), phx_target: @target, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@bg_color}", id: "repo-#{@repo.id}" do %>
       <div>
         <%= @repo.name %>
       </div>

@@ -28,7 +28,6 @@ defmodule MrgrWeb.Components.Live.RepositorySettingsPolicyForm do
 
   def handle_event("toggle-selected-repository", %{"id" => id}, socket) do
     selected = socket.assigns.selected_repository_ids
-    id = String.to_integer(id)
 
     selected =
       case MapSet.member?(selected, id) do

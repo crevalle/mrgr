@@ -42,9 +42,7 @@
 
         <div class="my-4">
           <div class="grid grid-cols-3 gap-3">
-            <%= for repo <- @repos do %>
-              <.repo_toggle_item repo={repo} target={@myself} selected={Enum.member?(@selected_repository_ids, repo.id)} />
-            <% end %>
+            <.repo_toggle_item :for={repo <- @repos} repo={repo} target={@myself} selected={Enum.member?(@selected_repository_ids, repo.id)} />
           </div>
         </div>
       </div>
