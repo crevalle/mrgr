@@ -4,6 +4,26 @@ defmodule Mrgr.Label do
   alias __MODULE__.Query
   alias Mrgr.Schema.Label, as: Schema
 
+  ### RELEASE TASK
+
+  def migrate_color_tags do
+    labels = Mrgr.Repo.all(Schema)
+
+    Enum.each(labels, fn label ->
+      label
+      |> Ecto.Changeset.change(%{color: String.replace(label.color, "#", "")})
+      |> Mrgr.Repo.update()
+    end)
+
+    alerts = Mrgr.Repo.all(Mrgr.Schema.FileChangeAlert)
+
+    Enum.each(alerts, fn alert ->
+      alert
+      |> Ecto.Changeset.change(%{color: String.replace(alert.color, "#", "")})
+      |> Mrgr.Repo.update()
+    end)
+  end
+
   def for_installation(installation_id) do
     Schema
     |> Query.for_installation(installation_id)

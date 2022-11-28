@@ -27,7 +27,18 @@ defmodule Mrgr.Schema.Label do
     schema
     |> cast(params, @allowed)
     |> validate_required([:name, :color])
+    |> strip_hashie_color_tag()
     |> cast_assoc(:label_repositories)
     |> foreign_key_constraint(:installation_id)
+  end
+
+  def strip_hashie_color_tag(changeset) do
+    case get_change(changeset, :color) do
+      color when is_bitstring(color) ->
+        put_change(changeset, :color, String.replace(color, "#", ""))
+
+      _ ->
+        changeset
+    end
   end
 end

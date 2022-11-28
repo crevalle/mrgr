@@ -32,6 +32,7 @@ defmodule Mrgr.Schema.FileChangeAlert do
     schema
     |> cast(params, @create_params)
     |> validate_required(@create_params)
+    |> strip_hashie_color_tag()
     |> foreign_key_constraint(:repository_id)
   end
 
@@ -39,5 +40,16 @@ defmodule Mrgr.Schema.FileChangeAlert do
     schema
     |> cast(params, @update_params)
     |> validate_required(@update_params)
+    |> strip_hashie_color_tag()
+  end
+
+  def strip_hashie_color_tag(changeset) do
+    case get_change(changeset, :color) do
+      color when is_bitstring(color) ->
+        put_change(changeset, :color, String.replace(color, "#", ""))
+
+      _ ->
+        changeset
+    end
   end
 end
