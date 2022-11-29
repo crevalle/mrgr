@@ -6,11 +6,9 @@ defmodule Mrgr.Schema.Label do
     field(:description, :string)
     field(:name, :string)
 
-    field(:repository_count, :integer, virtual: true, default: 0)
-
     belongs_to(:installation, Mrgr.Schema.Installation)
 
-    has_many(:label_repositories, Mrgr.Schema.LabelRepository, on_replace: :delete)
+    has_many(:label_repositories, Mrgr.Schema.LabelRepository, on_replace: :delete, on_delete: :delete_all)
     has_many(:repositories, through: [:label_repositories, :repository])
 
     timestamps()

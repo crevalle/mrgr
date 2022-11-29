@@ -68,7 +68,7 @@ defmodule MrgrWeb.Components.Live.LabelForm do
         true ->
           params
           |> Map.put("installation_id", socket.assigns.current_user.current_installation_id)
-          |> Mrgr.Label.create()
+          |> Mrgr.Label.create_from_form()
 
         false ->
           Mrgr.Label.update(object, params)

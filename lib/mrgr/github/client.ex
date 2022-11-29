@@ -28,6 +28,10 @@ defmodule Mrgr.Github.Client do
     client.auth.access_token
   end
 
+  def fetch_token(%{installation_id: id}) when is_integer(id) do
+    fetch_token(id)
+  end
+
   def fetch_token(id) when is_integer(id) do
     Mrgr.Repo.get(Mrgr.Schema.Installation, id)
   end

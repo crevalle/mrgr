@@ -19,6 +19,7 @@ defmodule Mrgr.Github.API do
   defdelegate get_new_installation_token(installation), to: @mod
   defdelegate head_commit(pull_request, installation), to: @mod
   defdelegate merge_pull_request(client, owner, repo, number, message), to: @mod
+  defdelegate push_label_to_repo(label, repo), to: @mod
   defdelegate update_repo_settings(repo, params), to: @mod
   defdelegate update_branch_protection(repo, params), to: @mod
 
