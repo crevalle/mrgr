@@ -4,32 +4,23 @@ defmodule Mrgr.Label do
   alias __MODULE__.Query
   alias Mrgr.Schema.Label, as: Schema
 
-  ### RELEASE TASK
-
-  def migrate_color_tags do
-    labels = Mrgr.Repo.all(Schema)
-
-    Enum.each(labels, fn label ->
-      label
-      |> Ecto.Changeset.change(%{color: String.replace(label.color, "#", "")})
-      |> Mrgr.Repo.update()
-    end)
-
-    alerts = Mrgr.Repo.all(Mrgr.Schema.FileChangeAlert)
-
-    Enum.each(alerts, fn alert ->
-      alert
-      |> Ecto.Changeset.change(%{color: String.replace(alert.color, "#", "")})
-      |> Mrgr.Repo.update()
-    end)
-  end
-
   def for_installation(installation_id) do
     Schema
     |> Query.for_installation(installation_id)
-    |> Query.preload_repositories()
+    |> Query.with_repositories()
     |> Query.order_by_insensitive(asc: :name)
     |> Mrgr.Repo.all()
+  end
+
+  def create_from_form(params) do
+    case create(params) do
+      {:ok, label} ->
+        push_to_github_async(label)
+        {:ok, label}
+
+      botch ->
+        botch
+    end
   end
 
   def create(params) do
@@ -54,6 +45,30 @@ defmodule Mrgr.Label do
     Mrgr.PubSub.broadcast_to_installation(label, @label_deleted)
   end
 
+  def push_to_github_async(label) do
+    %{id: label.id}
+    |> Mrgr.Worker.PushLabel.new()
+    |> Oban.insert()
+  end
+
+  def push_to_all_repos(label) do
+    lrs =
+      Enum.map(label.label_repositories, fn lr ->
+        response = Mrgr.Github.API.push_label_to_repo(label, lr.repository)
+        store_node_id(lr, response)
+      end)
+
+    %{label | label_repositories: lrs}
+  end
+
+  defp store_node_id(label_repository, %{"createLabel" => %{"label" => %{"id" => node_id}}}) do
+    label_repository
+    |> Ecto.Changeset.change(%{node_id: node_id})
+    |> Mrgr.Repo.update!()
+  end
+
+  defp store_node_id(label_repository, _bum_response), do: label_repository
+
   def find_or_create_for_repo(params, repo) do
     case find_by_name_for_repo(params["name"], repo) do
       %Schema{} = label ->
@@ -65,11 +80,6 @@ defmodule Mrgr.Label do
           label -> associate_with_repo(label, repo)
         end
     end
-
-    # "color" => "0075ca",
-    # "description" => "Improvements or additions to documentation",
-    # "name" => "documentation"
-    # },
   end
 
   def create_for_repo(params, repo) do
@@ -102,6 +112,13 @@ defmodule Mrgr.Label do
     |> Mrgr.Repo.one()
   end
 
+  def find_with_label_repositories(id) do
+    Schema
+    |> Query.by_id(id)
+    |> Query.with_label_repositories()
+    |> Mrgr.Repo.one()
+  end
+
   defmodule Query do
     use Mrgr.Query
 
@@ -127,11 +144,19 @@ defmodule Mrgr.Label do
 
     ### preloads both associations off the label, so
     # you *can't* do label_repository.repository
-    def preload_repositories(query) do
+    def with_repositories(query) do
       from(q in query,
         join: lr in assoc(q, :label_repositories),
         join: r in assoc(q, :repositories),
         preload: [label_repositories: lr, repositories: r]
+      )
+    end
+
+    def with_label_repositories(query) do
+      from(q in query,
+        join: lr in assoc(q, :label_repositories),
+        join: r in assoc(lr, :repository),
+        preload: [label_repositories: {lr, repository: r}]
       )
     end
   end

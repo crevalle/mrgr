@@ -66,9 +66,7 @@ defmodule Mrgr.Github.Repository do
       }
       labels(first: 99) {
         nodes {
-          color
-          description
-          name
+          #{Mrgr.Github.Label.GraphQL.basic()}
         }
       }
       languages(first: 99) {

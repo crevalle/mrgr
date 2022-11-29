@@ -257,6 +257,32 @@ defmodule Mrgr.Github.API.Live do
     request!(&Tentacat.Pulls.commits/4, installation, [owner, name, number])
   end
 
+  def push_label_to_repo(label, repository) do
+    mutation = """
+    mutation ($var: CreateLabelInput!) {
+      createLabel(input:$var) {
+        label {
+          color
+          id
+          name
+        }
+      }
+    }
+    """
+
+    params = %{
+      var: %{
+        color: label.color,
+        description: label.description,
+        name: label.name,
+        repositoryId: repository.node_id
+      }
+    }
+
+    neuron_request!(repository, mutation, params)
+  end
+
+  # will accept not just an installation, but anything with an `installation_id`
   def neuron_request!(installation, query, params \\ %{}) do
     token = Mrgr.Github.Client.graphql(installation)
 
@@ -265,7 +291,8 @@ defmodule Mrgr.Github.API.Live do
       connection_opts: [recv_timeout: 15_000],
       headers: [
         Authorization: "bearer #{token}",
-        Accept: "application/vnd.github.merge-info-preview+json"
+        Accept: "application/vnd.github.merge-info-preview+json",
+        Accept: "application/vnd.github.bane-preview+json"
       ]
     ]
 
@@ -345,6 +372,7 @@ defmodule Mrgr.Github.API.Live do
     Mrgr.Github.Client.new(installation)
   end
 
+  defp create_api_request(%{installation_id: id}, api_call), do: create_api_request(id, api_call)
   defp create_api_request(%{id: id}, api_call), do: create_api_request(id, api_call)
 
   defp create_api_request(installation_id, api_call) do
