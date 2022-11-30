@@ -56,12 +56,12 @@ defmodule MrgrWeb.Components.Live.LabelForm do
   def handle_event("save", %{"label" => params}, socket) do
     object = socket.assigns.object
 
+    label_repository_ids =
+      Enum.map(socket.assigns.selected_repository_ids, fn id -> %{"repository_id" => id} end)
+
     params =
       params
-      |> Map.put(
-        "label_repositories",
-        Enum.map(socket.assigns.selected_repository_ids, fn id -> %{"repository_id" => id} end)
-      )
+      |> Map.put("label_repositories", label_repository_ids)
 
     res =
       case creating?(object) do
@@ -71,7 +71,7 @@ defmodule MrgrWeb.Components.Live.LabelForm do
           |> Mrgr.Label.create_from_form()
 
         false ->
-          Mrgr.Label.update(object, params)
+          Mrgr.Label.update_from_form(object, params)
       end
 
     case res do
@@ -89,7 +89,7 @@ defmodule MrgrWeb.Components.Live.LabelForm do
 
   def handle_event("delete", _params, socket) do
     label = socket.assigns.object
-    Mrgr.Label.delete(label)
+    Mrgr.Label.delete_async(label)
 
     socket
     |> hide_detail()

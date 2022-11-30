@@ -257,7 +257,7 @@ defmodule Mrgr.Github.API.Live do
     request!(&Tentacat.Pulls.commits/4, installation, [owner, name, number])
   end
 
-  def push_label_to_repo(label, repository) do
+  def create_label(label, repository) do
     mutation = """
     mutation ($var: CreateLabelInput!) {
       createLabel(input:$var) {
@@ -276,6 +276,52 @@ defmodule Mrgr.Github.API.Live do
         description: label.description,
         name: label.name,
         repositoryId: repository.node_id
+      }
+    }
+
+    neuron_request!(repository, mutation, params)
+  end
+
+  def update_label(label, repository, node_id) do
+    mutation = """
+    mutation ($var: UpdateLabelInput!) {
+      updateLabel(input:$var) {
+        label {
+          color
+          id
+          name
+        }
+      }
+    }
+    """
+
+    params = %{
+      var: %{
+        color: label.color,
+        description: label.description,
+        name: label.name,
+        id: node_id
+      }
+    }
+
+    neuron_request!(repository, mutation, params)
+  end
+
+  def delete_label_from_repo(node_id, repository) do
+    # we don't send in a clientMutationId but I need to ask the server
+    # for some kind of response or it'll 💣
+
+    mutation = """
+    mutation ($var: DeleteLabelInput!) {
+      deleteLabel(input:$var) {
+        clientMutationId
+      }
+    }
+    """
+
+    params = %{
+      var: %{
+        id: node_id
       }
     }
 
