@@ -443,7 +443,7 @@ defmodule Mrgr.PullRequest do
   end
 
   def broadcast(pull_request, event) do
-    topic = Mrgr.PubSub.Topic.installation(pull_request.repository.installation)
+    topic = Mrgr.PubSub.Topic.installation(pull_request.repository)
 
     Mrgr.PubSub.broadcast(pull_request, topic, event)
     pull_request
@@ -461,6 +461,7 @@ defmodule Mrgr.PullRequest do
     files_changed = Enum.map(node["files"]["nodes"], & &1["path"])
 
     translated = %{
+      labels: Mrgr.Github.Label.from_graphql(node["labels"]["nodes"]),
       files_changed: files_changed,
       merge_state_status: node["mergeStateStatus"],
       mergeable: node["mergeable"],
@@ -486,6 +487,30 @@ defmodule Mrgr.PullRequest do
 
   def fetch_commits(pull_request) do
     Mrgr.Github.API.commits(pull_request, pull_request.repository.installation)
+  end
+
+  def add_label(pull_request, %Mrgr.Github.Label{} = new_label) do
+    # in case things go haywire, avoid duplicates
+    updated_labels =
+      pull_request.labels
+      |> Enum.reject(fn label -> label.node_id == new_label.node_id end)
+      |> Kernel.++([new_label])
+      |> Enum.sort_by(& &1.name)
+
+    pull_request
+    |> Schema.labels_changeset(%{labels: updated_labels})
+    |> Mrgr.Repo.update!()
+    |> broadcast(@pull_request_labels_updated)
+  end
+
+  def remove_label(pull_request, %Mrgr.Github.Label{} = old_label) do
+    updated_labels =
+      Enum.reject(pull_request.labels, fn label -> label.node_id == old_label.node_id end)
+
+    pull_request
+    |> Schema.labels_changeset(%{labels: updated_labels})
+    |> Mrgr.Repo.update!()
+    |> broadcast(@pull_request_labels_updated)
   end
 
   def generate_merge_args(pull_request, message, merger) do

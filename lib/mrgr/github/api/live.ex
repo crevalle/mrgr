@@ -39,6 +39,11 @@ defmodule Mrgr.Github.API.Live do
             files(first: #{github_limit}) {
               nodes #{Mrgr.Github.PullRequest.GraphQL.files()}
             }
+            labels(first: #{github_limit}, orderBy: {direction: ASC, field: NAME}) {
+              nodes {
+                #{Mrgr.Github.Label.GraphQL.pull_request()}
+              }
+            }
           }
         }
       }

@@ -78,6 +78,14 @@ defmodule Mrgr.Github.Webhook do
     Mrgr.PullRequest.Webhook.remove_reviewer(payload)
   end
 
+  def handle("pull_request", %{"action" => "labeled"} = payload) do
+    Mrgr.PullRequest.Webhook.add_label(payload)
+  end
+
+  def handle("pull_request", %{"action" => "unlabeled"} = payload) do
+    Mrgr.PullRequest.Webhook.remove_label(payload)
+  end
+
   def handle("push", payload) do
     Mrgr.Branch.push(payload)
   end

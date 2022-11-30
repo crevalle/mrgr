@@ -34,6 +34,20 @@ defmodule Mrgr.PullRequest.Webhook do
     end
   end
 
+  def add_label(payload) do
+    with {:ok, pull_request} <- find_pull_request(payload),
+         %Mrgr.Github.Label{} = label <- Mrgr.Github.Label.new(payload["label"]) do
+      Mrgr.PullRequest.add_label(pull_request, label)
+    end
+  end
+
+  def remove_label(payload) do
+    with {:ok, pull_request} <- find_pull_request(payload),
+         %Mrgr.Github.Label{} = label <- Mrgr.Github.Label.new(payload["label"]) do
+      Mrgr.PullRequest.remove_label(pull_request, label)
+    end
+  end
+
   # "requested_team" => %{
   # "description" => "Engineers who review infrastructure PRs",
   # "html_url" => "https://github.com/orgs/Shimmur/teams/infrastructure-reviewers",

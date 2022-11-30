@@ -79,12 +79,13 @@ defmodule Mrgr.PubSub do
         @pull_request_created "pull_request:created"
         @pull_request_edited "pull_request:edited"
         @pull_request_reopened "pull_request:reopened"
-        @pull_request_synchronized "pull_request:synchronized"
+        @pull_request_assignees_updated "pull_request:assignees_updated"
         @pull_request_closed "pull_request:closed"
         @pull_request_comment_created "pull_request:comment_created"
-        @pull_request_assignees_updated "pull_request:assignees_updated"
+        @pull_request_labels_updated "pull_request:labels_updated"
         @pull_request_reviewers_updated "pull_request:reviewers_updated"
         @pull_request_reviews_updated "pull_request:reviews_updated"
+        @pull_request_synchronized "pull_request:synchronized"
 
         @repository_updated "repository:updated"
 
