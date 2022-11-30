@@ -1,4 +1,16 @@
 defmodule Mrgr.Github.API.Fake do
+  def create_label(_label, _repo) do
+    %{
+      "createLabel" => %{
+        "label" => %{
+          "id" => "node_id",
+          "color" => "ff0000",
+          "name" => "socks"
+        }
+      }
+    }
+  end
+
   def update_repo_settings(_repo, _params) do
     %{}
   end

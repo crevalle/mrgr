@@ -8,7 +8,11 @@ defmodule Mrgr.Schema.Label do
 
     belongs_to(:installation, Mrgr.Schema.Installation)
 
-    has_many(:label_repositories, Mrgr.Schema.LabelRepository, on_replace: :delete, on_delete: :delete_all)
+    has_many(:label_repositories, Mrgr.Schema.LabelRepository,
+      on_replace: :delete,
+      on_delete: :delete_all
+    )
+
     has_many(:repositories, through: [:label_repositories, :repository])
 
     timestamps()
@@ -21,13 +25,13 @@ defmodule Mrgr.Schema.Label do
     name
   ]a
 
-  def changeset(schema, params) do
+  def create_changeset(schema, params) do
     schema
-    |> simple_changeset(params)
+    |> changeset(params)
     |> cast_assoc(:label_repositories)
   end
 
-  def simple_changeset(schema, params) do
+  def changeset(schema, params) do
     schema
     |> cast(params, @allowed)
     |> validate_required([:name, :color])
