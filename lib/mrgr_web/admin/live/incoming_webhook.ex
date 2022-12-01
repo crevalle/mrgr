@@ -75,7 +75,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
   end
 
   def handle_event("fire", %{"id" => id}, socket) do
-    hook = Mrgr.List.find(socket.assigns.incoming_webhooks, id)
+    hook = Mrgr.List.find(socket.assigns.page.entries, id)
 
     Mrgr.IncomingWebhook.fire!(hook)
 
@@ -89,8 +89,9 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
   end
 
   def handle_info(%{event: @incoming_webhook_created, payload: payload}, socket) do
-    hooks = socket.assigns.incoming_webhooks
-    socket = assign(socket, :incoming_webhooks, [payload | hooks])
+    hooks = socket.assigns.page.entries
+
+    socket = assign(socket, :page, %{socket.assigns.page | entries: [payload | hooks]})
     {:noreply, socket}
   end
 
