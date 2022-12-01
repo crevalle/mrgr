@@ -53,15 +53,6 @@ defmodule Mrgr.Github.Label do
         color
         description
         id
-        name
-      """
-    end
-
-    def pull_request do
-      """
-        color
-        description
-        id
         isDefault
         name
         url

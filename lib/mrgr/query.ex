@@ -7,6 +7,12 @@ defmodule Mrgr.Query do
     quote do
       import Ecto.Query
 
+      def where(query, conditions) do
+        from(q in query,
+          where: ^conditions
+        )
+      end
+
       @spec by_id(Ecto.Queryable.t(), integer() | String.t()) :: Ecto.Query.t()
       def by_id(queryable, id) when is_integer(id) do
         from(q in queryable,

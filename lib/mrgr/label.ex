@@ -19,45 +19,92 @@ defmodule Mrgr.Label do
     |> Mrgr.Repo.one()
   end
 
+  def find_association_by_node_id(node_id) do
+    Mrgr.Schema.LabelRepository
+    |> Query.by_node_id(node_id)
+    |> Query.with_lr_assocs()
+    |> Mrgr.Repo.one()
+  end
+
+  @spec create_from_form(map) :: {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
   def create_from_form(params) do
-    case create(params) do
+    %Schema{}
+    |> Schema.create_changeset(params)
+    |> Mrgr.Repo.insert()
+    |> case do
       {:ok, label} ->
+        Mrgr.PubSub.broadcast_to_installation(label, @label_created)
         push_to_all_repos_async(label)
         {:ok, label}
 
-      botch ->
-        botch
+      error ->
+        error
     end
   end
 
+  @spec update_from_form(Schema.t(), map) :: {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
   def update_from_form(schema, params) do
-    case update(schema, params) do
+    schema
+    |> Schema.changeset(params)
+    |> Mrgr.Repo.update()
+    |> case do
       {:ok, label} ->
+        Mrgr.PubSub.broadcast_to_installation(label, @label_updated)
+        label = update_repo_associations(label, params["label_repositories"])
         push_to_all_repos_async(label)
         {:ok, label}
 
-      botch ->
-        botch
+      error ->
+        error
     end
   end
 
-  def create(params) do
-    with cs <- Schema.create_changeset(%Schema{}, params),
-         {:ok, label} <- Mrgr.Repo.insert(cs) do
-      Mrgr.PubSub.broadcast_to_installation(label, @label_created)
-      {:ok, label}
+  @spec update_from_webhook(Mrgr.Schema.LabelRepository.t(), map, map) ::
+          {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
+  def update_from_webhook(lr, params, changes) do
+    with true <- has_several_repos?(lr.label),
+         true <- changing_name?(changes) do
+      fork_label(params, lr)
+    else
+      false ->
+        lr.label
+        |> Schema.changeset(params)
+        |> Mrgr.Repo.update()
+        |> case do
+          {:ok, label} ->
+            Mrgr.PubSub.broadcast_to_installation(label, @label_updated)
+            {:ok, label}
+
+          error ->
+            error
+        end
     end
   end
 
-  def update(schema, params) do
-    with cs <- Schema.changeset(schema, params),
-         {:ok, label} <- Mrgr.Repo.update(cs),
-         label <- update_repo_associations(label, params["label_repositories"]) do
-      Mrgr.PubSub.broadcast_to_installation(label, @label_updated)
-      {:ok, label}
-    end
+  defp changing_name?(%{"name" => _yep}), do: true
+  defp changing_name?(_nope), do: false
+
+  defp has_several_repos?(label) do
+    repo_count(label) > 1
   end
 
+  def repo_count(label) do
+    Mrgr.Schema.LabelRepository
+    |> Query.where(label_id: label.id)
+    |> Mrgr.Repo.aggregate(:count, :id)
+  end
+
+  @spec fork_label(map, Mrgr.Schema.LabelRepository.t()) ::
+          {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
+  def fork_label(params, lr) do
+    repo = lr.repository
+
+    delete_repo_association(lr)
+
+    create_for_repo(params, repo)
+  end
+
+  @spec update_repo_associations(Schema.t(), list() | nil) :: Schema.t()
   def update_repo_associations(label, repository_ids) when is_list(repository_ids) do
     new_ids = Enum.map(repository_ids, fn id -> id["repository_id"] end) |> MapSet.new()
 
@@ -129,6 +176,18 @@ defmodule Mrgr.Label do
     Mrgr.PubSub.broadcast_to_installation(label, @label_deleted)
   end
 
+  def delete_from_webhook(%{label: label} = lr) do
+    case has_several_repos?(label) do
+      true ->
+        Mrgr.Label.delete_repo_association(lr)
+
+      false ->
+        # delete takes care of the associations
+        label = %{label | label_repositories: [lr]}
+        delete(label)
+    end
+  end
+
   def push_to_all_repos_async(label) do
     %{id: label.id}
     |> Mrgr.Worker.PushLabel.new()
@@ -146,6 +205,7 @@ defmodule Mrgr.Label do
 
   def push_label_to_repo(label, %{node_id: nil} = lr) do
     response = Mrgr.Github.API.create_label(label, lr.repository)
+
     store_node_id(lr, response)
   end
 
@@ -170,28 +230,31 @@ defmodule Mrgr.Label do
       nil ->
         case find_by_name_for_installation(params["name"], repo.installation_id) do
           nil -> create_for_repo(params, repo)
-          label -> associate_with_repo(label, repo)
+          label -> associate_with_repo(label.id, repo.id, params["node_id"])
         end
     end
   end
 
+  # for associating to a single repo, not many at once a la the form
   def create_for_repo(params, repo) do
     params = Map.put(params, "installation_id", repo.installation_id)
 
     with cs <- Schema.changeset(%Schema{}, params),
          {:ok, label} <- Mrgr.Repo.insert(cs),
-         _label_repository <- associate_with_repo(label, repo) do
-      {:ok, label}
+         label_repository <- associate_with_repo(label.id, repo.id, params["node_id"]) do
+      Mrgr.PubSub.broadcast_to_installation(label, @label_created)
+
+      {:ok, %{label | label_repositories: [label_repository]}}
     end
   end
 
-  def associate_with_repo(%Schema{} = label, %Mrgr.Schema.Repository{} = repo) do
-    associate_with_repo(label.id, repo.id)
-  end
-
-  def associate_with_repo(label_id, repo_id) do
+  def associate_with_repo(label_id, repo_id, node_id \\ nil) do
     %Mrgr.Schema.LabelRepository{}
-    |> Mrgr.Schema.LabelRepository.changeset(%{label_id: label_id, repository_id: repo_id})
+    |> Mrgr.Schema.LabelRepository.changeset(%{
+      label_id: label_id,
+      repository_id: repo_id,
+      node_id: node_id
+    })
     |> Mrgr.Repo.insert!()
   end
 

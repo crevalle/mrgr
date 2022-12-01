@@ -41,7 +41,7 @@ defmodule Mrgr.Github.API.Live do
             }
             labels(first: #{github_limit}, orderBy: {direction: ASC, field: NAME}) {
               nodes {
-                #{Mrgr.Github.Label.GraphQL.pull_request()}
+                #{Mrgr.Github.Label.GraphQL.basic()}
               }
             }
           }

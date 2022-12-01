@@ -86,6 +86,18 @@ defmodule Mrgr.Github.Webhook do
     Mrgr.PullRequest.Webhook.remove_label(payload)
   end
 
+  def handle("label", %{"action" => "created"} = payload) do
+    Mrgr.Label.Webhook.create(payload)
+  end
+
+  def handle("label", %{"action" => "edited"} = payload) do
+    Mrgr.Label.Webhook.update(payload)
+  end
+
+  def handle("label", %{"action" => "deleted"} = payload) do
+    Mrgr.Label.Webhook.delete(payload)
+  end
+
   def handle("push", payload) do
     Mrgr.Branch.push(payload)
   end
