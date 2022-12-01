@@ -2,7 +2,7 @@ defmodule Mrgr.Schema.Label do
   use Mrgr.Schema
 
   schema "labels" do
-    field(:color, :string, default: "#f1e5d1")
+    field(:color, :string, default: "f1e5d1")
     field(:description, :string)
     field(:name, :string)
 
