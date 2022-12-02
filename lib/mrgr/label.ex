@@ -176,6 +176,13 @@ defmodule Mrgr.Label do
     Mrgr.PubSub.broadcast_to_installation(label, @label_deleted)
   end
 
+  # does not do anything to github
+  def delete_locally(label) do
+    Enum.map(label.label_repositories, &Mrgr.Repo.delete/1)
+    Mrgr.Repo.delete(label)
+    Mrgr.PubSub.broadcast_to_installation(label, @label_deleted)
+  end
+
   def delete_from_webhook(%{label: label} = lr) do
     case has_several_repos?(label) do
       true ->
