@@ -5,7 +5,7 @@ defmodule Mrgr.Worker.DeleteLabel do
   def perform(%Oban.Job{args: %{"label_repository_id" => id}}) do
     lr = Mrgr.Label.find_association(id)
 
-    Mrgr.Label.delete_repo_association(lr)
+    Mrgr.Label.delete_remote_association(lr)
 
     :ok
   end
@@ -13,7 +13,7 @@ defmodule Mrgr.Worker.DeleteLabel do
   def perform(%Oban.Job{args: %{"id" => id}}) do
     label = Mrgr.Label.find_with_label_repositories(id)
 
-    Mrgr.Label.delete(label)
+    Mrgr.Label.delete_remotely(label)
 
     :ok
   end

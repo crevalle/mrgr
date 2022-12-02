@@ -99,7 +99,7 @@ defmodule Mrgr.Label do
   def fork_label(params, lr) do
     repo = lr.repository
 
-    delete_repo_association(lr)
+    Mrgr.Repo.delete(lr)
 
     create_for_repo(params, repo)
   end
@@ -153,13 +153,13 @@ defmodule Mrgr.Label do
     |> Oban.insert()
   end
 
-  def delete_repo_association(%{node_id: nil} = lr) do
-    Mrgr.Repo.delete(lr)
+  def delete_remote_association(%{node_id: nil} = lr) do
+    lr
   end
 
-  def delete_repo_association(lr) do
+  def delete_remote_association(lr) do
     Mrgr.Github.API.delete_label_from_repo(lr.node_id, lr.repository)
-    Mrgr.Repo.delete(lr)
+    lr
   end
 
   def delete_async(label) do
@@ -168,17 +168,15 @@ defmodule Mrgr.Label do
     |> Oban.insert()
   end
 
-  def delete(label) do
-    Enum.map(label.label_repositories, &delete_repo_association/1)
-
-    Mrgr.Repo.delete(label)
-
-    Mrgr.PubSub.broadcast_to_installation(label, @label_deleted)
+  def delete_remotely(label) do
+    Enum.map(label.label_repositories, &delete_remote_association/1)
+    delete_locally(label)
   end
 
-  # does not do anything to github
+  # will choke on excessive label_repositories
   def delete_locally(label) do
     Enum.map(label.label_repositories, &Mrgr.Repo.delete/1)
+
     Mrgr.Repo.delete(label)
     Mrgr.PubSub.broadcast_to_installation(label, @label_deleted)
   end
@@ -186,12 +184,12 @@ defmodule Mrgr.Label do
   def delete_from_webhook(%{label: label} = lr) do
     case has_several_repos?(label) do
       true ->
-        Mrgr.Label.delete_repo_association(lr)
+        Mrgr.Repo.delete(lr)
 
       false ->
         # delete takes care of the associations
         label = %{label | label_repositories: [lr]}
-        delete(label)
+        delete_locally(label)
     end
   end
 
