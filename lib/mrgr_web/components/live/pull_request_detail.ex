@@ -20,8 +20,4 @@ defmodule MrgrWeb.Components.Live.PullRequestDetail do
         |> noreply()
     end
   end
-
-  def external_pull_request_url(pull_request) do
-    Mrgr.Schema.PullRequest.external_pull_request_url(pull_request)
-  end
 end

@@ -40,6 +40,7 @@ defmodule Mrgr.Github.WebhookTest do
 
       {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
       assert pull_request.merge_queue_index == 0
+      assert pull_request.url == "https://github.com/crevalle/mrgr/pull/14"
       assert Enum.count(pull_request.assignees) == 1
       assert Enum.count(pull_request.requested_reviewers) == 1
     end
