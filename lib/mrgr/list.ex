@@ -45,7 +45,11 @@ defmodule Mrgr.List do
     Enum.find_index(list, fn i -> i.id == id end)
   end
 
-  @spec replace(list(), map()) :: list()
+  @spec replace(Scrivener.Page.t() | list(), map()) :: list()
+  def replace(%Scrivener.Page{} = page, item) do
+    %{page | entries: replace(page.entries, item)}
+  end
+
   def replace(list, item) do
     # no-op if not in list
 

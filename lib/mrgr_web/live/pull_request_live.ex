@@ -246,15 +246,18 @@ defmodule MrgrWeb.PullRequestLive do
              @pull_request_labels_updated
            ] do
     hydrated = Mrgr.PullRequest.preload_for_pending_list(pull_request)
-    pull_requests = Mrgr.List.replace(socket.assigns.pull_requests, hydrated)
 
-    previously_selected =
-      find_previously_selected(pull_requests, socket.assigns.selected_pull_request)
+    {tabs, selected_tab} =
+      Tabs.update_pr(socket.assigns.tabs, socket.assigns.selected_tab, hydrated)
+
+    selected_pull_request =
+      maybe_update_selected_pr(hydrated, socket.assigns.selected_pull_request)
 
     socket
     |> Flash.put(:info, "Pull Request \"#{pull_request.title}\" updated.")
-    |> assign(:pull_requests, pull_requests)
-    |> assign(:selected_pull_request, previously_selected)
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected_tab)
+    |> assign(:selected_pull_request, selected_pull_request)
     |> noreply()
   end
 
@@ -278,10 +281,9 @@ defmodule MrgrWeb.PullRequestLive do
     Flash.put(socket, :info, "#{pull_request.title} merged! 🍾")
   end
 
-  def find_previously_selected(_pull_requests, nil), do: nil
+  def maybe_update_selected_pr(%{id: id} = updated, %{id: id} = _currently_selected), do: updated
 
-  def find_previously_selected(pull_requests, pull_request),
-    do: Mrgr.List.find(pull_requests, pull_request)
+  def maybe_update_selected_pr(_pr, currently_selected), do: currently_selected
 
   defp previewing_pull_request?(%{id: id}, %{id: id}), do: true
   defp previewing_pull_request?(_previewing, _closed), do: false
@@ -354,6 +356,19 @@ defmodule MrgrWeb.PullRequestLive do
           snoozed: load_pull_requests("stale", user, %{snoozed: true})
         }
       ]
+    end
+
+    def update_pr(tabs, selected, pr) do
+      # slow, dumb traversal through everything.  ignore snoozed stuff
+      tabs =
+        Enum.map(tabs, fn tab ->
+          unsnoozed = Mrgr.List.replace(tab.unsnoozed, pr)
+          %{tab | unsnoozed: unsnoozed}
+        end)
+
+      selected = %{selected | unsnoozed: Mrgr.List.replace(selected.unsnoozed, pr)}
+
+      {tabs, selected}
     end
 
     def reload_prs(all, selected, user) do
