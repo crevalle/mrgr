@@ -86,6 +86,24 @@ defmodule MrgrWeb.Components.Form do
     """
   end
 
+  def color_input(assigns) do
+    value = Phoenix.HTML.Form.input_value(assigns.f, :color)
+
+    value =
+      case String.starts_with?(value, "#") do
+        true -> value
+        false -> "##{value}"
+      end
+
+    assigns =
+      assigns
+      |> assign(:value, value)
+
+    ~H"""
+    <%= color_input @f, :color, value: @value, class: "shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
+    """
+  end
+
   def input(%{type: "text"} = assigns) do
     # defaults
     assigns =
@@ -106,7 +124,7 @@ defmodule MrgrWeb.Components.Form do
       end)
 
     ~H"""
-    <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start">
+    <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
       <%= label(@f, @field, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
       <div class="mt-1 sm:mt-0 sm:col-span-2">
         <%= text_input @f, @field, required: @required, autocomplete: @autocomplete, value: @value, placeholder: @placeholder, class: [@common_styles] ++ [(if Keyword.get(@f.errors, @field), do: @error_styles, else: @success_styles)] %>

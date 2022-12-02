@@ -5,7 +5,7 @@
   </div>
 
   <div class="mt-8 bg-white overflow-hidden ">
-    <.form let={f} for={@changeset} phx-submit="save" phx-change="validate" phx-target={@myself} class="space-y-8 divide-y divide-gray-200">
+    <.form let={f} for={@form.changeset} phx-submit="save" phx-change="validate" phx-target={@myself} class="space-y-8 divide-y divide-gray-200">
 
       <.input type="text" f={f} field={:name} required={true} placeholder="eg. 'design-review', 'needs-qa'"/>
 
@@ -13,13 +13,12 @@
 
 
       <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-        <%= label(f, :color, "Background Color", class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
+        <%= label(f, :color, "Color", class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
         <div class="mt-1 sm:mt-0 sm:col-span-2">
-          <%= color_input f, :color, class: "shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
-          <p class="mt-2 text-sm text-gray-500" id="color-description">Background Color for the Label</p>
+          <.color_input f={f} />
           <p class="flex items-center mt-2 text-sm text-gray-500">
             <span class="mr-1">Preview: </span>
-            <.badge item={@changeset.data} text="text-gray-800" />
+            <.badge item={@form.badge_preview} text="text-gray-800" />
           </p>
         </div>
       </div>

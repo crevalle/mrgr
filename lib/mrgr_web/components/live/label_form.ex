@@ -7,7 +7,7 @@ defmodule MrgrWeb.Components.Live.LabelForm do
     socket
     |> assign(assigns)
     |> assign(:selected_repository_ids, MapSet.new(selected_ids))
-    |> assign(:changeset, build_changeset(assigns.object))
+    |> assign(:form, build_form(assigns.object))
     |> ok()
   end
 
@@ -43,13 +43,24 @@ defmodule MrgrWeb.Components.Live.LabelForm do
   # if I don't save the params here they get wiped when i toggle the repos.
   # not sure why
   def handle_event("validate", %{"label" => params}, socket) do
-    changeset =
-      socket.assigns.object
-      |> build_changeset(params)
-      |> Map.put(:action, :validate)
+    # used to trigger updates to label preview
+    form = socket.assigns.form
+
+    badge_preview = %{
+      color: params["color"],
+      name: params["name"]
+    }
+
+    # i'm only interested in the badge preview, but i need to set changeset
+    # data here otherwise an unknown bug will clear out my fields.  same with FCAs
+    form = %{
+      form
+      | badge_preview: badge_preview,
+        changeset: Mrgr.Schema.Label.changeset(form.changeset.data, params)
+    }
 
     socket
-    |> assign(:changeset, changeset)
+    |> assign(:form, form)
     |> noreply()
   end
 
@@ -96,8 +107,16 @@ defmodule MrgrWeb.Components.Live.LabelForm do
     |> noreply()
   end
 
-  defp build_changeset(schema, params \\ %{}) do
-    Mrgr.Schema.Label.changeset(schema, params)
+  defp build_form(schema, params \\ %{}) do
+    changeset = Mrgr.Schema.Label.changeset(schema, params)
+
+    %{
+      changeset: changeset,
+      badge_preview: %{
+        color: schema.color,
+        name: schema.name
+      }
+    }
   end
 
   defp creating?(%{id: nil}), do: true
