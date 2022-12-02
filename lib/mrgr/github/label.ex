@@ -36,6 +36,8 @@ defmodule Mrgr.Github.Label do
     Enum.map(labels, &from_graphql/1)
   end
 
+  def from_graphql(nil), do: []
+
   def from_graphql(label) do
     %{
       "color" => label["color"],
