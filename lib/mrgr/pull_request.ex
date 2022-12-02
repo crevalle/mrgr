@@ -8,6 +8,31 @@ defmodule Mrgr.PullRequest do
   alias Mrgr.PullRequest.Query
   alias Mrgr.Schema.PullRequest, as: Schema
 
+  def migrate_urls(installation_id, opts) do
+    prs =
+      Schema
+      |> Query.for_installation(installation_id)
+      |> Mrgr.Repo.paginate(opts)
+
+    Enum.reduce(prs.entries, 0, fn pr, acc ->
+      case migrate_url(pr) do
+        {:ok, _pr} ->
+          acc + 1
+
+        _ ->
+          acc
+      end
+    end)
+  end
+
+  def migrate_url(%{raw: %{"raw" => %{"html_url" => url}}} = pr) when is_bitstring(url) do
+    pr
+    |> Ecto.Changeset.change(%{url: url})
+    |> Mrgr.Repo.update()
+  end
+
+  def migrate_url(pr), do: pr
+
   def create_from_webhook(payload) do
     params = payload_to_params(payload)
 
