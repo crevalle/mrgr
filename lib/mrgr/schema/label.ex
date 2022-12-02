@@ -5,6 +5,7 @@ defmodule Mrgr.Schema.Label do
     field(:color, :string, default: "f1e5d1")
     field(:description, :string)
     field(:name, :string)
+    field(:repo_count, :integer, virtual: true)
 
     belongs_to(:installation, Mrgr.Schema.Installation)
 

@@ -41,6 +41,8 @@ defmodule MrgrWeb.LabelListLive do
   end
 
   def handle_info(%{event: @label_created, payload: label}, socket) do
+    label = %{label | repo_count: Enum.count(Mrgr.Label.repo_ids(label))}
+
     labels = [label | socket.assigns.labels]
     # sort them
 
@@ -51,6 +53,7 @@ defmodule MrgrWeb.LabelListLive do
   end
 
   def handle_info(%{event: @label_updated, payload: label}, socket) do
+    label = %{label | repo_count: Enum.count(Mrgr.Label.repo_ids(label))}
     labels = Mrgr.List.replace(socket.assigns.labels, label)
 
     socket
@@ -74,6 +77,6 @@ defmodule MrgrWeb.LabelListLive do
   def selected_repository_ids(repos, %{id: nil}), do: Enum.map(repos, & &1.id)
 
   def selected_repository_ids(_repos, label) do
-    Enum.map(label.label_repositories, & &1.repository_id)
+    Mrgr.Label.repo_ids(label)
   end
 end

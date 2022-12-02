@@ -4,10 +4,12 @@ defmodule Mrgr.Label do
   alias __MODULE__.Query
   alias Mrgr.Schema.Label, as: Schema
 
+  def for_installation(%{id: id}), do: for_installation(id)
+
   def for_installation(installation_id) do
     Schema
     |> Query.for_installation(installation_id)
-    |> Query.with_repositories()
+    |> Query.with_repo_count()
     |> Query.order_by_insensitive(asc: :name)
     |> Mrgr.Repo.all()
   end
@@ -24,6 +26,13 @@ defmodule Mrgr.Label do
     |> Query.by_node_id(node_id)
     |> Query.with_lr_assocs()
     |> Mrgr.Repo.one()
+  end
+
+  def repo_ids(label) do
+    Mrgr.Schema.LabelRepository
+    |> Query.where(label_id: label.id)
+    |> Query.select_repo_ids()
+    |> Mrgr.Repo.all()
   end
 
   @spec create_from_form(map) :: {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
@@ -307,13 +316,11 @@ defmodule Mrgr.Label do
       )
     end
 
-    ### preloads both associations off the label, so
-    # you *can't* do label_repository.repository
-    def with_repositories(query) do
+    def with_repo_count(query) do
       from(q in query,
         join: lr in assoc(q, :label_repositories),
-        join: r in assoc(q, :repositories),
-        preload: [label_repositories: lr, repositories: r]
+        select: %{q | repo_count: count(lr.id)},
+        group_by: [q.id]
       )
     end
 
@@ -331,6 +338,12 @@ defmodule Mrgr.Label do
         join: l in assoc(q, :label),
         join: r in assoc(q, :repository),
         preload: [label: l, repository: r]
+      )
+    end
+
+    def select_repo_ids(query) do
+      from(q in query,
+        select: q.repository_id
       )
     end
   end

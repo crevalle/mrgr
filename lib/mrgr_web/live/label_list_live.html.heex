@@ -36,7 +36,7 @@
               <td class="p-3 text-gray-500 text-left text-nowrap">
                 <%= label.description %>
               </td>
-              <td class="p-3 text-center"><%= Enum.count(label.label_repositories) %></td>
+              <td class="p-3 text-center"><%= label.repo_count %></td>
               <td class="p-3 text-right">
                 <.l
                   phx_click={
