@@ -460,7 +460,7 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def tab_select_button(assigns) do
+  def pr_tab_button(assigns) do
     selected =
       case assigns.selected? do
         true -> "selected"
@@ -474,14 +474,26 @@ defmodule MrgrWeb.Components.UI do
     ~H"""
       <button
         class={"flex items-center tab-select-button #{@selected} hover:bg-gray-50 p-2 rounded-t-lg border-b-2"}
-        phx-click={JS.push("select-tab", value: %{id: @item.id})}
-        id={"#{@item.id}-tab"}
+        phx-click={JS.push("select-tab", value: %{id: @tab.id})}
+        id={"#{@tab.id}-tab"}
         type="button"
         role="tab"
         aria-selected="false">
-        <%= @item.title %>
-        <.pr_count_badge count={@item.unsnoozed.total_entries} />
+        <.pr_tab_title tab={@tab} />
+        <.pr_count_badge count={@tab.unsnoozed.total_entries} />
       </button>
+    """
+  end
+
+  def pr_tab_title(%{tab: %{type: :label}} = assigns) do
+    ~H"""
+    <.badge item={@tab.meta} />
+    """
+  end
+
+  def pr_tab_title(assigns) do
+    ~H"""
+      <%= @tab.title %>
     """
   end
 

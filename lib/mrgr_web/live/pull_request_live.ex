@@ -48,7 +48,7 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   def handle_event("select-tab", %{"id" => id}, socket) do
-    selected = Tabs.select(id, socket)
+    selected = Tabs.select_tab(id, socket)
 
     socket
     |> assign(:selected_tab, selected)
@@ -56,7 +56,6 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   def handle_event("toggle-label", %{"id" => id}, socket) do
-    IO.inspect(id, label: "LABEL ID")
     label = Mrgr.List.find(socket.assigns.labels, id)
 
     tabs =
@@ -347,12 +346,15 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   defmodule Tabs do
+    import Ecto.Query
+
     def new(user) do
       [
         %{
           id: "this-week",
           title: "This Week",
           type: :time,
+          meta: %{},
           viewing_snoozed: false,
           unsnoozed: load_pull_requests("this-week", user, %{snoozed: false}),
           snoozed: load_pull_requests("this-week", user, %{snoozed: true})
@@ -361,6 +363,7 @@ defmodule MrgrWeb.PullRequestLive do
           id: "last-week",
           title: "Last Week",
           type: :time,
+          meta: %{},
           viewing_snoozed: false,
           unsnoozed: load_pull_requests("last-week", user, %{snoozed: false}),
           snoozed: load_pull_requests("last-week", user, %{snoozed: true})
@@ -369,6 +372,7 @@ defmodule MrgrWeb.PullRequestLive do
           id: "this-month",
           title: "This Month",
           type: :time,
+          meta: %{},
           viewing_snoozed: false,
           unsnoozed: load_pull_requests("this-month", user, %{snoozed: false}),
           snoozed: load_pull_requests("this-month", user, %{snoozed: true})
@@ -377,43 +381,83 @@ defmodule MrgrWeb.PullRequestLive do
           id: "stale",
           title: "Stale (> 4 weeks)",
           type: :time,
-          viewing_snoozed: false,
-          unsnoozed: load_pull_requests("stale", user, %{snoozed: false}),
-          snoozed: load_pull_requests("stale", user, %{snoozed: true})
-        },
-        %{
-          id: "bug",
-          title: "bug",
-          type: :label,
+          meta: %{},
           viewing_snoozed: false,
           unsnoozed: load_pull_requests("stale", user, %{snoozed: false}),
           snoozed: load_pull_requests("stale", user, %{snoozed: true})
         }
-      ]
+      ] ++ label_tabs_for_user(user)
     end
 
-    def add_tab(tabs, label, user) do
-      new_tab = %{
+    def label_tabs_for_user(user) do
+      labels = Mrgr.Label.tabs_for_user(user)
+
+      Enum.map(labels, fn label ->
+        build_label_tab(label, user)
+      end)
+    end
+
+    defp build_label_tab(label, user) do
+      %{
         id: label.name,
         title: label.name,
         type: :label,
+        meta: label,
         viewing_snoozed: false,
         unsnoozed: load_pull_requests("stale", user, %{snoozed: false}),
         snoozed: load_pull_requests("stale", user, %{snoozed: true})
       }
+    end
+
+    def add_tab(tabs, label, user) do
+      query =
+        from(q in Mrgr.Schema.LabelPRTab,
+          where: q.user_id == ^user.id,
+          order_by: [desc: :position],
+          limit: 1,
+          select: [:position]
+        )
+
+      last =
+        case Mrgr.Repo.one(query) do
+          nil ->
+            0
+
+          %{position: position} ->
+            position
+        end
+
+      {:ok, label_tab} =
+        %Mrgr.Schema.LabelPRTab{}
+        |> Mrgr.Schema.LabelPRTab.changeset(%{
+          position: last + 1,
+          user_id: user.id,
+          label_id: label.id
+        })
+        |> Mrgr.Repo.insert()
+
+      label = %{label | pr_tab: label_tab}
+      new_tab = build_label_tab(label, user)
 
       tabs ++ [new_tab]
     end
 
     def present?(tabs, label) do
-      case Enum.find(tabs, fn tab -> tab.id == label.name end) do
+      case find_tab(tabs, label) do
         nil -> false
         _ -> true
       end
     end
 
     def remove_tab(tabs, label) do
+      tab = find_tab(tabs, label)
+      Mrgr.Repo.delete(tab.meta.pr_tab)
+
       Enum.reject(tabs, fn tab -> tab.id == label.name end)
+    end
+
+    def find_tab(tabs, label) do
+      Enum.find(tabs, fn tab -> tab.id == label.name end)
     end
 
     def time_tabs(tabs) do
@@ -451,16 +495,16 @@ defmodule MrgrWeb.PullRequestLive do
 
       tabs = set_page(tabs, selected_tab, page)
 
-      selected = select(tabs, selected_tab.id)
+      selected = select_tab(tabs, selected_tab.id)
 
       {tabs, selected}
     end
 
-    def select(id, %{assigns: %{tabs: tabs}}) do
-      select(tabs, id)
+    def select_tab(id, %{assigns: %{tabs: tabs}}) do
+      select_tab(tabs, id)
     end
 
-    def select(tabs, id) do
+    def select_tab(tabs, id) do
       Enum.find(tabs, fn i -> i.id == id end)
     end
 
@@ -468,7 +512,7 @@ defmodule MrgrWeb.PullRequestLive do
       tab
       |> viewing_page()
       |> Map.get(:entries)
-      |> select(id)
+      |> select_tab(id)
     end
 
     def viewing_page(tab) do

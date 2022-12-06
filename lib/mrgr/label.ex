@@ -21,6 +21,12 @@ defmodule Mrgr.Label do
     |> Mrgr.Repo.all()
   end
 
+  def tabs_for_user(user) do
+    Schema
+    |> Query.tabs_for_user(user.id)
+    |> Mrgr.Repo.all()
+  end
+
   def find_association(lr_id) do
     Mrgr.Schema.LabelRepository
     |> Query.by_id(lr_id)
@@ -351,6 +357,15 @@ defmodule Mrgr.Label do
     def select_repo_ids(query) do
       from(q in query,
         select: q.repository_id
+      )
+    end
+
+    def tabs_for_user(query, user_id) do
+      from(q in query,
+        join: t in assoc(q, :pr_tab),
+        where: t.user_id == ^user_id,
+        preload: [pr_tab: t],
+        order_by: [asc: t.position]
       )
     end
   end

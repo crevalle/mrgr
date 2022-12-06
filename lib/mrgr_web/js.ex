@@ -36,12 +36,12 @@ defmodule MrgrWeb.JS do
     )
   end
 
-  defp toggle_in_transition do
+  def toggle_in_transition do
     {"transition ease-out duration-100", "transform opacity-0 scale-95",
      "transform opacity-100 scale-100"}
   end
 
-  defp toggle_out_transition do
+  def toggle_out_transition do
     {"transition ease-in duration-75", "transform opacity-100 scale-100",
      "transform opacity-0 scale-95"}
   end

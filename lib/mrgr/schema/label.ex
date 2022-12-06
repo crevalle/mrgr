@@ -9,6 +9,8 @@ defmodule Mrgr.Schema.Label do
 
     belongs_to(:installation, Mrgr.Schema.Installation)
 
+    has_one(:pr_tab, Mrgr.Schema.LabelPRTab)
+
     has_many(:label_repositories, Mrgr.Schema.LabelRepository,
       on_replace: :delete,
       on_delete: :delete_all
