@@ -918,7 +918,7 @@ defmodule Mrgr.PullRequest do
 
     def with_labels(query) do
       from(q in query,
-        join: l in assoc(q, :labels),
+        left_join: l in assoc(q, :labels),
         preload: [labels: l]
       )
     end

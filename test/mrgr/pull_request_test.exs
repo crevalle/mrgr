@@ -21,7 +21,7 @@ defmodule Mrgr.PullRequestTest do
 
       page = Mrgr.PullRequest.paged_pending_pull_requests(i.id, %{page_size: 1})
 
-      assert page.total_entries == 4
+      assert page.total_entries == 2
       assert Enum.count(page.entries) == 1
 
       page =
