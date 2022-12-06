@@ -14,6 +14,13 @@ defmodule Mrgr.Label do
     |> Mrgr.Repo.all()
   end
 
+  def list_for_user(%{current_installation_id: installation_id}) do
+    Schema
+    |> Query.for_installation(installation_id)
+    |> Query.order_by_insensitive(asc: :name)
+    |> Mrgr.Repo.all()
+  end
+
   def find_association(lr_id) do
     Mrgr.Schema.LabelRepository
     |> Query.by_id(lr_id)

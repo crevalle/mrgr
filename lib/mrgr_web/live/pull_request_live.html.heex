@@ -18,7 +18,7 @@
           out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
         )}
         colors="text-gray-700 border-gray-300 hover:bg-gray-50"
-        id="menu-button"
+        id="freeze-menu-button"
         aria-expanded="false"
         aria-haspopup="true">
         Freeze Merging
@@ -26,7 +26,7 @@
       </.secondary_button>
     </div>
 
-    <div style="display: none;" id="merge-freeze-menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="menu-button" tabindex="-1">
+    <div style="display: none;" id="merge-freeze-menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="freeze-menu-button" tabindex="-1">
       <div class="py-1" role="none">
         <.l :for={r <- @repos}
           id={"repo-menu-item-#{r.id}"}
@@ -67,16 +67,63 @@
   <div class="basis-1/2">
 
     <div class="mb-4">
-      <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" id="myTab" data-tabs-toggle="#myTabContent" role="tablist">
-        <li :for={pr_type <- @tabs} class="mr-2" role="presentation">
-          <.tab_select_button
-            id={pr_type.id}
-            count={pr_type.unsnoozed.total_entries}
-            selected_tab={@selected_tab} >
-            <%= pr_type.title %>
-          </.tab_select_button>
-        </li>
-      </ul>
+      <div class="flex flex-col space-y-4">
+        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
+          <li :for={tab <- Tabs.time_tabs(@tabs)} class="mr-2" role="presentation">
+            <.tab_select_button
+              item={tab}
+              selected?={selected?(tab, @selected_tab)} >
+            </.tab_select_button>
+          </li>
+        </ul>
+        <div class="relative">
+          <ul class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
+            <li :for={tab <- Tabs.label_tabs(@tabs)} class="mr-2" role="presentation">
+              <.tab_select_button
+                item={tab}
+                selected?={selected?(tab, @selected_tab)} >
+              </.tab_select_button>
+            </li>
+            <li>
+              <.inline_link
+                phx-click={toggle(to: "#pr-tab-label-dropdown")}
+                id="pr-tab-label-dropdown-toggle"
+                aria-expanded="false"
+                aria-haspopup="true">
+                <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
+              </.inline_link>
+
+            </li>
+          </ul>
+
+          <div style="display: none;" id="pr-tab-label-dropdown" class="origin-top-right z-50 mt-2 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="nav-tab-label-dropdown-toggle" tabindex="-1">
+            <div class="mt-2 flex flex-col text-sm sm:mt-0">
+              <.l :for={label <- @labels}
+                id={"label-#{label.id}"}
+                phx_click={JS.push("toggle-label", value: %{id: label.id})}
+                class="text-gray-700 block py-2 text-sm outline-none hover:bg-gray-50"
+                role="menuitem"
+                tabindex="-1" >
+                <div class="flex items-center">
+                  <div class="w-8 text-blue-400 ml-2">
+                    <%= if Tabs.present?(@tabs, label) do %>
+                    ❄️
+                    <% end %>
+                  </div>
+                  <.badge item={label} />
+                </div>
+              </.l>
+            </div>
+          </div>
+          </div>
+
+
+
+
+
+
+
+      </div>
     </div>
 
     <div >

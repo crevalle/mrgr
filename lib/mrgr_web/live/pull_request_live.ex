@@ -14,6 +14,9 @@ defmodule MrgrWeb.PullRequestLive do
 
       repos = Mrgr.Repository.for_user_with_rules(current_user)
       frozen_repos = filter_frozen_repos(repos)
+
+      labels = Mrgr.Label.list_for_user(current_user)
+
       subscribe(current_user)
 
       # id will be `nil` for the index action
@@ -26,6 +29,7 @@ defmodule MrgrWeb.PullRequestLive do
       |> assign(:selected_tab, hd(tabs))
       |> assign(:selected_pull_request, nil)
       |> assign(:repos, repos)
+      |> assign(:labels, labels)
       |> assign(:frozen_repos, frozen_repos)
       |> put_title("Open Pull Requests")
       |> ok()
@@ -48,6 +52,24 @@ defmodule MrgrWeb.PullRequestLive do
 
     socket
     |> assign(:selected_tab, selected)
+    |> noreply()
+  end
+
+  def handle_event("toggle-label", %{"id" => id}, socket) do
+    IO.inspect(id, label: "LABEL ID")
+    label = Mrgr.List.find(socket.assigns.labels, id)
+
+    tabs =
+      case Tabs.present?(socket.assigns.tabs, label) do
+        true ->
+          Tabs.remove_tab(socket.assigns.tabs, label)
+
+        false ->
+          Tabs.add_tab(socket.assigns.tabs, label, socket.assigns.current_user)
+      end
+
+    socket
+    |> assign(:tabs, tabs)
     |> noreply()
   end
 
@@ -330,6 +352,7 @@ defmodule MrgrWeb.PullRequestLive do
         %{
           id: "this-week",
           title: "This Week",
+          type: :time,
           viewing_snoozed: false,
           unsnoozed: load_pull_requests("this-week", user, %{snoozed: false}),
           snoozed: load_pull_requests("this-week", user, %{snoozed: true})
@@ -337,6 +360,7 @@ defmodule MrgrWeb.PullRequestLive do
         %{
           id: "last-week",
           title: "Last Week",
+          type: :time,
           viewing_snoozed: false,
           unsnoozed: load_pull_requests("last-week", user, %{snoozed: false}),
           snoozed: load_pull_requests("last-week", user, %{snoozed: true})
@@ -344,6 +368,7 @@ defmodule MrgrWeb.PullRequestLive do
         %{
           id: "this-month",
           title: "This Month",
+          type: :time,
           viewing_snoozed: false,
           unsnoozed: load_pull_requests("this-month", user, %{snoozed: false}),
           snoozed: load_pull_requests("this-month", user, %{snoozed: true})
@@ -351,11 +376,52 @@ defmodule MrgrWeb.PullRequestLive do
         %{
           id: "stale",
           title: "Stale (> 4 weeks)",
+          type: :time,
+          viewing_snoozed: false,
+          unsnoozed: load_pull_requests("stale", user, %{snoozed: false}),
+          snoozed: load_pull_requests("stale", user, %{snoozed: true})
+        },
+        %{
+          id: "bug",
+          title: "bug",
+          type: :label,
           viewing_snoozed: false,
           unsnoozed: load_pull_requests("stale", user, %{snoozed: false}),
           snoozed: load_pull_requests("stale", user, %{snoozed: true})
         }
       ]
+    end
+
+    def add_tab(tabs, label, user) do
+      new_tab = %{
+        id: label.name,
+        title: label.name,
+        type: :label,
+        viewing_snoozed: false,
+        unsnoozed: load_pull_requests("stale", user, %{snoozed: false}),
+        snoozed: load_pull_requests("stale", user, %{snoozed: true})
+      }
+
+      tabs ++ [new_tab]
+    end
+
+    def present?(tabs, label) do
+      case Enum.find(tabs, fn tab -> tab.id == label.name end) do
+        nil -> false
+        _ -> true
+      end
+    end
+
+    def remove_tab(tabs, label) do
+      Enum.reject(tabs, fn tab -> tab.id == label.name end)
+    end
+
+    def time_tabs(tabs) do
+      Enum.filter(tabs, fn t -> t.type == :time end)
+    end
+
+    def label_tabs(tabs) do
+      Enum.filter(tabs, fn t -> t.type == :label end)
     end
 
     def update_pr(tabs, selected, pr) do
