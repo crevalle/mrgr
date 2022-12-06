@@ -18,6 +18,9 @@ defmodule Mrgr.Schema.Label do
 
     has_many(:repositories, through: [:label_repositories, :repository])
 
+    has_many(:pr_labels, Mrgr.Schema.PullRequestLabel)
+    has_many(:pull_requests, through: [:pr_labels, :pull_request])
+
     timestamps()
   end
 

@@ -460,8 +460,12 @@ defmodule Mrgr.PullRequest do
 
     files_changed = Enum.map(node["files"]["nodes"], & &1["path"])
 
+    labels =
+      node["labels"]["nodes"]
+      |> Mrgr.Github.Label.from_graphql()
+      |> Enum.map(&Mrgr.Github.Label.new/1)
+
     translated = %{
-      labels: Mrgr.Github.Label.from_graphql(node["labels"]["nodes"]),
       files_changed: files_changed,
       merge_state_status: node["mergeStateStatus"],
       mergeable: node["mergeable"],
@@ -469,6 +473,7 @@ defmodule Mrgr.PullRequest do
     }
 
     pull_request
+    |> update_labels_from_sync(labels)
     |> Schema.most_changeset(translated)
     |> Mrgr.Repo.update!()
   end
@@ -490,26 +495,74 @@ defmodule Mrgr.PullRequest do
   end
 
   def add_label(pull_request, %Mrgr.Github.Label{} = new_label) do
-    # in case things go haywire, avoid duplicates
-    updated_labels =
-      pull_request.labels
-      |> Enum.reject(fn label -> label.node_id == new_label.node_id end)
-      |> Kernel.++([new_label])
-      |> Enum.sort_by(& &1.name)
+    case do_add_label(pull_request, new_label) do
+      %Schema{} = pull_request ->
+        pull_request
+        |> Mrgr.Repo.preload(:labels)
+        |> broadcast(@pull_request_labels_updated)
+
+      :error ->
+        :error
+    end
+  end
+
+  def do_add_label(pull_request, %Mrgr.Github.Label{} = gh_label) do
+    installation_id = pull_request.repository.installation_id
+
+    with %Mrgr.Schema.Label{} = label <-
+           Mrgr.Label.find_by_name_for_installation(gh_label.name, installation_id),
+         nil <- find_pr_label(pull_request, label),
+         {:ok, _pr_label} <- create_pr_label(pull_request, label) do
+      pull_request
+    else
+      _ -> :error
+    end
+  end
+
+  def find_pr_label(pull_request, %Mrgr.Github.Label{} = gh_label) do
+    installation_id = pull_request.repository.installation_id
+
+    with %Mrgr.Schema.Label{} = label <-
+           Mrgr.Label.find_by_name_for_installation(gh_label.name, installation_id) do
+      find_pr_label(pull_request, label)
+    end
+  end
+
+  def find_pr_label(pull_request, %Mrgr.Schema.Label{} = label) do
+    Mrgr.Repo.get_by(Mrgr.Schema.PullRequestLabel,
+      pull_request_id: pull_request.id,
+      label_id: label.id
+    )
+  end
+
+  def create_pr_label(pull_request, label) do
+    %Mrgr.Schema.PullRequestLabel{}
+    |> Ecto.Changeset.change(%{pull_request_id: pull_request.id, label_id: label.id})
+    |> Mrgr.Repo.insert()
+  end
+
+  def remove_label(pull_request, %Mrgr.Github.Label{} = gh_label) do
+    case find_pr_label(pull_request, gh_label) do
+      nil ->
+        nil
+
+      pr_label ->
+        Mrgr.Repo.delete(pr_label)
+    end
 
     pull_request
-    |> Schema.labels_changeset(%{labels: updated_labels})
-    |> Mrgr.Repo.update!()
+    |> Mrgr.Repo.preload(:labels)
     |> broadcast(@pull_request_labels_updated)
   end
 
-  def remove_label(pull_request, %Mrgr.Github.Label{} = old_label) do
-    updated_labels =
-      Enum.reject(pull_request.labels, fn label -> label.node_id == old_label.node_id end)
+  def update_labels_from_sync(pull_request, labels) do
+    pull_request = Mrgr.Repo.preload(pull_request, :pr_labels)
+    Enum.map(pull_request.pr_labels, &Mrgr.Repo.delete/1)
+
+    Enum.map(labels, fn label -> do_add_label(pull_request, label) end)
 
     pull_request
-    |> Schema.labels_changeset(%{labels: updated_labels})
-    |> Mrgr.Repo.update!()
+    |> Mrgr.Repo.preload(:labels)
     |> broadcast(@pull_request_labels_updated)
   end
 
@@ -535,7 +588,7 @@ defmodule Mrgr.PullRequest do
   def load_pull_request_for_merging(id) do
     Schema
     |> Query.by_id(id)
-    |> Query.preload_for_merging()
+    |> Query.with_installation()
     |> Mrgr.Repo.one()
   end
 
@@ -548,7 +601,7 @@ defmodule Mrgr.PullRequest do
   def find_by_node_id(id) do
     Schema
     |> Query.by_node_id(id)
-    |> Query.preload_for_merging()
+    |> Query.with_installation()
     |> Query.with_comments()
     |> Mrgr.Repo.one()
   end
@@ -563,7 +616,7 @@ defmodule Mrgr.PullRequest do
   def find_with_everything(id) do
     Schema
     |> Query.by_id(id)
-    |> Query.preload_for_merging()
+    |> Query.with_installation()
     |> Query.with_comments()
     |> Mrgr.Repo.one()
   end
@@ -594,6 +647,22 @@ defmodule Mrgr.PullRequest do
       |> Query.order_by_opened()
       |> Query.maybe_snooze(with_snoozed)
       |> Query.opened_between(before, since)
+      |> Query.with_labels()
+      |> Mrgr.Repo.paginate(opts)
+
+    entries_with_preloads = Mrgr.Repo.preload(page.entries, Query.pending_preloads())
+    %{page | entries: entries_with_preloads}
+  end
+
+  def paged_for_label(label, opts \\ %{}) do
+    with_snoozed = Map.get(opts, :snoozed)
+
+    page =
+      Schema
+      |> Query.open()
+      |> Query.for_label(label)
+      |> Query.order_by_opened()
+      |> Query.maybe_snooze(with_snoozed)
       |> Mrgr.Repo.paginate(opts)
 
     entries_with_preloads = Mrgr.Repo.preload(page.entries, Query.pending_preloads())
@@ -769,7 +838,7 @@ defmodule Mrgr.PullRequest do
       )
     end
 
-    def preload_for_merging(query) do
+    def with_installation(query) do
       from([q, repository: r] in with_repository(query),
         join: i in assoc(r, :installation),
         join: a in assoc(i, :account),
@@ -837,6 +906,21 @@ defmodule Mrgr.PullRequest do
       |> with_file_alert_rules()
       |> with_comments()
       |> with_pr_reviews()
+    end
+
+    def for_label(query, label) do
+      from(q in query,
+        join: l in assoc(q, :labels),
+        where: l.id == ^label.id,
+        preload: [labels: l]
+      )
+    end
+
+    def with_labels(query) do
+      from(q in query,
+        join: l in assoc(q, :labels),
+        preload: [labels: l]
+      )
     end
 
     def order_by_opened(query) do

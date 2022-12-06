@@ -354,59 +354,62 @@ defmodule MrgrWeb.PullRequestLive do
           id: "this-week",
           title: "This Week",
           type: :time,
-          meta: %{},
+          meta: %{user: user},
           viewing_snoozed: false,
-          unsnoozed: load_pull_requests("this-week", user, %{snoozed: false}),
-          snoozed: load_pull_requests("this-week", user, %{snoozed: true})
+          unsnoozed: :not_loaded,
+          snoozed: :not_loaded
         },
         %{
           id: "last-week",
           title: "Last Week",
           type: :time,
-          meta: %{},
+          meta: %{user: user},
           viewing_snoozed: false,
-          unsnoozed: load_pull_requests("last-week", user, %{snoozed: false}),
-          snoozed: load_pull_requests("last-week", user, %{snoozed: true})
+          unsnoozed: :not_loaded,
+          snoozed: :not_loaded
         },
         %{
           id: "this-month",
           title: "This Month",
           type: :time,
-          meta: %{},
+          meta: %{user: user},
           viewing_snoozed: false,
-          unsnoozed: load_pull_requests("this-month", user, %{snoozed: false}),
-          snoozed: load_pull_requests("this-month", user, %{snoozed: true})
+          unsnoozed: :not_loaded,
+          snoozed: :not_loaded
         },
         %{
           id: "stale",
           title: "Stale (> 4 weeks)",
           type: :time,
-          meta: %{},
+          meta: %{user: user},
           viewing_snoozed: false,
-          unsnoozed: load_pull_requests("stale", user, %{snoozed: false}),
-          snoozed: load_pull_requests("stale", user, %{snoozed: true})
+          unsnoozed: :not_loaded,
+          snoozed: :not_loaded
         }
-      ] ++ label_tabs_for_user(user)
+      ]
+      |> Enum.map(&load_snoozed_and_non/1)
+      |> Kernel.++(label_tabs_for_user(user))
     end
 
     def label_tabs_for_user(user) do
       labels = Mrgr.Label.tabs_for_user(user)
 
       Enum.map(labels, fn label ->
-        build_label_tab(label, user)
+        build_label_tab(label)
       end)
     end
 
-    defp build_label_tab(label, user) do
+    defp build_label_tab(label) do
       %{
         id: label.name,
         title: label.name,
         type: :label,
-        meta: label,
+        meta: %{label: label},
         viewing_snoozed: false,
-        unsnoozed: load_pull_requests("stale", user, %{snoozed: false}),
-        snoozed: load_pull_requests("stale", user, %{snoozed: true})
+        unsnoozed: :not_loaded,
+        snoozed: :not_loaded
       }
+      |> load_snoozed_and_non()
     end
 
     def add_tab(tabs, label, user) do
@@ -437,7 +440,7 @@ defmodule MrgrWeb.PullRequestLive do
         |> Mrgr.Repo.insert()
 
       label = %{label | pr_tab: label_tab}
-      new_tab = build_label_tab(label, user)
+      new_tab = build_label_tab(label)
 
       tabs ++ [new_tab]
     end
@@ -451,7 +454,7 @@ defmodule MrgrWeb.PullRequestLive do
 
     def remove_tab(tabs, label) do
       tab = find_tab(tabs, label)
-      Mrgr.Repo.delete(tab.meta.pr_tab)
+      Mrgr.Repo.delete(tab.meta.label.pr_tab)
 
       Enum.reject(tabs, fn tab -> tab.id == label.name end)
     end
@@ -482,16 +485,24 @@ defmodule MrgrWeb.PullRequestLive do
     end
 
     def reload_prs(all, selected, user) do
-      {snoozed, unsnoozed} = load_prs(selected, user)
+      snoozed =
+        load_pull_requests(selected, %{snoozed: true, page_number: selected.snoozed.page_number})
+
+      unsnoozed =
+        load_pull_requests(selected, %{
+          snoozed: false,
+          page_number: selected.unsnoozed.page_number
+        })
+
       updated = %{selected | snoozed: snoozed, unsnoozed: unsnoozed}
 
       {Mrgr.List.replace(all, updated), updated}
     end
 
-    def nav(params, %{assigns: %{tabs: tabs, selected_tab: selected_tab, current_user: user}}) do
+    def nav(params, %{assigns: %{tabs: tabs, selected_tab: selected_tab}}) do
       params = Map.merge(params, %{snoozed: selected_tab.viewing_snoozed})
 
-      page = load_pull_requests(selected_tab.id, user, params)
+      page = load_pull_requests(selected_tab, params)
 
       tabs = set_page(tabs, selected_tab, page)
 
@@ -522,37 +533,38 @@ defmodule MrgrWeb.PullRequestLive do
       end
     end
 
-    def load_prs(tab, user) do
-      snoozed =
-        load_pull_requests(tab.id, user, %{snoozed: true, page_number: tab.snoozed.page_number})
+    def load_snoozed_and_non(tab, opts \\ %{}) do
+      snoozed = load_pull_requests(tab, Map.put(opts, :snoozed, true))
+      unsnoozed = load_pull_requests(tab, Map.put(opts, :snoozed, false))
 
-      unsnoozed =
-        load_pull_requests(tab.id, user, %{snoozed: false, page_number: tab.unsnoozed.page_number})
-
-      {snoozed, unsnoozed}
+      %{tab | snoozed: snoozed, unsnoozed: unsnoozed}
     end
 
-    def load_pull_requests(key, user, page_params \\ %{})
+    def load_pull_requests(tab, page_params \\ %{})
 
-    def load_pull_requests("this-week", user, page_params) do
+    def load_pull_requests(%{id: "this-week"} = tab, page_params) do
       opts = Map.merge(page_params, %{since: this_week()})
 
-      Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
+      Mrgr.PullRequest.paged_pending_pull_requests(tab.meta.user, opts)
     end
 
-    def load_pull_requests("last-week", user, page_params) do
+    def load_pull_requests(%{id: "last-week"} = tab, page_params) do
       opts = Map.merge(page_params, %{before: this_week(), since: two_weeks_ago()})
-      Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
+      Mrgr.PullRequest.paged_pending_pull_requests(tab.meta.user, opts)
     end
 
-    def load_pull_requests("this-month", user, page_params) do
+    def load_pull_requests(%{id: "this-month"} = tab, page_params) do
       opts = Map.merge(page_params, %{before: two_weeks_ago(), since: four_weeks_ago()})
-      Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
+      Mrgr.PullRequest.paged_pending_pull_requests(tab.meta.user, opts)
     end
 
-    def load_pull_requests("stale", user, page_params) do
+    def load_pull_requests(%{id: "stale"} = tab, page_params) do
       opts = Map.merge(page_params, %{before: four_weeks_ago()})
-      Mrgr.PullRequest.paged_pending_pull_requests(user, opts)
+      Mrgr.PullRequest.paged_pending_pull_requests(tab.meta.user, opts)
+    end
+
+    def load_pull_requests(tab, page_params) do
+      Mrgr.PullRequest.paged_for_label(tab.meta.label, page_params)
     end
 
     def set_page(all, selected, page) do

@@ -29,7 +29,6 @@ defmodule Mrgr.Schema.PullRequest do
     field(:title, :string)
     field(:url, :string)
 
-    embeds_many(:labels, Mrgr.Github.Label, on_replace: :delete)
     embeds_many(:commits, Mrgr.Github.Commit, on_replace: :delete)
     embeds_many(:assignees, Mrgr.Github.User, on_replace: :delete)
     embeds_many(:requested_reviewers, Mrgr.Github.User, on_replace: :delete)
@@ -46,6 +45,9 @@ defmodule Mrgr.Schema.PullRequest do
 
     has_one(:checklist, Mrgr.Schema.Checklist, on_delete: :delete_all)
     has_many(:checks, through: [:checklist, :checks])
+
+    has_many(:pr_labels, Mrgr.Schema.PullRequestLabel)
+    has_many(:labels, through: [:pr_labels, :label])
 
     has_many(:comments, Mrgr.Schema.Comment, on_delete: :delete_all)
     has_many(:pr_reviews, Mrgr.Schema.PRReview, on_delete: :delete_all)
@@ -82,7 +84,6 @@ defmodule Mrgr.Schema.PullRequest do
     |> cast_embed(:assignees)
     |> cast_embed(:requested_reviewers)
     |> cast_embed(:head)
-    |> cast_embed(:labels)
     |> put_open_status()
     |> put_external_id()
     |> put_change(:raw, params)
@@ -142,17 +143,8 @@ defmodule Mrgr.Schema.PullRequest do
   def most_changeset(schema, params) do
     schema
     |> cast(params, @most_params)
-    |> cast_embed(:labels)
     |> validate_inclusion(:mergeable, @mergeable_states)
     |> validate_inclusion(:merge_state_status, @merge_state_statuses)
-  end
-
-  def labels_changeset(schema, params) do
-    params = %{params | labels: Enum.map(params.labels, &unstructify/1)}
-
-    schema
-    |> cast(params, [])
-    |> cast_embed(:labels)
   end
 
   def unstructify(struct) when is_struct(struct), do: Map.from_struct(struct)

@@ -29,7 +29,7 @@ defmodule MrgrWeb.JS do
   end
 
   def toggle(js \\ %JS{}, opts) do
-    JS.toggle(
+    JS.toggle(js,
       to: opts[:to],
       in: toggle_in_transition(),
       out: toggle_out_transition()

@@ -487,7 +487,7 @@ defmodule MrgrWeb.Components.UI do
 
   def pr_tab_title(%{tab: %{type: :label}} = assigns) do
     ~H"""
-    <.badge item={@tab.meta} />
+    <.badge item={@tab.meta.label} />
     """
   end
 
