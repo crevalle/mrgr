@@ -283,10 +283,6 @@ defmodule Mrgr.Repository do
       [] ->
         repo
 
-        # repo no longer exists?
-      nil ->
-        repo
-
       pr_data ->
         repo
         |> create_pull_requests_from_data(pr_data)
@@ -301,11 +297,12 @@ defmodule Mrgr.Repository do
     |> parse_graphql_attrs()
   end
 
+  # repo no longer exists?
+  def parse_graphql_attrs(nil), do: []
+
   def parse_graphql_attrs(attrs) do
     attrs["repository"]["pullRequests"]["edges"]
-    |> Enum.map(fn %{"node" => node} ->
-      parse_node(node)
-    end)
+    |> Enum.map(fn %{"node" => node} -> parse_node(node) end)
   end
 
   defp parse_node(node) do
