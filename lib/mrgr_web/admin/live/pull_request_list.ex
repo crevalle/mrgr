@@ -21,7 +21,7 @@ defmodule MrgrWeb.Admin.Live.PullRequestList do
     end
   end
 
-  def handle_event("nav", params, socket) do
+  def handle_event("paginate", params, socket) do
     page = Mrgr.PullRequest.open_for_repo_id(socket.assigns.repository.id, params)
 
     socket

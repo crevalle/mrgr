@@ -66,7 +66,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
     end
   end
 
-  def handle_event("nav", params, socket) do
+  def handle_event("paginate", params, socket) do
     page = Mrgr.IncomingWebhook.paged(params)
 
     socket

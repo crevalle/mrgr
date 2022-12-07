@@ -38,8 +38,8 @@ defmodule MrgrWeb.PullRequestLive do
     end
   end
 
-  def handle_event("nav", params, socket) do
-    {tabs, selected_tab} = Tabs.nav(params, socket)
+  def handle_event("paginate", params, socket) do
+    {tabs, selected_tab} = Tabs.paginate(params, socket)
 
     socket
     |> assign(:tabs, tabs)
@@ -543,7 +543,7 @@ defmodule MrgrWeb.PullRequestLive do
       {Mrgr.List.replace(all, updated), updated}
     end
 
-    def nav(params, %{assigns: %{tabs: tabs, selected_tab: selected_tab}}) do
+    def paginate(params, %{assigns: %{tabs: tabs, selected_tab: selected_tab}}) do
       params = Map.merge(params, %{snoozed: selected_tab.viewing_snoozed})
 
       page = load_pull_requests(selected_tab, params)

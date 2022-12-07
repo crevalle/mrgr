@@ -60,7 +60,7 @@ defmodule MrgrWeb.Admin.Live.InstallationRepoTable do
     end
   end
 
-  def handle_event("nav", params, socket) do
+  def handle_event("paginate", params, socket) do
     page = Mrgr.Repository.for_installation(socket.assigns.installation_id, params)
 
     socket

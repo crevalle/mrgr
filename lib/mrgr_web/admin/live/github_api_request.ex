@@ -67,7 +67,7 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
     {:noreply, socket}
   end
 
-  def handle_event("nav", params, socket) do
+  def handle_event("paginate", params, socket) do
     page = Mrgr.Github.API.paged_requests(params)
 
     socket
