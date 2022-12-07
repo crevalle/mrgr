@@ -297,13 +297,13 @@ defmodule Mrgr.Repository do
     |> parse_graphql_attrs()
   end
 
-  # repo no longer exists?
-  def parse_graphql_attrs(nil), do: []
-
-  def parse_graphql_attrs(attrs) do
-    attrs["repository"]["pullRequests"]["edges"]
-    |> Enum.map(fn %{"node" => node} -> parse_node(node) end)
+  def parse_graphql_attrs(%{"repository" => %{"pullRequests" => %{"edges" => edges}}})
+      when is_list(edges) do
+    Enum.map(edges, fn %{"node" => node} -> parse_node(node) end)
   end
+
+  # repo no longer exists?
+  def parse_graphql_attrs(_), do: []
 
   defp parse_node(node) do
     requested_reviewers =
