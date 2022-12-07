@@ -10,12 +10,12 @@ defmodule MrgrWeb.PullRequestLive do
     if connected?(socket) do
       current_user = socket.assigns.current_user
 
-      tabs = Tabs.new(current_user)
-
       repos = Mrgr.Repository.for_user_with_rules(current_user)
       frozen_repos = filter_frozen_repos(repos)
 
       labels = Mrgr.Label.list_for_user(current_user)
+
+      tabs = Tabs.new(current_user)
 
       subscribe(current_user)
 
