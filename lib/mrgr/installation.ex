@@ -217,7 +217,8 @@ defmodule Mrgr.Installation do
   end
 
   def sync_pull_request_data(installation) do
-    # assumes account and repositories have been preloaded
+    # assumes PRs have been deleted
+    # and account and repositories have been preloaded
 
     # we already have the installation here, so we reverse preload it onto its children repositories
     # so they'll have it for their API calls

@@ -283,6 +283,10 @@ defmodule Mrgr.Repository do
       [] ->
         repo
 
+        # repo no longer exists?
+      nil ->
+        repo
+
       pr_data ->
         repo
         |> create_pull_requests_from_data(pr_data)
