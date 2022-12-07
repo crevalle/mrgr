@@ -228,9 +228,6 @@ defmodule Mrgr.Installation do
 
     installation = %{installation | repositories: repositories}
 
-    # this returns a list, not the installation
-    Mrgr.MergeQueue.regenerate_pull_request_queue(installation)
-
     installation
   end
 

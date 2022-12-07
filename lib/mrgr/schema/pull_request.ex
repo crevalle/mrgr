@@ -19,7 +19,6 @@ defmodule Mrgr.Schema.PullRequest do
     field(:head_commit, :map)
     field(:mergeable, :string)
     field(:merge_state_status, :string)
-    field(:merge_queue_index, :integer)
     field(:node_id, :string)
     field(:number, :integer)
     field(:opened_at, :utc_datetime)
@@ -58,7 +57,6 @@ defmodule Mrgr.Schema.PullRequest do
   @create_fields ~w[
     mergeable
     merge_state_status
-    merge_queue_index
     node_id
     number
     opened_at
@@ -96,11 +94,6 @@ defmodule Mrgr.Schema.PullRequest do
     schema
     |> cast(attrs, [])
     |> cast_embed(:commits)
-  end
-
-  def merge_queue_changeset(schema, attrs) do
-    schema
-    |> cast(attrs, [:merge_queue_index])
   end
 
   def close_changeset(schema, %{"merged" => true} = params) do

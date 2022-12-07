@@ -25,14 +25,8 @@ import {Socket} from "phoenix"
 import {LiveSocket} from "phoenix_live_view"
 import topbar from "../vendor/topbar"
 
-// LiveView Hooks
-import Drag from "./dragHook";
-
-const Hooks = { Drag: Drag };
-
 let csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 let liveSocket = new LiveSocket("/live", Socket, {
-  hooks: Hooks,
   params: {
     _csrf_token: csrfToken,
     locale: Intl.NumberFormat().resolvedOptions().locale,

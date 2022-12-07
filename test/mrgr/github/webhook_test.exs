@@ -39,37 +39,9 @@ defmodule Mrgr.Github.WebhookTest do
       insert!(:repository, installation: ctx.installation, node_id: "R_kgDOGGc3xQ")
 
       {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
-      assert pull_request.merge_queue_index == 0
       assert pull_request.url == "https://github.com/crevalle/mrgr/pull/14"
       assert Enum.count(pull_request.assignees) == 1
       assert Enum.count(pull_request.requested_reviewers) == 1
-    end
-
-    test "enqueues in the merge queue", ctx do
-      subscribe_to_installation(ctx.installation)
-
-      repo = build(:repository, installation: ctx.installation, node_id: "R_kgDOGGc3xQ")
-      first_pull_request = insert!(:pull_request, repository: repo, merge_queue_index: 0)
-
-      payload = read_webhook_data("pull_request", "opened")
-      {:ok, second_pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
-
-      assert second_pull_request.node_id == "PR_kwDOGGc3xc4uUvfP"
-
-      assert Mrgr.PullRequest.pending_pull_requests(ctx.installation) |> Enum.map(& &1.id) == [
-               first_pull_request.id,
-               second_pull_request.id
-             ]
-
-      assert second_pull_request.merge_queue_index == 1
-
-      # need to pull this out for matches to work
-      id_2 = second_pull_request.id
-
-      assert_received(%{
-        event: "pull_request:created",
-        payload: %Mrgr.Schema.PullRequest{id: ^id_2}
-      })
     end
   end
 

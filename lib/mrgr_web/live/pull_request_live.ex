@@ -86,18 +86,6 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
-  def handle_event("dropped", %{"draggedId" => id, "draggableIndex" => index}, socket) do
-    dragged = find_dragged(socket.assigns.pull_requests, get_id(id))
-
-    pull_requests =
-      socket.assigns.pull_requests
-      |> update_pull_request_order(dragged, index)
-
-    socket
-    |> assign(:pull_requests, pull_requests)
-    |> noreply()
-  end
-
   def handle_event("select-pull-request", %{"id" => id}, socket) do
     selected = Tabs.select_pull_request(socket.assigns.selected_tab, id)
 
@@ -203,17 +191,6 @@ defmodule MrgrWeb.PullRequestLive do
     |> assign(:tabs, tabs)
     |> assign(:selected_tab, selected)
     |> noreply()
-  end
-
-  # pulls the id off the div constructed above
-  defp get_id("pull-request-" <> id), do: String.to_integer(id)
-
-  defp find_dragged(pull_requests, id) do
-    Mrgr.List.find(pull_requests, id)
-  end
-
-  defp update_pull_request_order(pull_requests, updated_item, new_index) do
-    Mrgr.MergeQueue.update(pull_requests, updated_item, new_index)
   end
 
   # event bus

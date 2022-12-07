@@ -20,7 +20,6 @@ defmodule Mrgr.PullRequest do
         |> preload_installation()
         |> sync_repo_if_first_pr()
         |> hydrate_github_data()
-        |> append_to_pull_request_queue()
         |> create_checklists()
         |> notify_file_alert_consumers()
         |> broadcast(@pull_request_created)
@@ -40,7 +39,6 @@ defmodule Mrgr.PullRequest do
       updated_pull_request
       |> preload_installation()
       |> hydrate_github_data()
-      |> append_to_pull_request_queue()
       |> broadcast(@pull_request_reopened)
       |> ok()
     else
@@ -90,7 +88,6 @@ defmodule Mrgr.PullRequest do
          {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
       updated_pull_request
       |> preload_installation()
-      |> remove_from_pull_request_queue()
       |> broadcast(@pull_request_closed)
       |> ok()
     else
@@ -681,7 +678,7 @@ defmodule Mrgr.PullRequest do
     Schema
     |> Query.for_installation(installation_id)
     |> Query.open()
-    |> Query.order_by_priority()
+    |> Query.order_by_opened()
     |> Query.with_pending_preloads()
     |> Mrgr.Repo.all()
   end
@@ -732,24 +729,6 @@ defmodule Mrgr.PullRequest do
       %Mrgr.Schema.Member{id: id} -> id
       nil -> nil
     end
-  end
-
-  defp append_to_pull_request_queue(pull_request) do
-    all_pending_pull_requests = pending_pull_requests(pull_request.repository.installation)
-
-    other_pull_requests =
-      Enum.reject(all_pending_pull_requests, fn m -> m.id == pull_request.id end)
-
-    Mrgr.MergeQueue.set_next_pull_request_queue_index(pull_request, other_pull_requests)
-  end
-
-  defp remove_from_pull_request_queue(pull_request) do
-    all_pending_pull_requests = pending_pull_requests(pull_request.repository.installation)
-
-    {_updated_list, updated_pull_request} =
-      Mrgr.MergeQueue.remove(all_pending_pull_requests, pull_request)
-
-    updated_pull_request
   end
 
   defp preload_installation(pull_request) do
@@ -829,12 +808,6 @@ defmodule Mrgr.PullRequest do
 
       from(q in query,
         where: not is_nil(q.snoozed_until) and q.snoozed_until > ^now
-      )
-    end
-
-    def order_by_priority(query) do
-      from(q in query,
-        order_by: [asc: q.merge_queue_index]
       )
     end
 
