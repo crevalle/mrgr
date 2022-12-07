@@ -165,12 +165,7 @@ defmodule MrgrWeb.PullRequestLive do
 
     Mrgr.PullRequest.snooze(pull_request, translate_snooze(time))
 
-    {tabs, selected} =
-      Tabs.reload_prs(
-        socket.assigns.tabs,
-        socket.assigns.selected_tab,
-        socket.assigns.current_user
-      )
+    {tabs, selected} = Tabs.reload_prs(socket.assigns.tabs, socket.assigns.selected_tab)
 
     socket =
       case previewing_pull_request?(socket.assigns.selected_pull_request, pull_request) do
@@ -192,12 +187,7 @@ defmodule MrgrWeb.PullRequestLive do
 
     pull_request = Mrgr.PullRequest.unsnooze(pull_request)
 
-    {tabs, selected} =
-      Tabs.reload_prs(
-        socket.assigns.tabs,
-        socket.assigns.selected_tab,
-        socket.assigns.current_user
-      )
+    {tabs, selected} = Tabs.reload_prs(socket.assigns.tabs, socket.assigns.selected_tab)
 
     # update in place to reflect new status
     socket =
@@ -512,16 +502,15 @@ defmodule MrgrWeb.PullRequestLive do
 
     # data for the currently visible tab
     def poke_snoozed_data(%{meta: %{ref: ref}} = tab, ref, data) do
-          meta = Map.drop(tab.meta, [:ref])
+      meta = Map.drop(tab.meta, [:ref])
 
-            tab
-            |> Map.merge(data)
-            |> Map.put(:meta, meta)
+      tab
+      |> Map.merge(data)
+      |> Map.put(:meta, meta)
     end
 
     # data for a different tab
     def poke_snoozed_data(tab, _ref, _data), do: tab
-
 
     def update_pr_data(tabs, selected, pr) do
       # slow, dumb traversal through everything.  ignore snoozed stuff
@@ -536,7 +525,7 @@ defmodule MrgrWeb.PullRequestLive do
       {tabs, selected}
     end
 
-    def reload_prs(all, selected, user) do
+    def reload_prs(all, selected) do
       snoozed =
         load_pull_requests(selected, %{snoozed: true, page_number: selected.snoozed.page_number})
 
