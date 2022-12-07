@@ -288,9 +288,11 @@ defmodule MrgrWeb.PullRequestLive do
     Process.demonitor(ref, [:flush])
 
     tabs = Tabs.poke_snoozed_data(socket.assigns.tabs, ref, result)
+    selected_tab = Tabs.poke_snoozed_data(socket.assigns.selected_tab, ref, result)
 
     socket
     |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected_tab)
     |> noreply()
   end
 
@@ -496,24 +498,30 @@ defmodule MrgrWeb.PullRequestLive do
       Enum.filter(tabs, fn t -> t.type == :label end)
     end
 
-    def poke_snoozed_data(tabs, ref, data) do
-      IO.inspect(ref, label: "ref")
-
+    def poke_snoozed_data(tabs, ref, data) when is_list(tabs) do
       case find_tab_by_ref(tabs, ref) do
         nil ->
           tabs
 
         tab ->
-          meta = Map.drop(tab.meta, [:ref])
-
-          updated =
-            tab
-            |> Map.merge(data)
-            |> Map.put(:meta, meta)
+          updated = poke_snoozed_data(tab, ref, data)
 
           Mrgr.List.replace(tabs, updated)
       end
     end
+
+    # data for the currently visible tab
+    def poke_snoozed_data(%{meta: %{ref: ref}} = tab, ref, data) do
+          meta = Map.drop(tab.meta, [:ref])
+
+            tab
+            |> Map.merge(data)
+            |> Map.put(:meta, meta)
+    end
+
+    # data for a different tab
+    def poke_snoozed_data(tab, _ref, _data), do: tab
+
 
     def update_pr_data(tabs, selected, pr) do
       # slow, dumb traversal through everything.  ignore snoozed stuff
