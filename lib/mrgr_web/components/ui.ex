@@ -416,6 +416,11 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def page_nav(%{page: :not_loaded} = assigns) do
+    ~H"""
+    """
+  end
+
   def page_nav(%{page: %{total_pages: 1}} = assigns) do
     ~H"""
     """
@@ -480,7 +485,7 @@ defmodule MrgrWeb.Components.UI do
         role="tab"
         aria-selected="false">
         <.pr_tab_title tab={@tab} />
-        <.pr_count_badge count={@tab.unsnoozed.total_entries} />
+        <.pr_count_badge items={@tab.unsnoozed} />
       </button>
     """
   end
@@ -522,9 +527,25 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def pr_count_badge(assigns) do
+  def pr_count_badge(%{items: :not_loaded} = assigns) do
     ~H"""
-    <span class="bg-gray-100 group-hover:bg-gray-200 ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full"> <%= @count %> </span>
+    <.pr_count_badge count="-" />
+    """
+  end
+
+  def pr_count_badge(%{items: %{total_entries: entries}} = assigns) do
+    assigns = assign(assigns, :count, entries)
+
+    ~H"""
+    <.pr_count_badge count={@count} />
+    """
+  end
+
+  def pr_count_badge(%{count: _count} = assigns) do
+    ~H"""
+    <span class="bg-gray-100 group-hover:bg-gray-200 ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full">
+      <%= @count %>
+    </span>
     """
   end
 

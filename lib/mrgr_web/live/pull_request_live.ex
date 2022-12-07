@@ -269,7 +269,7 @@ defmodule MrgrWeb.PullRequestLive do
     hydrated = Mrgr.PullRequest.preload_for_pending_list(pull_request)
 
     {tabs, selected_tab} =
-      Tabs.update_pr(socket.assigns.tabs, socket.assigns.selected_tab, hydrated)
+      Tabs.update_pr_data(socket.assigns.tabs, socket.assigns.selected_tab, hydrated)
 
     selected_pull_request =
       maybe_update_selected_pr(hydrated, socket.assigns.selected_pull_request)
@@ -280,6 +280,24 @@ defmodule MrgrWeb.PullRequestLive do
     |> assign(:selected_tab, selected_tab)
     |> assign(:selected_pull_request, selected_pull_request)
     |> noreply()
+  end
+
+  # async data loading
+  def handle_info({ref, result}, socket) do
+    # The task succeed so we can cancel the monitoring and discard the DOWN message
+    Process.demonitor(ref, [:flush])
+
+    tabs = Tabs.poke_snoozed_data(socket.assigns.tabs, ref, result)
+
+    socket
+    |> assign(:tabs, tabs)
+    |> noreply()
+  end
+
+  # If the task fails...
+  def handle_info({:DOWN, _ref, _, _, reason}, socket) do
+    IO.puts("failed with reason #{inspect(reason)}")
+    noreply(socket)
   end
 
   def handle_info(_uninteresting_event, socket) do
@@ -387,8 +405,8 @@ defmodule MrgrWeb.PullRequestLive do
           snoozed: :not_loaded
         }
       ]
-      |> Enum.map(&load_snoozed_and_non/1)
       |> Kernel.++(label_tabs_for_user(user))
+      |> Enum.map(&load_snoozed_and_non/1)
     end
 
     def label_tabs_for_user(user) do
@@ -409,7 +427,6 @@ defmodule MrgrWeb.PullRequestLive do
         unsnoozed: :not_loaded,
         snoozed: :not_loaded
       }
-      |> load_snoozed_and_non()
     end
 
     def add_tab(tabs, label, user) do
@@ -440,7 +457,11 @@ defmodule MrgrWeb.PullRequestLive do
         |> Mrgr.Repo.insert()
 
       label = %{label | pr_tab: label_tab}
-      new_tab = build_label_tab(label)
+
+      new_tab =
+        label
+        |> build_label_tab()
+        |> load_snoozed_and_non()
 
       tabs ++ [new_tab]
     end
@@ -463,6 +484,10 @@ defmodule MrgrWeb.PullRequestLive do
       Enum.find(tabs, fn tab -> tab.id == label.name end)
     end
 
+    def find_tab_by_ref(tabs, ref) do
+      Enum.find(tabs, fn tab -> tab.meta[:ref] == ref end)
+    end
+
     def time_tabs(tabs) do
       Enum.filter(tabs, fn t -> t.type == :time end)
     end
@@ -471,7 +496,26 @@ defmodule MrgrWeb.PullRequestLive do
       Enum.filter(tabs, fn t -> t.type == :label end)
     end
 
-    def update_pr(tabs, selected, pr) do
+    def poke_snoozed_data(tabs, ref, data) do
+      IO.inspect(ref, label: "ref")
+
+      case find_tab_by_ref(tabs, ref) do
+        nil ->
+          tabs
+
+        tab ->
+          meta = Map.drop(tab.meta, [:ref])
+
+          updated =
+            tab
+            |> Map.merge(data)
+            |> Map.put(:meta, meta)
+
+          Mrgr.List.replace(tabs, updated)
+      end
+    end
+
+    def update_pr_data(tabs, selected, pr) do
       # slow, dumb traversal through everything.  ignore snoozed stuff
       tabs =
         Enum.map(tabs, fn tab ->
@@ -534,10 +578,17 @@ defmodule MrgrWeb.PullRequestLive do
     end
 
     def load_snoozed_and_non(tab, opts \\ %{}) do
-      snoozed = load_pull_requests(tab, Map.put(opts, :snoozed, true))
-      unsnoozed = load_pull_requests(tab, Map.put(opts, :snoozed, false))
+      task =
+        Task.async(fn ->
+          %{
+            snoozed: load_pull_requests(tab, Map.put(opts, :snoozed, true)),
+            unsnoozed: load_pull_requests(tab, Map.put(opts, :snoozed, false))
+          }
+        end)
 
-      %{tab | snoozed: snoozed, unsnoozed: unsnoozed}
+      meta = tab.meta
+
+      %{tab | meta: Map.put(meta, :ref, task.ref)}
     end
 
     def load_pull_requests(tab, page_params \\ %{})
