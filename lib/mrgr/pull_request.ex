@@ -8,6 +8,24 @@ defmodule Mrgr.PullRequest do
   alias Mrgr.PullRequest.Query
   alias Mrgr.Schema.PullRequest, as: Schema
 
+  def load_authors do
+    Schema
+    |> Mrgr.Repo.all()
+    |> Enum.map(&load_author/1)
+  end
+
+  def load_author(pull_request) do
+    case Mrgr.Repo.get_by(Mrgr.Schema.Member, login: pull_request.user.login) do
+      nil ->
+        {:error, pull_request.id}
+
+      member ->
+        pull_request
+        |> Ecto.Changeset.change(%{author_id: member.id})
+        |> Mrgr.Repo.update()
+    end
+  end
+
   def create_from_webhook(payload) do
     params = payload_to_params(payload)
 
@@ -870,6 +888,7 @@ defmodule Mrgr.PullRequest do
       [
         :comments,
         :pr_reviews,
+        :author,
         repository: [:file_change_alerts]
       ]
     end
@@ -880,6 +899,7 @@ defmodule Mrgr.PullRequest do
       |> with_comments()
       |> with_pr_reviews()
       |> with_labels()
+      |> with_author()
     end
 
     def for_label(query, label) do

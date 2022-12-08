@@ -9,6 +9,12 @@ defmodule Mrgr.Member do
     |> Mrgr.Repo.paginate(page)
   end
 
+  def find_by_node_id(node_id) do
+    Schema
+    |> Query.by_node_id(node_id)
+    |> Mrgr.Repo.one()
+  end
+
   defmodule Query do
     use Mrgr.Query
 

@@ -86,10 +86,9 @@ defmodule Mrgr.Github.User do
 
     def actor do
       """
-      {
-        avatarUrl
-        login
-      }
+      avatarUrl
+      login
+      id
       """
     end
 

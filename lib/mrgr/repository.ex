@@ -311,7 +311,14 @@ defmodule Mrgr.Repository do
       |> Enum.map(fn node -> node["requestedReviewer"] end)
       |> Enum.map(&Mrgr.Github.User.graphql_to_attrs/1)
 
+    author_id =
+      case Mrgr.Member.find_by_node_id(node["author"]["id"]) do
+        %{id: id} -> id
+        nil -> nil
+      end
+
     parsed = %{
+      "author_id" => author_id,
       "assignees" => Mrgr.Github.User.graphql_to_attrs(node["assignees"]["nodes"]),
       "created_at" => node["createdAt"],
       "head" => %{
@@ -322,11 +329,7 @@ defmodule Mrgr.Repository do
       "id" => node["databaseId"],
       "node_id" => node["id"],
       "requested_reviewers" => requested_reviewers,
-      "url" => node["permalink"],
-      "user" => %{
-        "login" => node["author"]["login"],
-        "avatar_url" => node["author"]["avatarUrl"]
-      }
+      "url" => node["permalink"]
     }
 
     Map.merge(node, parsed)

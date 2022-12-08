@@ -156,7 +156,11 @@ defmodule Mrgr.Github.API.Live do
                     #{Mrgr.Github.User.GraphQL.user()}
                   }
                 }
-                author #{Mrgr.Github.User.GraphQL.actor()}
+                author {
+                  ... on User {
+                    #{Mrgr.Github.User.GraphQL.actor()}
+                  }
+                }
                 createdAt
                 databaseId
                 mergeStateStatus
@@ -171,7 +175,9 @@ defmodule Mrgr.Github.API.Live do
                   nodes {
                     databaseId
                     requestedReviewer {
-                      ... on User #{Mrgr.Github.User.GraphQL.user()}
+                      ... on User {
+                        #{Mrgr.Github.User.GraphQL.user()}
+                      }
                     }
                   }
                 }

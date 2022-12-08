@@ -55,6 +55,7 @@ defmodule Mrgr.Schema.PullRequest do
   end
 
   @create_fields ~w[
+    author_id
     mergeable
     merge_state_status
     node_id

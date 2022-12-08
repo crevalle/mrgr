@@ -328,7 +328,71 @@ defmodule Mrgr.Github.API.Fake do
     %{
       "repository" => %{
         "pullRequests" => %{
-          "edges" => []
+          "edges" => [
+            %{
+              "node" => %{
+                "assignees" => %{"nodes" => []},
+                "author" => %{
+                  "avatarUrl" =>
+                    "https://avatars.githubusercontent.com/u/572921?u=f5f4a514e7ebb859f83945d2cbd3c0ea549cda60&v=4",
+                  "id" => "MDQ6VXNlcjU3MjkyMQ==",
+                  "login" => "desmondmonster"
+                },
+                "createdAt" => "2021-11-11T17:07:47Z",
+                "databaseId" => 778_755_998,
+                "headRef" => %{
+                  "id" => "REF_kwDOGGc3xbNyZWZzL2hlYWRzL2JyYW5jaC0z",
+                  "name" => "branch-3",
+                  "target" => %{"oid" => "f2d8aef723347eb453044b362c309f07629ae97f"}
+                },
+                "id" => "PR_kwDOGGc3xc4uat-e",
+                "mergeStateStatus" => "DIRTY",
+                "mergeable" => "CONFLICTING",
+                "number" => 19,
+                "permalink" => "https://github.com/crevalle/mrgr/pull/19",
+                "reviewRequests" => %{"nodes" => []},
+                "state" => "OPEN",
+                "title" => "Commit on tres"
+              }
+            },
+            %{
+              "node" => %{
+                "assignees" => %{
+                  "nodes" => [
+                    %{
+                      "avatarUrl" =>
+                        "https://avatars.githubusercontent.com/u/572921?u=f5f4a514e7ebb859f83945d2cbd3c0ea549cda60&v=4",
+                      "databaseId" => 572_921,
+                      "id" => "MDQ6VXNlcjU3MjkyMQ==",
+                      "login" => "desmondmonster",
+                      "name" => "Desmond Bowe"
+                    }
+                  ]
+                },
+                "author" => %{
+                  "avatarUrl" =>
+                    "https://avatars.githubusercontent.com/u/572921?u=f5f4a514e7ebb859f83945d2cbd3c0ea549cda60&v=4",
+                  "id" => "MDQ6VXNlcjU3MjkyMQ==",
+                  "login" => "desmondmonster"
+                },
+                "createdAt" => "2022-09-01T20:13:20Z",
+                "databaseId" => 1_044_185_500,
+                "headRef" => %{
+                  "id" => "REF_kwDOGGc3xbtyZWZzL2hlYWRzL215LXN3ZWV0LWZlYXR1cmU",
+                  "name" => "my-sweet-feature",
+                  "target" => %{"oid" => "ee8e85a08019daeb1549d5db866711d170d5410f"}
+                },
+                "id" => "PR_kwDOGGc3xc4-PQGc",
+                "mergeStateStatus" => "BLOCKED",
+                "mergeable" => "MERGEABLE",
+                "number" => 32,
+                "permalink" => "https://github.com/crevalle/mrgr/pull/32",
+                "reviewRequests" => %{"nodes" => []},
+                "state" => "OPEN",
+                "title" => "The best PR is here"
+              }
+            }
+          ]
         }
       }
     }
