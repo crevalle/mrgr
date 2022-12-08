@@ -15,5 +15,6 @@ defmodule Mrgr.Schema.Membership do
     |> cast(params, [:member_id, :installation_id, :active])
     |> foreign_key_constraint(:member_id)
     |> foreign_key_constraint(:installation_id)
+    |> unique_constraint([:member_id, :installation_id])
   end
 end
