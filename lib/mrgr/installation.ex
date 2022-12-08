@@ -86,6 +86,7 @@ defmodule Mrgr.Installation do
     installation
     |> broadcast(@installation_loading_members)
     |> create_members()
+    |> create_teams()
     |> broadcast(@installation_loading_repositories)
     |> sync_repositories()
     |> broadcast(@installation_loading_pull_requests)
@@ -103,7 +104,14 @@ defmodule Mrgr.Installation do
   def create_members(installation) do
     # create memberships
     members = Mrgr.Github.API.fetch_members(installation)
-    add_team_members(installation, members)
+    add_members(installation, members)
+
+    installation
+  end
+
+  def create_teams(installation) do
+    teams = Mrgr.Github.API.fetch_teams(installation)
+    add_teams(installation, teams)
 
     installation
   end
@@ -247,7 +255,7 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.update!()
   end
 
-  defp add_team_members(installation, github_members) do
+  defp add_members(installation, github_members) do
     members = Enum.map(github_members, &find_or_create_member/1)
     Enum.map(members, &create_membership(installation, &1))
 
@@ -289,6 +297,23 @@ defmodule Mrgr.Installation do
 
   def maybe_associate_with_existing_user(attrs, %{id: id}) do
     Map.put(attrs, :user_id, id)
+  end
+
+  def add_teams(installation, github_teams) do
+    Enum.map(github_teams, &find_or_create_team(installation, &1))
+  end
+
+  def find_or_create_team(installation, github_team) do
+    case Mrgr.Team.find_by_node_id(github_team.node_id) do
+      nil ->
+        github_team
+        |> Mrgr.Github.Schema.to_attrs()
+        |> Map.put(:installation_id, installation.id)
+        |> Mrgr.Team.create!()
+
+      team ->
+        team
+    end
   end
 
   def find_by_external_id(external_id) do

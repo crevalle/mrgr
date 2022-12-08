@@ -14,4 +14,15 @@ defmodule Mrgr.InstallationTest do
       assert languages == ["Elixir", "Ruby", "JavaScript"]
     end
   end
+
+  describe "create_teams/1" do
+    test "creates teams" do
+      i = insert!(:installation)
+
+      Mrgr.Installation.create_teams(i)
+
+      teams = Mrgr.Team.for_installation(i.id)
+      assert Enum.count(teams) == 5
+    end
+  end
 end

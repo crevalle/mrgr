@@ -95,13 +95,22 @@ defmodule Mrgr.Github.User do
 
     def user do
       """
-      {
-        avatarUrl
-        databaseId
-        id
-        login
-        name
-      }
+      avatarUrl
+      databaseId
+      id
+      login
+      name
+      """
+    end
+
+    def team do
+      """
+      avatarUrl
+      databaseId
+      id
+      name
+      description
+      slug
       """
     end
 
@@ -110,18 +119,6 @@ defmodule Mrgr.Github.User do
       {
         databaseId
         description
-        name
-        slug
-      }
-      """
-    end
-
-    def team do
-      """
-      {
-        databaseId
-        description
-        membersUrl
         name
         slug
       }

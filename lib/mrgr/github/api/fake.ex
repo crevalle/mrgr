@@ -1,4 +1,6 @@
 defmodule Mrgr.Github.API.Fake do
+  import Mrgr.Github.API.Utils
+
   def create_label(_label, _repo) do
     %{
       "createLabel" => %{
@@ -342,6 +344,87 @@ defmodule Mrgr.Github.API.Fake do
 
   def fetch_members(_installation) do
     []
+  end
+
+  def fetch_teams(_installation) do
+    [
+      %{
+        "description" => "what isn't this group about?",
+        "html_url" => "https://github.com/orgs/crevalle/teams/crevalle-merchants",
+        "id" => 1_224_669,
+        "members_url" =>
+          "https://api.github.com/organizations/7728671/team/1224669/members{/member}",
+        "name" => "crevalle merchants",
+        "node_id" => "MDQ6VGVhbTEyMjQ2Njk=",
+        "parent" => nil,
+        "permission" => "admin",
+        "privacy" => "secret",
+        "repositories_url" => "https://api.github.com/organizations/7728671/team/1224669/repos",
+        "slug" => "crevalle-merchants",
+        "url" => "https://api.github.com/organizations/7728671/team/1224669"
+      },
+      %{
+        "description" => "servers",
+        "html_url" => "https://github.com/orgs/crevalle/teams/deploy",
+        "id" => 1_114_829,
+        "members_url" =>
+          "https://api.github.com/organizations/7728671/team/1114829/members{/member}",
+        "name" => "deploy",
+        "node_id" => "MDQ6VGVhbTExMTQ4Mjk=",
+        "parent" => nil,
+        "permission" => "pull",
+        "privacy" => "secret",
+        "repositories_url" => "https://api.github.com/organizations/7728671/team/1114829/repos",
+        "slug" => "deploy",
+        "url" => "https://api.github.com/organizations/7728671/team/1114829"
+      },
+      %{
+        "description" => nil,
+        "html_url" => "https://github.com/orgs/crevalle/teams/desmond",
+        "id" => 848_400,
+        "members_url" =>
+          "https://api.github.com/organizations/7728671/team/848400/members{/member}",
+        "name" => "desmond",
+        "node_id" => "MDQ6VGVhbTg0ODQwMA==",
+        "parent" => nil,
+        "permission" => "admin",
+        "privacy" => "secret",
+        "repositories_url" => "https://api.github.com/organizations/7728671/team/848400/repos",
+        "slug" => "desmond",
+        "url" => "https://api.github.com/organizations/7728671/team/848400"
+      },
+      %{
+        "description" => "",
+        "html_url" => "https://github.com/orgs/crevalle/teams/empex",
+        "id" => 2_379_748,
+        "members_url" =>
+          "https://api.github.com/organizations/7728671/team/2379748/members{/member}",
+        "name" => "EMPEX",
+        "node_id" => "MDQ6VGVhbTIzNzk3NDg=",
+        "parent" => nil,
+        "permission" => "pull",
+        "privacy" => "closed",
+        "repositories_url" => "https://api.github.com/organizations/7728671/team/2379748/repos",
+        "slug" => "empex",
+        "url" => "https://api.github.com/organizations/7728671/team/2379748"
+      },
+      %{
+        "description" => "pixelling your face",
+        "html_url" => "https://github.com/orgs/crevalle/teams/pixelface",
+        "id" => 1_305_503,
+        "members_url" =>
+          "https://api.github.com/organizations/7728671/team/1305503/members{/member}",
+        "name" => "pixelface",
+        "node_id" => "MDQ6VGVhbTEzMDU1MDM=",
+        "parent" => nil,
+        "permission" => "push",
+        "privacy" => "secret",
+        "repositories_url" => "https://api.github.com/organizations/7728671/team/1305503/repos",
+        "slug" => "pixelface",
+        "url" => "https://api.github.com/organizations/7728671/team/1305503"
+      }
+    ]
+    |> parse_into(Mrgr.Github.Team)
   end
 
   def fetch_mergeable_statuses_on_open_pull_requests(_repository) do

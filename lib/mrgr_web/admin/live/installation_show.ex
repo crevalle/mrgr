@@ -54,8 +54,15 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
       </div>
 
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
-        <%= Phoenix.Component.live_render @socket, MrgrWeb.Admin.Live.InstallationRepoTable, id: "repository-table", session: %{"id" => @installation.id} %>
+        <%= live_render @socket, MrgrWeb.Admin.Live.InstallationMemberTable, id: "member-table", session: %{"id" => @installation.id} %>
+      </div>
 
+      <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+        <.live_component module={MrgrWeb.Components.Live.TeamListComponent} id="team-list" installation_id={@installation.id} timezone={@timezone} />
+      </div>
+
+      <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+        <%= live_render @socket, MrgrWeb.Admin.Live.InstallationRepoTable, id: "repository-table", session: %{"id" => @installation.id} %>
       </div>
     </div>
 

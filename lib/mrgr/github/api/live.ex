@@ -152,7 +152,9 @@ defmodule Mrgr.Github.API.Live do
             edges {
               node {
                 assignees(first: 20) {
-                  nodes #{Mrgr.Github.User.GraphQL.user()}
+                  nodes {
+                    #{Mrgr.Github.User.GraphQL.user()}
+                  }
                 }
                 author #{Mrgr.Github.User.GraphQL.actor()}
                 createdAt
@@ -228,6 +230,17 @@ defmodule Mrgr.Github.API.Live do
       )
 
     parse_into(result, Mrgr.Github.User)
+  end
+
+  def fetch_teams(installation) do
+    result =
+      request!(
+        &Tentacat.Organizations.Teams.list/2,
+        installation,
+        [installation.account.login]
+      )
+
+    parse_into(result, Mrgr.Github.Team)
   end
 
   def fetch_repositories(installation) do
