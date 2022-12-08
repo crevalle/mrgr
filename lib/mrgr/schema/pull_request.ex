@@ -187,7 +187,7 @@ defmodule Mrgr.Schema.PullRequest do
     commit.message
   end
 
-  def author_name(%Mrgr.Github.Commit{commit: commit}) do
+  def commit_author_name(%Mrgr.Github.Commit{commit: commit}) do
     commit.author.name
   end
 

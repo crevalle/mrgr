@@ -112,7 +112,7 @@ defmodule MrgrWeb.Components.PullRequest do
           <p class="text-sm text-gray-500"><%= ts(PullRequest.committed_at(@commit)) %></p>
         </div>
         <div class="flex space-between space-x-2 divide-x divide-gray-500">
-          <p class="text-sm text-gray-500"><%= PullRequest.author_name(@commit) %></p>
+          <p class="text-sm text-gray-500"><%= PullRequest.commit_author_name(@commit) %></p>
           <p class="pl-2 text-sm text-gray-500"><%= shorten_sha(PullRequest.commit_sha(@commit)) %></p>
         </div>
       </div>
