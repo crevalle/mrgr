@@ -329,7 +329,11 @@ defmodule Mrgr.Repository do
       "id" => node["databaseId"],
       "node_id" => node["id"],
       "requested_reviewers" => requested_reviewers,
-      "url" => node["permalink"]
+      "url" => node["permalink"],
+      "user" => %{
+        "login" => node["author"]["login"],
+        "avatar_url" => node["author"]["avatarUrl"]
+      }
     }
 
     Map.merge(node, parsed)

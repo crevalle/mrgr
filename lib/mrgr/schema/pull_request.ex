@@ -32,6 +32,11 @@ defmodule Mrgr.Schema.PullRequest do
     embeds_many(:assignees, Mrgr.Github.User, on_replace: :delete)
     embeds_many(:requested_reviewers, Mrgr.Github.User, on_replace: :delete)
 
+    # duplicate author info.
+    # legacy PRs may have been opened by users who left
+    # before Mrgr was installed, thus we don't have them as
+    # members of the organization.  we don't care about finding
+    # PRs by them, but we need to display their name somehow
     embeds_one(:user, Mrgr.Github.User, on_replace: :update)
 
     embeds_one(:head, Mrgr.Schema.Head, on_replace: :update)
@@ -197,4 +202,8 @@ defmodule Mrgr.Schema.PullRequest do
   def required_approvals(pull_request) do
     pull_request.repository.settings.required_approving_review_count
   end
+
+  def author_name(%{author: %{login: login}}), do: login
+  def author_name(%{user: %{login: login}}), do: login
+  def author_name(_), do: "unknown"
 end
