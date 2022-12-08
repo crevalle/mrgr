@@ -879,6 +879,7 @@ defmodule Mrgr.PullRequest do
       |> with_file_alert_rules()
       |> with_comments()
       |> with_pr_reviews()
+      |> with_labels()
     end
 
     def for_label(query, label) do
