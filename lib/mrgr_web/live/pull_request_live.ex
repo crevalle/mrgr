@@ -14,6 +14,7 @@ defmodule MrgrWeb.PullRequestLive do
       frozen_repos = filter_frozen_repos(repos)
 
       labels = Mrgr.Label.list_for_user(current_user)
+      authors = Mrgr.Member.for_installation(current_user.current_installation_id)
 
       tabs = Tabs.new(current_user)
 
@@ -30,6 +31,7 @@ defmodule MrgrWeb.PullRequestLive do
       |> assign(:selected_pull_request, nil)
       |> assign(:repos, repos)
       |> assign(:labels, labels)
+      |> assign(:authors, authors)
       |> assign(:frozen_repos, frozen_repos)
       |> put_title("Open Pull Requests")
       |> ok()
@@ -52,6 +54,24 @@ defmodule MrgrWeb.PullRequestLive do
 
     socket
     |> assign(:selected_tab, selected)
+    |> noreply()
+  end
+
+  def handle_event("toggle-author", %{"id" => id}, socket) do
+    author = Mrgr.List.find(socket.assigns.authors, id)
+
+    tabs =
+      case Tabs.present?(socket.assigns.tabs, author) do
+        true ->
+          Tabs.remove_tab(socket.assigns.tabs, author)
+
+        false ->
+          IO.inspect("adding")
+          Tabs.add_tab(socket.assigns.tabs, author, socket.assigns.current_user)
+      end
+
+    socket
+    |> assign(:tabs, tabs)
     |> noreply()
   end
 
@@ -336,6 +356,13 @@ defmodule MrgrWeb.PullRequestLive do
     import Ecto.Query
 
     def new(user) do
+      time_tabs_for_user(user)
+      |> Kernel.++(label_tabs_for_user(user))
+      |> Kernel.++(author_tabs_for_user(user))
+      |> Enum.map(&load_prs_async/1)
+    end
+
+    def time_tabs_for_user(user) do
       [
         %{
           id: "this-week",
@@ -374,38 +401,54 @@ defmodule MrgrWeb.PullRequestLive do
           snoozed: :not_loaded
         }
       ]
-      |> Kernel.++(label_tabs_for_user(user))
-      |> Enum.map(&load_snoozed_and_non/1)
     end
 
     def label_tabs_for_user(user) do
-      labels = Mrgr.Label.tabs_for_user(user)
-
-      Enum.map(labels, fn label ->
-        build_label_tab(label)
-      end)
+      user
+      |> Mrgr.Label.tabs_for_user()
+      |> Enum.map(&build_tab/1)
     end
 
-    defp build_label_tab(label) do
+    def author_tabs_for_user(user) do
+      user
+      |> Mrgr.Member.tabs_for_user()
+      |> Enum.map(&build_tab/1)
+    end
+
+    defp build_tab(%Mrgr.Schema.Member{} = member) do
       %{
-        id: label.name,
-        title: label.name,
-        type: :label,
-        meta: %{label: label},
+        id: member.login,
+        title: member.login,
+        type: :author,
+        meta: %{subject: member},
         viewing_snoozed: false,
         unsnoozed: :not_loaded,
         snoozed: :not_loaded
       }
     end
 
-    def add_tab(tabs, label, user) do
-      query =
-        from(q in Mrgr.Schema.LabelPRTab,
-          where: q.user_id == ^user.id,
-          order_by: [desc: :position],
-          limit: 1,
-          select: [:position]
-        )
+    defp build_tab(%Mrgr.Schema.Label{} = label) do
+      %{
+        id: label.name,
+        title: label.name,
+        type: :label,
+        meta: %{subject: label},
+        viewing_snoozed: false,
+        unsnoozed: :not_loaded,
+        snoozed: :not_loaded
+      }
+    end
+
+    def add_tab(tabs, %Mrgr.Schema.Member{} = member, user) do
+      {:ok, member_tab} =
+        %Mrgr.Schema.MemberPRTab{}
+        |> Mrgr.Schema.MemberPRTab.changeset(%{
+          user_id: user.id,
+          member_id: member.id
+        })
+        |> Mrgr.Repo.insert()
+
+      member = %{member | pr_tab: member_tab}
 
       last =
         case Mrgr.Repo.one(query) do
@@ -416,6 +459,7 @@ defmodule MrgrWeb.PullRequestLive do
             position
         end
 
+    def add_tab(tabs, %Mrgr.Schema.Label{} = label, user) do
       {:ok, label_tab} =
         %Mrgr.Schema.LabelPRTab{}
         |> Mrgr.Schema.LabelPRTab.changeset(%{
@@ -429,8 +473,8 @@ defmodule MrgrWeb.PullRequestLive do
 
       new_tab =
         label
-        |> build_label_tab()
-        |> load_snoozed_and_non()
+        |> build_tab()
+        |> load_prs_async()
 
       tabs ++ [new_tab]
     end
@@ -442,15 +486,24 @@ defmodule MrgrWeb.PullRequestLive do
       end
     end
 
-    def remove_tab(tabs, label) do
-      tab = find_tab(tabs, label)
-      Mrgr.Repo.delete(tab.meta.label.pr_tab)
+    def remove_tab(tabs, subject) do
+      tab = find_tab(tabs, subject)
+      Mrgr.Repo.delete(tab.meta.subject.pr_tab)
 
-      Enum.reject(tabs, fn tab -> tab.id == label.name end)
+      reject_tab(tabs, subject)
     end
 
-    def find_tab(tabs, label) do
-      Enum.find(tabs, fn tab -> tab.id == label.name end)
+    def subject_id(%Mrgr.Schema.Member{login: login}), do: login
+    def subject_id(%Mrgr.Schema.Label{name: name}), do: name
+
+    def reject_tab(tabs, obj) do
+      id = subject_id(obj)
+      Enum.reject(tabs, fn tab -> tab.id == id end)
+    end
+
+    def find_tab(tabs, subject) do
+      id = subject_id(subject)
+      Enum.find(tabs, fn tab -> tab.id == id end)
     end
 
     def find_tab_by_ref(tabs, ref) do
@@ -463,6 +516,10 @@ defmodule MrgrWeb.PullRequestLive do
 
     def label_tabs(tabs) do
       Enum.filter(tabs, fn t -> t.type == :label end)
+    end
+
+    def author_tabs(tabs) do
+      Enum.filter(tabs, fn t -> t.type == :author end)
     end
 
     def poke_snoozed_data(tabs, ref, data) when is_list(tabs) do
@@ -551,7 +608,7 @@ defmodule MrgrWeb.PullRequestLive do
       end
     end
 
-    def load_snoozed_and_non(tab, opts \\ %{}) do
+    def load_prs_async(tab, opts \\ %{}) do
       task =
         Task.async(fn ->
           %{
@@ -588,8 +645,16 @@ defmodule MrgrWeb.PullRequestLive do
       Mrgr.PullRequest.paged_pending_pull_requests(tab.meta.user, opts)
     end
 
-    def load_pull_requests(tab, page_params) do
-      Mrgr.PullRequest.paged_for_label(tab.meta.label, page_params)
+    def load_pull_requests(%{type: :label, meta: %{subject: subject}}, page_params) do
+      Mrgr.PullRequest.paged_for_label(subject, page_params)
+    end
+
+    def load_pull_requests(%{type: :author, meta: %{subject: subject}}, page_params) do
+      Mrgr.PullRequest.paged_for_author(subject, page_params)
+    end
+
+    def load_pull_requests(_unknown_tab, _params) do
+      []
     end
 
     def set_page(all, selected, page) do

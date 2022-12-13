@@ -490,9 +490,15 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def pr_tab_title(%{tab: %{type: :label}} = assigns) do
+  def pr_tab_title(%{tab: %{meta: %{subject: %Mrgr.Schema.Label{}}}} = assigns) do
     ~H"""
-    <.badge item={@tab.meta.label} />
+    <.badge item={@tab.meta.subject} />
+    """
+  end
+
+  def pr_tab_title(%{tab: %{meta: %{subject: %Mrgr.Schema.Member{}}}} = assigns) do
+    ~H"""
+      <%= @tab.meta.subject.login %>
     """
   end
 

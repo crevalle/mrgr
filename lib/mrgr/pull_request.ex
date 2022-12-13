@@ -684,6 +684,21 @@ defmodule Mrgr.PullRequest do
     %{page | entries: entries_with_preloads}
   end
 
+  def paged_for_author(author, opts \\ %{}) do
+    with_snoozed = Map.get(opts, :snoozed)
+
+    page =
+      Schema
+      |> Query.open()
+      # |> Query.for_author(author)
+      |> Query.order_by_opened()
+      |> Query.maybe_snooze(with_snoozed)
+      |> Mrgr.Repo.paginate(opts)
+
+    entries_with_preloads = Mrgr.Repo.preload(page.entries, Query.pending_preloads())
+    %{page | entries: entries_with_preloads}
+  end
+
   def pending_pull_requests(%Mrgr.Schema.Installation{id: id}) do
     pending_pull_requests(id)
   end

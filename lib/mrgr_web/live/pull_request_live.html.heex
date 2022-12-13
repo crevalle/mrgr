@@ -68,6 +68,7 @@
 
     <div class="mb-4">
       <div class="flex flex-col space-y-4">
+        <!-- times -->
         <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
           <li :for={tab <- Tabs.time_tabs(@tabs)} class="mr-2" role="presentation">
             <.pr_tab_button
@@ -76,6 +77,8 @@
             </.pr_tab_button>
           </li>
         </ul>
+
+        <!-- labels -->
         <div class="relative">
           <ul class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
             <li :for={tab <- Tabs.label_tabs(@tabs)} class="mr-2" role="presentation">
@@ -125,8 +128,58 @@
           </div>
         </div>
 
+        <!-- users -->
+        <div class="relative">
+          <ul class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
+            <li :for={tab <- Tabs.author_tabs(@tabs)} class="mr-2" role="presentation">
+              <.pr_tab_button
+                tab={tab}
+                selected?={selected?(tab, @selected_tab)} >
+              </.pr_tab_button>
+            </li>
+            <li>
+              <.inline_link
+                phx-click={toggle(to: "#pr-tab-author-dropdown")}
+                id="pr-tab-author-dropdown-toggle"
+                aria-expanded="false"
+                aria-haspopup="true">
+                <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
+              </.inline_link>
+            </li>
+          </ul>
 
-
+          <div style="display: none;" id="pr-tab-author-dropdown" class="origin-top-right z-50 mt-2 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="nav-tab-label-dropdown-toggle" tabindex="-1">
+            <div phx-click-away={JS.hide(
+                  to: "#pr-tab-author-dropdown",
+                  transition: toggle_out_transition()
+                )}
+               class="mt-2 flex flex-col text-sm sm:mt-0 divide-y divide-gray-100">
+              <p class="text-center text-gray-500 p-2">
+                Add or Remove Users
+              </p>
+              <div class="flex flex-col">
+                <.l :for={author <- @authors}
+                  id={"author-#{author.id}"}
+                  phx_click={JS.push("toggle-author", value: %{id: author.id})}
+                  class="text-gray-700 block p-2 text-sm outline-none hover:bg-gray-50"
+                  role="menuitem"
+                  tabindex="-1" >
+                  <div class="flex items-center">
+                    <div class="w-8 text-blue-400 ">
+                      <%= if Tabs.present?(@tabs, author) do %>
+                        <.icon name="check" class="text-teal-700 h-5 w-5" />
+                      <% end %>
+                    </div>
+                    <div class="flex">
+                      <%= img_tag author.avatar_url, class: "h-5 w-5 mr-2" %>
+                      <%= author.login %>
+                    </div>
+                  </div>
+                </.l>
+              </div>
+            </div>
+          </div>
+        </div>
 
 
 
