@@ -450,20 +450,19 @@ defmodule MrgrWeb.PullRequestLive do
 
       member = %{member | pr_tab: member_tab}
 
-      last =
-        case Mrgr.Repo.one(query) do
-          nil ->
-            0
+      new_tab =
+        member
+        |> build_tab()
+        |> IO.inspect()
+        |> load_prs_async()
 
-          %{position: position} ->
-            position
-        end
+      tabs ++ [new_tab]
+    end
 
     def add_tab(tabs, %Mrgr.Schema.Label{} = label, user) do
       {:ok, label_tab} =
         %Mrgr.Schema.LabelPRTab{}
         |> Mrgr.Schema.LabelPRTab.changeset(%{
-          position: last + 1,
           user_id: user.id,
           label_id: label.id
         })

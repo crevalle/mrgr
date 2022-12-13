@@ -365,7 +365,7 @@ defmodule Mrgr.Label do
         join: t in assoc(q, :pr_tab),
         where: t.user_id == ^user_id,
         preload: [pr_tab: t],
-        order_by: [asc: t.position]
+        order_by: [asc: t.inserted_at]
       )
     end
   end

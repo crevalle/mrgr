@@ -2,8 +2,6 @@ defmodule Mrgr.Schema.LabelPRTab do
   use Mrgr.Schema
 
   schema "label_pr_tabs" do
-    field(:position, :integer)
-
     belongs_to(:user, Mrgr.Schema.User)
     belongs_to(:label, Mrgr.Schema.Label)
 
@@ -12,7 +10,6 @@ defmodule Mrgr.Schema.LabelPRTab do
 
   @allowed ~w[
     label_id
-    position
     user_id
   ]a
 
