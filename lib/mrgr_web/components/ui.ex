@@ -498,13 +498,72 @@ defmodule MrgrWeb.Components.UI do
 
   def pr_tab_title(%{tab: %{meta: %{subject: %Mrgr.Schema.Member{}}}} = assigns) do
     ~H"""
-      <%= @tab.meta.subject.login %>
+      <div class="flex">
+        <%= img_tag @tab.meta.subject.avatar_url, class: "rounded-xl h-5 w-5 mr-1" %>
+        <%= @tab.meta.subject.login %>
+      </div>
     """
   end
 
   def pr_tab_title(assigns) do
     ~H"""
       <%= @tab.title %>
+    """
+  end
+
+  def dropdown_menu(assigns) do
+    ~H"""
+    <div
+      style="display: none;"
+      id={@name}
+      phx-click-away={JS.hide(transition: toggle_out_transition())}
+      class="origin-top-right z-50 absolute rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+      role="menu"
+      aria-orientation="vertical"
+      aria-labelledby={"#{@name}-toggle"}
+      tabindex="-1">
+
+      <div class="mt-2 w-max flex flex-col text-sm sm:mt-0 divide-y divide-gray-100">
+        <p class="text-center text-gray-500 p-2">
+          <%= render_slot(@description) %>
+        </p>
+
+        <%= render_slot(@inner_block) %>
+
+      </div>
+    </div>
+    """
+  end
+
+  def dropdown_toggle_link(assigns) do
+    ~H"""
+    <.inline_link
+      phx-click={toggle(to: "##{@target}")}
+      id={"#{@target}-toggle"}
+      aria-expanded="false"
+      aria-haspopup="true">
+
+      <%= render_slot(@inner_block) %>
+
+    </.inline_link>
+    """
+  end
+
+  def dropdown_toggle_list(assigns) do
+    ~H"""
+      <div class="flex flex-col">
+        <.l :for={item <- @items}
+          id={"#{@name}-#{item.id}"}
+          phx_click={JS.push("toggle-#{@name}", value: %{id: item.id})}
+          class="text-gray-700 block p-2 text-sm outline-none hover:bg-gray-50"
+          role="menuitem"
+          tabindex="-1" >
+
+          <%= for row <- @row do %>
+            <%= render_slot(row, item) %>
+          <% end %>
+        </.l>
+      </div>
     """
   end
 

@@ -2,6 +2,9 @@
   <div class="flex flex-col">
     <.heading title="Open Pull Requests" />
 
+    <p class="mt-1">
+      Add favorite groupings of PRs by time, label, or author.
+    </p>
   </div>
 
   <div class="relative inline-block text-left">
@@ -69,120 +72,102 @@
     <div class="mb-4">
       <div class="flex flex-col space-y-4">
         <!-- times -->
-        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
-          <li :for={tab <- Tabs.time_tabs(@tabs)} class="mr-2" role="presentation">
-            <.pr_tab_button
-              tab={tab}
-              selected?={selected?(tab, @selected_tab)} >
-            </.pr_tab_button>
-          </li>
-        </ul>
 
-        <!-- labels -->
-        <div class="relative">
-          <ul class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
-            <li :for={tab <- Tabs.label_tabs(@tabs)} class="mr-2" role="presentation">
-              <.pr_tab_button
-                tab={tab}
-                selected?={selected?(tab, @selected_tab)} >
-              </.pr_tab_button>
-            </li>
-            <li>
-              <.inline_link
-                phx-click={toggle(to: "#pr-tab-label-dropdown")}
-                id="pr-tab-label-dropdown-toggle"
-                aria-expanded="false"
-                aria-haspopup="true">
-                <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
-              </.inline_link>
+        <div class="flex items-center">
+          <.icon name="clock" class="text-gray-400 mr-1 h-5 w-5" />
+
+          <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
+            <li :for={tab <- Tabs.time_tabs(@tabs)} class="mr-2" role="presentation">
+              <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
             </li>
           </ul>
+        </div>
 
-          <div style="display: none;" id="pr-tab-label-dropdown" class="origin-top-right z-50 mt-2 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="nav-tab-label-dropdown-toggle" tabindex="-1">
-            <div phx-click-away={JS.hide(
-                  to: "#pr-tab-label-dropdown",
-                  transition: toggle_out_transition()
-                )}
-               class="mt-2 flex flex-col text-sm sm:mt-0 divide-y divide-gray-100">
-              <p class="text-center text-gray-500 p-2">
-                Add or Remove Labels
-              </p>
-              <div class="flex flex-col">
-                <.l :for={label <- @labels}
-                  id={"label-#{label.id}"}
-                  phx_click={JS.push("toggle-label", value: %{id: label.id})}
-                  class="text-gray-700 block p-2 text-sm outline-none hover:bg-gray-50"
-                  role="menuitem"
-                  tabindex="-1" >
-                  <div class="flex items-center">
-                    <div class="w-8 text-blue-400 ">
-                      <%= if Tabs.present?(@tabs, label) do %>
-                        <.icon name="check" class="text-teal-700 h-5 w-5" />
-                      <% end %>
-                    </div>
-                    <.badge item={label} />
-                  </div>
-                </.l>
+        <!-- labels -->
+        <div class="flex items-center">
+          <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />
+
+          <div class="relative">
+
+            <div class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
+              <div :for={tab <- Tabs.label_tabs(@tabs)} class="mr-2" role="presentation">
+                <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
+              </div>
+              <div class="relative">
+                <.dropdown_toggle_link target="pr-tab-label-dropdown" >
+                  <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
+                </.dropdown_toggle_link>
+
+                <.dropdown_menu name="pr-tab-label-dropdown" >
+                  <:description>
+                    Add or Remove Labels
+                  </:description>
+
+                  <.dropdown_toggle_list name="label" items={@labels} >
+
+                    <:row :let={label}>
+                      <div class="flex items-center">
+                        <div class="w-8 text-blue-400 ">
+                          <%= if Tabs.present?(@tabs, label) do %>
+                            <.icon name="check" class="text-teal-700 h-5 w-5" />
+                          <% end %>
+                        </div>
+                        <.badge item={label} />
+                      </div>
+                    </:row>
+
+                  </.dropdown_toggle_list>
+                </.dropdown_menu>
+
               </div>
             </div>
+
           </div>
         </div>
 
         <!-- users -->
-        <div class="relative">
-          <ul class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
-            <li :for={tab <- Tabs.author_tabs(@tabs)} class="mr-2" role="presentation">
-              <.pr_tab_button
-                tab={tab}
-                selected?={selected?(tab, @selected_tab)} >
-              </.pr_tab_button>
-            </li>
-            <li>
-              <.inline_link
-                phx-click={toggle(to: "#pr-tab-author-dropdown")}
-                id="pr-tab-author-dropdown-toggle"
-                aria-expanded="false"
-                aria-haspopup="true">
-                <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
-              </.inline_link>
-            </li>
-          </ul>
+        <div class="flex items-center">
+          <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
 
-          <div style="display: none;" id="pr-tab-author-dropdown" class="origin-top-right z-50 mt-2 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="nav-tab-label-dropdown-toggle" tabindex="-1">
-            <div phx-click-away={JS.hide(
-                  to: "#pr-tab-author-dropdown",
-                  transition: toggle_out_transition()
-                )}
-               class="mt-2 flex flex-col text-sm sm:mt-0 divide-y divide-gray-100">
-              <p class="text-center text-gray-500 p-2">
-                Add or Remove Users
-              </p>
-              <div class="flex flex-col">
-                <.l :for={author <- @authors}
-                  id={"author-#{author.id}"}
-                  phx_click={JS.push("toggle-author", value: %{id: author.id})}
-                  class="text-gray-700 block p-2 text-sm outline-none hover:bg-gray-50"
-                  role="menuitem"
-                  tabindex="-1" >
-                  <div class="flex items-center">
-                    <div class="w-8 text-blue-400 ">
-                      <%= if Tabs.present?(@tabs, author) do %>
-                        <.icon name="check" class="text-teal-700 h-5 w-5" />
-                      <% end %>
+          <div class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
+            <div :for={tab <- Tabs.author_tabs(@tabs)} class="mr-2" role="presentation">
+              <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
+            </div>
+
+            <div class="relative">
+
+              <.dropdown_toggle_link target="pr-tab-author-dropdown" >
+                <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
+              </.dropdown_toggle_link>
+
+              <.dropdown_menu name="pr-tab-author-dropdown" >
+                <:description>
+                  Add or Remove Users
+                </:description>
+
+                <.dropdown_toggle_list name="author" items={@authors} >
+
+                  <:row :let={author}>
+                    <div class="flex items-center">
+                      <div class="w-8 text-blue-400 ">
+                        <%= if Tabs.present?(@tabs, author) do %>
+                          <.icon name="check" class="text-teal-700 h-5 w-5" />
+                        <% end %>
+                      </div>
+                      <div class="flex">
+                        <%= img_tag author.avatar_url, class: "rounded-xl h-5 w-5 mr-1" %>
+                        <%= author.login %>
+                      </div>
                     </div>
-                    <div class="flex">
-                      <%= img_tag author.avatar_url, class: "h-5 w-5 mr-2" %>
-                      <%= author.login %>
-                    </div>
-                  </div>
-                </.l>
-              </div>
+                  </:row>
+
+                </.dropdown_toggle_list>
+              </.dropdown_menu>
+
             </div>
           </div>
+
         </div>
-
-
-
 
       </div>
     </div>
@@ -194,7 +179,7 @@
 
     <div class="mt-4">
       <%= if pull_requests(@selected_tab) == :not_loaded do %>
-        <p class="text-center">LOADING FOOL</p>
+        <p class="text-center">loading...</p>
       <% else %>
         <%= if Enum.empty?(pull_requests(@selected_tab)) do %>
           <div class="flex justify-center max-w-xl">

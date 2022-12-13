@@ -66,7 +66,6 @@ defmodule MrgrWeb.PullRequestLive do
           Tabs.remove_tab(socket.assigns.tabs, author)
 
         false ->
-          IO.inspect("adding")
           Tabs.add_tab(socket.assigns.tabs, author, socket.assigns.current_user)
       end
 
@@ -453,7 +452,6 @@ defmodule MrgrWeb.PullRequestLive do
       new_tab =
         member
         |> build_tab()
-        |> IO.inspect()
         |> load_prs_async()
 
       tabs ++ [new_tab]

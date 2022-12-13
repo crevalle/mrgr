@@ -664,9 +664,7 @@ defmodule Mrgr.PullRequest do
       |> Query.opened_between(before, since)
       |> Query.with_labels()
       |> Mrgr.Repo.paginate(opts)
-
-    entries_with_preloads = Mrgr.Repo.preload(page.entries, Query.pending_preloads())
-    %{page | entries: entries_with_preloads}
+      |> add_pending_preloads()
   end
 
   def paged_for_label(label, opts \\ %{}) do
@@ -679,9 +677,7 @@ defmodule Mrgr.PullRequest do
       |> Query.order_by_opened()
       |> Query.maybe_snooze(with_snoozed)
       |> Mrgr.Repo.paginate(opts)
-
-    entries_with_preloads = Mrgr.Repo.preload(page.entries, Query.pending_preloads())
-    %{page | entries: entries_with_preloads}
+      |> add_pending_preloads()
   end
 
   def paged_for_author(author, opts \\ %{}) do
@@ -690,13 +686,11 @@ defmodule Mrgr.PullRequest do
     page =
       Schema
       |> Query.open()
-      # |> Query.for_author(author)
+      |> Query.for_author(author)
       |> Query.order_by_opened()
       |> Query.maybe_snooze(with_snoozed)
       |> Mrgr.Repo.paginate(opts)
-
-    entries_with_preloads = Mrgr.Repo.preload(page.entries, Query.pending_preloads())
-    %{page | entries: entries_with_preloads}
+      |> add_pending_preloads()
   end
 
   def pending_pull_requests(%Mrgr.Schema.Installation{id: id}) do
@@ -735,6 +729,11 @@ defmodule Mrgr.PullRequest do
     |> Query.by_id(pull_request.id)
     |> Query.with_pending_preloads()
     |> Mrgr.Repo.one()
+  end
+
+  def add_pending_preloads(page) do
+    entries_with_preloads = Mrgr.Repo.preload(page.entries, Query.pending_preloads())
+    %{page | entries: entries_with_preloads}
   end
 
   def delete_installation_pull_requests(installation) do
@@ -902,6 +901,7 @@ defmodule Mrgr.PullRequest do
     def pending_preloads do
       [
         :comments,
+        :labels,
         :pr_reviews,
         :author,
         repository: [:file_change_alerts]
@@ -922,6 +922,14 @@ defmodule Mrgr.PullRequest do
         join: l in assoc(q, :labels),
         where: l.id == ^label.id,
         preload: [labels: l]
+      )
+    end
+
+    def for_author(query, author) do
+      from(q in query,
+        join: a in assoc(q, :author),
+        where: a.id == ^author.id,
+        preload: [author: a]
       )
     end
 
