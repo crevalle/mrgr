@@ -352,8 +352,6 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   defmodule Tabs do
-    import Ecto.Query
-
     def new(user) do
       time_tabs_for_user(user)
       |> Kernel.++(label_tabs_for_user(user))
