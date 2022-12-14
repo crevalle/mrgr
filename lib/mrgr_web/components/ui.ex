@@ -600,7 +600,6 @@ defmodule MrgrWeb.Components.UI do
 
   def pr_count_badge(%{items: %{total_entries: 0}} = assigns) do
     ~H"""
-    <.pr_count_badge count="-" />
     """
   end
 
