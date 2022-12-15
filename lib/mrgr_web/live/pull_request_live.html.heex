@@ -2,9 +2,6 @@
   <div class="flex flex-col">
     <.heading title="Open Pull Requests" />
 
-    <p class="mt-1">
-      Add favorite groupings of PRs by time, label, or author.
-    </p>
   </div>
 
   <div class="relative inline-block text-left">
@@ -66,10 +63,13 @@
   <p class="my-3">To resume merging for these repos, disable the Merge Freeze.</p>
 </div>
 
+
+
 <div class="flex mt-8 space-x-4">
   <div class="basis-1/2">
+    <%= live_render @socket, MrgrWeb.Live.AnalyticsBox, session: %{"installation_id" => @current_user.current_installation_id}, id: "analytics-box" %>
 
-    <div class="mb-4">
+    <div class="my-4">
       <div class="flex flex-col space-y-3">
         <!-- times -->
 

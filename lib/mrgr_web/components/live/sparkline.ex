@@ -42,6 +42,12 @@ defmodule MrgrWeb.Components.Live.Sparkline do
   end
 
   defp to_sparkline_data(bucket) do
+    # sorted_keys = Map.keys(bucket) |> Enum.sort_by(& (&1), DateTime)
+
+    # sorted_keys
+    # |> Enum.map(& Map.get(bucket, &1))
+    # |> Enum.reverse()
+
     bucket
     |> Map.values()
     |> Enum.reverse()

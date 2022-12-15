@@ -707,6 +707,14 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
+  def closed_for_installation(installation_id, since) do
+    Schema
+    |> Query.for_installation(installation_id)
+    |> Query.closed_since(since)
+    |> Query.select([:id, :opened_at, :merged_at])
+    |> Mrgr.Repo.all()
+  end
+
   def for_installation(%Mrgr.Schema.Installation{id: installation_id}) do
     Schema
     |> Query.for_installation(installation_id)
@@ -784,6 +792,12 @@ defmodule Mrgr.PullRequest do
     pull_request.pr_reviews
     |> Enum.filter(&(&1.state == "approved"))
     |> Enum.count()
+  end
+
+  def time_open(%{merged_at: nil}), do: nil
+
+  def time_open(pr) do
+    DateTime.diff(pr.merged_at, pr.opened_at, :hour)
   end
 
   defmodule Query do
@@ -959,6 +973,10 @@ defmodule Mrgr.PullRequest do
 
     def opened_since(query, since) do
       from(q in query, where: q.opened_at >= ^since)
+    end
+
+    def closed_since(query, since) do
+      from(q in query, where: q.merged_at >= ^since)
     end
 
     def count_open(query, installation_id) do

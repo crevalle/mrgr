@@ -490,6 +490,12 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def to_days(assigns) do
+    ~H"""
+    <%= Float.round(@hours / 24, 1) %> days
+    """
+  end
+
   def pr_tab_title(%{tab: %{meta: %{subject: %Mrgr.Schema.Label{}}}} = assigns) do
     ~H"""
     <.badge item={@tab.meta.subject} />
