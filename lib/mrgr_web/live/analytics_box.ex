@@ -5,22 +5,36 @@ defmodule MrgrWeb.Live.AnalyticsBox do
 
   def render(assigns) do
     ~H"""
-      <div class="flex flex-col border-gray-300">
-        <.h3>Weekly Analytics</.h3>
-        <div class="flex items-center mt-2 space-y-2">
-          <div class="flex flex-col">
-            <p>Closed PRs</p>
-            <p>Average Time Open</p>
-          </div>
-          <div class="flex flex-col ml-2">
-            <p><%= @closed_pr_sparkline %></p>
-            <p><%= @time_open_sparkline %></p>
-          </div>
-          <div class="flex flex-col ml-2">
-            <p><%= closed_this_week(@bucket) %></p>
-            <p><.to_days hours={@time_open_this_week} /></p>
-          </div>
-        </div>
+      <div class="flex flex-col border p-2 rounded-md border-gray-300">
+        <.h3>Analytics</.h3>
+        <table class="mt-2 w-max">
+          <thead>
+            <th></th>
+            <th>12-week Trend</th>
+            <th>This Week</th>
+          </thead>
+          <tr>
+            <td class="nowrap">Closed PRs</td>
+            <td class="nowrap px-2"><%= @closed_pr_sparkline %></td>
+            <td class="nowrap"><%= closed_this_week(@bucket) %></td>
+          </tr>
+          <tr class="mt-2">
+            <td class="nowrap">Average Time Open</td>
+            <td class="nowrap px-2"><%= @time_open_sparkline %></td>
+            <td class="nowrap"><.to_days hours={@time_open_this_week} /></td>
+          </tr>
+          <tr>
+            <td></td>
+            <td>
+              <div class="flex justify-between text-gray-500 text-sm italic px-2">
+                <span><%= format_week(@first_week) %></span>
+                <span>---></span>
+                <span>now</span>
+              </div>
+            </td>
+            <td></td>
+          </tr>
+        </table>
       </div>
     """
   end
@@ -44,6 +58,7 @@ defmodule MrgrWeb.Live.AnalyticsBox do
       socket
       |> assign(:installation_id, installation_id)
       |> assign(:bucket, bucket)
+      |> assign(:first_week, twelve_weeks_ago)
       |> assign(:closed_pr_sparkline, generate_closed_pr_sparkline(bucket))
       |> assign(:time_open_sparkline, generate_time_open_sparkline(bucket))
       |> assign(:time_open_this_week, time_open_this_week(bucket))
@@ -61,36 +76,30 @@ defmodule MrgrWeb.Live.AnalyticsBox do
   end
 
   def generate_closed_pr_sparkline(bucket) do
-    line = "#b2892b"
-    fill = "#fce09f"
-
-    data =
-      bucket
-      |> DasBucket.to_sparkline_data()
-      |> Enum.map(fn %{count: count} -> count end)
+    bucket
+    |> DasBucket.to_sparkline_data()
+    |> Enum.map(fn %{count: count} -> count end)
+    |> draw_sparkline()
 
     # [
     # %{count: 2, time_open: -768},
     # %{count: 2, time_open: -1104},
-
-    data
-    |> Contex.Sparkline.new()
-    |> Contex.Sparkline.style(line_stroke: line, area_fill: fill)
-    |> Contex.Sparkline.draw()
   end
 
   def generate_time_open_sparkline(bucket) do
-    line = "#b2892b"
-    fill = "#fce09f"
+    bucket
+    |> DasBucket.to_sparkline_data()
+    |> Enum.map(&average_time_open/1)
+    |> draw_sparkline()
+  end
 
-    data =
-      bucket
-      |> DasBucket.to_sparkline_data()
-      |> Enum.map(&average_time_open/1)
+  defp draw_sparkline(data) do
+    line = "#2d30f6"
+    fill = "#cfddfc"
 
     data
     |> Contex.Sparkline.new()
-    |> Contex.Sparkline.style(line_stroke: line, area_fill: fill)
+    |> Contex.Sparkline.style(line_stroke: line, area_fill: fill, width: "200px")
     |> Contex.Sparkline.draw()
   end
 
@@ -105,9 +114,11 @@ defmodule MrgrWeb.Live.AnalyticsBox do
     Float.round(time_open / count, 2)
   end
 
-  defmodule DasBucket do
-    # 12-week bucket
+  def format_week(date) do
+    Calendar.strftime(date, "%-m/%d")
+  end
 
+  defmodule DasBucket do
     def new() do
       weeks = 12
 
@@ -115,7 +126,7 @@ defmodule MrgrWeb.Live.AnalyticsBox do
         key = determine_key(d)
 
         stats = %{
-          count: :rand.uniform(10),
+          count: 0,
           time_open: 0
         }
 
@@ -127,12 +138,16 @@ defmodule MrgrWeb.Live.AnalyticsBox do
       Enum.reduce(prs, bucket, fn pr, acc ->
         key = determine_key(pr)
 
-        stats = acc[key]
+        case acc[key] do
+          nil ->
+            acc
 
-        time_open = Mrgr.PullRequest.time_open(pr)
+          stats ->
+            time_open = Mrgr.PullRequest.time_open(pr)
 
-        updated = %{count: stats.count + 1, time_open: stats.time_open + time_open}
-        Map.put(acc, key, updated)
+            updated = %{count: stats.count + 1, time_open: stats.time_open + time_open}
+            Map.put(acc, key, updated)
+        end
       end)
     end
 
