@@ -110,8 +110,12 @@ defmodule MrgrWeb.Live.AnalyticsBox do
     |> average_time_open()
   end
 
-  def average_time_open(%{count: count, time_open: time_open}) do
+  def average_time_open(%{count: count, time_open: time_open}) when count > 0 and time_open > 0 do
     Float.round(time_open / count, 2)
+  end
+
+  def average_time_open(_) do
+    0
   end
 
   def format_week(date) do
