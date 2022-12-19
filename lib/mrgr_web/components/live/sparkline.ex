@@ -42,15 +42,13 @@ defmodule MrgrWeb.Components.Live.Sparkline do
   end
 
   defp to_sparkline_data(bucket) do
-    # sorted_keys = Map.keys(bucket) |> Enum.sort_by(& (&1), DateTime)
+    sorted_keys =
+      Map.keys(bucket)
+      |> Enum.sort()
+      |> Enum.reverse()
 
-    # sorted_keys
-    # |> Enum.map(& Map.get(bucket, &1))
-    # |> Enum.reverse()
-
-    bucket
-    |> Map.values()
-    |> Enum.reverse()
+    sorted_keys
+    |> Enum.map(&Map.get(bucket, &1))
   end
 
   def filter_recent(interesting_thing) do
