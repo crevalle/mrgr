@@ -40,6 +40,7 @@ defmodule Mrgr.Github.WebhookTest do
 
       {:ok, pull_request} = Mrgr.Github.Webhook.handle("pull_request", payload)
       assert pull_request.url == "https://github.com/crevalle/mrgr/pull/14"
+      assert pull_request.ci_status == "success"
       assert Enum.count(pull_request.assignees) == 1
       assert Enum.count(pull_request.requested_reviewers) == 1
     end
@@ -252,6 +253,46 @@ defmodule Mrgr.Github.WebhookTest do
       assert repository.name == "test-repo"
       assert repository.private
       assert repository.installation_id == ctx.installation.id
+    end
+  end
+
+  describe "check_suite:requested" do
+    setup [:with_install_user, :with_installation, :with_open_pull_request]
+
+    test "sets the ci status to 'running'" do
+      payload = read_webhook_data("check_suite", "requested")
+
+      [{:ok, pull_request}] = Mrgr.Github.Webhook.handle("check_suite", payload)
+
+      assert pull_request.ci_status == "running"
+    end
+  end
+
+  describe "check_suite:completed" do
+    setup [:with_install_user, :with_installation, :with_open_pull_request]
+
+    test "sets the ci status to 'success' on success" do
+      payload = read_webhook_data("check_suite", "completed_success")
+
+      [{:ok, pull_request}] = Mrgr.Github.Webhook.handle("check_suite", payload)
+
+      assert pull_request.ci_status == "success"
+    end
+
+    test "sets the ci status to 'failure' on failure" do
+      payload = read_webhook_data("check_suite", "completed_failure")
+
+      [{:ok, pull_request}] = Mrgr.Github.Webhook.handle("check_suite", payload)
+
+      assert pull_request.ci_status == "failure"
+    end
+
+    test "sets the ci status to 'failure' on an other status" do
+      payload = read_webhook_data("check_suite", "completed_neutral")
+
+      [{:ok, pull_request}] = Mrgr.Github.Webhook.handle("check_suite", payload)
+
+      assert pull_request.ci_status == "failure"
     end
   end
 

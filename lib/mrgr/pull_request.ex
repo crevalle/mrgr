@@ -581,6 +581,24 @@ defmodule Mrgr.PullRequest do
     |> broadcast(@pull_request_labels_updated)
   end
 
+  def set_ci_status_running(pull_request) do
+    pull_request
+    |> Schema.ci_status_changeset(%{ci_status: "running"})
+    |> Mrgr.Repo.update()
+  end
+
+  def set_ci_status_conclusion(pull_request, "success") do
+    pull_request
+    |> Schema.ci_status_changeset(%{ci_status: "success"})
+    |> Mrgr.Repo.update()
+  end
+
+  def set_ci_status_conclusion(pull_request, _failure) do
+    pull_request
+    |> Schema.ci_status_changeset(%{ci_status: "failure"})
+    |> Mrgr.Repo.update()
+  end
+
   def generate_merge_args(pull_request, message, merger) do
     installation = pull_request.repository.installation
 

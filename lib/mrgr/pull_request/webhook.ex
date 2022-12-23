@@ -91,6 +91,29 @@ defmodule Mrgr.PullRequest.Webhook do
     end
   end
 
+  @spec check_suite_requested(webhook()) :: [success() | change_error()]
+  def check_suite_requested(%{"check_suite" => %{"pull_requests" => pull_request_data}}) do
+    # comes in with a list of PRs, though how many there usually are, IDK
+    pull_request_data
+    |> Enum.map(&Map.get(&1, "id"))
+    |> Enum.map(&Mrgr.PullRequest.find_by_external_id/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(&Mrgr.PullRequest.set_ci_status_running/1)
+  end
+
+  @spec check_suite_completed(webhook()) :: [success() | change_error()]
+  def check_suite_completed(%{"check_suite" => check_suite}) do
+    pull_request_data = check_suite["pull_requests"]
+
+    conclusion = check_suite["conclusion"]
+
+    pull_request_data
+    |> Enum.map(&Map.get(&1, "id"))
+    |> Enum.map(&Mrgr.PullRequest.find_by_external_id/1)
+    |> Enum.reject(&is_nil/1)
+    |> Enum.map(&Mrgr.PullRequest.set_ci_status_conclusion(&1, conclusion))
+  end
+
   @spec find_pull_request(webhook() | map()) :: {:ok, Schema.t()} | not_found()
   defp find_pull_request(%{"node_id" => node_id}) do
     case Mrgr.PullRequest.find_by_node_id(node_id) do

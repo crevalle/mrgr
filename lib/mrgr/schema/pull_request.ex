@@ -13,7 +13,14 @@ defmodule Mrgr.Schema.PullRequest do
     "UNSTABLE"
   ]
 
+  @ci_statuses [
+    "success",
+    "failure",
+    "running"
+  ]
+
   schema "pull_requests" do
+    field(:ci_status, :string, default: "success")
     field(:external_id, :integer)
     field(:files_changed, {:array, :string})
     field(:head_commit, :map)
@@ -61,6 +68,7 @@ defmodule Mrgr.Schema.PullRequest do
 
   @create_fields ~w[
     author_id
+    ci_status
     mergeable
     merge_state_status
     node_id
@@ -91,9 +99,16 @@ defmodule Mrgr.Schema.PullRequest do
     |> put_open_status()
     |> put_external_id()
     |> put_change(:raw, params)
+    |> validate_inclusion(:ci_status, @ci_statuses)
     |> unique_constraint(:node_id)
     |> foreign_key_constraint(:repository_id)
     |> foreign_key_constraint(:author_id)
+  end
+
+  def ci_status_changeset(schema, params) do
+    schema
+    |> cast(params, [:ci_status])
+    |> validate_inclusion(:ci_status, @ci_statuses)
   end
 
   def commits_changeset(schema, attrs) do

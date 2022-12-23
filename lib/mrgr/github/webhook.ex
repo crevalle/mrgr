@@ -28,6 +28,14 @@ defmodule Mrgr.Github.Webhook do
   #
   ### add new handlers below vvvv
 
+  def handle("check_suite", %{"action" => "requested"} = payload) do
+    Mrgr.PullRequest.Webhook.check_suite_requested(payload)
+  end
+
+  def handle("check_suite", %{"action" => "completed"} = payload) do
+    Mrgr.PullRequest.Webhook.check_suite_completed(payload)
+  end
+
   def handle("installation", %{"action" => "created"} = payload) do
     Mrgr.Installation.create_from_webhook(payload)
   end
