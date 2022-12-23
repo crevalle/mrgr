@@ -8,7 +8,7 @@ defmodule Mrgr.Github.Webhook do
   def handle_webhook(headers, params) do
     obj = headers["x-github-event"]
     action = params["action"]
-    IO.inspect("*** HANDLING WEBHOOK: #{obj}:#{action}")
+    IO.inspect("*** RECEIVED WEBHOOK: #{obj}:#{action}")
 
     {:ok, hook} = create_incoming_webhook_record(obj, action, headers, params)
 
@@ -124,7 +124,7 @@ defmodule Mrgr.Github.Webhook do
   #
   ### DEFAULT HANDLER ###
   def handle(obj, payload) do
-    IO.inspect("*** NOT IMPLEMENTED #{obj} ACTION #{payload["action"]}")
+    IO.inspect("*** NOT IMPLEMENTED #{obj}:#{payload["action"]}")
     {:ok, payload}
   end
 
