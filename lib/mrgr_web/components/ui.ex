@@ -643,7 +643,7 @@ defmodule MrgrWeb.Components.UI do
       |> assign(:color, color)
 
     ~H"""
-      <span style={"background-color: ##{@color}; color: rgb(75 85 99);"} class={"px-2 inline-flex text-xs leading-5 font-semibold rounded-full"}>
+      <span style={"background-color: ##{@color};"} class={"px-2 inline-flex text-xs leading-5 font-semibold rounded-full text-gray-900"}>
         <%= @item.name %>
       </span>
     """
