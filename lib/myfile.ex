@@ -1,6 +1,6 @@
 defmodule MyFile do
 
   def pants do
-    socks()
+    socks = 21
   end
 end
