@@ -529,14 +529,15 @@ defmodule Mrgr.PullRequest do
     end
   end
 
+  def ci_status_from_latest_check_suite_data(%{"check_suites" => []}), do: "success"
+
   def ci_status_from_latest_check_suite_data(%{"check_suites" => suites}) do
     suites
     |> Enum.reverse()
     |> hd()
     |> case do
-      %{"status" => "queued"} -> "running"
       %{"status" => "completed", "conclusion" => conclusion} -> conclusion
-      _none -> "success"
+      _queued_or_running -> "running"
     end
   end
 
