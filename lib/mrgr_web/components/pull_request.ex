@@ -99,6 +99,42 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
+  def ci_status(%{ci_status: "success"} = assigns) do
+    ~H"""
+    <p class="flex">
+      <.icon name="check-circle" class="text-sky-600 mr-1 h-5 w-5" />
+      CI Passing
+    </p>
+    """
+  end
+
+  def ci_status(%{ci_status: "running"} = assigns) do
+    ~H"""
+    <p class="flex">
+      <.icon name="wrench" class="text-gray-500 mr-1 h-5 w-5" />
+      CI Running
+    </p>
+    """
+  end
+
+  def ci_status(%{ci_status: "failure"} = assigns) do
+    ~H"""
+    <p class="flex">
+      <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" />
+      Fix CI
+    </p>
+    """
+  end
+
+  def ci_status(assigns) do
+    ~H"""
+    <p class="flex">
+      <.icon name="question-mark-circle" class="text-gray-500 mr-1 h-5 w-5" />
+      CI Status Unknown
+    </p>
+    """
+  end
+
   def preview_commit(assigns) do
     ~H"""
     <li class="p-2">

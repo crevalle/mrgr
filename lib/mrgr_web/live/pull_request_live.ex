@@ -250,7 +250,8 @@ defmodule MrgrWeb.PullRequestLive do
              @pull_request_reviewers_updated,
              @pull_request_assignees_updated,
              @pull_request_reviews_updated,
-             @pull_request_labels_updated
+             @pull_request_labels_updated,
+             @pull_request_ci_status_updated
            ] do
     hydrated = Mrgr.PullRequest.preload_for_pending_list(pull_request)
 

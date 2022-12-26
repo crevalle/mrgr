@@ -96,7 +96,7 @@ defmodule Mrgr.PullRequest.Webhook do
     # comes in with a list of PRs, though how many there usually are, IDK
     pull_request_data
     |> Enum.map(&Map.get(&1, "id"))
-    |> Enum.map(&Mrgr.PullRequest.find_by_external_id/1)
+    |> Enum.map(&Mrgr.PullRequest.find_by_external_id_with_repository/1)
     |> Enum.reject(&is_nil/1)
     |> Enum.map(&Mrgr.PullRequest.set_ci_status_running/1)
   end
@@ -109,7 +109,7 @@ defmodule Mrgr.PullRequest.Webhook do
 
     pull_request_data
     |> Enum.map(&Map.get(&1, "id"))
-    |> Enum.map(&Mrgr.PullRequest.find_by_external_id/1)
+    |> Enum.map(&Mrgr.PullRequest.find_by_external_id_with_repository/1)
     |> Enum.reject(&is_nil/1)
     |> Enum.map(&Mrgr.PullRequest.set_ci_status_conclusion(&1, conclusion))
   end

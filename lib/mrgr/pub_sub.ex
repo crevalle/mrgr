@@ -77,6 +77,7 @@ defmodule Mrgr.PubSub do
         @label_updated "label:updated"
 
         @pull_request_created "pull_request:created"
+        @pull_request_ci_status_updated "pull_request:ci_status_updated"
         @pull_request_edited "pull_request:edited"
         @pull_request_reopened "pull_request:reopened"
         @pull_request_assignees_updated "pull_request:assignees_updated"

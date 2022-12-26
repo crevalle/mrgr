@@ -582,20 +582,32 @@ defmodule Mrgr.PullRequest do
   end
 
   def set_ci_status_running(pull_request) do
-    pull_request
-    |> Schema.ci_status_changeset(%{ci_status: "running"})
-    |> Mrgr.Repo.update()
+    with {:ok, pull_request} <- update_ci_status(pull_request, "running") do
+      pull_request
+      |> broadcast(@pull_request_ci_status_updated)
+      |> ok()
+    end
   end
 
   def set_ci_status_conclusion(pull_request, "success") do
-    pull_request
-    |> Schema.ci_status_changeset(%{ci_status: "success"})
-    |> Mrgr.Repo.update()
+    with {:ok, pull_request} <- update_ci_status(pull_request, "success") do
+      pull_request
+      |> broadcast(@pull_request_ci_status_updated)
+      |> ok()
+    end
   end
 
   def set_ci_status_conclusion(pull_request, _failure) do
+    with {:ok, pull_request} <- update_ci_status(pull_request, "failure") do
+      pull_request
+      |> broadcast(@pull_request_ci_status_updated)
+      |> ok()
+    end
+  end
+
+  defp update_ci_status(pull_request, status) do
     pull_request
-    |> Schema.ci_status_changeset(%{ci_status: "failure"})
+    |> Schema.ci_status_changeset(%{ci_status: status})
     |> Mrgr.Repo.update()
   end
 
@@ -628,6 +640,13 @@ defmodule Mrgr.PullRequest do
   def find_by_external_id(id) do
     Schema
     |> Query.by_external_id(id)
+    |> Mrgr.Repo.one()
+  end
+
+  def find_by_external_id_with_repository(id) do
+    Schema
+    |> Query.by_external_id(id)
+    |> Query.with_repository()
     |> Mrgr.Repo.one()
   end
 
