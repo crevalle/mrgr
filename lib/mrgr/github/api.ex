@@ -3,7 +3,7 @@ defmodule Mrgr.Github.API do
 
   @mod Application.compile_env!(:mrgr, :github)[:implementation]
 
-  defdelegate commits(pull_request, installation), to: @mod
+  defdelegate commits(pull_request), to: @mod
   defdelegate fetch_filtered_pulls(installation, repo, opts), to: @mod
   defdelegate fetch_pulls_graphql(installation, repo), to: @mod
   defdelegate fetch_repository_settings_graphql(repo), to: @mod
@@ -20,6 +20,7 @@ defmodule Mrgr.Github.API do
   defdelegate delete_label_from_repo(node_id, repository), to: @mod
   defdelegate get_new_installation_token(installation), to: @mod
   defdelegate head_commit(pull_request, installation), to: @mod
+  defdelegate check_suites_for_pr(pull_request), to: @mod
   defdelegate merge_pull_request(client, owner, repo, number, message), to: @mod
   defdelegate create_label(label, repo), to: @mod
   defdelegate update_label(label, repo, node_id), to: @mod

@@ -274,11 +274,23 @@ defmodule Mrgr.Github.API.Live do
     request!(&Tentacat.Commits.find/4, installation, [sha, owner, name])
   end
 
-  def commits(pull_request, installation) do
+  def commits(pull_request) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(pull_request.repository)
     number = pull_request.number
 
-    request!(&Tentacat.Pulls.commits/4, installation, [owner, name, number])
+    request!(&Tentacat.Pulls.commits/4, pull_request.repository, [owner, name, number])
+  end
+
+  # doesn't get them all, just gets ones for HEAD
+  def check_suites_for_pr(pull_request) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(pull_request.repository)
+
+    ref =
+      pull_request
+      |> Mrgr.Schema.PullRequest.head()
+      |> Map.get(:sha)
+
+    request!(&Tentacat.CheckSuites.list_for_ref/4, pull_request.repository, [owner, name, ref])
   end
 
   def create_label(label, repository) do
@@ -406,13 +418,13 @@ defmodule Mrgr.Github.API.Live do
     }
   end
 
-  def request!(f, installation, args) do
-    client = generate_client!(installation)
-    request!(f, installation, client, args)
+  def request!(f, client_source, args) do
+    client = generate_client!(client_source)
+    request!(f, client_source, client, args)
   end
 
-  def request!(f, installation, client, args) do
-    api_request = create_api_request(installation, f)
+  def request!(f, client_source, client, args) do
+    api_request = create_api_request(client_source, f)
 
     result = do_request!(f, [client] ++ args)
 
@@ -437,9 +449,10 @@ defmodule Mrgr.Github.API.Live do
     }
   end
 
-  defp generate_client!(installation) do
+  defp generate_client!(client_source) do
+    # can create with an installation or anything with an installation_id
     # may call out to GH to refresh client token
-    Mrgr.Github.Client.new(installation)
+    Mrgr.Github.Client.new(client_source)
   end
 
   defp create_api_request(%{installation_id: id}, api_call), do: create_api_request(id, api_call)

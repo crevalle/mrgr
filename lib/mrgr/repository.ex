@@ -286,7 +286,7 @@ defmodule Mrgr.Repository do
       pr_data ->
         repo
         |> create_pull_requests_from_data(pr_data)
-        |> hydrate_pull_request_data()
+        |> synchronize_pull_request_data()
     end
   end
 
@@ -345,13 +345,15 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.update!()
   end
 
-  def hydrate_pull_request_data(repo) do
+  def synchronize_pull_request_data(repo) do
     pull_requests =
       repo.pull_requests
-      # reverse preloading for API call
+      # reverse preloading for API calls
       |> Enum.map(fn m -> %{m | repository: repo} end)
-      |> Enum.map(&Mrgr.PullRequest.hydrate_github_data/1)
-      # fetch comments outside of `hydrate_github_data` since we only
+      # !!! this makes several API calls.  careful about scaling many onboarding users!
+      |> Enum.map(&Mrgr.PullRequest.synchronize_github_data/1)
+      |> Enum.map(&Mrgr.PullRequest.synchronize_latest_ci_status!/1)
+      # fetch comments outside of `synchronize_github_data` since we only
       # need to hit the API when we're creating the world
       |> Enum.map(&Mrgr.PullRequest.sync_comments/1)
 

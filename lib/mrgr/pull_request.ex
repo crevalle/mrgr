@@ -37,7 +37,7 @@ defmodule Mrgr.PullRequest do
         pull_request
         |> preload_installation()
         |> sync_repo_if_first_pr()
-        |> hydrate_github_data()
+        |> synchronize_github_data()
         |> create_checklists()
         |> notify_file_alert_consumers()
         |> broadcast(@pull_request_created)
@@ -56,7 +56,7 @@ defmodule Mrgr.PullRequest do
          {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
       updated_pull_request
       |> preload_installation()
-      |> hydrate_github_data()
+      |> synchronize_github_data()
       |> broadcast(@pull_request_reopened)
       |> ok()
     else
@@ -90,7 +90,7 @@ defmodule Mrgr.PullRequest do
     with {:ok, pull_request} <- find_from_payload(payload) do
       pull_request
       |> preload_installation()
-      |> hydrate_github_data()
+      |> synchronize_github_data()
       |> broadcast(@pull_request_synchronized)
       |> ok()
     else
@@ -464,7 +464,7 @@ defmodule Mrgr.PullRequest do
     pull_request
   end
 
-  def hydrate_github_data(pull_request) do
+  def synchronize_github_data(pull_request) do
     pull_request
     |> synchronize_most_stuff()
     |> synchronize_commits()
@@ -506,7 +506,45 @@ defmodule Mrgr.PullRequest do
   end
 
   def fetch_commits(pull_request) do
-    Mrgr.Github.API.commits(pull_request, pull_request.repository.installation)
+    Mrgr.Github.API.commits(pull_request)
+  end
+
+  def synchronize_latest_ci_status!(pull_request) do
+    case synchronize_latest_ci_status(pull_request) do
+      {:ok, updated} -> updated
+      _error -> pull_request
+    end
+  end
+
+  @spec synchronize_latest_ci_status(Schema.t()) ::
+          {:ok, Schema.t()} | {:error, Ecto.Changeset.t()} | {:error, String.t()}
+  def synchronize_latest_ci_status(pull_request) do
+    case fetch_check_suites_for_head(pull_request) do
+      {:ok, result} ->
+        status = ci_status_from_latest_check_suite_data(result)
+        set_ci_status_conclusion(pull_request, status)
+
+      error ->
+        error
+    end
+  end
+
+  def ci_status_from_latest_check_suite_data(%{"check_suites" => suites}) do
+    suites
+    |> Enum.reverse()
+    |> hd()
+    |> case do
+      %{"status" => "queued"} -> "running"
+      %{"status" => "completed", "conclusion" => conclusion} -> conclusion
+      _none -> "success"
+    end
+  end
+
+  def fetch_check_suites_for_head(pull_request) do
+    case Mrgr.Github.API.check_suites_for_pr(pull_request) do
+      %{"documentation_url" => _url, "message" => message} -> {:error, message}
+      result -> {:ok, result}
+    end
   end
 
   def add_label(pull_request, %Mrgr.Github.Label{} = new_label) do
@@ -581,16 +619,10 @@ defmodule Mrgr.PullRequest do
     |> broadcast(@pull_request_labels_updated)
   end
 
-  def set_ci_status_running(pull_request) do
-    with {:ok, pull_request} <- update_ci_status(pull_request, "running") do
-      pull_request
-      |> broadcast(@pull_request_ci_status_updated)
-      |> ok()
-    end
-  end
-
-  def set_ci_status_conclusion(pull_request, "success") do
-    with {:ok, pull_request} <- update_ci_status(pull_request, "success") do
+  @spec set_ci_status_conclusion(Schema.t(), String.t()) ::
+          {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
+  def set_ci_status_conclusion(pull_request, status) when status in ["running", "success"] do
+    with {:ok, pull_request} <- update_ci_status(pull_request, status) do
       pull_request
       |> broadcast(@pull_request_ci_status_updated)
       |> ok()
@@ -663,6 +695,13 @@ defmodule Mrgr.PullRequest do
     |> Query.by_id(id)
     |> Query.with_file_alert_rules()
     |> Mrgr.Repo.one()
+  end
+
+  def find(id, preloads) do
+    Schema
+    |> Query.by_id(id)
+    |> Mrgr.Repo.one()
+    |> Mrgr.Repo.preload(preloads)
   end
 
   def find_with_everything(id) do

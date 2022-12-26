@@ -98,7 +98,7 @@ defmodule Mrgr.PullRequest.Webhook do
     |> Enum.map(&Map.get(&1, "id"))
     |> Enum.map(&Mrgr.PullRequest.find_by_external_id_with_repository/1)
     |> Enum.reject(&is_nil/1)
-    |> Enum.map(&Mrgr.PullRequest.set_ci_status_running/1)
+    |> Enum.map(&Mrgr.PullRequest.set_ci_status_conclusion(&1, "running"))
   end
 
   @spec check_suite_completed(webhook()) :: [success() | change_error()]
