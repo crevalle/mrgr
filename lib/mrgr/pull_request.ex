@@ -537,6 +537,7 @@ defmodule Mrgr.PullRequest do
     |> hd()
     |> case do
       %{"status" => "completed", "conclusion" => conclusion} -> conclusion
+      %{"latest_check_runs_count" => 0} -> "success"
       _queued_or_running -> "running"
     end
   end
