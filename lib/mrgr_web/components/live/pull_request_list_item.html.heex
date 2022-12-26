@@ -68,8 +68,9 @@
 
     <!-- 3rd row -->
     <div class="mt-2 sm:flex sm:justify-between text-sm text-gray-500 items-start">
-      <div>
-        <.pr_approval_badge pull_request={@pull_request} />
+      <div class="flex space-x-2">
+        <.pr_approval_badge fully_approved={Mrgr.PullRequest.fully_approved?(@pull_request)} />
+        <.ci_status ci_status={@pull_request.ci_status} />
       </div>
 
       <p>

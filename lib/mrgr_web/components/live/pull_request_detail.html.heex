@@ -22,7 +22,7 @@
     </div>
 
     <div class="flex items-center space-x-2 mt-2 text-gray-500">
-      <.pr_approval_badge pull_request={@pull_request} />
+      <.pr_approval_badge fully_approved={Mrgr.PullRequest.fully_approved?(@pull_request)} />
       <.aside><.pr_approval_text pull_request={@pull_request} /></.aside>
     </div>
 

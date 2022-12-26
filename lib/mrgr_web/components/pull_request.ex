@@ -64,25 +64,21 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
-  def pr_approval_badge(assigns) do
-    fully_approved = Mrgr.PullRequest.fully_approved?(assigns.pull_request)
-
-    assigns =
-      assigns
-      |> assign(:fully_approved, fully_approved)
-
+  def pr_approval_badge(%{fully_approved: true} = assigns) do
     ~H"""
-    <%= if @fully_approved do %>
       <p class="flex">
         <.icon name="check" class="text-sky-600 mr-1 h-5 w-5" />
         Ready to merge
       </p>
-    <% else %>
+    """
+  end
+
+  def pr_approval_badge(%{fully_approved: false} = assigns) do
+    ~H"""
       <p class="flex">
         <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" />
         Awaiting approvals
       </p>
-    <% end %>
     """
   end
 
