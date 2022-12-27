@@ -340,11 +340,7 @@ defmodule Mrgr.Repository do
       |> Enum.map(fn node -> node["requestedReviewer"] end)
       |> Enum.map(&Mrgr.Github.User.graphql_to_attrs/1)
 
-    author_id =
-      case Mrgr.Member.find_by_node_id(node["author"]["id"]) do
-        %{id: id} -> id
-        nil -> nil
-      end
+    author_id = find_member_id(node["author"]["id"])
 
     parsed = %{
       "author_id" => author_id,
@@ -368,6 +364,15 @@ defmodule Mrgr.Repository do
     }
 
     Map.merge(node, parsed)
+  end
+
+  def find_member_id(nil), do: nil
+
+  def find_member_id(node_id) do
+    case Mrgr.Member.find_by_node_id(node_id) do
+      %{id: id} -> id
+      nil -> nil
+    end
   end
 
   # will blow up if you try to do a duplicate
