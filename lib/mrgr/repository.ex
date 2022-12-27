@@ -277,23 +277,52 @@ defmodule Mrgr.Repository do
     %{node_id: data["id"], name: data["name"], name_with_owner: data["nameWithOwner"]}
   end
 
-  @spec fetch_and_store_open_pull_requests!(Schema.t()) :: Schema.t()
-  def fetch_and_store_open_pull_requests!(repo) do
+  def sync_recentish_closed_pull_requests(repo) do
+    case fetch_recently_closed_pull_requests(repo) do
+      [] ->
+        repo
+
+      pr_data ->
+        # i don't want to carry this info around on the repo since
+        # it's only really used for analytics.  plus i don't need all
+        # the extensive PR data for closed PRs.
+        _prs = create_pull_requests_from_data(repo, pr_data)
+        repo
+    end
+  end
+
+  @spec sync_open_pull_requests(Schema.t()) :: Schema.t()
+  def sync_open_pull_requests(repo) do
     case fetch_open_pull_requests(repo) do
       [] ->
         repo
 
       pr_data ->
-        repo
-        |> create_pull_requests_from_data(pr_data)
-        |> synchronize_pull_request_data()
+        pull_requests =
+          repo
+          |> create_pull_requests_from_data(pr_data)
+          # reverse preloading for API calls
+          |> Enum.map(fn pr -> %{pr | repository: repo} end)
+          # !!! this makes several API calls.  careful about scaling many onboarding users!
+          |> Enum.map(&Mrgr.PullRequest.synchronize_for_creating_the_world/1)
+
+        %{repo | pull_requests: pull_requests}
     end
   end
 
-  def fetch_open_pull_requests(repo) do
-    result = Mrgr.Github.API.fetch_pulls_graphql(repo.installation, repo)
+  def fetch_recently_closed_pull_requests(repo) do
+    params = "last: 95, states: [MERGED], orderBy: {direction: DESC, field: CREATED_AT}"
 
-    result
+    repo.installation
+    |> Mrgr.Github.API.fetch_pulls_graphql(repo, params)
+    |> parse_graphql_attrs()
+  end
+
+  def fetch_open_pull_requests(repo) do
+    params = "last: 50, states: [OPEN]"
+
+    repo.installation
+    |> Mrgr.Github.API.fetch_pulls_graphql(repo, params)
     |> parse_graphql_attrs()
   end
 
@@ -327,8 +356,10 @@ defmodule Mrgr.Repository do
         "sha" => node["headRef"]["target"]["oid"]
       },
       "id" => node["databaseId"],
+      "merged_at" => node["mergedAt"],
       "node_id" => node["id"],
       "requested_reviewers" => requested_reviewers,
+      "status" => String.downcase(node["state"]),
       "url" => node["permalink"],
       "user" => %{
         "login" => node["author"]["login"],
@@ -339,25 +370,11 @@ defmodule Mrgr.Repository do
     Map.merge(node, parsed)
   end
 
-  defp create_pull_requests_from_data(repo, data) do
-    repo
-    |> Schema.create_pull_requests_changeset(%{pull_requests: data})
-    |> Mrgr.Repo.update!()
-  end
-
-  def synchronize_pull_request_data(repo) do
-    pull_requests =
-      repo.pull_requests
-      # reverse preloading for API calls
-      |> Enum.map(fn m -> %{m | repository: repo} end)
-      # !!! this makes several API calls.  careful about scaling many onboarding users!
-      |> Enum.map(&Mrgr.PullRequest.synchronize_github_data/1)
-      |> Enum.map(&Mrgr.PullRequest.synchronize_latest_ci_status!/1)
-      # fetch comments outside of `synchronize_github_data` since we only
-      # need to hit the API when we're creating the world
-      |> Enum.map(&Mrgr.PullRequest.sync_comments/1)
-
-    %{repo | pull_requests: pull_requests}
+  # will blow up if you try to do a duplicate
+  def create_pull_requests_from_data(repo, data) do
+    data
+    |> Enum.map(&Map.put(&1, "repository_id", repo.id))
+    |> Enum.map(&Mrgr.PullRequest.create_from_github_api_data/1)
   end
 
   # expects that you've preloaded it

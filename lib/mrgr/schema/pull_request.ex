@@ -31,7 +31,7 @@ defmodule Mrgr.Schema.PullRequest do
     field(:opened_at, :utc_datetime)
     field(:raw, :map)
     field(:snoozed_until, :utc_datetime)
-    field(:status, :string)
+    field(:status, :string, default: "open")
     field(:title, :string)
     field(:url, :string)
 
@@ -71,11 +71,13 @@ defmodule Mrgr.Schema.PullRequest do
     ci_status
     mergeable
     merge_state_status
+    merged_at
     node_id
     number
     opened_at
     raw
     repository_id
+    status
     title
     url
   ]a
@@ -96,7 +98,6 @@ defmodule Mrgr.Schema.PullRequest do
     |> cast_embed(:assignees)
     |> cast_embed(:requested_reviewers)
     |> cast_embed(:head)
-    |> put_open_status()
     |> put_external_id()
     |> put_change(:raw, params)
     |> validate_inclusion(:ci_status, @ci_statuses)
@@ -121,7 +122,7 @@ defmodule Mrgr.Schema.PullRequest do
     schema
     |> cast(params, [])
     |> cast_embed(:merged_by)
-    |> put_closed_status()
+    |> put_merged_status()
     |> put_timestamp(:merged_at)
   end
 
@@ -168,14 +169,8 @@ defmodule Mrgr.Schema.PullRequest do
     put_change(changeset, :status, "closed")
   end
 
-  def put_open_status(changeset) do
-    case get_change(changeset, :status) do
-      empty when empty in [nil, ""] ->
-        put_change(changeset, :status, "open")
-
-      _status ->
-        changeset
-    end
+  def put_merged_status(changeset) do
+    put_change(changeset, :status, "merged")
   end
 
   def set_opened_at(%{:created_at => at} = params) do

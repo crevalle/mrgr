@@ -48,6 +48,12 @@ defmodule Mrgr.PullRequest do
     end
   end
 
+  def create_from_github_api_data(data) do
+    %Schema{}
+    |> Schema.create_changeset(data)
+    |> Mrgr.Repo.insert!()
+  end
+
   @spec reopen(map()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def reopen(payload) do
@@ -464,6 +470,16 @@ defmodule Mrgr.PullRequest do
     pull_request
   end
 
+  def synchronize_for_creating_the_world(pull_request) do
+    # fetch comments outside of `synchronize_github_data` since we only
+    # need to hit the API when we're creating the world
+
+    pull_request
+    |> synchronize_github_data()
+    |> synchronize_latest_ci_status!()
+    |> sync_comments()
+  end
+
   def synchronize_github_data(pull_request) do
     pull_request
     |> synchronize_most_stuff()
@@ -788,7 +804,8 @@ defmodule Mrgr.PullRequest do
   def closed_for_installation(installation_id, since) do
     Schema
     |> Query.for_installation(installation_id)
-    |> Query.closed_since(since)
+    |> Query.merged()
+    |> Query.merged_since(since)
     |> Query.select([:id, :opened_at, :merged_at])
     |> Mrgr.Repo.all()
   end
@@ -1053,7 +1070,11 @@ defmodule Mrgr.PullRequest do
       from(q in query, where: q.opened_at >= ^since)
     end
 
-    def closed_since(query, since) do
+    def merged(query) do
+      from(q in query, where: not is_nil(q.merged_at))
+    end
+
+    def merged_since(query, since) do
       from(q in query, where: q.merged_at >= ^since)
     end
 

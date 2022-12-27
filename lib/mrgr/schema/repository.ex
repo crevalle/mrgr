@@ -45,13 +45,6 @@ defmodule Mrgr.Schema.Repository do
     |> foreign_key_constraint(:installation_id)
   end
 
-  def create_pull_requests_changeset(schema, params) do
-    schema
-    |> Mrgr.Repo.preload(:pull_requests)
-    |> cast(params, [])
-    |> cast_assoc(:pull_requests, with: &Mrgr.Schema.PullRequest.create_changeset/2)
-  end
-
   def merge_freeze_changeset(schema, attrs) do
     schema
     |> cast(attrs, [:merge_freeze_enabled])

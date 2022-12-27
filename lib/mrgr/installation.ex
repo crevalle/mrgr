@@ -233,11 +233,10 @@ defmodule Mrgr.Installation do
     repositories =
       installation.repositories
       |> Enum.map(fn r -> %{r | installation: installation} end)
-      |> Enum.map(&Mrgr.Repository.fetch_and_store_open_pull_requests!/1)
+      |> Enum.map(&Mrgr.Repository.sync_open_pull_requests/1)
+      |> Enum.map(&Mrgr.Repository.sync_recentish_closed_pull_requests/1)
 
-    installation = %{installation | repositories: repositories}
-
-    installation
+    %{installation | repositories: repositories}
   end
 
   def set_tokens(install, %Mrgr.Github.AccessToken{} = token) do

@@ -142,13 +142,13 @@ defmodule Mrgr.Github.API.Live do
     neuron_request!(repository.installation_id, query)
   end
 
-  def fetch_pulls_graphql(installation, repo) do
+  def fetch_pulls_graphql(installation, repo, params) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
 
     query = """
       query {
         repository(owner:"#{owner}", name:"#{name}") {
-          pullRequests(last: 50, states: [OPEN]) {
+          pullRequests(#{params}) {
             edges {
               node {
                 assignees(first: 20) {
@@ -165,6 +165,7 @@ defmodule Mrgr.Github.API.Live do
                 databaseId
                 mergeStateStatus
                 mergeable
+                mergedAt
                 id
                 number
                 permalink
