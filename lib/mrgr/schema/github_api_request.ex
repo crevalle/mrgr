@@ -39,6 +39,16 @@ defmodule Mrgr.Schema.GithubAPIRequest do
     |> handle_data_list()
   end
 
+  def ratelimit_reset(request) do
+    ts = request.response_headers["X-RateLimit-Reset"]
+    {:ok, datetime} = DateTime.from_unix(String.to_integer(ts))
+    datetime
+  end
+
+  def ratelimit_remaining(request) do
+    request.response_headers["X-RateLimit-Remaining"]
+  end
+
   defp handle_data_list(%{data: data} = params) when is_list(data) do
     Map.put(params, :data, %{ein_listen: data})
   end

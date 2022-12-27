@@ -19,12 +19,13 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
               <tr>
                 <.th uppercase={true}>ID</.th>
                 <.th uppercase={true}>Installation</.th>
+                <.th uppercase={true}>RateLimit Remaining</.th>
+                <.th uppercase={true}>RateLimit Reset</.th>
                 <.th uppercase={true}>API Call</.th>
                 <.th uppercase={true}>Response Code</.th>
                 <.th uppercase={true}>Elapsed Time (ms)</.th>
                 <.th uppercase={true}>Data</.th>
                 <.th uppercase={true}>Response Headers</.th>
-                <.th uppercase={true}>Updated</.th>
                 <.th uppercase={true}>Created</.th>
               </tr>
             </thead>
@@ -33,6 +34,8 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
               <.tr striped={true}>
                 <.td><%= r.id %></.td>
                 <.td><%= link r.installation.account.login, to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, r.installation_id), class: "text-teal-700 hover:text-teal-500" %></.td>
+                <.td><%= Mrgr.Schema.GithubAPIRequest.ratelimit_remaining(r) %></.td>
+                <.td><%= ts(Mrgr.Schema.GithubAPIRequest.ratelimit_reset(r), @timezone) %></.td>
                 <.td><%= shorten(r.api_call) %></.td>
                 <.td><%= r.response_code %></.td>
                 <.td><%= r.elapsed_time %></.td>
@@ -42,7 +45,6 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
                 <.td>
                   <.live_component module={MrgrWeb.Components.Live.JSONModalComponent} id={"headers-modal-#{r.id}"} title={"Request #{r.id} Response Headers"} data={r.response_headers} ./>
                 </.td>
-                <.td><%= ts(r.updated_at, @timezone) %></.td>
                 <.td><%= ts(r.inserted_at, @timezone) %></.td>
               </.tr>
             <% end %>
