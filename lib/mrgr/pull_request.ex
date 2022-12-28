@@ -944,13 +944,8 @@ defmodule Mrgr.PullRequest do
 
     def maybe_snooze(query, :all), do: query
 
-    def maybe_snooze(query, should_i) do
-      if should_i do
-        snoozed(query)
-      else
-        unsnoozed(query)
-      end
-    end
+    def maybe_snooze(query, true), do: snoozed(query)
+    def maybe_snooze(query, false), do: unsnoozed(query)
 
     def unsnoozed(query) do
       now = Mrgr.DateTime.safe_truncate(Mrgr.DateTime.now())

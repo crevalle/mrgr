@@ -690,12 +690,12 @@ defmodule MrgrWeb.PullRequestLive do
       Mrgr.PullRequest.paged_fix_ci_prs(tab.meta.user, opts)
     end
 
-    def load_pull_requests(%{type: :label, meta: %{subject: subject}}, page_params) do
-      Mrgr.PullRequest.paged_for_label(subject, page_params)
+    def load_pull_requests(%{type: :label, meta: %{subject: subject}}, opts) do
+      Mrgr.PullRequest.paged_for_label(subject, opts)
     end
 
-    def load_pull_requests(%{type: :author, meta: %{subject: subject}}, page_params) do
-      Mrgr.PullRequest.paged_for_author(subject, page_params)
+    def load_pull_requests(%{type: :author, meta: %{subject: subject}}, opts) do
+      Mrgr.PullRequest.paged_for_author(subject, opts)
     end
 
     def load_pull_requests(_unknown_tab, _params) do
