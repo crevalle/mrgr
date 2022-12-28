@@ -106,7 +106,7 @@ defmodule Mrgr.Schema.RepositorySettings do
     %{
       is_admin_enforced: data["enforce_admins"]["enabled"],
       required_approving_review_count:
-        data["required_pull_request_reviews"]["required_approving_review_count"]
+        data["required_pull_request_reviews"]["required_approving_review_count"] || 0
     }
   end
 
@@ -214,7 +214,7 @@ defmodule Mrgr.Schema.RepositorySettings do
       dismiss_stale_reviews: map["dismissesStaleReviews"],
       is_admin_enforced: map["isAdminEnforced"],
       push_allowances: translate_push_allowances(map["pushAllowances"]),
-      required_approving_review_count: map["requiredApprovingReviewCount"],
+      required_approving_review_count: map["requiredApprovingReviewCount"] || 0,
       required_status_checks: map["requiredStatusChecks"],
       requires_approving_reviews: map["requiresApprovingReviews"],
       requires_code_owner_reviews: map["requiresCodeOwnerReviews"],
