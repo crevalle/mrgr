@@ -176,7 +176,7 @@ defmodule MrgrWeb.Components.UI do
     assigns = assign_new(assigns, :description, fn -> nil end)
 
     ~H"""
-    <div class="sm:flex-auto">
+    <div class="">
       <.h1><%= @title %></.h1>
       <%= if @description do %>
         <p class="mt-2 text-sm text-gray-700"><%= @description %></p>
