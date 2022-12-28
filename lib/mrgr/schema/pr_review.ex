@@ -37,6 +37,7 @@ defmodule Mrgr.Schema.PRReview do
     |> put_data_map()
     |> cast_embed(:user)
     |> validate_required(@create_params)
+    |> validate_inclusion(:state, @states)
     |> foreign_key_constraint(:pull_request_id)
   end
 

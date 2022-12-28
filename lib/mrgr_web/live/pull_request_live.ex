@@ -327,12 +327,6 @@ defmodule MrgrWeb.PullRequestLive do
     Mrgr.List.member?(repos, pull_request.repository)
   end
 
-  defp fetch_pending_pull_requests(%{current_installation_id: nil}), do: []
-
-  defp fetch_pending_pull_requests(user) do
-    Mrgr.PullRequest.pending_pull_requests(user)
-  end
-
   defp selected?(%{id: id}, %{id: id}), do: true
   defp selected?(_pull_request, _selected), do: false
 
