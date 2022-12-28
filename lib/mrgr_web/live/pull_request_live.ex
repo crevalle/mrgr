@@ -125,11 +125,13 @@ defmodule MrgrWeb.PullRequestLive do
     installation = Mrgr.Repo.preload(user.current_installation, :repositories)
     Mrgr.Installation.refresh_pull_requests!(installation)
 
-    pull_requests = fetch_pending_pull_requests(user)
+    tabs = Tabs.new(user)
 
-    socket = assign(socket, :pull_requests, pull_requests)
-
-    {:noreply, socket}
+    socket
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, hd(tabs))
+    |> assign(:selected_pull_request, nil)
+    |> noreply()
   end
 
   def handle_event("toggle-check", %{"check-id" => id}, socket) do
