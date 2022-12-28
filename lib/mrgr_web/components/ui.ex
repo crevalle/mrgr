@@ -478,7 +478,7 @@ defmodule MrgrWeb.Components.UI do
 
     ~H"""
       <button
-        class={"flex items-center tab-select-button #{@selected} hover:bg-gray-50 p-2 rounded-t-lg border-b-2"}
+        class={"flex items-center tab-select-button #{@selected} hover:bg-gray-50 p-1 m-1 rounded-t-lg"}
         phx-click={JS.push("select-tab", value: %{id: @tab.id})}
         id={"#{@tab.id}-tab"}
         type="button"

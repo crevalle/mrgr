@@ -72,22 +72,32 @@ defmodule Mrgr.Factory do
       node_id: Ecto.UUID.generate(),
       private: true,
       language: "Elixir",
-      installation: installation
+      installation: installation,
+      settings: build(:repository_settings)
     }
   end
 
   def build(:pull_request) do
-    opened_at =
-      Mrgr.DateTime.safe_truncate(DateTime.add(Mrgr.DateTime.now(), 1 - :rand.uniform(45), :day))
-
     %Mrgr.Schema.PullRequest{
       title: Faker.Company.bs(),
       number: System.unique_integer([:positive, :monotonic]),
       node_id: Ecto.UUID.generate(),
-      opened_at: opened_at,
+      opened_at: Mrgr.DateTime.safe_truncate(Mrgr.DateTime.now()),
+      ci_status: "success",
       status: "open",
       head: build(:head),
       repository: build(:repository)
+    }
+  end
+
+  def build(:pr_review) do
+    %Mrgr.Schema.PRReview{
+      pull_request: build(:pull_request),
+      user: build(:github_user),
+      state: "approved",
+      commit_id: Ecto.UUID.generate(),
+      node_id: Ecto.UUID.generate(),
+      data: %{}
     }
   end
 

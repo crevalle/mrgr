@@ -89,7 +89,7 @@ defmodule MrgrWeb.Components.PullRequest do
           "no approvals required for this repo"
 
         num ->
-          "(#{Mrgr.PullRequest.approving_reviews(assigns.pull_request)}/#{num}) approvals"
+          "(#{assigns.pull_request.approving_review_count}/#{num}) approvals"
       end
 
     assigns = assign(assigns, :text, text)

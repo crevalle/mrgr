@@ -1,6 +1,14 @@
 defmodule Mrgr.Schema.PRReview do
   use Mrgr.Schema
 
+  @states [
+    "approved",
+    "changes_requested",
+    "commented",
+    "dismissed",
+    "pending"
+  ]
+
   schema "pr_reviews" do
     field(:state, :string)
     field(:node_id, :string)

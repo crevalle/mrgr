@@ -353,10 +353,44 @@ defmodule MrgrWeb.PullRequestLive do
 
   defmodule Tabs do
     def new(user) do
-      time_tabs_for_user(user)
+      []
+      |> Kernel.++(state_tabs_for_user(user))
+      |> Kernel.++(time_tabs_for_user(user))
       |> Kernel.++(label_tabs_for_user(user))
       |> Kernel.++(author_tabs_for_user(user))
       |> Enum.map(&load_prs_async/1)
+    end
+
+    def state_tabs_for_user(user) do
+      [
+        %{
+          id: "ready-to-merge",
+          title: "Ready to Merge",
+          type: :state,
+          meta: %{user: user},
+          viewing_snoozed: false,
+          unsnoozed: :not_loaded,
+          snoozed: :not_loaded
+        },
+        %{
+          id: "needs-approval",
+          title: "Needs Approval",
+          type: :state,
+          meta: %{user: user},
+          viewing_snoozed: false,
+          unsnoozed: :not_loaded,
+          snoozed: :not_loaded
+        },
+        %{
+          id: "fix-ci",
+          title: "Fix CI",
+          type: :state,
+          meta: %{user: user},
+          viewing_snoozed: false,
+          unsnoozed: :not_loaded,
+          snoozed: :not_loaded
+        }
+      ]
     end
 
     def time_tabs_for_user(user) do
@@ -509,6 +543,10 @@ defmodule MrgrWeb.PullRequestLive do
       Enum.filter(tabs, fn t -> t.type == :time end)
     end
 
+    def state_tabs(tabs) do
+      Enum.filter(tabs, fn t -> t.type == :state end)
+    end
+
     def label_tabs(tabs) do
       Enum.filter(tabs, fn t -> t.type == :label end)
     end
@@ -638,6 +676,18 @@ defmodule MrgrWeb.PullRequestLive do
     def load_pull_requests(%{id: "stale"} = tab, page_params) do
       opts = Map.merge(page_params, %{before: four_weeks_ago()})
       Mrgr.PullRequest.paged_pending_pull_requests(tab.meta.user, opts)
+    end
+
+    def load_pull_requests(%{id: "ready-to-merge"} = tab, opts) do
+      Mrgr.PullRequest.paged_ready_to_merge_prs(tab.meta.user, opts)
+    end
+
+    def load_pull_requests(%{id: "needs-approval"} = tab, opts) do
+      Mrgr.PullRequest.paged_needs_approval_prs(tab.meta.user, opts)
+    end
+
+    def load_pull_requests(%{id: "fix-ci"} = tab, opts) do
+      Mrgr.PullRequest.paged_fix_ci_prs(tab.meta.user, opts)
     end
 
     def load_pull_requests(%{type: :label, meta: %{subject: subject}}, page_params) do

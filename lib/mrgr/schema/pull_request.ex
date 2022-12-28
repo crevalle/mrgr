@@ -20,6 +20,8 @@ defmodule Mrgr.Schema.PullRequest do
   ]
 
   schema "pull_requests" do
+    # counter cache, can update out from under us
+    field(:approving_review_count, :integer)
     field(:ci_status, :string, default: "success")
     field(:external_id, :integer)
     field(:files_changed, {:array, :string})

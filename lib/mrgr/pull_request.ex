@@ -736,6 +736,32 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
+  def paged_ready_to_merge_prs(%{current_installation_id: id}, opts \\ %{}) do
+    # load in two passes because adding the joins messes up my LIMITs
+
+    Schema
+    |> Query.pending_stuff(id, Map.get(opts, :snoozed, false))
+    |> Query.ready_to_merge()
+    |> Mrgr.Repo.paginate(opts)
+    |> add_pending_preloads()
+  end
+
+  def paged_needs_approval_prs(%{current_installation_id: id}, opts \\ %{}) do
+    Schema
+    |> Query.pending_stuff(id, Map.get(opts, :snoozed, false))
+    |> Query.needs_approval()
+    |> Mrgr.Repo.paginate(opts)
+    |> add_pending_preloads()
+  end
+
+  def paged_fix_ci_prs(%{current_installation_id: id}, opts \\ %{}) do
+    Schema
+    |> Query.pending_stuff(id, Map.get(opts, :snoozed, false))
+    |> Query.fix_ci()
+    |> Mrgr.Repo.paginate(opts)
+    |> add_pending_preloads()
+  end
+
   def paged_pending_pull_requests(user_or_id, opts \\ %{})
 
   def paged_pending_pull_requests(%{current_installation_id: id}, opts) do
@@ -880,13 +906,7 @@ defmodule Mrgr.PullRequest do
   end
 
   def fully_approved?(pull_request) do
-    approving_reviews(pull_request) >= Schema.required_approvals(pull_request)
-  end
-
-  def approving_reviews(pull_request) do
-    pull_request.pr_reviews
-    |> Enum.filter(&(&1.state == "approved"))
-    |> Enum.count()
+    pull_request.approving_review_count >= Schema.required_approvals(pull_request)
   end
 
   def time_open(%{merged_at: nil}), do: nil
@@ -1043,6 +1063,60 @@ defmodule Mrgr.PullRequest do
       from(q in query,
         left_join: l in assoc(q, :labels),
         preload: [labels: l]
+      )
+    end
+
+    def pending_stuff(schema, installation_id, with_snoozed) do
+      schema
+      |> for_installation(installation_id)
+      |> open()
+      |> order_by_opened()
+      |> maybe_snooze(with_snoozed)
+      |> with_labels()
+    end
+
+    def fix_ci(query) do
+      query
+      |> ci_failing()
+    end
+
+    def needs_approval(query) do
+      query
+      |> ci_passing_or_running()
+      |> not_approved()
+    end
+
+    def ready_to_merge(query) do
+      query
+      |> ci_passing_or_running()
+      |> approved()
+    end
+
+    def ci_passing_or_running(query) do
+      from(q in query,
+        where: q.ci_status == "running" or q.ci_status == "success"
+      )
+    end
+
+    def ci_failing(query) do
+      from(q in query,
+        where: q.ci_status == "failure"
+      )
+    end
+
+    def approved(query) do
+      from([q, repository: r] in with_repository(query),
+        where:
+          q.approving_review_count >=
+            fragment("(?->?)::integer", r.settings, "required_approving_review_count")
+      )
+    end
+
+    def not_approved(query) do
+      from([q, repository: r] in with_repository(query),
+        where:
+          q.approving_review_count <
+            fragment("(?->?)::integer", r.settings, "required_approving_review_count")
       )
     end
 
