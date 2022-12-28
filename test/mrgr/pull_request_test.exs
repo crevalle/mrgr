@@ -47,8 +47,9 @@ defmodule Mrgr.PullRequestTest do
 
       user = %{current_installation_id: ctx.i.id}
 
-      %{entries: [e]} = Mrgr.PullRequest.paged_needs_approval_prs(user)
+      %{entries: [e], total_entries: total} = Mrgr.PullRequest.paged_needs_approval_prs(user)
 
+      assert total == 1
       assert e.id == pull_request.id
     end
 

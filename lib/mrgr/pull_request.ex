@@ -781,7 +781,6 @@ defmodule Mrgr.PullRequest do
     |> Query.order_by_opened()
     |> Query.maybe_snooze(with_snoozed)
     |> Query.opened_between(before, since)
-    |> Query.with_labels()
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
@@ -1046,8 +1045,7 @@ defmodule Mrgr.PullRequest do
     def for_label(query, label) do
       from(q in query,
         join: l in assoc(q, :labels),
-        where: l.id == ^label.id,
-        preload: [labels: l]
+        where: l.id == ^label.id
       )
     end
 
@@ -1072,7 +1070,6 @@ defmodule Mrgr.PullRequest do
       |> open()
       |> order_by_opened()
       |> maybe_snooze(with_snoozed)
-      |> with_labels()
     end
 
     def fix_ci(query) do
