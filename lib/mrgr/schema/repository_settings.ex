@@ -4,7 +4,7 @@ defmodule Mrgr.Schema.RepositorySettings do
   @primary_key false
   embedded_schema do
     field(:dismiss_stale_reviews, :boolean, default: true)
-    field(:required_approving_review_count, :integer, default: 1)
+    field(:required_approving_review_count, :integer, default: 0)
 
     field(:merge_commit_allowed, :boolean, default: false)
     field(:rebase_merge_allowed, :boolean, default: false)
@@ -201,7 +201,11 @@ defmodule Mrgr.Schema.RepositorySettings do
   def parse_default_branch_name(%{"defaultBranchRef" => %{"name" => name}}), do: name
   def parse_default_branch_name(_), do: nil
 
-  def branch_protection_params(nil), do: %{}
+  def branch_protection_params(nil) do
+    %{
+      required_approving_review_count: 0
+    }
+  end
 
   def branch_protection_params(map) do
     %{

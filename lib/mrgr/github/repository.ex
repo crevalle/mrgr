@@ -38,9 +38,9 @@ defmodule Mrgr.Github.Repository do
           pushAllowances(first: 50) {
             nodes {
               actor  {
-                ... on User #{Mrgr.Github.User.GraphQL.user()}
-                ... on App #{Mrgr.Github.User.GraphQL.app()}
-                ... on Team #{Mrgr.Github.User.GraphQL.team()}
+                ... on User { #{Mrgr.Github.User.GraphQL.user()} }
+                ... on App { #{Mrgr.Github.User.GraphQL.app()} }
+                ... on Team { #{Mrgr.Github.User.GraphQL.team()} }
               }
             }
           }

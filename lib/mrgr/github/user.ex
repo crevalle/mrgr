@@ -115,12 +115,10 @@ defmodule Mrgr.Github.User do
 
     def app do
       """
-      {
-        databaseId
-        description
-        name
-        slug
-      }
+      databaseId
+      description
+      name
+      slug
       """
     end
   end
