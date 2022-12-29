@@ -23,6 +23,8 @@ defmodule Mrgr.Github.API do
   defdelegate check_suites_for_pr(pull_request), to: @mod
   defdelegate merge_pull_request(client, owner, repo, number, message), to: @mod
   defdelegate create_label(label, repo), to: @mod
+  defdelegate remove_review_request(pull_request, login), to: @mod
+  defdelegate add_review_request(pull_request, login), to: @mod
   defdelegate update_label(label, repo, node_id), to: @mod
   defdelegate update_repo_settings(repo, params), to: @mod
   defdelegate update_branch_protection(repo, params), to: @mod

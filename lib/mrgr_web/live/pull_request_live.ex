@@ -14,7 +14,7 @@ defmodule MrgrWeb.PullRequestLive do
       frozen_repos = filter_frozen_repos(repos)
 
       labels = Mrgr.Label.list_for_user(current_user)
-      authors = Mrgr.Member.for_installation(current_user.current_installation_id)
+      members = Mrgr.Member.for_installation(current_user.current_installation_id)
 
       tabs = Tabs.new(current_user)
 
@@ -31,7 +31,7 @@ defmodule MrgrWeb.PullRequestLive do
       |> assign(:selected_pull_request, nil)
       |> assign(:repos, repos)
       |> assign(:labels, labels)
-      |> assign(:authors, authors)
+      |> assign(:members, members)
       |> assign(:frozen_repos, frozen_repos)
       |> put_title("Open Pull Requests")
       |> ok()
@@ -50,7 +50,7 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   def handle_event("select-tab", %{"id" => id}, socket) do
-    selected = Tabs.select_tab(id, socket)
+    selected = Tabs.select(socket.assigns.tabs, id)
 
     socket
     |> assign(:selected_tab, selected)
@@ -58,7 +58,7 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   def handle_event("toggle-author", %{"id" => id}, socket) do
-    author = Mrgr.List.find(socket.assigns.authors, id)
+    author = Mrgr.List.find(socket.assigns.members, id)
 
     tabs =
       case Tabs.present?(socket.assigns.tabs, author) do
@@ -88,6 +88,22 @@ defmodule MrgrWeb.PullRequestLive do
 
     socket
     |> assign(:tabs, tabs)
+    |> noreply()
+  end
+
+  def handle_event(
+        "toggle-reviewer",
+        %{"id" => member_id, "pull_request_id" => pull_request_id},
+        socket
+      ) do
+    reviewer = Mrgr.List.find(socket.assigns.members, member_id)
+    pull_request = Tabs.select_pull_request(socket.assigns.selected_tab, pull_request_id)
+
+    Task.start(fn ->
+      Mrgr.PullRequest.toggle_reviewer(pull_request, reviewer)
+    end)
+
+    socket
     |> noreply()
   end
 
@@ -610,24 +626,20 @@ defmodule MrgrWeb.PullRequestLive do
 
       tabs = set_page(tabs, selected_tab, page)
 
-      selected = select_tab(tabs, selected_tab.id)
+      selected = Mrgr.List.find(tabs, selected_tab.id)
 
       {tabs, selected}
     end
 
-    def select_tab(id, %{assigns: %{tabs: tabs}}) do
-      select_tab(tabs, id)
-    end
-
-    def select_tab(tabs, id) do
-      Enum.find(tabs, fn i -> i.id == id end)
+    def select(tabs, id) do
+      Mrgr.List.find(tabs, id)
     end
 
     def select_pull_request(tab, id) do
       tab
       |> viewing_page()
       |> Map.get(:entries)
-      |> select_tab(id)
+      |> Mrgr.List.find(id)
     end
 
     def viewing_page(tab) do

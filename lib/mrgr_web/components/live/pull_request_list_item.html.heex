@@ -21,36 +21,49 @@
       </div>
       <!-- action button -->
       <div class="relative">
-        <%= if Mrgr.PullRequest.snoozed?(@pull_request) do %>
-          <p class="text-gray-400 italic">
-          😴 Snoozed until <%= ts(@pull_request.snoozed_until) %>.
-          </p>
-        <% else %>
-            <.l phx-click={JS.toggle(
-                to: "#snooze-menu-#{@pull_request.id}",
-                in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
-                out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
-              )}
-              id={"snooze-menu-button-#{@pull_request.id}"}
-              aria-expanded="false"
-              aria-haspopup="true"
-              class="flex items-baseline px-2 py-1 text-gray-700 border-gray-300 border hover:bg-gray-50 rounded-md font-light text-sm">
-              Snooze
-              <.icon name="chevron-down" class="ml-1 h-3 w-3" />
-            </.l>
+        <.dropdown_link target={"action-dropdown-#{@pull_request.id}"} class="flex items-baseline px-2 py-1 text-gray-700 border-gray-300 border hover:bg-gray-50 rounded-md font-light text-sm">
+          Action
+          <.icon name="chevron-down" class="ml-1 h-3 w-3" />
+        </.dropdown_link>
 
-            <div style="display: none;" id={"snooze-menu-#{@pull_request.id}"} class="origin-top-right z-50 mt-2 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"snooze-menu-button-#{@pull_request.id}"} tabindex="-1">
-              <div class="mt-2 flex flex-col text-sm text-gray-500 sm:mt-0">
-                <%= for %{title: title, value: value} <- MrgrWeb.PullRequestLive.snooze_options() do %>
-                  <.l phx_click={
-                   JS.push("snooze-pull-request", value: %{id: @pull_request.id, time: value})
-                   } class="text-teal-700 hover:text-teal-500 font-light p-3 text-sm rounded-md" >
-                    <%= title %>
-                  </.l>
-                <% end %>
-              </div>
+        <.dropdown_socks name={"action-dropdown-#{@pull_request.id}"} >
+
+          <div class="mt-2 flex flex-col">
+
+            <div class="text-gray-700 py-2 pl-4 pr-2 text-sm outline-none hover:bg-gray-50">Merge</div>
+            <div class="text-gray-700 py-2 pl-4 pr-2 text-sm outline-none hover:bg-gray-50 flex flex-col">
+              <p>Ping Author</p>
+              <p class="pt-1 text-xs text-gray-500 italic">@<%= @pull_request.author.login %></p>
             </div>
-        <% end %>
+            <div class="text-gray-700 p-2 text-sm outline-none hover:bg-gray-50">Ping Reviewers</div>
+            <.dropdown>
+              <div class="text-gray-700 p-2 text-sm outline-none hover:bg-gray-50 flex justify-between items-center">
+                Add Reviewer
+                <.icon name="chevron-right" class="ml-1 h-3 w-3" />
+              </div>
+
+              <.dropright_list>
+
+              <.dropdown_toggle_list name="reviewer" items={members_less_author(@members, @pull_request)} ctx={"pull-request-#{@pull_request.id}"} value={%{pull_request_id: @pull_request.id}}>
+                  <:row :let={member}>
+                    <div class="flex items-center">
+                      <div class="w-8 text-blue-400 ">
+                        <%= if Mrgr.Schema.PullRequest.reviewer_requested?(@pull_request, member) do %>
+                          <.icon name="check" class="text-teal-700 h-5 w-5" />
+                        <% end %>
+                      </div>
+                      <.avatar member={member} />
+                    </div>
+                  </:row>
+
+                </.dropdown_toggle_list>
+
+              </.dropright_list>
+            </.dropdown>
+
+          </div>
+        </.dropdown_socks>
+
       </div>
     </div>
 

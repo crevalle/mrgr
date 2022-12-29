@@ -38,6 +38,7 @@ defmodule Mrgr.Schema.PullRequest do
     field(:url, :string)
 
     embeds_many(:commits, Mrgr.Github.Commit, on_replace: :delete)
+    # what are assignees? how are they differetn from requested reviewers?
     embeds_many(:assignees, Mrgr.Github.User, on_replace: :delete)
     embeds_many(:requested_reviewers, Mrgr.Github.User, on_replace: :delete)
 
@@ -213,6 +214,12 @@ defmodule Mrgr.Schema.PullRequest do
 
   def required_approvals(pull_request) do
     pull_request.repository.settings.required_approving_review_count
+  end
+
+  def reviewer_requested?(pr, member) do
+    pr.requested_reviewers
+    |> Enum.map(& &1.login)
+    |> Enum.member?(member.login)
   end
 
   def author_name(%{author: %{login: login}}), do: login

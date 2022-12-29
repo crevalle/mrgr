@@ -40,9 +40,14 @@ defmodule Mrgr.Schema.GithubAPIRequest do
   end
 
   def ratelimit_reset(request) do
-    ts = request.response_headers["X-RateLimit-Reset"]
-    {:ok, datetime} = DateTime.from_unix(String.to_integer(ts))
-    datetime
+    case request.response_headers["X-RateLimit-Reset"] do
+      nil ->
+        nil
+
+      ts ->
+        {:ok, datetime} = DateTime.from_unix(String.to_integer(ts))
+        datetime
+    end
   end
 
   def ratelimit_remaining(request) do

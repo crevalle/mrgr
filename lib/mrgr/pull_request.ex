@@ -179,11 +179,35 @@ defmodule Mrgr.PullRequest do
     end
   end
 
+  @spec toggle_reviewer(Schema.t(), Mrgr.Github.User.t() | Mrgr.Schema.Member.t()) ::
+          {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
+  def toggle_reviewer(pull_request, %Mrgr.Schema.Member{} = member) do
+    toggle_reviewer(pull_request, Mrgr.Github.User.from_member(member))
+  end
+
+  def toggle_reviewer(pull_request, gh_user) do
+    # for a smoother UX, we update locally and broadcast the update before
+    # we push to GH, which we optimistically assume will work.  This lets me
+    # avoid having to do a whole spinner thing on the UI.
+    #
+    # our add_reviewer and remove_reviewer webhooks are no-ops if the user has
+    # already been added/removed.
+    case Mrgr.Schema.PullRequest.reviewer_requested?(pull_request, gh_user) do
+      true ->
+        remove_reviewer(pull_request, gh_user)
+        Mrgr.Github.API.remove_review_request(pull_request, gh_user.login)
+
+      false ->
+        add_reviewer(pull_request, gh_user)
+        Mrgr.Github.API.add_review_request(pull_request, gh_user.login)
+    end
+  end
+
   @spec add_reviewer(Schema.t(), Mrgr.Github.User.t()) ::
           {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
   def add_reviewer(pull_request, gh_user) do
-    case Mrgr.List.absent?(pull_request.requested_reviewers, gh_user) do
-      true ->
+    case Mrgr.Schema.PullRequest.reviewer_requested?(pull_request, gh_user) do
+      false ->
         case set_reviewers(pull_request, [gh_user | pull_request.requested_reviewers]) do
           {:ok, pull_request} ->
             # we want to unsnooze only if the user has been tagged,
@@ -201,7 +225,7 @@ defmodule Mrgr.PullRequest do
             error
         end
 
-      false ->
+      true ->
         # no-op
         {:ok, pull_request}
     end
@@ -210,9 +234,12 @@ defmodule Mrgr.PullRequest do
   @spec remove_reviewer(Schema.t(), Mrgr.Github.User.t()) ::
           {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
   def remove_reviewer(pull_request, gh_user) do
-    case Mrgr.List.present?(pull_request.assignees, gh_user) do
+    case Mrgr.Schema.PullRequest.reviewer_requested?(pull_request, gh_user) do
       true ->
-        set_reviewers(pull_request, Mrgr.List.remove(pull_request.requested_reviewers, gh_user))
+        updated_list =
+          Enum.reject(pull_request.requested_reviewers, fn r -> r.login == gh_user.login end)
+
+        set_reviewers(pull_request, updated_list)
 
       false ->
         {:ok, pull_request}

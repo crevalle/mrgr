@@ -504,16 +504,37 @@ defmodule MrgrWeb.Components.UI do
 
   def pr_tab_title(%{tab: %{meta: %{subject: %Mrgr.Schema.Member{}}}} = assigns) do
     ~H"""
-      <div class="flex">
-        <%= img_tag @tab.meta.subject.avatar_url, class: "rounded-xl h-5 w-5 mr-1" %>
-        <%= @tab.meta.subject.login %>
-      </div>
+    <.avatar member={@tab.meta.subject} />
     """
   end
 
   def pr_tab_title(assigns) do
     ~H"""
       <%= @tab.title %>
+    """
+  end
+
+  def dropdown(assigns) do
+    ~H"""
+    <div class="dropdown relative inline-block">
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  def dropdown_list(assigns) do
+    ~H"""
+    <div class="dropdown-content hidden absolute z-1 overflow-visible w-max rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  def dropright_list(assigns) do
+    ~H"""
+    <div class="dropdown-content hidden absolute left-32 top-0 z-1 overflow-visible w-max rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+      <%= render_slot(@inner_block) %>
+    </div>
     """
   end
 
@@ -541,6 +562,45 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def dropdown_socks(assigns) do
+    ~H"""
+    <div
+      style="display: none;"
+      id={@name}
+      phx-click-away={JS.hide(transition: toggle_out_transition())}
+      class="origin-top-right z-50 absolute rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+      role="menu"
+      aria-orientation="vertical"
+      aria-labelledby={"#{@name}-toggle"}
+      tabindex="-1">
+
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  def dropdown_link(assigns) do
+    extra = assigns_to_attributes(assigns)
+
+    assigns =
+      assigns
+      |> assign(:extra, extra)
+
+    ~H"""
+    <.l
+      phx-click={toggle(to: "##{@target}")}
+      id={"#{@target}-toggle"}
+      aria-expanded="false"
+      aria-haspopup="true"
+      {@extra}
+      >
+
+      <%= render_slot(@inner_block) %>
+
+    </.l>
+    """
+  end
+
   def dropdown_toggle_link(assigns) do
     ~H"""
     <.inline_link
@@ -556,12 +616,22 @@ defmodule MrgrWeb.Components.UI do
   end
 
   def dropdown_toggle_list(assigns) do
+    id_prefix =
+      [Map.get(assigns, :ctx), assigns.name]
+      |> Enum.reject(&is_nil/1)
+      |> Enum.join("-")
+
+    assigns =
+      assigns
+      |> assign_new(:value, fn -> %{} end)
+      |> assign(:id_prefix, id_prefix)
+
     ~H"""
       <div class="flex flex-col">
         <.l :for={item <- @items}
-          id={"#{@name}-#{item.id}"}
-          phx_click={JS.push("toggle-#{@name}", value: %{id: item.id})}
-          class="text-gray-700 block p-2 text-sm outline-none hover:bg-gray-50"
+          id={"#{@id_prefix}-#{item.id}"}
+          phx_click={JS.push("toggle-#{@name}", value: Map.merge(%{id: item.id}, @value))}
+          class="text-gray-700 p-2 text-sm rounded-md hover:bg-gray-50"
           role="menuitem"
           tabindex="-1" >
 
@@ -646,6 +716,15 @@ defmodule MrgrWeb.Components.UI do
       <span style={"background-color: ##{@color};"} class={"px-2 inline-flex text-xs leading-5 font-semibold rounded-full text-gray-900"}>
         <%= @item.name %>
       </span>
+    """
+  end
+
+  def avatar(assigns) do
+    ~H"""
+      <div class="flex">
+        <%= img_tag @member.avatar_url, class: "rounded-xl h-5 w-5 mr-1" %>
+        <span><%= @member.login %></span>
+      </div>
     """
   end
 

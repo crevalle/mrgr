@@ -22,4 +22,8 @@ defmodule MrgrWeb.Components.Live.PullRequestListItem do
         end
     end
   end
+
+  def members_less_author(members, pull_request) do
+    Enum.reject(members, fn m -> m.login == pull_request.author.login end)
+  end
 end

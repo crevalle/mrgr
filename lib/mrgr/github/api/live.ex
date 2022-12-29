@@ -268,6 +268,31 @@ defmodule Mrgr.Github.API.Live do
     )
   end
 
+  # endpoint accepts a list of reviewers, but for now we do one at at ime
+  def add_review_request(pull_request, login) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(pull_request.repository)
+    number = pull_request.number
+
+    request!(&Tentacat.Pulls.ReviewRequests.create/5, pull_request.repository, [
+      owner,
+      name,
+      number,
+      [login]
+    ])
+  end
+
+  def remove_review_request(pull_request, login) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(pull_request.repository)
+    number = pull_request.number
+
+    request!(&Tentacat.Pulls.ReviewRequests.remove/5, pull_request.repository, [
+      owner,
+      name,
+      number,
+      [login]
+    ])
+  end
+
   def head_commit(pull_request, installation) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(pull_request.repository)
     sha = Mrgr.Schema.PullRequest.head(pull_request).sha

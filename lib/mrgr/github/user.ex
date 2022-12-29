@@ -54,6 +54,12 @@ defmodule Mrgr.Github.User do
     |> apply_changes()
   end
 
+  def from_member(member) do
+    member
+    |> Map.from_struct()
+    |> new()
+  end
+
   def changeset(schema, params) do
     cast(schema, params, @fields)
   end
