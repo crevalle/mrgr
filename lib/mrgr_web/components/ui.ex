@@ -532,7 +532,7 @@ defmodule MrgrWeb.Components.UI do
 
   def dropright_list(assigns) do
     ~H"""
-    <div class="dropdown-content hidden absolute left-32 top-0 z-1 overflow-visible w-max rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+    <div class="dropdown-content hidden absolute -top-2 left-[120px] z-1 overflow-visible w-max rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
       <%= render_slot(@inner_block) %>
     </div>
     """

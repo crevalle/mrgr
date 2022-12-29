@@ -28,38 +28,45 @@
 
         <.dropdown_socks name={"action-dropdown-#{@pull_request.id}"} >
 
-          <div class="mt-2 flex flex-col">
+          <div class="flex flex-col">
 
-            <div class="text-gray-700 py-2 pl-4 pr-2 text-sm outline-none hover:bg-gray-50">Merge</div>
-            <div class="text-gray-700 py-2 pl-4 pr-2 text-sm outline-none hover:bg-gray-50 flex flex-col">
+            <div class="text-gray-700 pt-3 pb-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50">Merge</div>
+            <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none hover:bg-gray-50 flex flex-col">
               <p>Ping Author</p>
-              <p class="pt-1 text-xs text-gray-500 italic">@<%= @pull_request.author.login %></p>
+              <p class="text-xs text-gray-500 italic"><%= username(@pull_request.author) %></p>
             </div>
-            <div class="text-gray-700 p-2 text-sm outline-none hover:bg-gray-50">Ping Reviewers</div>
-            <.dropdown>
-              <div class="text-gray-700 p-2 text-sm outline-none hover:bg-gray-50 flex justify-between items-center">
-                Add Reviewer
-                <.icon name="chevron-right" class="ml-1 h-3 w-3" />
-              </div>
+            <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none hover:bg-gray-50 flex flex-col">
+              <p>Ping Reviewers</p>
+              <p class="text-xs text-gray-500 italic"><%= usernames(@pull_request.requested_reviewers) %></p>
+            </div>
 
-              <.dropright_list>
+            <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
 
-              <.dropdown_toggle_list name="reviewer" items={members_less_author(@members, @pull_request)} ctx={"pull-request-#{@pull_request.id}"} value={%{pull_request_id: @pull_request.id}}>
-                  <:row :let={member}>
-                    <div class="flex items-center">
-                      <div class="w-8 text-blue-400 ">
-                        <%= if Mrgr.Schema.PullRequest.reviewer_requested?(@pull_request, member) do %>
-                          <.icon name="check" class="text-teal-700 h-5 w-5" />
-                        <% end %>
+              <.dropdown>
+                <div class="flex justify-between items-center">
+                  Add Reviewer
+                  <.icon name="chevron-right" class="ml-1 h-3 w-3" />
+                </div>
+
+                <.dropright_list>
+
+                  <.dropdown_toggle_list name="reviewer" items={members_less_author(@members, @pull_request)} ctx={"pull-request-#{@pull_request.id}"} value={%{pull_request_id: @pull_request.id}}>
+                    <:row :let={member}>
+                      <div class="flex items-center">
+                        <div class="w-8 text-blue-400 ">
+                          <%= if Mrgr.Schema.PullRequest.reviewer_requested?(@pull_request, member) do %>
+                            <.icon name="check" class="text-teal-700 h-5 w-5" />
+                          <% end %>
+                        </div>
+                        <.avatar member={member} />
                       </div>
-                      <.avatar member={member} />
-                    </div>
-                  </:row>
+                    </:row>
 
-                </.dropdown_toggle_list>
+                  </.dropdown_toggle_list>
 
-              </.dropright_list>
-            </.dropdown>
+                </.dropright_list>
+              </.dropdown>
+            </div>
 
           </div>
         </.dropdown_socks>

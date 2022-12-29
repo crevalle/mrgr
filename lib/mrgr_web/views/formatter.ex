@@ -106,4 +106,12 @@ defmodule MrgrWeb.Formatter do
   # used on trs to prevent overlapping borders
   def selected_outline(true), do: "outline outline-1 outline-teal-500"
   def selected_outline(false), do: "border border-gray-200"
+
+  def username(%{login: login}), do: "@#{login}"
+
+  def usernames(members) do
+    members
+    |> Enum.map(&username/1)
+    |> Enum.join(", ")
+  end
 end
