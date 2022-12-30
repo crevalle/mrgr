@@ -225,4 +225,12 @@ defmodule Mrgr.Schema.PullRequest do
   def author_name(%{author: %{login: login}}), do: login
   def author_name(%{user: %{login: login}}), do: login
   def author_name(_), do: "unknown"
+
+  def recent_comments(pull_request) do
+    recently = Mrgr.DateTime.shift_from_now(-1, :day)
+
+    pull_request.comments
+    |> Enum.filter(&Mrgr.DateTime.after?(&1.posted_at, recently))
+    |> Enum.sort_by(& &1.posted_at, DateTime)
+  end
 end

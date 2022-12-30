@@ -17,4 +17,10 @@ defmodule Mrgr.Schema.Comment do
     |> validate_required([:object, :posted_at])
     |> foreign_key_constraint(:pull_request_id)
   end
+
+  def author(%{raw: %{"comment" => %{"user" => user}}}) do
+    Mrgr.Github.User.new(user)
+  end
+
+  def body(%{raw: %{"comment" => %{"body" => body}}}), do: body
 end

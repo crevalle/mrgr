@@ -20,7 +20,15 @@ defmodule MrgrWeb.Formatter do
   end
 
   def ts(timestamp) do
-    Calendar.strftime(timestamp, "%I:%M%p %b %d, '%y")
+    # 3:14pm Mar 3, '22
+
+    format =
+      case timestamp.year == Mrgr.DateTime.now().year do
+        true -> "%-I:%M%p %b %d"
+        false -> "%-I:%M%p %b %d, '%y"
+      end
+
+    Calendar.strftime(timestamp, format)
   end
 
   def ago(nil), do: nil

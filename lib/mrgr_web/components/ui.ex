@@ -530,9 +530,9 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def dropright_list(assigns) do
+  def action_dropright(assigns) do
     ~H"""
-    <div class="dropdown-content hidden absolute -top-2 left-[120px] z-1 overflow-visible w-max rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
+    <div class="dropdown-content hidden absolute top-1 left-64 z-1 overflow-visible w-max rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
       <%= render_slot(@inner_block) %>
     </div>
     """
@@ -562,13 +562,13 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def dropdown_socks(assigns) do
+  def action_dropdown(assigns) do
     ~H"""
     <div
       style="display: none;"
       id={@name}
       phx-click-away={JS.hide(transition: toggle_out_transition())}
-      class="origin-top-right z-50 absolute rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+      class="origin-top-right z-50 w-64 absolute rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
       role="menu"
       aria-orientation="vertical"
       aria-labelledby={"#{@name}-toggle"}
@@ -631,7 +631,7 @@ defmodule MrgrWeb.Components.UI do
         <.l :for={item <- @items}
           id={"#{@id_prefix}-#{item.id}"}
           phx_click={JS.push("toggle-#{@name}", value: Map.merge(%{id: item.id}, @value))}
-          class="text-gray-700 p-2 text-sm rounded-md hover:bg-gray-50"
+          class="text-gray-700 p-2 text-sm w-52 rounded-md hover:bg-gray-50"
           role="menuitem"
           tabindex="-1" >
 
@@ -723,7 +723,7 @@ defmodule MrgrWeb.Components.UI do
     ~H"""
       <div class="flex">
         <%= img_tag @member.avatar_url, class: "rounded-xl h-5 w-5 mr-1" %>
-        <span><%= @member.login %></span>
+        <%= @member.login %>
       </div>
     """
   end

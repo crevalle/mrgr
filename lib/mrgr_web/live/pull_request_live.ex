@@ -632,7 +632,11 @@ defmodule MrgrWeb.PullRequestLive do
     end
 
     def select(tabs, id) do
-      Mrgr.List.find(tabs, id)
+      # Mrgr.List.find currently coerces ids to integers
+      # because of legacy handling in live view params
+      # here we want to tolerate both integers and strings (tabs have
+      # string ids) so just do the search manually
+      Enum.find(tabs, fn t -> t.id == id end)
     end
 
     def select_pull_request(tab, id) do

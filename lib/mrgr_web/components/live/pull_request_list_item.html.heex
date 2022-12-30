@@ -26,7 +26,7 @@
           <.icon name="chevron-down" class="ml-1 h-3 w-3" />
         </.dropdown_link>
 
-        <.dropdown_socks name={"action-dropdown-#{@pull_request.id}"} >
+        <.action_dropdown name={"action-dropdown-#{@pull_request.id}"} >
 
           <div class="flex flex-col">
 
@@ -40,15 +40,14 @@
               <p class="text-xs text-gray-500 italic"><%= usernames(@pull_request.requested_reviewers) %></p>
             </div>
 
-            <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
-
-              <.dropdown>
+            <.dropdown>
+              <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
                 <div class="flex justify-between items-center">
                   Add Reviewer
                   <.icon name="chevron-right" class="ml-1 h-3 w-3" />
                 </div>
 
-                <.dropright_list>
+                <.action_dropright>
 
                   <.dropdown_toggle_list name="reviewer" items={members_less_author(@members, @pull_request)} ctx={"pull-request-#{@pull_request.id}"} value={%{pull_request_id: @pull_request.id}}>
                     <:row :let={member}>
@@ -64,12 +63,49 @@
 
                   </.dropdown_toggle_list>
 
-                </.dropright_list>
+                </.action_dropright>
+              </div>
+            </.dropdown>
+
+            <%= if Mrgr.Schema.PullRequest.recent_comments(@pull_request) == [] do %>
+              <div class="py-3 pl-4 pr-2 text-sm outline-none rounded-md">
+                <p class="text-gray-500 italic">No Recent Comments</p>
+              </div>
+            <% else %>
+              <.dropdown>
+                <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
+                  <div class="flex justify-between items-center">
+                    Review <%= Enum.count(Mrgr.Schema.PullRequest.recent_comments(@pull_request)) %> Recent Comments
+                    <.icon name="chevron-right" class="ml-1 h-3 w-3" />
+                  </div>
+
+                  <.action_dropright>
+                    <div class="flex flex-col divide-y divide-solid w-72">
+                      <div class="p-2">
+                        <.l href={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)} class="flex text-teal-700 hover:text-teal-500" target="_blank">
+                          <p>View Full Discussion</p>
+                          <.icon name="arrow-top-right-on-square" class="ml-1 h-5 w-5" />
+                        </.l>
+                      </div>
+                      <div :for={comment <- Mrgr.Schema.PullRequest.recent_comments(@pull_request)} class="p-2 flex flex-col">
+                        <div class="flex justify-between">
+                          <.avatar member={Mrgr.Schema.Comment.author(comment)} />
+                          <p><%= ts(comment.posted_at, @timezone) %></p>
+                        </div>
+                        <div class="pt-1">
+                          <p class="text-gray-500 italic">
+                            <%= Mrgr.Schema.Comment.body(comment) %>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </.action_dropright>
+                </div>
               </.dropdown>
-            </div>
+            <% end %>
 
           </div>
-        </.dropdown_socks>
+        </.action_dropdown>
 
       </div>
     </div>
