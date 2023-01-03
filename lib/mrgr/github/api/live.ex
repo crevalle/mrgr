@@ -319,6 +319,18 @@ defmodule Mrgr.Github.API.Live do
     request!(&Tentacat.CheckSuites.list_for_ref/4, pull_request.repository, [owner, name, ref])
   end
 
+  def create_comment(pull_request, message) do
+    {owner, name} = Mrgr.Schema.Repository.owner_name(pull_request.repository)
+
+    request!(&Tentacat.Issues.Comments.create/5, pull_request.repository, [
+      owner,
+      name,
+      pull_request.number,
+      %{body: message}
+    ])
+    |> parse_success()
+  end
+
   def create_label(label, repository) do
     mutation = """
     mutation ($var: CreateLabelInput!) {
@@ -473,6 +485,14 @@ defmodule Mrgr.Github.API.Live do
       elapsed_time: elapsed_time,
       response_headers: Map.new(response.headers)
     }
+  end
+
+  def parse_success(%{"message" => _message} = error) do
+    {:error, error}
+  end
+
+  def parse_success(obj) do
+    {:ok, obj}
   end
 
   defp generate_client!(client_source) do

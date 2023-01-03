@@ -1,0 +1,115 @@
+<div class="relative">
+  <.dropdown_link
+    target={"action-dropdown-#{@pull_request.id}"}
+    class="flex items-baseline px-2 py-1 text-gray-700 border-gray-300 border hover:bg-gray-50 rounded-md font-light text-sm"
+  >
+    Action <.icon name="chevron-down" class="ml-1 h-3 w-3" />
+  </.dropdown_link>
+
+  <.action_dropdown name={"action-dropdown-#{@pull_request.id}"}>
+    <div class="flex flex-col">
+      <.action_menu_item>
+        <:title>
+          <div phx-click={show_modal("poke-author-modal-#{@pull_request.id}")}>
+            <p>Poke Author</p>
+            <p class="text-xs text-gray-500 italic">
+              <%= username(@pull_request.author) %>
+            </p>
+
+            <.modal id={"poke-author-modal-#{@pull_request.id}"}>
+              <:title>
+                Poke the Author
+              </:title>
+
+              <:subtitle>
+                Sending a poke will post a comment to the PR where your team can see it.  Any tagged users will be notified if their Github notifications have been turned on.
+              </:subtitle>
+
+              <.form
+                :let={f}
+                for={:pull_request}
+                phx-submit={
+                  JS.push("poke")
+                  |> hide_modal("poke-author-modal-#{@pull_request.id}")
+                }
+                phx-target={@myself}
+                class="flex flex-col pt-2 space-y-4"
+              >
+                <div class="mt-1">
+                  <.textarea
+                    form={f}
+                    field={:message}
+                    opts={[
+                      value: default_author_poke_message(@pull_request),
+                      placeholder: "Enter your message here",
+                      required: true
+                    ]}
+                  />
+                </div>
+                <%= hidden_input(f, :type, value: "author") %>
+                <div class="flex items-end">
+                  <.button
+                    phx-disable-with="Poking..."
+                    class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+                  >
+                    Send das poke!
+                  </.button>
+                </div>
+              </.form>
+            </.modal>
+          </div>
+        </:title>
+      </.action_menu_item>
+
+      <.action_menu_item>
+        <:title>
+          <div>
+            <p>Ping Reviewers</p>
+            <p class="text-xs text-gray-500 italic">
+              <%= usernames(@pull_request.requested_reviewers) %>
+            </p>
+          </div>
+        </:title>
+      </.action_menu_item>
+
+      <.submenu_action_menu_item>
+        <:title>
+          <p>Add Reviewer</p>
+        </:title>
+
+        <.action_dropright>
+          <.dropdown_toggle_list
+            name="reviewer"
+            items={members_sans_author(@members, @pull_request)}
+            ctx={"pull-request-#{@pull_request.id}"}
+            value={%{pull_request_id: @pull_request.id}}
+          >
+            <:row :let={member}>
+              <div class="flex items-center">
+                <div class="w-8 text-blue-400 ">
+                  <%= if Mrgr.Schema.PullRequest.reviewer_requested?(@pull_request, member) do %>
+                    <.icon name="check" class="text-teal-700 h-5 w-5" />
+                  <% end %>
+                </div>
+                <.avatar member={member} />
+              </div>
+            </:row>
+          </.dropdown_toggle_list>
+        </.action_dropright>
+      </.submenu_action_menu_item>
+
+      <.view_recent_comments_action
+        comments={Mrgr.Schema.PullRequest.recent_comments(@pull_request)}
+        total_comment_count={Enum.count(@pull_request.comments)}
+        permalink={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)}
+        tz={@timezone}
+      />
+
+      <.action_menu_link url={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)}>
+        <:title>
+          <p>Review Changes</p>
+        </:title>
+      </.action_menu_link>
+    </div>
+  </.action_dropdown>
+</div>

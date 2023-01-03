@@ -915,6 +915,39 @@ defmodule Mrgr.PullRequest do
     end
   end
 
+  def merge_action_state(pull_request) do
+    cond do
+      ready_to_merge?(pull_request) -> :ready_to_merge
+      needs_approval?(pull_request) -> :needs_approval
+      needs_ci_fixed?(pull_request) -> :fix_ci
+      true -> :ready_to_merge
+    end
+  end
+
+  def ready_to_merge?(pull_request) do
+    approved?(pull_request) && !ci_failed?(pull_request)
+  end
+
+  def needs_approval?(pull_request) do
+    !approved?(pull_request) && !ci_failed?(pull_request)
+  end
+
+  def needs_ci_fixed?(pull_request) do
+    ci_failed?(pull_request)
+  end
+
+  def approved?(%{
+        approving_review_count: c,
+        repository: %{settings: %{required_approving_review_count: r}}
+      })
+      when c >= r,
+      do: true
+
+  def approved?(_pull_request), do: false
+
+  def ci_failed?(%{ci_status: "failure"}), do: true
+  def ci_failed?(_pull_request), do: false
+
   defp preload_installation(pull_request) do
     Mrgr.Repo.preload(pull_request, repository: [:installation, :file_change_alerts])
   end

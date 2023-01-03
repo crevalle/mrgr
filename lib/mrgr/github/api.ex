@@ -4,6 +4,7 @@ defmodule Mrgr.Github.API do
   @mod Application.compile_env!(:mrgr, :github)[:implementation]
 
   defdelegate commits(pull_request), to: @mod
+  defdelegate create_comment(pull_request, message), to: @mod
   defdelegate fetch_filtered_pulls(installation, repo, opts), to: @mod
   defdelegate fetch_pulls_graphql(installation, repo, params), to: @mod
   defdelegate fetch_repository_settings_graphql(repo), to: @mod

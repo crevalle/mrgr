@@ -120,6 +120,7 @@ defmodule MrgrWeb.Formatter do
   def usernames(members) do
     members
     |> Enum.map(&username/1)
+    |> Enum.sort()
     |> Enum.join(", ")
   end
 end
