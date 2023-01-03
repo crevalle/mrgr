@@ -1,6 +1,8 @@
 defmodule MrgrWeb.AuthController do
   use MrgrWeb, :controller
 
+  require Logger
+
   def new(conn, _params) do
     render(conn)
   end
@@ -31,15 +33,19 @@ defmodule MrgrWeb.AuthController do
         |> put_flash(:info, "Hi there! 👋")
         |> redirect(to: post_sign_in_path(conn, user))
 
-      {:error, %OAuth2.Response{body: _body}} ->
-        conn
-        |> put_flash(:info, "Sorry, OAuth expired.  Please log in again.")
-        |> redirect(to: Routes.auth_path(conn, :github))
+      {:error, %OAuth2.Response{body: body}} ->
+        Logger.warn(inspect(body))
 
-      {:error, %OAuth2.Error{reason: _reason}} ->
         conn
         |> put_flash(:info, "Sorry, OAuth expired.  Please log in again.")
-        |> redirect(to: Routes.auth_path(conn, :github))
+        |> redirect(to: Routes.auth_path(conn, :new))
+
+      {:error, %OAuth2.Error{reason: reason}} ->
+        Logger.warn(inspect(reason))
+
+        conn
+        |> put_flash(:info, "Sorry, OAuth failed.  Please try again later.")
+        |> redirect(to: Routes.auth_path(conn, :new))
     end
   end
 

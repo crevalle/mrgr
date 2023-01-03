@@ -22,7 +22,11 @@ defmodule Auth.GitHub do
 
   # you can pass options to the underlying http library via `opts` parameter
   def get_token!(params \\ [], headers \\ [], opts \\ []) do
-    OAuth2.Client.get_token!(client(), params, headers, opts)
+    client()
+    |> OAuth2.Client.get_token!(params, headers, opts)
+    # Github requires API requests to have a user agent header
+    # get_token!/4 resets our headers so we put the user agent here, not in the constructor
+    |> put_header("User-Agent", "Mrgr")
   end
 
   # Strategy Callbacks
