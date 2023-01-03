@@ -106,7 +106,6 @@
       <div class="sm:flex items-center">
         <.me_tag pull_request={@pull_request} current_user={@current_user} />
         <.badges pull_request={@pull_request} />
-        Opened by <%= Mrgr.Schema.PullRequest.author_name(@pull_request) %> at
       </div>
 
       <.live_component
