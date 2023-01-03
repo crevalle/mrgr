@@ -85,6 +85,7 @@
               comments={Mrgr.Schema.PullRequest.recent_comments(@pull_request)}
               total_comment_count={Enum.count(@pull_request.comments)}
               permalink={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)}
+              tz={@timezone}
             />
 
           </div>

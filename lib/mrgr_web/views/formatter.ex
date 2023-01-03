@@ -10,37 +10,16 @@ defmodule MrgrWeb.Formatter do
     String.slice(sha, 0..6)
   end
 
+  def ts(nil, _timezone), do: nil
+
   def ts(timestamp, timezone) do
     case DateTime.shift_zone(timestamp, timezone) do
-      {:ok, new_timestamp} -> format_ts(new_timestamp)
-      {:error, _busted} -> format_ts(timestamp)
-    end
-  end
-
-  def ts(nil), do: nil
-
-  def ts(timestamp) do
-    timezone = Process.get(:timezone, "America/Los_Angeles")
-
-    case DateTime.shift_zone(timestamp, timezone) do
-      {:ok, new_timestamp} -> format_ts(new_timestamp)
-      {:error, _busted} -> format_ts(timestamp)
+      {:ok, new_timestamp} -> ts(new_timestamp)
+      {:error, _busted} -> ts(timestamp)
     end
   end
 
   def ts(timestamp) do
-    # 3:14pm Mar 3, '22
-
-    format =
-      case timestamp.year == Mrgr.DateTime.now().year do
-        true -> "%-I:%M%p %b %d"
-        false -> "%-I:%M%p %b %d, '%y"
-      end
-
-    Calendar.strftime(timestamp, format)
-  end
-
-  def format_ts(timestamp) do
     # 3:14pm Mar 3, '22
 
     format =

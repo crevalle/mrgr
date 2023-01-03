@@ -763,7 +763,7 @@ defmodule MrgrWeb.Components.UI do
             <div :for={comment <- @comments} class="p-2 flex flex-col">
               <div class="flex justify-between">
                 <.avatar member={Mrgr.Schema.Comment.author(comment)} />
-                <p><%= ts(comment.posted_at) %></p>
+                <p><%= ts(comment.posted_at, @tz) %></p>
               </div>
               <div class="pt-1">
                 <p class="text-gray-500 italic">
