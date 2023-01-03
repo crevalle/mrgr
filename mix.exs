@@ -48,7 +48,7 @@ defmodule Mrgr.MixProject do
       {:neuron, "~> 5.0"},
       {:oban, "~> 2.13"},
       {:oban_web, "~> 2.9", repo: "oban"},
-      {:path_glob, "~> 0.1.1"},
+      {:path_glob, "~> 0.2"},
       {:phoenix, "~> 1.6"},
       {:phoenix_ecto, "~> 4.4"},
       {:phoenix_html, "~> 3.0"},
