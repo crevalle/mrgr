@@ -103,16 +103,17 @@
       <.textarea
         form={f}
         field={:message}
-        opts={[placeholder: "Commit message defaults to PR title.  Enter additional info here."]}
+        opts={[
+          placeholder: "Commit message defaults to PR title.  Enter additional info here."
+        ]}
       />
     </div>
     <%= hidden_input(f, :id, value: @pull_request.id) %>
     <div class="flex items-end">
       <.button
         disabled={@merge_frozen}
-        submit={true}
-        phx_disable_with="Merging..."
-        colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+        phx-disable-with="Merging..."
+        class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
       >
         Merge
       </.button>

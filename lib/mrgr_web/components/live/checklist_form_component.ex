@@ -9,7 +9,7 @@ defmodule MrgrWeb.Components.Live.ChecklistFormComponent do
           <div class="flex items-start items-center">
             <.h1>Create a Pull Request Checklist</.h1>
           </div>
-          <button phx-click="close-detail" colors="outline-none">
+          <button phx-click="close-detail" class="outline-none">
             <.icon name="x-circle" class="text-gray-400 mr-1 h-5 w-5" />
           </button>
         </div>
@@ -82,9 +82,8 @@ defmodule MrgrWeb.Components.Live.ChecklistFormComponent do
           </div>
           <div class="flex items-end">
             <.button
-              submit={true}
-              phx_disable_with="Saving..."
-              colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+              phx-disable-with="Saving..."
+              class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
             >
               Save
             </.button>

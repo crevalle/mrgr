@@ -8,14 +8,14 @@
 
   <div class="relative inline-block text-left">
     <div>
-      <.secondary_button
+      <.outline_button
         :if={admin?(@current_user)}
         phx-click="refresh"
-        colors="text-teal-700 border-teal-600 hover:bg-teal-700"
+        class="text-teal-700 border-teal-600 hover:bg-teal-50"
       >
         Refresh PRs
-      </.secondary_button>
-      <.secondary_button
+      </.outline_button>
+      <.outline_button
         phx-click={
           JS.toggle(
             to: "#merge-freeze-menu",
@@ -27,13 +27,13 @@
                "transform opacity-0 scale-95"}
           )
         }
-        colors="text-gray-700 border-gray-300 hover:bg-gray-50"
+        class="text-gray-700 border-gray-300 hover:bg-gray-100"
         id="freeze-menu-button"
         aria-expanded="false"
         aria-haspopup="true"
       >
         Freeze Merging <.icon name="chevron-down" class="-mr-1 ml-2 h-5 w-5" />
-      </.secondary_button>
+      </.outline_button>
     </div>
 
     <div

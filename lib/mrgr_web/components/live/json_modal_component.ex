@@ -16,7 +16,7 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
       <.button
         phx-click="open"
         phx-target={@myself}
-        colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+        class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
       >
         <%= @button %>
       </.button>

@@ -14,7 +14,7 @@ defmodule MrgrWeb.Components.Form do
     defaults = [
       rows: 4,
       class:
-        "shadow-inner border-emerald-100 focus:ring-emerald-500 focus:border-emerald-500 block w-full sm:text-sm border-gray-300 rounded-md"
+        "shadow-inner border-teal-500 focus:ring-teal-700 focus:border-teal-700 block w-full sm:text-sm rounded-md"
     ]
 
     assigns =

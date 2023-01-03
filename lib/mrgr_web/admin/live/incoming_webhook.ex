@@ -44,8 +44,8 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
                   <.button
                     phx-click="fire"
                     phx-value-id={hook.id}
-                    phx_disable_with="Firing 🚀..."
-                    colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+                    phx-disable-with="Firing 🚀..."
+                    class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
                   >
                     Fire!
                   </.button>

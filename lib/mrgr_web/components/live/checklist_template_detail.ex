@@ -9,7 +9,7 @@ defmodule MrgrWeb.Components.Live.ChecklistTemplateDetail do
           <div class="flex items-start items-center">
             <.h1><%= @template.title %></.h1>
           </div>
-          <button phx-click="close-detail" colors="outline-none">
+          <button phx-click="close-detail" class="outline-none">
             <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
           </button>
         </div>

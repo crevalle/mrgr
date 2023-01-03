@@ -119,6 +119,7 @@ defmodule MrgrWeb do
       # function component helpers
       import MrgrWeb.Components.UI
       import MrgrWeb.Components.Form
+      import MrgrWeb.Components.Core
     end
   end
 

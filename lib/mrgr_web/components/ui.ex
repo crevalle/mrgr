@@ -2,6 +2,7 @@ defmodule MrgrWeb.Components.UI do
   use MrgrWeb, :component
 
   import MrgrWeb.JS
+  import MrgrWeb.Components.Core
 
   alias Phoenix.LiveView.JS
 
@@ -89,84 +90,10 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def button(assigns) do
-    colors =
-      if assigns[:disabled] do
-        "bg-gray-600 hover:bg-gray-700 focus:ring-gray-500"
-      else
-        assigns[:colors]
-      end
-
-    class =
-      "inline-flex items-center py-2 px-4 border border-transparent shadow-md text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 #{colors}"
-
-    type = if assigns[:submit], do: "submit", else: false
-
-    extra = assigns_to_attributes(assigns, [:submit])
-
-    assigns =
-      assigns
-      |> assign(:type, type)
-      |> assign(:class, class)
-      |> assign(:extra, extra)
-
-    ~H"""
-    <button type={@type} class={@class} {@extra}>
-      <%= render_slot(@inner_block) %>
-    </button>
-    """
-  end
-
-  def secondary_button(assigns) do
-    colors =
-      if assigns[:disabled] do
-        "text-gray-700 border-gray-700 hover:bg-gray-700"
-      else
-        assigns[:colors]
-      end
-
-    standard_opts =
-      Enum.join(
-        [
-          "inline-flex",
-          "items-center",
-          "py-2",
-          "px-4",
-          "shadow-md",
-          "text-sm",
-          "font-medium",
-          "border",
-          "hover:border-transparent",
-          "hover:text-white",
-          "rounded-md",
-          "bg-transparent"
-        ],
-        " "
-      )
-
-    class = "#{standard_opts} #{colors}"
-
-    type = if assigns[:submit], do: "submit", else: false
-
-    extra = assigns_to_attributes(assigns, [:submit])
-
-    assigns =
-      assigns
-      |> assign(:type, type)
-      |> assign(:class, class)
-      |> assign(:extra, extra)
-
-    ~H"""
-    <button type={@type} class={@class} {@extra}>
-      <%= render_slot(@inner_block) %>
-    </button>
-    """
-  end
-
   def copy_button(assigns) do
     ~H"""
     <.button
-      colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+      class="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
       phx-click={Phoenix.LiveView.JS.dispatch("mrgr:clipcopy", to: @target)}
     >
       Copy to Clipboard
