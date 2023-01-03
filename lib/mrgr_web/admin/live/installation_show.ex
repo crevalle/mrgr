@@ -12,9 +12,8 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
 
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
         <div class="px-4 py-5 sm:px-6">
-
           <div class="mt-1">
-            <.installation_table installation={@installation} tz={@timezone} ./>
+            <.installation_table installation={@installation} tz={@timezone} . />
           </div>
         </div>
       </div>
@@ -27,16 +26,15 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
 
           <div class="mt-1">
             <table class="min-w-full">
-              <.table_attr obj={@installation.account} key={:avatar_url} ./>
-              <.table_attr obj={@installation.account} key={:external_id} ./>
-              <.table_attr obj={@installation.account} key={:login} ./>
-              <.table_attr obj={@installation.account} key={:type} ./>
-              <.table_attr obj={@installation.account} key={:url} ./>
-              <.table_attr obj={@installation.account} key={:updated_at} tz={@timezone} ./>
-              <.table_attr obj={@installation.account} key={:inserted_at} tz={@timezone} ./>
+              <.table_attr obj={@installation.account} key={:avatar_url} . />
+              <.table_attr obj={@installation.account} key={:external_id} . />
+              <.table_attr obj={@installation.account} key={:login} . />
+              <.table_attr obj={@installation.account} key={:type} . />
+              <.table_attr obj={@installation.account} key={:url} . />
+              <.table_attr obj={@installation.account} key={:updated_at} tz={@timezone} . />
+              <.table_attr obj={@installation.account} key={:inserted_at} tz={@timezone} . />
             </table>
           </div>
-
         </div>
       </div>
 
@@ -47,25 +45,34 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
           </div>
 
           <div class="mt-1">
-            <.admin_user_table users={@installation.users} tz={@timezone} ./>
+            <.admin_user_table users={@installation.users} tz={@timezone} . />
           </div>
-
         </div>
       </div>
 
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
-        <%= live_render @socket, MrgrWeb.Admin.Live.InstallationMemberTable, id: "member-table", session: %{"id" => @installation.id} %>
+        <%= live_render(@socket, MrgrWeb.Admin.Live.InstallationMemberTable,
+          id: "member-table",
+          session: %{"id" => @installation.id}
+        ) %>
       </div>
 
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
-        <.live_component module={MrgrWeb.Components.Live.TeamListComponent} id="team-list" installation_id={@installation.id} timezone={@timezone} />
+        <.live_component
+          module={MrgrWeb.Components.Live.TeamListComponent}
+          id="team-list"
+          installation_id={@installation.id}
+          timezone={@timezone}
+        />
       </div>
 
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
-        <%= live_render @socket, MrgrWeb.Admin.Live.InstallationRepoTable, id: "repository-table", session: %{"id" => @installation.id} %>
+        <%= live_render(@socket, MrgrWeb.Admin.Live.InstallationRepoTable,
+          id: "repository-table",
+          session: %{"id" => @installation.id}
+        ) %>
       </div>
     </div>
-
     """
   end
 

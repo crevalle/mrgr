@@ -21,7 +21,7 @@ defmodule MrgrWeb.Components.PullRequest do
       |> assign(:color, color)
 
     ~H"""
-      <li style={"border-color: #{@color};"} class="pl-2 border-l-2"><pre><%= @filename %></pre></li>
+    <li style={"border-color: #{@color};"} class="pl-2 border-l-2"><pre><%= @filename %></pre></li>
     """
   end
 
@@ -33,9 +33,8 @@ defmodule MrgrWeb.Components.PullRequest do
       |> assign(:recent_comments, recent_comments)
 
     ~H"""
-      <.icon name="location-marker" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-      <%= Enum.count(@comments) %> comments
-      <%= Enum.count(@recent_comments) %> in last 24 hours
+    <.icon name="location-marker" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+    <%= Enum.count(@comments) %> comments <%= Enum.count(@recent_comments) %> in last 24 hours
     """
   end
 
@@ -60,25 +59,23 @@ defmodule MrgrWeb.Components.PullRequest do
       |> assign(:tagged, tagged)
 
     ~H"""
-      <.icon :if={@tagged} name="at-symbol" type="solid" class={"mr-1 text-emerald-600 h-4 w-4"} />
+    <.icon :if={@tagged} name="at-symbol" type="solid" class="mr-1 text-emerald-600 h-4 w-4" />
     """
   end
 
   def pr_approval_badge(%{fully_approved: true} = assigns) do
     ~H"""
-      <p class="flex">
-        <.icon name="check" class="text-sky-600 mr-1 h-5 w-5" />
-        Ready to merge
-      </p>
+    <p class="flex">
+      <.icon name="check" class="text-sky-600 mr-1 h-5 w-5" /> Ready to merge
+    </p>
     """
   end
 
   def pr_approval_badge(%{fully_approved: false} = assigns) do
     ~H"""
-      <p class="flex">
-        <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" />
-        Awaiting approvals
-      </p>
+    <p class="flex">
+      <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" /> Awaiting approvals
+    </p>
     """
   end
 
@@ -102,8 +99,7 @@ defmodule MrgrWeb.Components.PullRequest do
   def ci_status(%{ci_status: "success"} = assigns) do
     ~H"""
     <p class="flex">
-      <.icon name="check-circle" class="text-sky-600 mr-1 h-5 w-5" />
-      CI Passing
+      <.icon name="check-circle" class="text-sky-600 mr-1 h-5 w-5" /> CI Passing
     </p>
     """
   end
@@ -111,8 +107,7 @@ defmodule MrgrWeb.Components.PullRequest do
   def ci_status(%{ci_status: "running"} = assigns) do
     ~H"""
     <p class="flex">
-      <.icon name="wrench" class="text-gray-500 mr-1 h-5 w-5" />
-      CI Running
+      <.icon name="wrench" class="text-gray-500 mr-1 h-5 w-5" /> CI Running
     </p>
     """
   end
@@ -120,8 +115,7 @@ defmodule MrgrWeb.Components.PullRequest do
   def ci_status(%{ci_status: "failure"} = assigns) do
     ~H"""
     <p class="flex">
-      <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" />
-      Fix CI
+      <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" /> Fix CI
     </p>
     """
   end
@@ -129,8 +123,7 @@ defmodule MrgrWeb.Components.PullRequest do
   def ci_status(assigns) do
     ~H"""
     <p class="flex">
-      <.icon name="question-mark-circle" class="text-gray-500 mr-1 h-5 w-5" />
-      CI Status Unknown
+      <.icon name="question-mark-circle" class="text-gray-500 mr-1 h-5 w-5" /> CI Status Unknown
     </p>
     """
   end
@@ -145,7 +138,9 @@ defmodule MrgrWeb.Components.PullRequest do
         </div>
         <div class="flex space-between space-x-2 divide-x divide-gray-500">
           <p class="text-sm text-gray-500"><%= PullRequest.commit_author_name(@commit) %></p>
-          <p class="pl-2 text-sm text-gray-500"><%= shorten_sha(PullRequest.commit_sha(@commit)) %></p>
+          <p class="pl-2 text-sm text-gray-500">
+            <%= shorten_sha(PullRequest.commit_sha(@commit)) %>
+          </p>
         </div>
       </div>
     </li>

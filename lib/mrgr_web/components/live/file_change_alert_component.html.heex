@@ -6,14 +6,13 @@
       <.language_icon language={@repo.language} />
     </div>
     <.l phx-click={
-       JS.push("add-alert", value: %{id: @repo.id})
-         |> show_detail()
-         }>
-         <div class="flex items-center">
-          <.icon name="plus-circle" class="mr-1 flex-shrink-0 h-6 w-6" />
-          Add Alert
-         </div>
-      </.l>
+      JS.push("add-alert", value: %{id: @repo.id})
+      |> show_detail()
+    }>
+      <div class="flex items-center">
+        <.icon name="plus-circle" class="mr-1 flex-shrink-0 h-6 w-6" /> Add Alert
+      </div>
+    </.l>
   </div>
 
   <table class="min-w-full">
@@ -21,7 +20,9 @@
       <tr class="border-t border-gray-200">
         <th class="pl-6 py-2 text-left text-sm font-light text-gray-400">File Pattern</th>
         <th class="py-2 text-left text-sm font-light text-gray-400">Badge</th>
-        <th class="py-2 text-center text-sm font-light text-gray-400">Notify me of new Pull Requests?</th>
+        <th class="py-2 text-center text-sm font-light text-gray-400">
+          Notify me of new Pull Requests?
+        </th>
         <th class="py-2 text-left text-sm font-light text-gray-400"></th>
       </tr>
     </thead>
@@ -38,17 +39,14 @@
           <%= tf(alert.notify_user) %>
         </td>
         <td class="whitespace-nowrap pr-4 py-2 text-right text-sm font-medium">
-          <.l
-            phx_click={
+          <.l phx_click={
             JS.push("edit-alert", value: %{repo: @repo.id, alert: alert.id})
             |> show_detail()
-            }
-            >
+          }>
             Edit
           </.l>
         </td>
       </tr>
-
     </tbody>
   </table>
 </div>

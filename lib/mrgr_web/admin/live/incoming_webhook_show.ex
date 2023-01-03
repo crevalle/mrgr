@@ -11,9 +11,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
 
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
         <div class="px-4 py-5 sm:px-6">
-
           <div class="mt-1">
-
             <table class="min-w-full">
               <thead class="bg-white">
                 <tr>
@@ -60,7 +58,6 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
           </pre>
         </div>
       </div>
-
     </div>
     """
   end

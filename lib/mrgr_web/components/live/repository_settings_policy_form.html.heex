@@ -1,16 +1,24 @@
 <div>
   <div class="flex justify-between items-start">
-    <.heading title={"#{if creating?(@object), do: "Add Security Policy", else: "Edit Security Policy"}"} description="Policies can enforce consistent rules across repos." />
-    <.close_detail_pane  />
+    <.heading
+      title={"#{if creating?(@object), do: "Add Security Policy", else: "Edit Security Policy"}"}
+      description="Policies can enforce consistent rules across repos."
+    />
+    <.close_detail_pane />
   </div>
 
   <div class="mt-8 bg-white overflow-hidden ">
-    <.form let={f} for={@changeset} phx-submit="save" phx-change="validate" phx-target={@myself} class="space-y-8 divide-y divide-gray-200">
-
-      <.input type="text" f={f} field={:name} placeholder="eg. 'default', 'sensitive'"/>
+    <.form
+      :let={f}
+      for={@changeset}
+      phx-submit="save"
+      phx-change="validate"
+      phx-target={@myself}
+      class="space-y-8 divide-y divide-gray-200"
+    >
+      <.input type="text" f={f} field={:name} placeholder="eg. 'default', 'sensitive'" />
 
       <%= for s <- inputs_for(f, :settings) do %>
-
         <.check form={s} attr={:squash_merge_allowed} description="Allow Squash Commits" />
 
         <.check form={s} attr={:merge_commit_allowed} description="Allow Merge Commits" />
@@ -18,29 +26,46 @@
         <.check form={s} attr={:rebase_merge_allowed} description="Allow Rebase Commits" />
 
         <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-center sm:border-t sm:border-gray-200 sm:pt-5">
-          <%= label(s, :required_approving_review_count, "Required Approvals to Merge", class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
+          <%= label(s, :required_approving_review_count, "Required Approvals to Merge",
+            class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
+          ) %>
           <div class="mt-1 sm:mt-0 flex items-center sm:col-span-2">
-            <%= number_input s, :required_approving_review_count, min: "0", max: "10", class: "w-24 shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md" %>
+            <%= number_input(s, :required_approving_review_count,
+              min: "0",
+              max: "10",
+              class:
+                "w-24 shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md"
+            ) %>
           </div>
         </div>
-
       <% end %>
 
-      <.check form={f} attr={:default} description="Default Policy" detail_text="Associate this policy with newly created repositories." />
+      <.check
+        form={f}
+        attr={:default}
+        description="Default Policy"
+        detail_text="Associate this policy with newly created repositories."
+      />
 
-      <.check form={f} attr={:enforce_automatically} description="Enforce Automatically" detail_text="Enforce this policy to any of its repos that fall out of compliance." />
-
+      <.check
+        form={f}
+        attr={:enforce_automatically}
+        description="Enforce Automatically"
+        detail_text="Enforce this policy to any of its repos that fall out of compliance."
+      />
 
       <div class="flex flex-col pt-5">
         <.subheading title="Associate with Repositories">
           <:description>
             <div class="flex flex-col">
               <p>
-              Choose which repos to associate with this policy.  Repositories may only have <strong>1 policy</strong>, so choosing a repo here will overwrite the repo's existing policy.
+                Choose which repos to associate with this policy.  Repositories may only have <strong>1 policy</strong>, so choosing a repo here will overwrite the repo's existing policy.
               </p>
 
               <p class="mt-2">
-                <.inline_link phx-click="toggle-all-repositories" phx-target={@myself}>Toggle All/None</.inline_link>
+                <.inline_link phx-click="toggle-all-repositories" phx-target={@myself}>
+                  Toggle All/None
+                </.inline_link>
               </p>
             </div>
           </:description>
@@ -49,7 +74,11 @@
         <div class="my-4">
           <div class="grid grid-cols-3 gap-3">
             <%= for repo <- @repos do %>
-              <.repo_toggle_item repo={repo} target={@myself} selected={Enum.member?(@selected_repository_ids, repo.id)} />
+              <.repo_toggle_item
+                repo={repo}
+                target={@myself}
+                selected={Enum.member?(@selected_repository_ids, repo.id)}
+              />
             <% end %>
           </div>
         </div>
@@ -58,13 +87,19 @@
       <div class="pt-5">
         <div class="flex space-x-4 justify-end items-center">
           <%= if editing?(@object) do %>
-            <%= link "Delete", to: "#", phx_click: "delete-policy", phx_target: @myself, data: [confirm: "Sure about that?"], class: "mr-2 text-rose-600 hover:text-rose-500 sm:text-sm" %>
+            <%= link("Delete",
+              to: "#",
+              phx_click: "delete-policy",
+              phx_target: @myself,
+              data: [confirm: "Sure about that?"],
+              class: "mr-2 text-rose-600 hover:text-rose-500 sm:text-sm"
+            ) %>
           <% end %>
-          <.button type="submit" colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">Save</.button>
+          <.button type="submit" colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">
+            Save
+          </.button>
         </div>
       </div>
-
     </.form>
   </div>
-
 </div>

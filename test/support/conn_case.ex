@@ -28,6 +28,8 @@ defmodule MrgrWeb.ConnCase do
 
       # The default endpoint for testing
       @endpoint MrgrWeb.Endpoint
+
+      use MrgrWeb, :verified_routes
     end
   end
 

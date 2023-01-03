@@ -1,63 +1,81 @@
-<div class="two-pane-layout" >
+<div class="two-pane-layout">
   <div class="main-pane">
-
     <div class="section">
       <div class="flex justify-between mb-2">
         <.h1>Security Policies</.h1>
         <.l phx-click={
-           JS.push("add-policy")
-           |> show_detail()
-           }>
-         Add New
+          JS.push("add-policy")
+          |> show_detail()
+        }>
+          Add New
         </.l>
       </div>
       <%= if @policies == [] do %>
         <div class="p-4 border border-solid rounded-md bg-blue-50 flex flex-col items-center">
-          <p><strong>None Yet!</strong> Why don't you <.inline_link phx-click={
-           JS.push("add-policy")
-             |> show_detail()
-             }>
-             Add One
-          </.inline_link>?</p>
+          <p>
+            <strong>None Yet!</strong>
+            Why don't you
+            <.inline_link phx-click={
+              JS.push("add-policy")
+              |> show_detail()
+            }>
+              Add One
+            </.inline_link>?
+          </p>
         </div>
       <% else %>
         <table class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
           <thead class="bg-gray-100">
-            <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Name</th>
-            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Repos</th>
-            <th class="p-2 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Required Approvals</th>
-            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">allowed merge types</th>
-            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500"></th>
+            <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              Name
+            </th>
+            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
+              Repos
+            </th>
+            <th class="p-2 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
+              Required Approvals
+            </th>
+            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
+              allowed merge types
+            </th>
+            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
+            </th>
           </thead>
           <tbody class="bg-white">
-            <tr :for={policy <- @policies} class={"#{selected_outline(selected?(policy, @selected_policy))}"} >
+            <tr
+              :for={policy <- @policies}
+              class={"#{selected_outline(selected?(policy, @selected_policy))}"}
+            >
               <td class="py-4 pl-4 flex items-center text-sm font-medium text-gray-900">
                 <%= policy.name %>
                 <.policy_badges policy={policy} />
               </td>
               <td class="p-3 text-gray-500 text-right text-nowrap">
-                <.compliant_repos_count compliant={Mrgr.RepositorySettingsPolicy.compliant_repos(policy)} repos={repos_for_policy(@all_repos, policy)} />
-                <.l phx-click={JS.push("select-policy", value: %{policy_id: policy.id})} >
-                Remediate
+                <.compliant_repos_count
+                  compliant={Mrgr.RepositorySettingsPolicy.compliant_repos(policy)}
+                  repos={repos_for_policy(@all_repos, policy)}
+                />
+                <.l phx-click={JS.push("select-policy", value: %{policy_id: policy.id})}>
+                  Remediate
                 </.l>
-
               </td>
-              <td class="p-3 text-center"><.approving_review_count count={policy.settings.required_approving_review_count } /></td>
+              <td class="p-3 text-center">
+                <.approving_review_count count={policy.settings.required_approving_review_count} />
+              </td>
               <td class="p-3"><.possible_merge_badges settings={policy.settings} /></td>
               <td class="p-3">
                 <.l
                   phx_click={
-                  JS.push("edit-policy")
-                  |> show_detail()
+                    JS.push("edit-policy")
+                    |> show_detail()
                   }
                   phx_value_id={policy.id}
-                  >
+                >
                   Edit
                 </.l>
               </td>
             </tr>
           </tbody>
-
         </table>
       <% end %>
     </div>
@@ -65,12 +83,17 @@
     <div class="section">
       <%= if @selected_policy do %>
         <div class="flex justify-between basis-1/2">
-          <.heading title={"Repositories assigned to policy #{@selected_policy.name}"}/>
+          <.heading title={"Repositories assigned to policy #{@selected_policy.name}"} />
 
-          <.inline_link phx-click={JS.push("enforce-policy-to-repos", value: %{policy_id: @selected_policy.id})} data_confirm="This will update the settings on all the policy's repositories.  Are you sure?" colors="text-red-700 hover:text-red-900" >
-          Enforce Policy on These Repos
+          <.inline_link
+            phx-click={
+              JS.push("enforce-policy-to-repos", value: %{policy_id: @selected_policy.id})
+            }
+            data_confirm="This will update the settings on all the policy's repositories.  Are you sure?"
+            colors="text-red-700 hover:text-red-900"
+          >
+            Enforce Policy on These Repos
           </.inline_link>
-
         </div>
       <% else %>
         <.heading title={"All Repositories for #{ @installation.account.login }"} />
@@ -79,91 +102,137 @@
 
       <table class="mt-4 min-w-full shadow ring-1 ring-black ring-opacity-5 md:rounded-lg">
         <thead class="bg-gray-100">
-          <th class="py-3 pl-20 text-left text-xs font-medium uppercase tracking-wide text-gray-500">Name</th>
-          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Required Approvals</th>
-          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Allowed Merge Types</th>
-          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">Compliant?</th>
+          <th class="py-3 pl-20 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+            Name
+          </th>
+          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
+            Required Approvals
+          </th>
+          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
+            Allowed Merge Types
+          </th>
+          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
+            Compliant?
+          </th>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
-          <tr :for={repo <- @repo_list} >
+          <tr :for={repo <- @repo_list}>
             <td class="py-4 pl-4 text-sm font-medium text-gray-900">
               <div class="flex space-x-2">
                 <.language_icon language={repo.language} />
                 <.lock bool={repo.private} />
-                <span><%= repo.name %> </span>
+                <span><%= repo.name %></span>
                 <.repo_forked_badge parent={repo.parent} />
               </div>
             </td>
-            <td class="text-center"><.approving_review_count count={repo.settings.required_approving_review_count} /></td>
+            <td class="text-center">
+              <.approving_review_count count={repo.settings.required_approving_review_count} />
+            </td>
             <td><.possible_merge_badges settings={repo.settings} /></td>
             <td class="pl-3">
               <.spinner id={"spinner-#{repo.id}"} />
 
-              <div id={"enforce-policy-#{repo.id}"} data-hide={JS.hide()} data-show={JS.show(transition: {"ease-out duration-300", "opacity-0", "opacity-100"}) } class="relative">
-
-                <.l phx-click={JS.toggle(
-                    to: "#enforce-policy-menu-#{repo.id}",
-                    in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
-                    out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
-                  )}
-                   phx-click-away={JS.hide(
-                    to: "#enforce-policy-menu-#{repo.id}",
-                    transition: {"ease-in duration-75", "opacity-100 scale-100", "opacity-0 scale-95"}
-                  )}
+              <div
+                id={"enforce-policy-#{repo.id}"}
+                data-hide={JS.hide()}
+                data-show={
+                  JS.show(transition: {"ease-out duration-300", "opacity-0", "opacity-100"})
+                }
+                class="relative"
+              >
+                <.l
+                  phx-click={
+                    JS.toggle(
+                      to: "#enforce-policy-menu-#{repo.id}",
+                      in:
+                        {"transition ease-out duration-100", "transform opacity-0 scale-95",
+                         "transform opacity-100 scale-100"},
+                      out:
+                        {"transition ease-in duration-75", "transform opacity-100 scale-100",
+                         "transform opacity-0 scale-95"}
+                    )
+                  }
+                  phx-click-away={
+                    JS.hide(
+                      to: "#enforce-policy-menu-#{repo.id}",
+                      transition:
+                        {"ease-in duration-75", "opacity-100 scale-100", "opacity-0 scale-95"}
+                    )
+                  }
                   id={"enforce-policy-menu-button-#{repo.id}"}
                   aria-expanded="false"
                   aria-haspopup="true"
-                  class="flex items-center px-2 py-1 text-gray-700 hover:bg-gray-50 rounded-md font-light text-sm">
-
-                    <%= if Mrgr.Repository.has_policy?(repo) do %>
-                      <%= if Mrgr.Repository.settings_match_policy?(repo) do %>
-                        <.icon name="check" class="text-emerald-500 mr-1 h-5 w-5" />
-                      <% else %>
-                        <.icon name="exclamation-circle" class="text-red-700 mr-1 h-5 w-5" />
-                      <% end %>
-                      <span class="text-gray-500 font-light"><%= Mrgr.Schema.Repository.policy_name(repo) %></span>
+                  class="flex items-center px-2 py-1 text-gray-700 hover:bg-gray-50 rounded-md font-light text-sm"
+                >
+                  <%= if Mrgr.Repository.has_policy?(repo) do %>
+                    <%= if Mrgr.Repository.settings_match_policy?(repo) do %>
+                      <.icon name="check" class="text-emerald-500 mr-1 h-5 w-5" />
                     <% else %>
-                      <p class="text-gray-500 font-light italic">no policy</p>
+                      <.icon name="exclamation-circle" class="text-red-700 mr-1 h-5 w-5" />
                     <% end %>
+                    <span class="text-gray-500 font-light">
+                      <%= Mrgr.Schema.Repository.policy_name(repo) %>
+                    </span>
+                  <% else %>
+                    <p class="text-gray-500 font-light italic">no policy</p>
+                  <% end %>
 
                   <.icon name="chevron-down" class="ml-1 h-3 w-3" />
                 </.l>
 
-                <div style="display: none;" id={"enforce-policy-menu-#{repo.id}"} class="origin-top-right z-50 mt-2 w-64 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby={"enforce-policy-menu-button-#{repo.id}"} tabindex="-1">
+                <div
+                  style="display: none;"
+                  id={"enforce-policy-menu-#{repo.id}"}
+                  class="origin-top-right z-50 mt-2 w-64 absolute right-0 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+                  role="menu"
+                  aria-orientation="vertical"
+                  aria-labelledby={"enforce-policy-menu-button-#{repo.id}"}
+                  tabindex="-1"
+                >
                   <div class="mt-2 flex flex-col text-sm text-gray-500 sm:mt-0">
                     <!-- title -->
                     <div class="flex justify-center">
                       <p class="px-3 pt-3 text-gray-900">Enforce Policy</p>
                     </div>
-                    <p class="p-3 text-center border-b">Select a policy to push its settings to your repository on Github.</p>
-
+                    <p class="p-3 text-center border-b">
+                      Select a policy to push its settings to your repository on Github.
+                    </p>
                     <!-- current policy default action -->
-                    <.enforce_policy_link :if={Mrgr.Repository.has_policy?(repo)} policy_id={repo.policy.id} repo_id={repo.id}>
+                    <.enforce_policy_link
+                      :if={Mrgr.Repository.has_policy?(repo)}
+                      policy_id={repo.policy.id}
+                      repo_id={repo.id}
+                    >
                       <div class="flex items-center justify-between">
                         <%= repo.policy.name %>
-                        <p class="text-gray-500 hover:text-gray-500 font-light italic">current policy</p>
+                        <p class="text-gray-500 hover:text-gray-500 font-light italic">
+                          current policy
+                        </p>
                       </div>
                     </.enforce_policy_link>
 
-                    <.enforce_policy_link :for={policy <- Mrgr.List.remove(@policies, repo.policy)} policy_id={policy.id} repo_id={repo.id}>
+                    <.enforce_policy_link
+                      :for={policy <- Mrgr.List.remove(@policies, repo.policy)}
+                      policy_id={policy.id}
+                      repo_id={repo.id}
+                    >
                       <%= policy.name %>
                     </.enforce_policy_link>
                   </div>
                 </div>
-
               </div>
             </td>
           </tr>
         </tbody>
       </table>
 
-      <div :if={@repo_list == []} class="mt-2 p-4 border border-solid rounded-md bg-blue-50 flex flex-col items-center">
-        <p><strong>None!</strong> </p>
+      <div
+        :if={@repo_list == []}
+        class="mt-2 p-4 border border-solid rounded-md bg-blue-50 flex flex-col items-center"
+      >
+        <p><strong>None!</strong></p>
       </div>
-
-
     </div>
-
   </div>
 
   <div id="detail-pane">
@@ -174,8 +243,7 @@
       repos={@all_repos}
       selected_repository_ids={Enum.map(repos_for_policy(@all_repos, @form_object), & &1.id)}
       current_user={@current_user}
-      timezone={@timezone} />
+      timezone={@timezone}
+    />
   </div>
 </div>
-
-

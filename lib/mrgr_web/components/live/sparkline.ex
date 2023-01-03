@@ -25,9 +25,9 @@ defmodule MrgrWeb.Components.Live.Sparkline do
 
   def render(assigns) do
     ~H"""
-      <div class="">
-        <%= @sp %>
-      </div>
+    <div class="">
+      <%= @sp %>
+    </div>
     """
   end
 

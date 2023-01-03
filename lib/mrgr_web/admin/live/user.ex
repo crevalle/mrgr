@@ -10,11 +10,9 @@ defmodule MrgrWeb.Admin.Live.User do
 
     <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
       <div class="px-4 py-5 sm:px-6">
-
         <div class="mt-1">
-          <.admin_user_table users={@users} tz={@timezone} ./>
+          <.admin_user_table users={@users} tz={@timezone} . />
         </div>
-
       </div>
     </div>
     """

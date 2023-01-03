@@ -3,29 +3,31 @@
 
   <div class="relative inline-block text-left">
     <div>
-      <.button phx-click="open-add-form"
-               colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500">
-        <.icon name="plus-small" class="mr-1 h-5 w-5" />
-        Add New
+      <.button
+        phx-click="open-add-form"
+        colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+      >
+        <.icon name="plus-small" class="mr-1 h-5 w-5" /> Add New
       </.button>
     </div>
-
   </div>
 </div>
 
 <div class="flex mt-8 space-x-4">
-
   <div class="basis-1/2 bg-white px-2 py-5 sm:px-6 overflow-hidden shadow rounded-lg">
     <%= if Enum.empty?(@templates) do %>
       <p>
-        None yet!  Why don't you <a href="#" phx-click="open-add-form" class="text-teal-700 hover:text-teal-500">Add One</a>?
+        None yet!  Why don't you <a
+          href="#"
+          phx-click="open-add-form"
+          class="text-teal-700 hover:text-teal-500"
+        >Add One</a>?
       </p>
     <% else %>
-
       <div class="shadow overflow-hidden sm:rounded-md">
         <ul role="list" class="divide-y divide-gray-200">
           <%= for template <- @templates do %>
-            <li >
+            <li>
               <%= link to: "#", phx_click: "show-detail", phx_value_id: template.id, class: "text-sm font-medium" do %>
                 <div class="block hover:bg-gray-50">
                   <div class="px-4 py-4 sm:px-6">
@@ -38,7 +40,10 @@
                           <.icon name="users" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5" />
                         </p>
                         <p class="mt-2 flex items-center text-sm text-gray-500 sm:mt-0 sm:ml-6">
-                          <.icon name="rectangle-stack" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
+                          <.icon
+                            name="rectangle-stack"
+                            class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400"
+                          />
                         </p>
                       </div>
                     </div>
@@ -52,14 +57,22 @@
     <% end %>
   </div>
 
-
   <%= if @changeset do %>
-    <.live_component module={MrgrWeb.Components.Live.ChecklistFormComponent} id="checklist_form" changeset={@changeset} repository_list={@repository_list} selected_repository_ids={@selected_repository_ids} />
+    <.live_component
+      module={MrgrWeb.Components.Live.ChecklistFormComponent}
+      id="checklist_form"
+      changeset={@changeset}
+      repository_list={@repository_list}
+      selected_repository_ids={@selected_repository_ids}
+    />
   <% end %>
 
   <%= if @detail do %>
-    <.live_component module={MrgrWeb.Components.Live.ChecklistTemplateDetail} id={"checklist_template_#{@detail.id}"} template={@detail} timezone={@timezone} />
+    <.live_component
+      module={MrgrWeb.Components.Live.ChecklistTemplateDetail}
+      id={"checklist_template_#{@detail.id}"}
+      template={@detail}
+      timezone={@timezone}
+    />
   <% end %>
-
 </div>
-

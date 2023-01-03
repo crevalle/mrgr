@@ -17,6 +17,10 @@ defmodule MrgrWeb do
   and import those modules here.
   """
 
+  def static_paths,
+    do:
+      ~w(assets fonts images favicon.ico manifest.json apple-touch-icon.png android-chrome-192x192.png android-chrome-512x512.png favicon-16x16.png favicon-132x32.png robots.txt)
+
   def controller do
     quote do
       use Phoenix.Controller, namespace: MrgrWeb
@@ -25,6 +29,8 @@ defmodule MrgrWeb do
       import MrgrWeb.Plug.Auth
       import MrgrWeb.Gettext
       alias MrgrWeb.Router.Helpers, as: Routes
+
+      unquote(verified_routes())
     end
   end
 
@@ -51,7 +57,7 @@ defmodule MrgrWeb do
   def live_view do
     quote do
       use Phoenix.LiveView,
-        layout: {MrgrWeb.LayoutView, "live.html"}
+        layout: {MrgrWeb.LayoutView, :live}
 
       import Mrgr.Tuple
       import MrgrWeb.Live
@@ -121,8 +127,7 @@ defmodule MrgrWeb do
       # Use all HTML functionality (forms, tags, etc)
       use Phoenix.HTML
 
-      # Import LiveView and .heex helpers (live_render, live_patch, <.form>, etc)
-      import Phoenix.LiveView.Helpers
+      import Phoenix.Component
 
       # Import basic rendering functionality (render, render_layout, etc)
       import Phoenix.View
@@ -139,6 +144,17 @@ defmodule MrgrWeb do
       alias MrgrWeb.Router.Helpers, as: Routes
 
       import MrgrWeb.JS
+
+      unquote(verified_routes())
+    end
+  end
+
+  def verified_routes do
+    quote do
+      use Phoenix.VerifiedRoutes,
+        endpoint: MrgrWeb.Endpoint,
+        router: MrgrWeb.Router,
+        statics: MrgrWeb.static_paths()
     end
   end
 

@@ -12,9 +12,12 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
 
   def render(assigns) do
     ~H"""
-
     <div>
-      <.button phx-click="open" phx-target={@myself} colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">
+      <.button
+        phx-click="open"
+        phx-target={@myself}
+        colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+      >
         <%= @button %>
       </.button>
       <%= if @state == "open" do %>
@@ -33,7 +36,7 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
 
           <div class="fixed inset-0 z-10 overflow-y-auto">
             <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-            <!--
+              <!--
             Modal panel, show/hide based on modal state.
 
             Leaving: "ease-in duration-200"
@@ -50,7 +53,7 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
                           phx-click="close"
                           phx-target={@myself}
                           class="inline-flex justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:text-sm"
-                          >
+                        >
                           Close
                         </button>
                         <.copy_button target={"#json-data-#{@id}"} />
@@ -70,7 +73,7 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
                     phx-click="close"
                     phx-target={@myself}
                     class="inline-flex w-full justify-center rounded-md border border-transparent bg-red-600 px-4 py-2 text-base font-medium text-white shadow-sm hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 sm:text-sm"
-                    >
+                  >
                     Close
                   </button>
                 </div>
@@ -78,11 +81,8 @@ defmodule MrgrWeb.Components.Live.JSONModalComponent do
             </div>
           </div>
         </div>
-
-    <% end %>
-
+      <% end %>
     </div>
-
     """
   end
 

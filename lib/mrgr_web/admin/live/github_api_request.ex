@@ -10,7 +10,6 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
 
     <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
       <div class="px-4 py-5 sm:px-6">
-
         <div class="mt-1">
           <.page_nav page={@page} />
 
@@ -33,25 +32,40 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
             <%= for r <- @page.entries do %>
               <.tr striped={true}>
                 <.td><%= r.id %></.td>
-                <.td><%= link r.installation.account.login, to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, r.installation_id), class: "text-teal-700 hover:text-teal-500" %></.td>
+                <.td>
+                  <%= link(r.installation.account.login,
+                    to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, r.installation_id),
+                    class: "text-teal-700 hover:text-teal-500"
+                  ) %>
+                </.td>
                 <.td><%= Mrgr.Schema.GithubAPIRequest.ratelimit_remaining(r) %></.td>
                 <.td><%= ts(Mrgr.Schema.GithubAPIRequest.ratelimit_reset(r), @timezone) %></.td>
                 <.td><%= shorten(r.api_call) %></.td>
                 <.td><%= r.response_code %></.td>
                 <.td><%= r.elapsed_time %></.td>
                 <.td>
-                  <.live_component module={MrgrWeb.Components.Live.JSONModalComponent} id={"data-modal-#{r.id}"} title={"Request #{r.id} Data"} data={r.data} ./>
+                  <.live_component
+                    module={MrgrWeb.Components.Live.JSONModalComponent}
+                    id={"data-modal-#{r.id}"}
+                    title={"Request #{r.id} Data"}
+                    data={r.data}
+                    .
+                  />
                 </.td>
                 <.td>
-                  <.live_component module={MrgrWeb.Components.Live.JSONModalComponent} id={"headers-modal-#{r.id}"} title={"Request #{r.id} Response Headers"} data={r.response_headers} ./>
+                  <.live_component
+                    module={MrgrWeb.Components.Live.JSONModalComponent}
+                    id={"headers-modal-#{r.id}"}
+                    title={"Request #{r.id} Response Headers"}
+                    data={r.response_headers}
+                    .
+                  />
                 </.td>
                 <.td><%= ts(r.inserted_at, @timezone) %></.td>
               </.tr>
             <% end %>
           </table>
-
         </div>
-
       </div>
     </div>
     """

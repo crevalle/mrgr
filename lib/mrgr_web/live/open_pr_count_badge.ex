@@ -27,7 +27,7 @@ defmodule MrgrWeb.Live.OpenPRCountBadge do
 
   def render(assigns) do
     ~H"""
-      <.pr_count_badge count={@count} />
+    <.pr_count_badge count={@count} />
     """
   end
 

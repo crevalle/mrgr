@@ -11,7 +11,6 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
 
     <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
       <div class="px-4 py-5 sm:px-6">
-
         <div class="mt-1">
           <.page_nav page={@page} />
 
@@ -33,19 +32,28 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
                 <.td><%= hook.id %></.td>
                 <.td><%= hook.installation_id %></.td>
                 <.td><%= pr_number(hook) %></.td>
-                <.td><%= link hook.object, to: Routes.admin_incoming_webhook_path(@socket, :show, hook.id), class: "text-teal-700 hover:text-teal-500" %></.td>
+                <.td>
+                  <%= link(hook.object,
+                    to: Routes.admin_incoming_webhook_path(@socket, :show, hook.id),
+                    class: "text-teal-700 hover:text-teal-500"
+                  ) %>
+                </.td>
                 <.td><%= hook.action %></.td>
                 <.td><%= ts(hook.inserted_at, assigns.timezone) %></.td>
                 <.td>
-                  <.button phx-click="fire" phx-value-id={hook.id} phx_disable_with="Firing 🚀..." colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">Fire!</.button>
+                  <.button
+                    phx-click="fire"
+                    phx-value-id={hook.id}
+                    phx_disable_with="Firing 🚀..."
+                    colors="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+                  >
+                    Fire!
+                  </.button>
                 </.td>
               </.tr>
             <% end %>
           </table>
-
-
         </div>
-
       </div>
     </div>
     """

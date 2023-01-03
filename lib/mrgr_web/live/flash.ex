@@ -20,11 +20,23 @@ defmodule MrgrWeb.Live.Flash do
   def render(assigns) do
     ~H"""
     <div>
-      <p :if={live_flash(@flash, :info)} id="flash-info" class="alert alert-info" phx-click="lv:clear-flash" role="alert">
+      <p
+        :if={live_flash(@flash, :info)}
+        id="flash-info"
+        class="alert alert-info"
+        phx-click="lv:clear-flash"
+        role="alert"
+      >
         <%= live_flash(@flash, :info) %>
       </p>
 
-      <p :if={live_flash(@flash, :error)} id="flash-error" class="alert alert-danger" phx-click="lv:clear-flash" role="alert">
+      <p
+        :if={live_flash(@flash, :error)}
+        id="flash-error"
+        class="alert alert-danger"
+        phx-click="lv:clear-flash"
+        role="alert"
+      >
         <%= live_flash(@flash, :error) %>
       </p>
     </div>

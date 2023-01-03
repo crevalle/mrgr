@@ -21,7 +21,6 @@ defmodule MrgrWeb.Components.Live.ChecklistTemplateDetail do
 
         <.h3>Check Templates</.h3>
         <ul>
-
           <%= for ct <- @template.check_templates do %>
             <li><%= ct.text %></li>
           <% end %>
@@ -29,15 +28,20 @@ defmodule MrgrWeb.Components.Live.ChecklistTemplateDetail do
 
         <.h3>Applies to Repos</.h3>
         <ul>
-        <%= for repo <- @template.repositories do %>
-          <li><%= repo.name %></li>
-        <% end %>
+          <%= for repo <- @template.repositories do %>
+            <li><%= repo.name %></li>
+          <% end %>
         </ul>
 
-
-        <%= link "Delete", to: "#", data: [confirm: "Sure about that?"], phx_click: "delete", phx_value_id: @template.id, class: "btn ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rose-600 hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-offset-2" %>
+        <%= link("Delete",
+          to: "#",
+          data: [confirm: "Sure about that?"],
+          phx_click: "delete",
+          phx_value_id: @template.id,
+          class:
+            "btn ml-3 inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-rose-600 hover:bg-rose-500 focus:outline-none focus:ring-2 focus:ring-offset-2"
+        ) %>
       </div>
-
     </div>
     """
   end

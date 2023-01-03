@@ -10,31 +10,29 @@ defmodule MrgrWeb.Admin.Live.UserShow do
       <.heading title={"User #{@user.nickname}"} />
 
       <p>
-        <%= img_tag @user.image, class: "rounded-md" %>
+        <%= img_tag(@user.image, class: "rounded-md") %>
       </p>
 
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
         <div class="px-4 py-5 sm:px-6">
-
           <div class="mt-1">
-
             <table class="min-w-full">
-              <.table_attr obj={@user} key={:id} ./>
-              <.table_attr obj={@user} key={:nickname} ./>
-              <.table_attr obj={@user} key={:birthday} ./>
-              <.table_attr obj={@user} key={:email} ./>
-              <.table_attr obj={@user} key={:name} ./>
-              <.table_attr obj={@user} key={:first_name} ./>
-              <.table_attr obj={@user} key={:last_name} ./>
-              <.table_attr obj={@user} key={:location} ./>
-              <.table_attr obj={@user} key={:avatar_url} ./>
-              <.table_attr obj={@user} key={:phone} ./>
-              <.table_attr obj={@user} key={:refresh_token} ./>
-              <.table_attr obj={@user} key={:token} ./>
-              <.table_attr obj={@user} key={:token_expires_at} tz={@timezone} ./>
-              <.table_attr obj={@user} key={:token_updated_at} tz={@timezone} ./>
-              <.table_attr obj={@user} key={:updated_at} tz={@timezone} ./>
-              <.table_attr obj={@user} key={:inserted_at} tz={@timezone} ./>
+              <.table_attr obj={@user} key={:id} . />
+              <.table_attr obj={@user} key={:nickname} . />
+              <.table_attr obj={@user} key={:birthday} . />
+              <.table_attr obj={@user} key={:email} . />
+              <.table_attr obj={@user} key={:name} . />
+              <.table_attr obj={@user} key={:first_name} . />
+              <.table_attr obj={@user} key={:last_name} . />
+              <.table_attr obj={@user} key={:location} . />
+              <.table_attr obj={@user} key={:avatar_url} . />
+              <.table_attr obj={@user} key={:phone} . />
+              <.table_attr obj={@user} key={:refresh_token} . />
+              <.table_attr obj={@user} key={:token} . />
+              <.table_attr obj={@user} key={:token_expires_at} tz={@timezone} . />
+              <.table_attr obj={@user} key={:token_updated_at} tz={@timezone} . />
+              <.table_attr obj={@user} key={:updated_at} tz={@timezone} . />
+              <.table_attr obj={@user} key={:inserted_at} tz={@timezone} . />
             </table>
           </div>
         </div>
@@ -47,27 +45,25 @@ defmodule MrgrWeb.Admin.Live.UserShow do
           </div>
 
           <div class="mt-1">
-
             <table class="min-w-full">
-              <.table_attr obj={@user.member} key={:login} ./>
-              <.table_attr obj={@user.member} key={:type} ./>
-              <.table_attr obj={@user.member} key={:site_admin} ./>
-              <.table_attr obj={@user.member} key={:node_id} ./>
-              <.table_attr obj={@user.member} key={:url} ./>
-              <.table_attr obj={@user.member} key={:avatar_url} ./>
-              <.table_attr obj={@user.member} key={:events_url} ./>
-              <.table_attr obj={@user.member} key={:followers_url} ./>
-              <.table_attr obj={@user.member} key={:following_url} ./>
-              <.table_attr obj={@user.member} key={:gists_url} ./>
-              <.table_attr obj={@user.member} key={:gravatar_id} ./>
-              <.table_attr obj={@user.member} key={:html_url} ./>
-              <.table_attr obj={@user.member} key={:organizations_url} ./>
-              <.table_attr obj={@user.member} key={:received_events_url} ./>
-              <.table_attr obj={@user.member} key={:starred_url} ./>
-              <.table_attr obj={@user.member} key={:subscriptions_url} ./>
+              <.table_attr obj={@user.member} key={:login} . />
+              <.table_attr obj={@user.member} key={:type} . />
+              <.table_attr obj={@user.member} key={:site_admin} . />
+              <.table_attr obj={@user.member} key={:node_id} . />
+              <.table_attr obj={@user.member} key={:url} . />
+              <.table_attr obj={@user.member} key={:avatar_url} . />
+              <.table_attr obj={@user.member} key={:events_url} . />
+              <.table_attr obj={@user.member} key={:followers_url} . />
+              <.table_attr obj={@user.member} key={:following_url} . />
+              <.table_attr obj={@user.member} key={:gists_url} . />
+              <.table_attr obj={@user.member} key={:gravatar_id} . />
+              <.table_attr obj={@user.member} key={:html_url} . />
+              <.table_attr obj={@user.member} key={:organizations_url} . />
+              <.table_attr obj={@user.member} key={:received_events_url} . />
+              <.table_attr obj={@user.member} key={:starred_url} . />
+              <.table_attr obj={@user.member} key={:subscriptions_url} . />
             </table>
           </div>
-
         </div>
       </div>
 
@@ -77,7 +73,7 @@ defmodule MrgrWeb.Admin.Live.UserShow do
             <.h3>Current Installation</.h3>
           </div>
 
-          <.installation_table installation={@user.current_installation} tz={@timezone} ./>
+          <.installation_table installation={@user.current_installation} tz={@timezone} . />
         </div>
       </div>
 
@@ -88,7 +84,7 @@ defmodule MrgrWeb.Admin.Live.UserShow do
           </div>
 
           <%= for _install <- @user.installations do %>
-            <.installation_table installation={@user.current_installation} tz={@timezone} ./>
+            <.installation_table installation={@user.current_installation} tz={@timezone} . />
           <% end %>
         </div>
       </div>
@@ -104,7 +100,6 @@ defmodule MrgrWeb.Admin.Live.UserShow do
           </pre>
         </div>
       </div>
-
     </div>
     """
   end

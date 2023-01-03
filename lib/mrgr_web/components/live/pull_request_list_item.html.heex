@@ -1,41 +1,45 @@
-<div class={"bg-white border #{item_border_color(@pull_request, @selected)} shadow rounded-lg"} id={"pull-request-#{@pull_request.id}"}>
+<div
+  class={"bg-white border #{item_border_color(@pull_request, @selected)} shadow rounded-lg"}
+  id={"pull-request-#{@pull_request.id}"}
+>
   <div class="p-3">
-
     <!-- top row -->
     <div class="flex items-center justify-between items-baseline">
-
       <!-- title -->
       <div class="flex items-baseline">
         <.h3>
-          <.l phx-click={
-           JS.push("select-pull-request", value: %{id: @pull_request.id})
-               |> show_detail()
-             }
-           class="text-teal-700 text-xl hover:text-teal-500">
-           <%= @pull_request.title %>
+          <.l
+            phx-click={
+              JS.push("select-pull-request", value: %{id: @pull_request.id})
+              |> show_detail()
+            }
+            class="text-teal-700 text-xl hover:text-teal-500"
+          >
+            <%= @pull_request.title %>
           </.l>
         </.h3>
         <p class={"ml-2 text-sm italic font-light #{repo_text_color(@merge_frozen)}"}>
           <%= @pull_request.repository.name %>
         </p>
       </div>
-
       <!-- action button -->
       <div class="relative">
-        <.dropdown_link target={"action-dropdown-#{@pull_request.id}"} class="flex items-baseline px-2 py-1 text-gray-700 border-gray-300 border hover:bg-gray-50 rounded-md font-light text-sm">
-          Action
-          <.icon name="chevron-down" class="ml-1 h-3 w-3" />
+        <.dropdown_link
+          target={"action-dropdown-#{@pull_request.id}"}
+          class="flex items-baseline px-2 py-1 text-gray-700 border-gray-300 border hover:bg-gray-50 rounded-md font-light text-sm"
+        >
+          Action <.icon name="chevron-down" class="ml-1 h-3 w-3" />
         </.dropdown_link>
 
-        <.action_dropdown name={"action-dropdown-#{@pull_request.id}"} >
-
+        <.action_dropdown name={"action-dropdown-#{@pull_request.id}"}>
           <div class="flex flex-col">
-
             <.action_menu_item>
               <:title>
                 <div>
                   <p>Ping Author</p>
-                  <p class="text-xs text-gray-500 italic"><%= username(@pull_request.author) %></p>
+                  <p class="text-xs text-gray-500 italic">
+                    <%= username(@pull_request.author) %>
+                  </p>
                 </div>
               </:title>
             </.action_menu_item>
@@ -44,11 +48,12 @@
               <:title>
                 <div>
                   <p>Ping Reviewers</p>
-                  <p class="text-xs text-gray-500 italic"><%= usernames(@pull_request.requested_reviewers) %></p>
+                  <p class="text-xs text-gray-500 italic">
+                    <%= usernames(@pull_request.requested_reviewers) %>
+                  </p>
                 </div>
               </:title>
             </.action_menu_item>
-
 
             <.submenu_action_menu_item>
               <:title>
@@ -56,8 +61,12 @@
               </:title>
 
               <.action_dropright>
-
-                <.dropdown_toggle_list name="reviewer" items={members_less_author(@members, @pull_request)} ctx={"pull-request-#{@pull_request.id}"} value={%{pull_request_id: @pull_request.id}}>
+                <.dropdown_toggle_list
+                  name="reviewer"
+                  items={members_less_author(@members, @pull_request)}
+                  ctx={"pull-request-#{@pull_request.id}"}
+                  value={%{pull_request_id: @pull_request.id}}
+                >
                   <:row :let={member}>
                     <div class="flex items-center">
                       <div class="w-8 text-blue-400 ">
@@ -68,12 +77,9 @@
                       <.avatar member={member} />
                     </div>
                   </:row>
-
                 </.dropdown_toggle_list>
-
               </.action_dropright>
             </.submenu_action_menu_item>
-
 
             <.view_recent_comments_action
               comments={Mrgr.Schema.PullRequest.recent_comments(@pull_request)}
@@ -82,33 +88,34 @@
               tz={@timezone}
             />
 
-            <.action_menu_link url={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)}>
+            <.action_menu_link url={
+              Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)
+            }>
               <:title>
                 <div class="flex">
                   <p>Review Changes</p>
                 </div>
               </:title>
             </.action_menu_link>
-
           </div>
         </.action_dropdown>
-
       </div>
     </div>
-
     <!-- 2nd row -->
     <div class="mt-2 sm:flex sm:justify-between">
-
       <div class="sm:flex items-center">
         <.me_tag pull_request={@pull_request} current_user={@current_user} />
         <.badges pull_request={@pull_request} />
         Opened by <%= Mrgr.Schema.PullRequest.author_name(@pull_request) %> at
       </div>
 
-
-      <.live_component module={MrgrWeb.Components.Live.Sparkline} id={"pull_request_#{@pull_request.id}_activity_preview"} comments={@pull_request.comments} commits={@pull_request.commits} />
+      <.live_component
+        module={MrgrWeb.Components.Live.Sparkline}
+        id={"pull_request_#{@pull_request.id}_activity_preview"}
+        comments={@pull_request.comments}
+        commits={@pull_request.commits}
+      />
     </div>
-
     <!-- 3rd row -->
     <div class="mt-2 sm:flex sm:justify-between text-sm text-gray-500 items-start">
       <div class="flex space-x-2">
@@ -117,14 +124,8 @@
       </div>
 
       <p>
-      Opened <.timeago
-         datetime={@pull_request.opened_at}
-         uhoh={true}
-         ./>
+        Opened <.timeago datetime={@pull_request.opened_at} uhoh={true} . />
       </p>
-
     </div>
-
   </div>
 </div>
-

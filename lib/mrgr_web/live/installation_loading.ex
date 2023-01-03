@@ -19,11 +19,16 @@ defmodule MrgrWeb.Live.InstallationLoading do
 
   def render(assigns) do
     ~H"""
-
     <div class="flex flex-col mt-8 space-y-4">
-      <p>We've connected Mrgr to your <span class="font-bold"><%= @current_user.current_installation.account.login %></span> account.</p>
+      <p>
+        We've connected Mrgr to your
+        <span class="font-bold"><%= @current_user.current_installation.account.login %></span>
+        account.
+      </p>
 
-      <p>We are currently syncing all of your data.  When that's done, you'll be automatically redirected to get started. 🙂</p>
+      <p>
+        We are currently syncing all of your data.  When that's done, you'll be automatically redirected to get started. 🙂
+      </p>
 
       <div class="flex flex-col space-y-4">
         <p><%= @dots %></p>
@@ -32,7 +37,6 @@ defmodule MrgrWeb.Live.InstallationLoading do
           <p class="text-gray-500"><%= event %></p>
         <% end %>
       </div>
-
     </div>
     """
   end

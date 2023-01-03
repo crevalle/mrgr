@@ -1,17 +1,18 @@
-<.heading title={"Open PRs for #{@repository.name}"}  />
+<.heading title={"Open PRs for #{@repository.name}"} />
 <.page_nav page={@page} />
 <div class="flex mt-8 space-x-4">
-    <div class="basis-1/2 overflow-hidden">
-      <div role="list" class="flex flex-col space-y-4" id="pending-pull-request-list">
-        <.live_component
-          :for={pull_request <- @pull_requests}
-          module={MrgrWeb.Components.Live.PullRequestListItem }
-          id={"pull_request_#{pull_request.id}"}
-          pull_request={pull_request}
-          selected={false}
-          merge_frozen={false}
-          current_user={@current_user}
-          timezone={@timezone} />
-      </div>
+  <div class="basis-1/2 overflow-hidden">
+    <div role="list" class="flex flex-col space-y-4" id="pending-pull-request-list">
+      <.live_component
+        :for={pull_request <- @pull_requests}
+        module={MrgrWeb.Components.Live.PullRequestListItem}
+        id={"pull_request_#{pull_request.id}"}
+        pull_request={pull_request}
+        selected={false}
+        merge_frozen={false}
+        current_user={@current_user}
+        timezone={@timezone}
+      />
     </div>
+  </div>
 </div>

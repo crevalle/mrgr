@@ -4,7 +4,7 @@ defmodule MrgrWeb.Live do
   """
 
   def put_title(socket, title) do
-    prefix = if Mrgr.dev?(), do: "Mrgr[dev]", else: "Mrgr"
-    Phoenix.Component.assign(socket, page_title: "#{prefix} - #{title}")
+    prefix = if Mrgr.dev?(), do: "[dev] ", else: ""
+    Phoenix.Component.assign(socket, page_title: "#{prefix}#{title}")
   end
 end

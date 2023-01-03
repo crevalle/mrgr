@@ -5,27 +5,24 @@ defmodule MrgrWeb.Live.AnalyticsBox do
 
   def render(assigns) do
     ~H"""
-
-      <div class="flex">
-        <p class="italic text-sm text-gray-500 mr-4">12 week analytics</p>
-        <div class="flex flex-col items-end mr-8">
-          <div class="flex">
-            <%= @closed_pr_sparkline %>
-            <span class="ml-2"><%= closed_this_week(@bucket) %></span>
-          </div>
-          <p class="text-sm text-gray-500">Closed PRs</p>
+    <div class="flex">
+      <p class="italic text-sm text-gray-500 mr-4">12 week analytics</p>
+      <div class="flex flex-col items-end mr-8">
+        <div class="flex">
+          <%= @closed_pr_sparkline %>
+          <span class="ml-2"><%= closed_this_week(@bucket) %></span>
         </div>
-
-        <div class="flex flex-col items-end">
-          <div class="flex">
-            <%= @time_open_sparkline %>
-            <span class="ml-2"><.to_days hours={@time_open_this_week} /></span>
-          </div>
-          <p class="text-sm text-gray-500">Average Time Open</p>
-        </div>
+        <p class="text-sm text-gray-500">Closed PRs</p>
       </div>
 
-
+      <div class="flex flex-col items-end">
+        <div class="flex">
+          <%= @time_open_sparkline %>
+          <span class="ml-2"><.to_days hours={@time_open_this_week} /></span>
+        </div>
+        <p class="text-sm text-gray-500">Average Time Open</p>
+      </div>
+    </div>
     """
   end
 

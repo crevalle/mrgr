@@ -82,7 +82,7 @@ defmodule MrgrWeb.Components.UI do
     ~H"""
     <.h3><%= @title %></.h3>
     <%= unless Enum.empty?(@description) do %>
-      <p class="mt-1 mb-2" >
+      <p class="mt-1 mb-2">
         <%= render_slot(@description) %>
       </p>
     <% end %>
@@ -111,9 +111,9 @@ defmodule MrgrWeb.Components.UI do
       |> assign(:extra, extra)
 
     ~H"""
-      <button type={@type} class={@class} {@extra} >
-        <%= render_slot(@inner_block) %>
-      </button>
+    <button type={@type} class={@class} {@extra}>
+      <%= render_slot(@inner_block) %>
+    </button>
     """
   end
 
@@ -157,16 +157,18 @@ defmodule MrgrWeb.Components.UI do
       |> assign(:extra, extra)
 
     ~H"""
-      <button type={@type} class={@class} {@extra} >
-        <%= render_slot(@inner_block) %>
-      </button>
+    <button type={@type} class={@class} {@extra}>
+      <%= render_slot(@inner_block) %>
+    </button>
     """
   end
 
   def copy_button(assigns) do
     ~H"""
-    <.button colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
-              phx-click={Phoenix.LiveView.JS.dispatch("mrgr:clipcopy", to: @target)}>
+    <.button
+      colors="bg-blue-600 hover:bg-blue-700 focus:ring-blue-500"
+      phx-click={Phoenix.LiveView.JS.dispatch("mrgr:clipcopy", to: @target)}
+    >
       Copy to Clipboard
     </.button>
     """
@@ -187,7 +189,7 @@ defmodule MrgrWeb.Components.UI do
 
   def heading_description(assigns) do
     ~H"""
-      <p class="mt-2 text-sm text-gray-700"><%= render_slot(@inner_block) %></p>
+    <p class="mt-2 text-sm text-gray-700"><%= render_slot(@inner_block) %></p>
     """
   end
 
@@ -265,60 +267,64 @@ defmodule MrgrWeb.Components.UI do
       <.td class="font-bold"><%= @label %></.td>
       <.td><%= @value %></.td>
     </.tr>
-
     """
   end
 
   def installation_table(assigns) do
     ~H"""
-      <table class="min-w-full">
-        <.table_attr obj={@installation} key={:app_id} ./>
-        <.table_attr obj={@installation} key={:app_slug} ./>
-        <.table_attr obj={@installation} key={:events} ./>
-        <.table_attr obj={@installation} key={:external_id} ./>
-        <.table_attr obj={@installation} key={:html_url} ./>
-        <.table_attr obj={@installation} key={:installation_created_at} tz={@tz} ./>
-        <.table_attr obj={@installation} key={:permissions} ./>
-        <.table_attr obj={@installation} key={:repositories_url} ./>
-        <.table_attr obj={@installation} key={:repository_selection} ./>
-        <.table_attr obj={@installation} key={:target_id} ./>
-        <.table_attr obj={@installation} key={:target_type} ./>
-        <.table_attr obj={@installation} key={:access_tokens_url} ./>
-        <.table_attr obj={@installation} key={:token} tz={@tz} ./>
-        <.table_attr obj={@installation} key={:token_expires_at} tz={@tz} ./>
-        <.table_attr obj={@installation} key={:updated_at} tz={@tz} ./>
-        <.table_attr obj={@installation} key={:inserted_at} tz={@tz} ./>
-      </table>
+    <table class="min-w-full">
+      <.table_attr obj={@installation} key={:app_id} . />
+      <.table_attr obj={@installation} key={:app_slug} . />
+      <.table_attr obj={@installation} key={:events} . />
+      <.table_attr obj={@installation} key={:external_id} . />
+      <.table_attr obj={@installation} key={:html_url} . />
+      <.table_attr obj={@installation} key={:installation_created_at} tz={@tz} . />
+      <.table_attr obj={@installation} key={:permissions} . />
+      <.table_attr obj={@installation} key={:repositories_url} . />
+      <.table_attr obj={@installation} key={:repository_selection} . />
+      <.table_attr obj={@installation} key={:target_id} . />
+      <.table_attr obj={@installation} key={:target_type} . />
+      <.table_attr obj={@installation} key={:access_tokens_url} . />
+      <.table_attr obj={@installation} key={:token} tz={@tz} . />
+      <.table_attr obj={@installation} key={:token_expires_at} tz={@tz} . />
+      <.table_attr obj={@installation} key={:updated_at} tz={@tz} . />
+      <.table_attr obj={@installation} key={:inserted_at} tz={@tz} . />
+    </table>
     """
   end
 
   def admin_user_table(assigns) do
     ~H"""
-      <table class="min-w-full">
-        <thead class="bg-white">
-          <tr>
-            <.th uppercase={true}>ID</.th>
-            <.th uppercase={true}>Current Installation</.th>
-            <.th uppercase={true}>nickname</.th>
-            <.th uppercase={true}>Full Name</.th>
-            <.th uppercase={true}>last Seen</.th>
-            <.th uppercase={true}>created</.th>
-            <.th uppercase={true}>updated</.th>
-          </tr>
-        </thead>
+    <table class="min-w-full">
+      <thead class="bg-white">
+        <tr>
+          <.th uppercase={true}>ID</.th>
+          <.th uppercase={true}>Current Installation</.th>
+          <.th uppercase={true}>nickname</.th>
+          <.th uppercase={true}>Full Name</.th>
+          <.th uppercase={true}>last Seen</.th>
+          <.th uppercase={true}>created</.th>
+          <.th uppercase={true}>updated</.th>
+        </tr>
+      </thead>
 
-        <%= for user <- @users do %>
-          <.tr striped={true}>
-            <.td><%= link user.id, to: Routes.admin_user_path(MrgrWeb.Endpoint, :show, user.id), class: "text-teal-700 hover:text-teal-500" %></.td>
-            <.td><%= link_to_installation(user) %></.td>
-            <.td><%= user.nickname %></.td>
-            <.td><%= user.name %></.td>
-            <.td><%= ts(user.last_seen_at, @tz) %></.td>
-            <.td><%= ts(user.inserted_at, @tz) %></.td>
-            <.td><%= ts(user.updated_at, @tz) %></.td>
-          </.tr>
-        <% end %>
-      </table>
+      <%= for user <- @users do %>
+        <.tr striped={true}>
+          <.td>
+            <%= link(user.id,
+              to: Routes.admin_user_path(MrgrWeb.Endpoint, :show, user.id),
+              class: "text-teal-700 hover:text-teal-500"
+            ) %>
+          </.td>
+          <.td><%= link_to_installation(user) %></.td>
+          <.td><%= user.nickname %></.td>
+          <.td><%= user.name %></.td>
+          <.td><%= ts(user.last_seen_at, @tz) %></.td>
+          <.td><%= ts(user.inserted_at, @tz) %></.td>
+          <.td><%= ts(user.updated_at, @tz) %></.td>
+        </.tr>
+      <% end %>
+    </table>
     """
   end
 
@@ -375,15 +381,15 @@ defmodule MrgrWeb.Components.UI do
     assigns = assign(assigns, :color, color)
 
     ~H"""
-      <span class={@color}>
-        <time datetime={@datetime}><%= ago(@datetime) %></time> ago
-      </span>
+    <span class={@color}>
+      <time datetime={@datetime}><%= ago(@datetime) %></time> ago
+    </span>
     """
   end
 
   def language_icon(%{language: nil} = assigns) do
     ~H"""
-      <span class="mr-5"></span>
+    <span class="mr-5"></span>
     """
   end
 
@@ -399,7 +405,7 @@ defmodule MrgrWeb.Components.UI do
 
     ~H"""
     <span>
-      <img src={@src} class="h-5 w-5"/>
+      <img src={@src} class="h-5 w-5" />
     </span>
     """
   end
@@ -408,9 +414,7 @@ defmodule MrgrWeb.Components.UI do
     assigns = assign_new(assigns, :phx_click, fn -> %Phoenix.LiveView.JS{} end)
 
     ~H"""
-    <button
-      phx-click={hide_detail(@phx_click)}
-      colors="outline-none">
+    <button phx-click={hide_detail(@phx_click)} colors="outline-none">
       <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
     </button>
     """
@@ -418,11 +422,13 @@ defmodule MrgrWeb.Components.UI do
 
   def page_nav(%{page: :not_loaded} = assigns) do
     ~H"""
+
     """
   end
 
   def page_nav(%{page: %{total_pages: 1}} = assigns) do
     ~H"""
+
     """
   end
 
@@ -431,15 +437,36 @@ defmodule MrgrWeb.Components.UI do
     <nav class="">
       <ul class="flex my-2">
         <li class="">
-          <a class={"px-2 py-2 #{if @page.page_number <= 1, do: "pointer-events-none text-gray-600", else: "text-teal-700 hover:text-teal-500"}"} href="#" phx-click="paginate" phx-value-page={@page.page_number - 1}>Previous</a>
+          <a
+            class={"px-2 py-2 #{if @page.page_number <= 1, do: "pointer-events-none text-gray-600", else: "text-teal-700 hover:text-teal-500"}"}
+            href="#"
+            phx-click="paginate"
+            phx-value-page={@page.page_number - 1}
+          >
+            Previous
+          </a>
         </li>
         <%= for idx <-  Enum.to_list(1..@page.total_pages) do %>
           <li class="">
-            <a class={"px-2 py-2 #{if @page.page_number == idx, do: "pointer-events-none text-teal-400", else: "text-teal-700 hover:text-teal-500"}"} href="#" phx-click="paginate" phx-value-page={idx}><%= idx %></a>
+            <a
+              class={"px-2 py-2 #{if @page.page_number == idx, do: "pointer-events-none text-teal-400", else: "text-teal-700 hover:text-teal-500"}"}
+              href="#"
+              phx-click="paginate"
+              phx-value-page={idx}
+            >
+              <%= idx %>
+            </a>
           </li>
         <% end %>
         <li class="">
-          <a class={"px-2 py-2 #{if @page.page_number >= @page.total_pages, do: "pointer-events-none text-gray-600", else: "text-teal-700 hover:text-teal-500"}"} href="#" phx-click="paginate" phx-value-page={@page.page_number + 1}>Next</a>
+          <a
+            class={"px-2 py-2 #{if @page.page_number >= @page.total_pages, do: "pointer-events-none text-gray-600", else: "text-teal-700 hover:text-teal-500"}"}
+            href="#"
+            phx-click="paginate"
+            phx-value-page={@page.page_number + 1}
+          >
+            Next
+          </a>
         </li>
       </ul>
     </nav>
@@ -448,20 +475,24 @@ defmodule MrgrWeb.Components.UI do
 
   def spinner(assigns) do
     ~H"""
-      <div id={@id}
-        class="hidden spinner"
-        data-spinning={show_spinner(@id)}
-        data-done={hide_spinner(@id)} >
-        <div class="bounce1"></div>
-        <div class="bounce2"></div>
-        <div class="bounce3"></div>
-      </div>
+    <div
+      id={@id}
+      class="hidden spinner"
+      data-spinning={show_spinner(@id)}
+      data-done={hide_spinner(@id)}
+    >
+      <div class="bounce1"></div>
+      <div class="bounce2"></div>
+      <div class="bounce3"></div>
+    </div>
     """
   end
 
   def installation_synced_at(assigns) do
     ~H"""
-      <p class="text-sm italic text-gray-500">Data last synced at <%= if @dt, do: ts(@dt, @timezone), else: "--" %></p>
+    <p class="text-sm italic text-gray-500">
+      Data last synced at <%= if @dt, do: ts(@dt, @timezone), else: "--" %>
+    </p>
     """
   end
 
@@ -477,16 +508,17 @@ defmodule MrgrWeb.Components.UI do
       |> assign(:selected, selected)
 
     ~H"""
-      <button
-        class={"flex items-center tab-select-button #{@selected} hover:bg-gray-50 p-1 m-1 rounded-t-lg"}
-        phx-click={JS.push("select-tab", value: %{id: @tab.id})}
-        id={"#{@tab.id}-tab"}
-        type="button"
-        role="tab"
-        aria-selected="false">
-        <.pr_tab_title tab={@tab} />
-        <.pr_count_badge items={@tab.unsnoozed} />
-      </button>
+    <button
+      class={"flex items-center tab-select-button #{@selected} hover:bg-gray-50 p-1 m-1 rounded-t-lg"}
+      phx-click={JS.push("select-tab", value: %{id: @tab.id})}
+      id={"#{@tab.id}-tab"}
+      type="button"
+      role="tab"
+      aria-selected="false"
+    >
+      <.pr_tab_title tab={@tab} />
+      <.pr_count_badge items={@tab.unsnoozed} />
+    </button>
     """
   end
 
@@ -510,7 +542,7 @@ defmodule MrgrWeb.Components.UI do
 
   def pr_tab_title(assigns) do
     ~H"""
-      <%= @tab.title %>
+    <%= @tab.title %>
     """
   end
 
@@ -548,15 +580,14 @@ defmodule MrgrWeb.Components.UI do
       role="menu"
       aria-orientation="vertical"
       aria-labelledby={"#{@name}-toggle"}
-      tabindex="-1">
-
+      tabindex="-1"
+    >
       <div class="mt-2 w-max flex flex-col text-sm sm:mt-0 divide-y divide-gray-100">
         <p class="text-center text-gray-500 p-2">
           <%= render_slot(@description) %>
         </p>
 
         <%= render_slot(@inner_block) %>
-
       </div>
     </div>
     """
@@ -572,8 +603,8 @@ defmodule MrgrWeb.Components.UI do
       role="menu"
       aria-orientation="vertical"
       aria-labelledby={"#{@name}-toggle"}
-      tabindex="-1">
-
+      tabindex="-1"
+    >
       <%= render_slot(@inner_block) %>
     </div>
     """
@@ -593,10 +624,8 @@ defmodule MrgrWeb.Components.UI do
       aria-expanded="false"
       aria-haspopup="true"
       {@extra}
-      >
-
+    >
       <%= render_slot(@inner_block) %>
-
     </.l>
     """
   end
@@ -607,10 +636,9 @@ defmodule MrgrWeb.Components.UI do
       phx-click={toggle(to: "##{@target}")}
       id={"#{@target}-toggle"}
       aria-expanded="false"
-      aria-haspopup="true">
-
+      aria-haspopup="true"
+    >
       <%= render_slot(@inner_block) %>
-
     </.inline_link>
     """
   end
@@ -627,19 +655,20 @@ defmodule MrgrWeb.Components.UI do
       |> assign(:id_prefix, id_prefix)
 
     ~H"""
-      <div class="flex flex-col">
-        <.l :for={item <- @items}
-          id={"#{@id_prefix}-#{item.id}"}
-          phx_click={JS.push("toggle-#{@name}", value: Map.merge(%{id: item.id}, @value))}
-          class="text-gray-700 p-2 text-sm w-52 rounded-md hover:bg-gray-50"
-          role="menuitem"
-          tabindex="-1" >
-
-          <%= for row <- @row do %>
-            <%= render_slot(row, item) %>
-          <% end %>
-        </.l>
-      </div>
+    <div class="flex flex-col">
+      <.l
+        :for={item <- @items}
+        id={"#{@id_prefix}-#{item.id}"}
+        phx_click={JS.push("toggle-#{@name}", value: Map.merge(%{id: item.id}, @value))}
+        class="text-gray-700 p-2 text-sm w-52 rounded-md hover:bg-gray-50"
+        role="menuitem"
+        tabindex="-1"
+      >
+        <%= for row <- @row do %>
+          <%= render_slot(row, item) %>
+        <% end %>
+      </.l>
+    </div>
     """
   end
 
@@ -647,7 +676,8 @@ defmodule MrgrWeb.Components.UI do
     ~H"""
     <div class="p-4 max-w-xl bg-blue-100 rounded-md border border-1">
       <p class="text-gray-400 italic">
-        😴 You're viewing snoozed PRs. <.l phx-click="toggle-viewing-snoozed">Show Unsnoozed</.l>
+        😴 You're viewing snoozed PRs.
+        <.l phx-click="toggle-viewing-snoozed">Show Unsnoozed</.l>
       </p>
     </div>
     """
@@ -655,9 +685,10 @@ defmodule MrgrWeb.Components.UI do
 
   def snooze_blurb(%{tab: %{snoozed: %{total_entries: e}}} = assigns) when e > 0 do
     ~H"""
-    <div  class="p-4 max-w-xl bg-blue-100 rounded-md border border-1">
+    <div class="p-4 max-w-xl bg-blue-100 rounded-md border border-1">
       <p class="text-gray-400 italic">
-        <%= @tab.snoozed.total_entries %> pull requests are snoozed. <.l phx-click="toggle-viewing-snoozed">Show Them</.l>
+        <%= @tab.snoozed.total_entries %> pull requests are snoozed.
+        <.l phx-click="toggle-viewing-snoozed">Show Them</.l>
       </p>
     </div>
     """
@@ -665,6 +696,7 @@ defmodule MrgrWeb.Components.UI do
 
   def snooze_blurb(assigns) do
     ~H"""
+
     """
   end
 
@@ -676,6 +708,7 @@ defmodule MrgrWeb.Components.UI do
 
   def pr_count_badge(%{items: %{total_entries: 0}} = assigns) do
     ~H"""
+
     """
   end
 
@@ -697,10 +730,10 @@ defmodule MrgrWeb.Components.UI do
 
   def badges(assigns) do
     ~H"""
-      <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
-        <.badge :for={alert <- Mrgr.FileChangeAlert.for_pull_request(@pull_request)} item={alert} />
-        <.badge :for={label <- @pull_request.labels} item={label} />
-      </div>
+    <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
+      <.badge :for={alert <- Mrgr.FileChangeAlert.for_pull_request(@pull_request)} item={alert} />
+      <.badge :for={label <- @pull_request.labels} item={label} />
+    </div>
     """
   end
 
@@ -713,30 +746,36 @@ defmodule MrgrWeb.Components.UI do
       |> assign(:color, color)
 
     ~H"""
-      <span style={"background-color: ##{@color};"} class={"px-2 inline-flex text-xs leading-5 font-semibold rounded-full text-gray-900"}>
-        <%= @item.name %>
-      </span>
+    <span
+      style={"background-color: ##{@color};"}
+      class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full text-gray-900"
+    >
+      <%= @item.name %>
+    </span>
     """
   end
 
   def avatar(assigns) do
     ~H"""
-      <div class="flex">
-        <%= img_tag @member.avatar_url, class: "rounded-xl h-5 w-5 mr-1" %>
-        <%= @member.login %>
-      </div>
+    <div class="flex">
+      <%= img_tag(@member.avatar_url, class: "rounded-xl h-5 w-5 mr-1") %>
+      <%= @member.login %>
+    </div>
     """
   end
 
   def action_menu_link(assigns) do
     ~H"""
-      <.l href={@url} class="text-teal-700 hover:text-teal-500 py-3 pl-4 pr-2 text-sm outline-none rounded-md" target="_blank">
-        <div class="flex justify-between items-center">
-          <%= render_slot(@title) %>
-          <.icon name="arrow-top-right-on-square" class="ml-1 h-5 w-5" />
-        </div>
-
-      </.l>
+    <.l
+      href={@url}
+      class="text-teal-700 hover:text-teal-500 py-3 pl-4 pr-2 text-sm outline-none rounded-md"
+      target="_blank"
+    >
+      <div class="flex justify-between items-center">
+        <%= render_slot(@title) %>
+        <.icon name="arrow-top-right-on-square" class="ml-1 h-5 w-5" />
+      </div>
+    </.l>
     """
   end
 
@@ -752,41 +791,44 @@ defmodule MrgrWeb.Components.UI do
       |> assign(:total_comments, "#{assigns.total_comment_count} #{maybe_pluralized}")
 
     ~H"""
-      <.submenu_action_menu_item>
-        <:title>
-          <%= if @comments == [] do %>
-            <p class="text-gray-500 italic">No Recent Comments</p>
-          <% else %>
-            Review <%= Enum.count(@comments) %> Recent Comments
-          <% end %>
-        </:title>
+    <.submenu_action_menu_item>
+      <:title>
+        <%= if @comments == [] do %>
+          <p class="text-gray-500 italic">No Recent Comments</p>
+        <% else %>
+          Review <%= Enum.count(@comments) %> Recent Comments
+        <% end %>
+      </:title>
 
-        <.action_dropright>
-          <div class="flex flex-col divide-y divide-solid w-72">
-            <div class="py-3 px-2 hover:bg-gray-50 rounded-md">
-              <.l href={@permalink} class="flex flex-col text-teal-700 hover:text-teal-500" target="_blank">
-                <div class="flex justify-between ">
-                  <p>View Full Discussion</p>
-                  <.icon name="arrow-top-right-on-square" class="ml-1 h-5 w-5" />
-                </div>
-                <p class="text-xs text-gray-500 italic"><%= @total_comments %></p>
-              </.l>
+      <.action_dropright>
+        <div class="flex flex-col divide-y divide-solid w-72">
+          <div class="py-3 px-2 hover:bg-gray-50 rounded-md">
+            <.l
+              href={@permalink}
+              class="flex flex-col text-teal-700 hover:text-teal-500"
+              target="_blank"
+            >
+              <div class="flex justify-between ">
+                <p>View Full Discussion</p>
+                <.icon name="arrow-top-right-on-square" class="ml-1 h-5 w-5" />
+              </div>
+              <p class="text-xs text-gray-500 italic"><%= @total_comments %></p>
+            </.l>
+          </div>
+          <div :for={comment <- @comments} class="p-2 flex flex-col">
+            <div class="flex justify-between">
+              <.avatar member={Mrgr.Schema.Comment.author(comment)} />
+              <p><%= ts(comment.posted_at, @tz) %></p>
             </div>
-            <div :for={comment <- @comments} class="p-2 flex flex-col">
-              <div class="flex justify-between">
-                <.avatar member={Mrgr.Schema.Comment.author(comment)} />
-                <p><%= ts(comment.posted_at, @tz) %></p>
-              </div>
-              <div class="pt-1">
-                <p class="text-gray-500 italic">
-                  <%= Mrgr.Schema.Comment.body(comment) %>
-                </p>
-              </div>
+            <div class="pt-1">
+              <p class="text-gray-500 italic">
+                <%= Mrgr.Schema.Comment.body(comment) %>
+              </p>
             </div>
           </div>
-        </.action_dropright>
-
-      </.submenu_action_menu_item>
+        </div>
+      </.action_dropright>
+    </.submenu_action_menu_item>
     """
   end
 
@@ -795,16 +837,16 @@ defmodule MrgrWeb.Components.UI do
 
   def submenu_action_menu_item(assigns) do
     ~H"""
-      <.dropdown>
-        <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
-          <div class="flex justify-between items-center">
-            <%= render_slot(@title) %>
-            <.icon name="chevron-right" class="ml-1 h-3 w-3" />
-          </div>
-
-          <%= render_slot(@inner_block) %>
+    <.dropdown>
+      <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
+        <div class="flex justify-between items-center">
+          <%= render_slot(@title) %>
+          <.icon name="chevron-right" class="ml-1 h-3 w-3" />
         </div>
-      </.dropdown>
+
+        <%= render_slot(@inner_block) %>
+      </div>
+    </.dropdown>
     """
   end
 
@@ -815,13 +857,13 @@ defmodule MrgrWeb.Components.UI do
     assigns = assign_new(assigns, :submenu, fn -> false end)
 
     ~H"""
-      <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
-        <div class="flex justify-between items-center">
-          <%= render_slot(@title) %>
-        </div>
-
-        <%= render_slot(@inner_block) %>
+    <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
+      <div class="flex justify-between items-center">
+        <%= render_slot(@title) %>
       </div>
+
+      <%= render_slot(@inner_block) %>
+    </div>
     """
   end
 

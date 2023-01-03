@@ -6,7 +6,7 @@ defmodule MrgrWeb.Components.Form do
 
   def error(assigns) do
     ~H"""
-      <%= MrgrWeb.ErrorHelpers.error_tag(@form, @attr, class: "mt-2 text-sm text-red-600") %>
+    <%= MrgrWeb.ErrorHelpers.error_tag(@form, @attr, class: "mt-2 text-sm text-red-600") %>
     """
   end
 
@@ -22,7 +22,7 @@ defmodule MrgrWeb.Components.Form do
       |> assign(:opts, Keyword.merge(defaults, assigns.opts))
 
     ~H"""
-      <%= textarea @form, @field, @opts %>
+    <%= textarea(@form, @field, @opts) %>
     """
   end
 
@@ -30,15 +30,20 @@ defmodule MrgrWeb.Components.Form do
     assigns = assign_new(assigns, :detail_text, fn -> nil end)
 
     ~H"""
-      <div class="grid grid-cols-3 gap-4 items-center border-t border-gray-200 pt-5">
-        <%= label(@form, @attr, @description, class: "block text-sm font-medium text-gray-700 mt-px pt-2") %>
-        <div class="mt-1 mt-0 flex items-center col-span-2">
-          <%= checkbox @form, @attr, class: "shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md" %>
-          <p :if={@detail_text} class="ml-4 text-sm text-gray-500">
-            <%= @detail_text %>
-          </p>
-        </div>
+    <div class="grid grid-cols-3 gap-4 items-center border-t border-gray-200 pt-5">
+      <%= label(@form, @attr, @description,
+        class: "block text-sm font-medium text-gray-700 mt-px pt-2"
+      ) %>
+      <div class="mt-1 mt-0 flex items-center col-span-2">
+        <%= checkbox(@form, @attr,
+          class:
+            "shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md"
+        ) %>
+        <p :if={@detail_text} class="ml-4 text-sm text-gray-500">
+          <%= @detail_text %>
+        </p>
       </div>
+    </div>
     """
   end
 
@@ -100,7 +105,11 @@ defmodule MrgrWeb.Components.Form do
       |> assign(:value, value)
 
     ~H"""
-    <%= color_input @f, :color, value: @value, class: "shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md" %>
+    <%= color_input(@f, :color,
+      value: @value,
+      class:
+        "shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
+    ) %>
     """
   end
 
@@ -127,9 +136,17 @@ defmodule MrgrWeb.Components.Form do
     <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
       <%= label(@f, @field, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
       <div class="mt-1 sm:mt-0 sm:col-span-2">
-        <%= text_input @f, @field, required: @required, autocomplete: @autocomplete, value: @value, placeholder: @placeholder, class: [@common_styles] ++ [(if Keyword.get(@f.errors, @field), do: @error_styles, else: @success_styles)] %>
+        <%= text_input(@f, @field,
+          required: @required,
+          autocomplete: @autocomplete,
+          value: @value,
+          placeholder: @placeholder,
+          class:
+            [@common_styles] ++
+              [if(Keyword.get(@f.errors, @field), do: @error_styles, else: @success_styles)]
+        ) %>
         <p :if={@required} class="pt-1 text-gray-500 text-xs italic">required</p>
-        <.error form={@f} attr={@field}/>
+        <.error form={@f} attr={@field} />
         <p class="mt-2 text-sm text-gray-500"><%= render_slot(@secondary) %></p>
       </div>
     </div>

@@ -1,44 +1,65 @@
 <div class="flex justify-between">
   <.heading title="Open Pull Requests" />
 
-  <%= live_render @socket, MrgrWeb.Live.AnalyticsBox, session: %{"installation_id" => @current_user.current_installation_id}, id: "analytics-box" %>
+  <%= live_render(@socket, MrgrWeb.Live.AnalyticsBox,
+    session: %{"installation_id" => @current_user.current_installation_id},
+    id: "analytics-box"
+  ) %>
 
   <div class="relative inline-block text-left">
     <div>
-
-      <.secondary_button :if={admin?(@current_user)}
+      <.secondary_button
+        :if={admin?(@current_user)}
         phx-click="refresh"
-        colors="text-teal-700 border-teal-600 hover:bg-teal-700">
+        colors="text-teal-700 border-teal-600 hover:bg-teal-700"
+      >
         Refresh PRs
       </.secondary_button>
-      <.secondary_button phx-click={JS.toggle(
-          to: "#merge-freeze-menu",
-          in: {"transition ease-out duration-100", "transform opacity-0 scale-95", "transform opacity-100 scale-100"},
-          out: {"transition ease-in duration-75", "transform opacity-100 scale-100", "transform opacity-0 scale-95"}
-        )}
+      <.secondary_button
+        phx-click={
+          JS.toggle(
+            to: "#merge-freeze-menu",
+            in:
+              {"transition ease-out duration-100", "transform opacity-0 scale-95",
+               "transform opacity-100 scale-100"},
+            out:
+              {"transition ease-in duration-75", "transform opacity-100 scale-100",
+               "transform opacity-0 scale-95"}
+          )
+        }
         colors="text-gray-700 border-gray-300 hover:bg-gray-50"
         id="freeze-menu-button"
         aria-expanded="false"
-        aria-haspopup="true">
-        Freeze Merging
-        <.icon name="chevron-down" class="-mr-1 ml-2 h-5 w-5" />
+        aria-haspopup="true"
+      >
+        Freeze Merging <.icon name="chevron-down" class="-mr-1 ml-2 h-5 w-5" />
       </.secondary_button>
     </div>
 
-    <div style="display: none;" id="merge-freeze-menu" class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none" role="menu" aria-orientation="vertical" aria-labelledby="freeze-menu-button" tabindex="-1">
+    <div
+      style="display: none;"
+      id="merge-freeze-menu"
+      class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+      role="menu"
+      aria-orientation="vertical"
+      aria-labelledby="freeze-menu-button"
+      tabindex="-1"
+    >
       <div class="py-1" role="none">
-        <.l :for={r <- @repos}
+        <.l
+          :for={r <- @repos}
           id={"repo-menu-item-#{r.id}"}
           phx_click="toggle-merge-freeze"
           phx_value_repo_id={r.id}
           data_confirm="Sure about that?"
           class="text-gray-700 block my-2 text-sm outline-none"
           role="menuitem"
-          tabindex="-1" >
+          tabindex="-1"
+        >
           <div class="flex items-center hover:bg-gray-50">
             <div class="basis-8 text-blue-400 ml-2">
               <%= if r.merge_freeze_enabled do %>
-              ❄️
+                ❄️
               <% end %>
             </div>
             <%= r.name %>
@@ -49,12 +70,15 @@
   </div>
 </div>
 
-<div :if={Enum.any?(@frozen_repos)} class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50">
+<div
+  :if={Enum.any?(@frozen_repos)}
+  class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50"
+>
   <.h3 color="text-blue-600">❄️ There is a Merge Freeze in effect❄️</.h3>
   <p class="my-3">PR merging is disabled for the following repos:</p>
 
   <ul class="list-disc my-3 mx-6">
-    <li :for={r <- @frozen_repos} >
+    <li :for={r <- @frozen_repos}>
       <%= r.name %>
     </li>
   </ul>
@@ -62,13 +86,10 @@
   <p class="my-3">To resume merging for these repos, disable the Merge Freeze.</p>
 </div>
 
-
-
 <div class="flex mt-4 space-x-4">
   <div class="basis-1/2">
     <div class="flex flex-col mt-2 space-y-3">
       <!-- states -->
-
       <div class="flex items-center">
         <.icon name="queue-list" class="text-gray-400 mr-1 h-5 w-5" />
 
@@ -78,7 +99,6 @@
           </li>
         </ul>
       </div>
-
       <!-- times -->
       <div class="flex items-center">
         <.icon name="clock" class="text-gray-400 mr-1 h-5 w-5" />
@@ -89,29 +109,29 @@
           </li>
         </ul>
       </div>
-
       <!-- labels -->
       <div class="flex items-center">
         <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />
 
         <div class="relative">
-
-          <div class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
+          <div
+            class="flex flex-wrap -mb-px text-sm font-medium text-center items-center"
+            role="tablist"
+          >
             <div :for={tab <- Tabs.label_tabs(@tabs)} class="mr-2" role="presentation">
               <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
             </div>
             <div class="relative">
-              <.dropdown_toggle_link target="pr-tab-label-dropdown" >
+              <.dropdown_toggle_link target="pr-tab-label-dropdown">
                 <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
               </.dropdown_toggle_link>
 
-              <.dropdown_menu name="pr-tab-label-dropdown" >
+              <.dropdown_menu name="pr-tab-label-dropdown">
                 <:description>
                   Add or Remove Labels
                 </:description>
 
-                <.dropdown_toggle_list name="label" items={@labels} >
-
+                <.dropdown_toggle_list name="label" items={@labels}>
                   <:row :let={label}>
                     <div class="flex items-center">
                       <div class="w-8 text-blue-400 ">
@@ -122,38 +142,35 @@
                       <.badge item={label} />
                     </div>
                   </:row>
-
                 </.dropdown_toggle_list>
               </.dropdown_menu>
-
             </div>
           </div>
-
         </div>
       </div>
-
       <!-- users -->
       <div class="flex items-center">
         <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
 
-        <div class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
+        <div
+          class="flex flex-wrap -mb-px text-sm font-medium text-center items-center"
+          role="tablist"
+        >
           <div :for={tab <- Tabs.author_tabs(@tabs)} class="mr-2" role="presentation">
             <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
           </div>
 
           <div class="relative">
-
-            <.dropdown_toggle_link target="pr-tab-author-dropdown" >
+            <.dropdown_toggle_link target="pr-tab-author-dropdown">
               <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
             </.dropdown_toggle_link>
 
-            <.dropdown_menu name="pr-tab-author-dropdown" >
+            <.dropdown_menu name="pr-tab-author-dropdown">
               <:description>
                 Add or Remove Users
               </:description>
 
-              <.dropdown_toggle_list name="author" items={@members} >
-
+              <.dropdown_toggle_list name="author" items={@members}>
                 <:row :let={author}>
                   <div class="flex items-center">
                     <div class="w-8 text-blue-400 ">
@@ -162,23 +179,19 @@
                       <% end %>
                     </div>
                     <div class="flex">
-                      <%= img_tag author.avatar_url, class: "rounded-xl h-5 w-5 mr-1" %>
+                      <%= img_tag(author.avatar_url, class: "rounded-xl h-5 w-5 mr-1") %>
                       <%= author.login %>
                     </div>
                   </div>
                 </:row>
-
               </.dropdown_toggle_list>
             </.dropdown_menu>
-
           </div>
         </div>
-
       </div>
-
     </div>
 
-    <div >
+    <div>
       <.snooze_blurb tab={@selected_tab} />
       <.page_nav page={pull_requests(@selected_tab)} />
     </div>
@@ -190,7 +203,7 @@
         <%= if Enum.empty?(pull_requests(@selected_tab)) do %>
           <div class="flex justify-center max-w-xl">
             <div class="flex flex-col space-y-4">
-              <%= img_tag Routes.static_path(MrgrWeb.Endpoint, "/images/gorbypuff.jpeg") %>
+              <%= img_tag(Routes.static_path(MrgrWeb.Endpoint, "/images/gorbypuff.jpeg")) %>
               <p class="text-center">All done!  Yay!  😊</p>
             </div>
           </div>
@@ -205,7 +218,8 @@
               merge_frozen={merge_frozen?(@frozen_repos, pull_request)}
               members={@members}
               current_user={@current_user}
-              timezone={@timezone} />
+              timezone={@timezone}
+            />
           </div>
         <% end %>
       <% end %>
@@ -213,7 +227,14 @@
   </div>
 
   <div id="detail-pane">
-    <.live_component :if={@selected_pull_request} module={MrgrWeb.Components.Live.PullRequestDetail} id="pull_request_detail" pull_request={@selected_pull_request} current_user={@current_user} merge_frozen={merge_frozen?(@frozen_repos, @selected_pull_request)} timezone={@timezone} />
+    <.live_component
+      :if={@selected_pull_request}
+      module={MrgrWeb.Components.Live.PullRequestDetail}
+      id="pull_request_detail"
+      pull_request={@selected_pull_request}
+      current_user={@current_user}
+      merge_frozen={merge_frozen?(@frozen_repos, @selected_pull_request)}
+      timezone={@timezone}
+    />
   </div>
 </div>
-
