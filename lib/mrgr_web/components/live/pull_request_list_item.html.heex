@@ -19,6 +19,7 @@
           <%= @pull_request.repository.name %>
         </p>
       </div>
+
       <!-- action button -->
       <div class="relative">
         <.dropdown_link target={"action-dropdown-#{@pull_request.id}"} class="flex items-baseline px-2 py-1 text-gray-700 border-gray-300 border hover:bg-gray-50 rounded-md font-light text-sm">
@@ -30,79 +31,61 @@
 
           <div class="flex flex-col">
 
-            <div class="text-gray-700 pt-3 pb-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50">Merge</div>
-            <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none hover:bg-gray-50 flex flex-col">
-              <p>Ping Author</p>
-              <p class="text-xs text-gray-500 italic"><%= username(@pull_request.author) %></p>
-            </div>
-            <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none hover:bg-gray-50 flex flex-col">
-              <p>Ping Reviewers</p>
-              <p class="text-xs text-gray-500 italic"><%= usernames(@pull_request.requested_reviewers) %></p>
-            </div>
+            <.action_menu_item>
+              <:title>
+                <p>Merge</p>
+              </:title>
+            </.action_menu_item>
 
-            <.dropdown>
-              <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
-                <div class="flex justify-between items-center">
-                  Add Reviewer
-                  <.icon name="chevron-right" class="ml-1 h-3 w-3" />
+            <.action_menu_item>
+              <:title>
+                <div>
+                  <p>Ping Author</p>
+                  <p class="text-xs text-gray-500 italic"><%= username(@pull_request.author) %></p>
                 </div>
+              </:title>
+            </.action_menu_item>
 
-                <.action_dropright>
+            <.action_menu_item>
+              <:title>
+                <div>
+                  <p>Ping Reviewers</p>
+                  <p class="text-xs text-gray-500 italic"><%= usernames(@pull_request.requested_reviewers) %></p>
+                </div>
+              </:title>
+            </.action_menu_item>
 
-                  <.dropdown_toggle_list name="reviewer" items={members_less_author(@members, @pull_request)} ctx={"pull-request-#{@pull_request.id}"} value={%{pull_request_id: @pull_request.id}}>
-                    <:row :let={member}>
-                      <div class="flex items-center">
-                        <div class="w-8 text-blue-400 ">
-                          <%= if Mrgr.Schema.PullRequest.reviewer_requested?(@pull_request, member) do %>
-                            <.icon name="check" class="text-teal-700 h-5 w-5" />
-                          <% end %>
-                        </div>
-                        <.avatar member={member} />
+
+            <.submenu_action_menu_item>
+              <:title>
+                <p>Add Reviewer</p>
+              </:title>
+
+              <.action_dropright>
+
+                <.dropdown_toggle_list name="reviewer" items={members_less_author(@members, @pull_request)} ctx={"pull-request-#{@pull_request.id}"} value={%{pull_request_id: @pull_request.id}}>
+                  <:row :let={member}>
+                    <div class="flex items-center">
+                      <div class="w-8 text-blue-400 ">
+                        <%= if Mrgr.Schema.PullRequest.reviewer_requested?(@pull_request, member) do %>
+                          <.icon name="check" class="text-teal-700 h-5 w-5" />
+                        <% end %>
                       </div>
-                    </:row>
-
-                  </.dropdown_toggle_list>
-
-                </.action_dropright>
-              </div>
-            </.dropdown>
-
-            <%= if Mrgr.Schema.PullRequest.recent_comments(@pull_request) == [] do %>
-              <div class="py-3 pl-4 pr-2 text-sm outline-none rounded-md">
-                <p class="text-gray-500 italic">No Recent Comments</p>
-              </div>
-            <% else %>
-              <.dropdown>
-                <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
-                  <div class="flex justify-between items-center">
-                    Review <%= Enum.count(Mrgr.Schema.PullRequest.recent_comments(@pull_request)) %> Recent Comments
-                    <.icon name="chevron-right" class="ml-1 h-3 w-3" />
-                  </div>
-
-                  <.action_dropright>
-                    <div class="flex flex-col divide-y divide-solid w-72">
-                      <div class="p-2">
-                        <.l href={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)} class="flex text-teal-700 hover:text-teal-500" target="_blank">
-                          <p>View Full Discussion</p>
-                          <.icon name="arrow-top-right-on-square" class="ml-1 h-5 w-5" />
-                        </.l>
-                      </div>
-                      <div :for={comment <- Mrgr.Schema.PullRequest.recent_comments(@pull_request)} class="p-2 flex flex-col">
-                        <div class="flex justify-between">
-                          <.avatar member={Mrgr.Schema.Comment.author(comment)} />
-                          <p><%= ts(comment.posted_at, @timezone) %></p>
-                        </div>
-                        <div class="pt-1">
-                          <p class="text-gray-500 italic">
-                            <%= Mrgr.Schema.Comment.body(comment) %>
-                          </p>
-                        </div>
-                      </div>
+                      <.avatar member={member} />
                     </div>
-                  </.action_dropright>
-                </div>
-              </.dropdown>
-            <% end %>
+                  </:row>
+
+                </.dropdown_toggle_list>
+
+              </.action_dropright>
+            </.submenu_action_menu_item>
+
+
+            <.view_recent_comments_action
+              comments={Mrgr.Schema.PullRequest.recent_comments(@pull_request)}
+              total_comment_count={Enum.count(@pull_request.comments)}
+              permalink={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)}
+            />
 
           </div>
         </.action_dropdown>

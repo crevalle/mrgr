@@ -728,6 +728,91 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def view_recent_comments_action(assigns) do
+    maybe_pluralized =
+      case assigns.total_comment_count do
+        1 -> "total comment"
+        _ -> "total comments"
+      end
+
+    assigns =
+      assigns
+      |> assign(:total_comments, "#{assigns.total_comment_count} #{maybe_pluralized}")
+
+    ~H"""
+      <.submenu_action_menu_item>
+        <:title>
+          <%= if @comments == [] do %>
+            <p class="text-gray-500 italic">No Recent Comments</p>
+          <% else %>
+            Review <%= Enum.count(@comments) %> Recent Comments
+          <% end %>
+        </:title>
+
+        <.action_dropright>
+          <div class="flex flex-col divide-y divide-solid w-72">
+            <div class="py-3 px-2 hover:bg-gray-50 rounded-md">
+              <.l href={@permalink} class="flex flex-col text-teal-700 hover:text-teal-500" target="_blank">
+                <div class="flex justify-between ">
+                  <p>View Full Discussion</p>
+                  <.icon name="arrow-top-right-on-square" class="ml-1 h-5 w-5" />
+                </div>
+                <p class="text-xs text-gray-500 italic"><%= @total_comments %></p>
+              </.l>
+            </div>
+            <div :for={comment <- @comments} class="p-2 flex flex-col">
+              <div class="flex justify-between">
+                <.avatar member={Mrgr.Schema.Comment.author(comment)} />
+                <p><%= ts(comment.posted_at) %></p>
+              </div>
+              <div class="pt-1">
+                <p class="text-gray-500 italic">
+                  <%= Mrgr.Schema.Comment.body(comment) %>
+                </p>
+              </div>
+            </div>
+          </div>
+        </.action_dropright>
+
+      </.submenu_action_menu_item>
+    """
+  end
+
+  slot(:title, required: true)
+  slot(:inner_block, required: true)
+
+  def submenu_action_menu_item(assigns) do
+    ~H"""
+      <.dropdown>
+        <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
+          <div class="flex justify-between items-center">
+            <%= render_slot(@title) %>
+            <.icon name="chevron-right" class="ml-1 h-3 w-3" />
+          </div>
+
+          <%= render_slot(@inner_block) %>
+        </div>
+      </.dropdown>
+    """
+  end
+
+  slot(:title, required: true)
+  slot(:inner_block, required: true)
+
+  def action_menu_item(assigns) do
+    assigns = assign_new(assigns, :submenu, fn -> false end)
+
+    ~H"""
+      <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
+        <div class="flex justify-between items-center">
+          <%= render_slot(@title) %>
+        </div>
+
+        <%= render_slot(@inner_block) %>
+      </div>
+    """
+  end
+
   defp language_icon_url("html" = name) do
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{name}5/#{name}5-original.svg"
   end
