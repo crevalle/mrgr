@@ -33,12 +33,6 @@
 
             <.action_menu_item>
               <:title>
-                <p>Merge</p>
-              </:title>
-            </.action_menu_item>
-
-            <.action_menu_item>
-              <:title>
                 <div>
                   <p>Ping Author</p>
                   <p class="text-xs text-gray-500 italic"><%= username(@pull_request.author) %></p>
@@ -87,6 +81,14 @@
               permalink={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)}
               tz={@timezone}
             />
+
+            <.action_menu_link url={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)}>
+              <:title>
+                <div class="flex">
+                  <p>Review Changes</p>
+                </div>
+              </:title>
+            </.action_menu_link>
 
           </div>
         </.action_dropdown>

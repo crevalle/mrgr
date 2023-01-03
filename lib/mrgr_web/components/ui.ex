@@ -728,6 +728,18 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def action_menu_link(assigns) do
+    ~H"""
+      <.l href={@url} class="text-teal-700 hover:text-teal-500 py-3 pl-4 pr-2 text-sm outline-none rounded-md" target="_blank">
+        <div class="flex justify-between items-center">
+          <%= render_slot(@title) %>
+          <.icon name="arrow-top-right-on-square" class="ml-1 h-5 w-5" />
+        </div>
+
+      </.l>
+    """
+  end
+
   def view_recent_comments_action(assigns) do
     maybe_pluralized =
       case assigns.total_comment_count do
