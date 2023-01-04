@@ -1,7 +1,7 @@
 defmodule MrgrWeb.Components.Live.ActionMenuComponent do
   use MrgrWeb, :live_component
 
-  def handle_event("poke", %{"pull_request" => params}, socket) do
+  def handle_event("save", %{"poke" => params}, socket) do
     type = params["type"]
     message = params["message"]
 
@@ -27,5 +27,11 @@ defmodule MrgrWeb.Components.Live.ActionMenuComponent do
       :fix_ci -> "#{author} CI is broken, can you please fix it?"
       _ -> ""
     end
+  end
+
+  def default_reviewers_poke_message(pull_request) do
+    reviewers = usernames(pull_request.requested_reviewers)
+
+    "#{reviewers} will you please look at this PR?"
   end
 end
