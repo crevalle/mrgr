@@ -804,6 +804,39 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def poke_author_action_menu_item(%{pull_request: %{author: nil}} = assigns) do
+    ~H"""
+    <.action_menu_item>
+      <:title>
+        <div>
+          <p class="text-gray-500">Poke Author</p>
+          <p class="text-xs text-gray-500 italic">
+            Author no longer active
+          </p>
+        </div>
+      </:title>
+    </.action_menu_item>
+    """
+  end
+
+  def poke_author_action_menu_item(assigns) do
+    ~H"""
+    <.action_menu_item
+      class="hover:cursor-pointer"
+      phx-click={show_modal("poke-author-modal-#{@pull_request.id}")}
+    >
+      <:title>
+        <div>
+          <p class="text-teal-700">Poke Author</p>
+          <p class="text-xs text-gray-500 italic">
+            <%= username(@pull_request.author) %>
+          </p>
+        </div>
+      </:title>
+    </.action_menu_item>
+    """
+  end
+
   def poke_modal(assigns) do
     id = "poke-#{assigns.type}-modal-#{assigns.pull_request.id}"
 

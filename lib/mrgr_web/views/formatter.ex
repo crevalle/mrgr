@@ -115,6 +115,7 @@ defmodule MrgrWeb.Formatter do
   def selected_outline(true), do: "outline outline-1 outline-teal-500"
   def selected_outline(false), do: "border border-gray-200"
 
+  def username(nil), do: nil
   def username(%{login: login}), do: "@#{login}"
 
   def usernames(members) do

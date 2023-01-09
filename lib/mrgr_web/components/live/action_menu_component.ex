@@ -14,6 +14,8 @@ defmodule MrgrWeb.Components.Live.ActionMenuComponent do
     |> noreply()
   end
 
+  def members_sans_author(members, %{author: nil}), do: members
+
   def members_sans_author(members, pull_request) do
     Enum.reject(members, fn m -> m.login == pull_request.author.login end)
   end

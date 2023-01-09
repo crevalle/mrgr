@@ -8,21 +8,9 @@
 
   <.action_dropdown name={"action-dropdown-#{@pull_request.id}"}>
     <div class="flex flex-col">
-      <.action_menu_item
-        class="hover:cursor-pointer"
-        phx-click={show_modal("poke-author-modal-#{@pull_request.id}")}
-      >
-        <:title>
-          <div>
-            <p class="text-teal-700">Poke Author</p>
-            <p class="text-xs text-gray-500 italic">
-              <%= username(@pull_request.author) %>
-            </p>
-          </div>
-        </:title>
-      </.action_menu_item>
+      <.poke_author_action_menu_item pull_request={@pull_request} />
 
-      <.poke_modal
+      <.poke_modal :if={@pull_request.author}
         pull_request={@pull_request}
         target={@myself}
         type="author"
@@ -45,7 +33,11 @@
           <div>
             <p class="text-teal-700">Poke Reviewers</p>
             <p class="text-xs text-gray-500 italic">
-              <%= usernames(@pull_request.requested_reviewers) %>
+              <%= if @pull_request.requested_reviewers == [] do %>
+                No reviews requested
+              <% else %>
+                <%= usernames(@pull_request.requested_reviewers) %>
+              <% end %>
             </p>
           </div>
         </:title>
