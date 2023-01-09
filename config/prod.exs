@@ -13,6 +13,7 @@ config :mrgr, :env, "prod"
 # before starting your production server.
 config :mrgr, MrgrWeb.Endpoint,
   url: [scheme: "https", host: "mrgr.io", port: 443],
+  check_origin: ["https://mrgr.io", "//mrgr.herokuapp.com"],
   force_ssl: [rewrite_on: [:x_forwarded_proto]],
   cache_static_manifest: "priv/static/cache_manifest.json"
 
