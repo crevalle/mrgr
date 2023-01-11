@@ -467,29 +467,6 @@ defmodule Mrgr.PullRequest do
     %{pull_request | repository: definitely_synced}
   end
 
-  @spec merge!(Schema.t() | integer(), String.t(), Mrgr.Schema.User.t()) ::
-          {:ok, Schema.t()} | {:error, String.t()}
-  def merge!(%Schema{} = pull_request, message, merger) do
-    # this only makes the API call.  side effects to the %PullRequest{} are handled in the close callback
-    args = generate_merge_args(pull_request, message, merger)
-
-    Mrgr.Github.API.merge_pull_request(args.client, args.owner, args.repo, args.number, args.body)
-    |> case do
-      {:ok, %{"sha" => _sha}} ->
-        {:ok, pull_request}
-
-      {:error, %{result: %{"message" => str}}} ->
-        {:error, str}
-    end
-  end
-
-  def merge!(id, message, merger) do
-    case load_pull_request_for_merging(id) do
-      nil -> {:error, :not_found}
-      pull_request -> merge!(pull_request, message, merger)
-    end
-  end
-
   def broadcast(pull_request, event) do
     topic = Mrgr.PubSub.Topic.installation(pull_request.repository)
 
@@ -686,32 +663,6 @@ defmodule Mrgr.PullRequest do
     pull_request
     |> Schema.ci_status_changeset(%{ci_status: status})
     |> Mrgr.Repo.update()
-  end
-
-  def generate_merge_args(pull_request, message, merger) do
-    installation = pull_request.repository.installation
-
-    client = Mrgr.Github.Client.new(merger)
-    owner = installation.account.login
-    repo = pull_request.repository.name
-    number = pull_request.number
-    head_commit = Mrgr.Schema.PullRequest.head(pull_request)
-
-    body = %{
-      "commit_title" => pull_request.title,
-      "commit_message" => message,
-      "sha" => head_commit.sha,
-      "merge_method" => "squash"
-    }
-
-    %{client: client, owner: owner, repo: repo, number: number, body: body}
-  end
-
-  def load_pull_request_for_merging(id) do
-    Schema
-    |> Query.by_id(id)
-    |> Query.with_installation()
-    |> Mrgr.Repo.one()
   end
 
   def find_by_external_id(id) do

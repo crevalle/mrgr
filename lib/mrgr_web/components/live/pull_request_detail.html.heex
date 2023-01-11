@@ -82,40 +82,6 @@
     </ul>
   </div>
 
-  <.h3>Merge This Pull Request</.h3>
-
-  <p :if={@merge_frozen} } class="text-blue-600 italic">
-    A Merge Freeze is in effect for this repository. This PR cannot be merged.
-  </p>
-
-  <.form
-    :let={f}
-    for={:pull_request}
-    phx-submit="merge"
-    phx-target={@myself}
-    class="flex flex-col space-y-4"
-  >
-    <div class="mt-1">
-      <.textarea
-        form={f}
-        field={:message}
-        opts={[
-          placeholder: "Commit message defaults to PR title.  Enter additional info here."
-        ]}
-      />
-    </div>
-    <%= hidden_input(f, :id, value: @pull_request.id) %>
-    <div class="flex items-end">
-      <.button
-        disabled={@merge_frozen}
-        phx-disable-with="Merging..."
-        class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
-      >
-        Merge
-      </.button>
-    </div>
-  </.form>
-
   <div :if={admin?(@current_user)} class="flex flex-col">
     <p>--- Admin ---</p>
     <p>id: <%= @pull_request.id %></p>

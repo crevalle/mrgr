@@ -17,11 +17,6 @@ defmodule Mrgr.Github.API.Live do
     parse_into(result, Mrgr.Github.AccessToken)
   end
 
-  def merge_pull_request(client, owner, repo, number, message) do
-    response = Tentacat.Pulls.merge(client, owner, repo, number, message)
-    handle_response(response)
-  end
-
   def fetch_most_pull_request_data(pull_request) do
     # don't feel like paginating today.  if >99 files have changed,
     # you've got other problems.

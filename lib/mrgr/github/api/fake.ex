@@ -324,10 +324,6 @@ defmodule Mrgr.Github.API.Fake do
     }
   end
 
-  def merge_pull_request(_client, _owner, _repo, _number, _message) do
-    {:ok, %{"sha" => "0xdeadbeef"}}
-  end
-
   def fetch_filtered_pulls(_installation, _repo, _opts) do
     %{}
   end
