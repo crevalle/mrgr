@@ -97,4 +97,57 @@
     </div>
   </div>
 
+  <div class="flex flex-col space-y-4 bg-gray-100 p-3 rounded-b-md drop-shadow-lg">
+    <h5>Poke your Team 👉</h5>
+    <div class="flex flex-col">
+      <div class="flex space-x-4">
+        <.l phx-click={
+          JS.push("set-poke-message",
+            target: @myself,
+            value: %{type: "author"}
+          )
+        }>
+          Poke Author
+        </.l>
+        <.l phx-click={
+          JS.push("set-poke-message",
+            target: @myself,
+            value: %{type: "reviewers"}
+          )
+        }>
+          Poke Reviewers
+        </.l>
+        <.l phx-click={
+          JS.push("set-poke-message",
+            target: @myself,
+            value: %{type: "good-job"}
+          )
+        }>
+          Say Good Job!
+        </.l>
+      </div>
+      <.form
+        :let={f}
+        for={@changeset}
+        id={"poke_#{@pull_request.id}"}
+        phx-target={@myself}
+        phx-submit="poke"
+      >
+        <div class="flex">
+          <%= text_input(f, :message,
+            required: true,
+            placeholder: "Post a comment directly to this PR",
+            class: "w-full text-sm font-medium rounded-l-md text-gray-700 mt-px pt-2"
+          ) %>
+          <.inline_button
+            type="submit"
+            phx-disable-with="Poking..."
+            class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+          >
+            Poke!
+          </.inline_button>
+        </div>
+      </.form>
+    </div>
+  </div>
 </div>

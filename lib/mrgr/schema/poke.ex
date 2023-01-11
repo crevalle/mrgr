@@ -8,7 +8,6 @@ defmodule Mrgr.Schema.Poke do
     node_id
     pull_request_id
     sender_id
-    type
     url
   )a
 

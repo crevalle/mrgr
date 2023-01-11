@@ -144,6 +144,38 @@ defmodule MrgrWeb.Components.Core do
   end
 
   @doc """
+  Renders an inline button.
+
+  ## Examples
+
+      <.inline_button>Send!</.inline_button>
+      <.inline_button phx-click="go" class="ml-2">Send!</.inline_button>
+  """
+  attr :type, :string, default: nil
+  attr :class, :string, default: nil
+  attr :rest, :global, include: ~w(disabled form name value)
+
+  slot :inner_block, required: true
+
+  def inline_button(assigns) do
+    ~H"""
+    <button
+      type={@type}
+      class={[
+        "phx-submit-loading:opacity-75 inline-flex items-center",
+        "border border-transparent shadow-md rounded-r-md bg-zinc-900 hover:bg-zinc-700 px-4",
+        "text-sm font-medium text-white",
+        "focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 focus:border-teal-500",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </button>
+    """
+  end
+
+  @doc """
   Renders a button with a transparent background.
 
   ## Examples

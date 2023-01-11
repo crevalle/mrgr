@@ -1,19 +1,6 @@
 defmodule MrgrWeb.Components.Live.ActionMenuComponent do
   use MrgrWeb, :live_component
 
-  def handle_event("save", %{"poke" => params}, socket) do
-    type = params["type"]
-    message = params["message"]
-
-    # let's just assume that this works :D
-    Task.start(fn ->
-      Mrgr.Poke.create(socket.assigns.pull_request, socket.assigns.current_user, type, message)
-    end)
-
-    socket
-    |> noreply()
-  end
-
   def members_sans_author(members, %{author: nil}), do: members
 
   def members_sans_author(members, pull_request) do
