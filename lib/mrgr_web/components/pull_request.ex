@@ -4,7 +4,7 @@ defmodule MrgrWeb.Components.PullRequest do
   alias Mrgr.Schema.PullRequest
   import MrgrWeb.Components.UI
 
-  def changed_file_li(assigns) do
+  def changed_file(assigns) do
     matching_alert =
       Enum.find(
         assigns.alerts,
@@ -22,7 +22,7 @@ defmodule MrgrWeb.Components.PullRequest do
       |> assign(:color, color)
 
     ~H"""
-    <li style={"border-color: #{@color};"} class="pl-2 border-l-2"><pre><%= @filename %></pre></li>
+    <div style={"border-color: #{@color};"} class="border-l-2"><pre><%= @filename %></pre></div>
     """
   end
 
@@ -187,20 +187,16 @@ defmodule MrgrWeb.Components.PullRequest do
 
   def preview_commit(assigns) do
     ~H"""
-    <li class="p-2">
-      <div class="flex flex-col ">
-        <div class="flex space-between items-center">
-          <p class="flex-1 truncate"><%= PullRequest.commit_message(@commit) %></p>
-          <p class="text-sm text-gray-500"><%= ts(PullRequest.committed_at(@commit)) %></p>
-        </div>
-        <div class="flex space-between space-x-2 divide-x divide-gray-500">
-          <p class="text-sm text-gray-500"><%= PullRequest.commit_author_name(@commit) %></p>
-          <p class="pl-2 text-sm text-gray-500">
-            <%= shorten_sha(PullRequest.commit_sha(@commit)) %>
-          </p>
-        </div>
+    <div class="flex flex-col">
+      <p class="truncate"><%= PullRequest.commit_message(@commit) %></p>
+      <div class="flex space-between space-x-2 divide-x divide-gray-500">
+        <p class="text-sm text-gray-500"><%= PullRequest.commit_author_name(@commit) %></p>
+        <p class="pl-2 text-sm text-gray-500"><%= ts(PullRequest.committed_at(@commit)) %></p>
+        <p class="pl-2 text-sm text-gray-500 truncate">
+          <%= shorten_sha(PullRequest.commit_sha(@commit)) %>
+        </p>
       </div>
-    </li>
+    </div>
     """
   end
 

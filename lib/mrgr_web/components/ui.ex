@@ -49,7 +49,7 @@ defmodule MrgrWeb.Components.UI do
 
   def aside(assigns) do
     ~H"""
-    <span class="italic text-sm text-gray-400">
+    <span class="text-sm text-gray-400">
       <%= render_slot(@inner_block) %>
     </span>
     """

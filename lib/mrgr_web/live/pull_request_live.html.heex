@@ -80,7 +80,7 @@
 </div>
 
 <div class="flex mt-4 space-x-4">
-  <div class="basis-4/5">
+  <div class="basis-10/12">
     <div class="flex flex-col mt-2 space-y-3">
       <!-- states -->
       <div class="flex items-center">
@@ -189,34 +189,32 @@
       <.page_nav page={pull_requests(@selected_tab)} />
     </div>
 
-    <div class="mt-8">
-      <%= if pull_requests(@selected_tab) == :not_loaded do %>
-        <p class="text-center">loading...</p>
+    <%= if pull_requests(@selected_tab) == :not_loaded do %>
+      <p class="mt-8 text-center">loading...</p>
+    <% else %>
+      <%= if Enum.empty?(pull_requests(@selected_tab)) do %>
+        <div class="mt-8 flex justify-center max-w-xl">
+          <div class="flex flex-col space-y-4">
+            <%= img_tag(Routes.static_path(MrgrWeb.Endpoint, "/images/gorbypuff.jpeg")) %>
+            <p class="text-center">All done!  Yay!  😊</p>
+          </div>
+        </div>
       <% else %>
-        <%= if Enum.empty?(pull_requests(@selected_tab)) do %>
-          <div class="flex justify-center max-w-xl">
-            <div class="flex flex-col space-y-4">
-              <%= img_tag(Routes.static_path(MrgrWeb.Endpoint, "/images/gorbypuff.jpeg")) %>
-              <p class="text-center">All done!  Yay!  😊</p>
-            </div>
-          </div>
-        <% else %>
-          <div role="list" class="flex flex-col space-y-4 dropzone" id="pending-pull-request-list">
-            <.live_component
-              :for={pull_request <- pull_requests(@selected_tab)}
-              module={MrgrWeb.Components.Live.PullRequestListItem}
-              id={"pull_request_#{pull_request.id}"}
-              pull_request={pull_request}
-              selected={selected?(pull_request, @selected_pull_request)}
-              merge_frozen={merge_frozen?(@frozen_repos, pull_request)}
-              members={@members}
-              current_user={@current_user}
-              timezone={@timezone}
-            />
-          </div>
-        <% end %>
+        <div role="list" class="flex flex-col space-y-4 mt-8" id="pending-pull-request-list">
+          <.live_component
+            :for={pull_request <- pull_requests(@selected_tab)}
+            module={MrgrWeb.Components.Live.PullRequestListItem}
+            id={"pull_request_#{pull_request.id}"}
+            pull_request={pull_request}
+            selected={selected?(pull_request, @selected_pull_request)}
+            merge_frozen={merge_frozen?(@frozen_repos, pull_request)}
+            members={@members}
+            current_user={@current_user}
+            timezone={@timezone}
+          />
+        </div>
       <% end %>
-    </div>
+    <% end %>
   </div>
 
   <div id="detail-pane">

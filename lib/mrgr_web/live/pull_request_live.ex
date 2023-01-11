@@ -215,6 +215,11 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
+  def handle_event("show-comments", params, socket) do
+    socket
+    |> noreply()
+  end
+
   # event bus
   def subscribe(user) do
     user
