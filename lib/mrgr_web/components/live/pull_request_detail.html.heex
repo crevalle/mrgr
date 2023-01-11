@@ -67,11 +67,7 @@
   <div>
     <.h3>Commits</.h3>
     <ul>
-      <MrgrWeb.Components.PullRequest.preview_commit
-        :for={c <- @pull_request.commits}
-        commit={c}
-        .
-      />
+      <MrgrWeb.Components.PullRequest.preview_commit :for={c <- @pull_request.commits} commit={c} />
     </ul>
   </div>
 

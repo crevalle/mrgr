@@ -760,6 +760,22 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def comment_preview(assigns) do
+    ~H"""
+    <div class="flex flex-col">
+      <div class="flex flex-col">
+        <.avatar member={Mrgr.Schema.Comment.author(@comment)} />
+        <.aside><%= ts(@comment.posted_at, @tz) %></.aside>
+      </div>
+      <div class="pt-1">
+        <p class="text-gray-500 italic">
+          <%= Mrgr.Schema.Comment.body(@comment) %>
+        </p>
+      </div>
+    </div>
+    """
+  end
+
   slot(:title, required: true)
   slot(:inner_block, required: true)
 

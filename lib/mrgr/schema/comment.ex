@@ -22,5 +22,10 @@ defmodule Mrgr.Schema.Comment do
     Mrgr.Github.User.new(user)
   end
 
+  def author(%{raw: %{"user" => user}}) do
+    Mrgr.Github.User.new(user)
+  end
+
   def body(%{raw: %{"comment" => %{"body" => body}}}), do: body
+  def body(%{raw: %{"body" => body}}), do: body
 end
