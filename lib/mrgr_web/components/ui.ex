@@ -3,7 +3,6 @@ defmodule MrgrWeb.Components.UI do
 
   import MrgrWeb.JS
   import MrgrWeb.Components.Core
-  import MrgrWeb.Components.Form
 
   alias Phoenix.LiveView.JS
 
@@ -490,14 +489,6 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def action_dropright(assigns) do
-    ~H"""
-    <div class="dropdown-content hidden absolute top-1 left-64 z-1 overflow-visible w-max rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none">
-      <%= render_slot(@inner_block) %>
-    </div>
-    """
-  end
-
   def dropdown_menu(assigns) do
     ~H"""
     <div
@@ -518,43 +509,6 @@ defmodule MrgrWeb.Components.UI do
         <%= render_slot(@inner_block) %>
       </div>
     </div>
-    """
-  end
-
-  def action_dropdown(assigns) do
-    ~H"""
-    <div
-      style="display: none;"
-      id={@name}
-      phx-click-away={JS.hide(transition: toggle_out_transition())}
-      class="origin-top-right z-50 w-64 absolute rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
-      role="menu"
-      aria-orientation="vertical"
-      aria-labelledby={"#{@name}-toggle"}
-      tabindex="-1"
-    >
-      <%= render_slot(@inner_block) %>
-    </div>
-    """
-  end
-
-  def dropdown_link(assigns) do
-    extra = assigns_to_attributes(assigns)
-
-    assigns =
-      assigns
-      |> assign(:extra, extra)
-
-    ~H"""
-    <.l
-      phx-click={toggle(to: "##{@target}")}
-      id={"#{@target}-toggle"}
-      aria-expanded="false"
-      aria-haspopup="true"
-      {@extra}
-    >
-      <%= render_slot(@inner_block) %>
-    </.l>
     """
   end
 
@@ -692,74 +646,6 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def action_menu_link(assigns) do
-    ~H"""
-    <.l
-      href={@url}
-      class="text-teal-700 hover:text-teal-500 py-3 pl-4 pr-2 text-sm outline-none rounded-md"
-      target="_blank"
-    >
-      <div class="flex justify-between items-center">
-        <%= render_slot(@title) %>
-        <.icon name="arrow-top-right-on-square" class="ml-1 h-5 w-5" />
-      </div>
-    </.l>
-    """
-  end
-
-  def view_recent_comments_action(assigns) do
-    maybe_pluralized =
-      case assigns.total_comment_count do
-        1 -> "total comment"
-        _ -> "total comments"
-      end
-
-    assigns =
-      assigns
-      |> assign(:total_comments, "#{assigns.total_comment_count} #{maybe_pluralized}")
-
-    ~H"""
-    <.submenu_action_menu_item>
-      <:title>
-        <%= if @comments == [] do %>
-          <p class="text-gray-500 italic">No Recent Comments</p>
-        <% else %>
-          Review <%= Enum.count(@comments) %> Recent Comments
-        <% end %>
-      </:title>
-
-      <.action_dropright>
-        <div class="flex flex-col divide-y divide-solid w-80">
-          <div class="py-3 px-2 hover:bg-gray-50 rounded-md">
-            <.l
-              href={@permalink}
-              class="flex flex-col text-teal-700 hover:text-teal-500"
-              target="_blank"
-            >
-              <div class="flex justify-between ">
-                <p>View Full Discussion</p>
-                <.icon name="arrow-top-right-on-square" class="ml-1 h-5 w-5" />
-              </div>
-              <p class="text-xs text-gray-500 italic"><%= @total_comments %></p>
-            </.l>
-          </div>
-          <div :for={comment <- @comments} class="p-2 flex flex-col">
-            <div class="flex justify-between">
-              <.avatar member={Mrgr.Schema.Comment.author(comment)} />
-              <p><%= ts(comment.posted_at, @tz) %></p>
-            </div>
-            <div class="pt-1">
-              <p class="text-gray-500 italic">
-                <%= Mrgr.Schema.Comment.body(comment) %>
-              </p>
-            </div>
-          </div>
-        </div>
-      </.action_dropright>
-    </.submenu_action_menu_item>
-    """
-  end
-
   def comment_preview(assigns) do
     ~H"""
     <div class="flex flex-col">
@@ -773,143 +659,6 @@ defmodule MrgrWeb.Components.UI do
         </p>
       </div>
     </div>
-    """
-  end
-
-  slot(:title, required: true)
-  slot(:inner_block, required: true)
-
-  def submenu_action_menu_item(assigns) do
-    ~H"""
-    <.dropdown>
-      <div class="text-gray-700 py-3 pl-4 pr-2 text-sm outline-none rounded-md hover:bg-gray-50 flex flex-col">
-        <div class="flex justify-between items-center">
-          <%= render_slot(@title) %>
-          <.icon name="chevron-right" class="ml-1 h-3 w-3" />
-        </div>
-
-        <%= render_slot(@inner_block) %>
-      </div>
-    </.dropdown>
-    """
-  end
-
-  attr :class, :string, default: nil
-  attr :rest, :global
-
-  slot(:title, required: true)
-  slot(:inner_block, required: true)
-
-  def action_menu_item(assigns) do
-    ~H"""
-    <div
-      class={[
-        "flex flex-col py-3 pl-4 pr-2",
-        "outline-none rounded-md",
-        "text-gray-700 text-sm hover:bg-gray-50",
-        @class
-      ]}
-      {@rest}
-    >
-      <div class="flex justify-between items-center">
-        <%= render_slot(@title) %>
-      </div>
-
-      <%= render_slot(@inner_block) %>
-    </div>
-    """
-  end
-
-  def poke_author_action_menu_item(%{pull_request: %{author: nil}} = assigns) do
-    ~H"""
-    <.action_menu_item>
-      <:title>
-        <div>
-          <p class="text-gray-500">Poke Author</p>
-          <p class="text-xs text-gray-500 italic">
-            Author no longer active
-          </p>
-        </div>
-      </:title>
-    </.action_menu_item>
-    """
-  end
-
-  def poke_author_action_menu_item(assigns) do
-    ~H"""
-    <.action_menu_item
-      class="hover:cursor-pointer"
-      phx-click={show_modal("poke-author-modal-#{@pull_request.id}")}
-    >
-      <:title>
-        <div>
-          <p class="text-teal-700">Poke Author</p>
-          <p class="text-xs text-gray-500 italic">
-            <%= username(@pull_request.author) %>
-          </p>
-        </div>
-      </:title>
-    </.action_menu_item>
-    """
-  end
-
-  def poke_modal(assigns) do
-    id = "poke-#{assigns.type}-modal-#{assigns.pull_request.id}"
-
-    assigns =
-      assigns
-      |> assign(:id, id)
-
-    ~H"""
-    <.modal id={@id}>
-      <:title>
-        <%= render_slot(@title) %>
-      </:title>
-
-      <:subtitle>
-        <%= render_slot(@subtitle) %>
-      </:subtitle>
-
-      <.form
-        :let={f}
-        for={:poke}
-        phx-submit={
-          JS.push("save")
-          |> hide_modal(@id)
-        }
-        phx-target={@target}
-        class="flex flex-col pt-2 space-y-4"
-      >
-        <div class="mt-1">
-          <.textarea
-            form={f}
-            field={:message}
-            opts={[
-              id: "poke-#{@type}-message-#{@pull_request.id}",
-              value: @default_message,
-              placeholder: "Enter your message here",
-              required: true
-            ]}
-          />
-        </div>
-        <%= hidden_input(f, :type, value: @type, id: "poke-#{@type}-value-#{@pull_request.id}") %>
-        <div class="flex items-center justify-end">
-          <.link
-            phx-click={hide_modal(@id)}
-            class="text-sm pr-4 font-semibold text-gray-500 hover:text-gray-700"
-          >
-            Cancel
-          </.link>
-
-          <.button
-            phx-disable-with="Poking..."
-            class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
-          >
-            Send das poke!
-          </.button>
-        </div>
-      </.form>
-    </.modal>
     """
   end
 
