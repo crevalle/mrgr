@@ -139,7 +139,7 @@ defmodule MrgrWeb.Components.UI do
   def tr(assigns) do
     striped = if assigns[:striped], do: "even:bg-white odd:bg-gray-50", else: nil
 
-    class = "border-t border-gray-300 py-4 #{striped}"
+    class = "border-t border-gray-300 py-2 #{striped}"
 
     assigns = assign(assigns, :class, class)
 
@@ -151,7 +151,7 @@ defmodule MrgrWeb.Components.UI do
   end
 
   def td(assigns) do
-    class = "whitespace-nowrap px-3 py-4 text-gray-700 #{assigns[:class]}"
+    class = "whitespace-nowrap px-3 text-gray-700 #{assigns[:class]}"
 
     assigns = assign(assigns, :class, class)
 

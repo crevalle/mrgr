@@ -30,7 +30,12 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
             <%= for hook <- @page.entries do %>
               <.tr striped={true}>
                 <.td><%= hook.id %></.td>
-                <.td><%= hook.installation_id %></.td>
+                <.td>
+                  <%= link(hook.installation.account.login,
+                    to: Routes.admin_installation_path(@socket, :show, hook.installation_id),
+                    class: "text-teal-700 hover:text-teal-500"
+                  ) %>
+                </.td>
                 <.td><%= pr_number(hook) %></.td>
                 <.td>
                   <%= link(hook.object,

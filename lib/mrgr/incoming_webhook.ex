@@ -33,6 +33,7 @@ defmodule Mrgr.IncomingWebhook do
   def paged(page \\ []) do
     Schema
     |> Query.rev_cron()
+    |> Query.with_installation()
     |> Mrgr.Repo.paginate(page)
   end
 
