@@ -2,6 +2,7 @@ defmodule MrgrWeb.Components.PullRequest do
   use MrgrWeb, :component
 
   alias Mrgr.Schema.PullRequest
+  import MrgrWeb.Components.UI
 
   def changed_file_li(assigns) do
     matching_alert =
@@ -51,15 +52,77 @@ defmodule MrgrWeb.Components.PullRequest do
     end
   end
 
-  def me_tag(assigns) do
-    tagged = Mrgr.PullRequest.tagged?(assigns.pull_request, assigns.current_user)
+  def reviewers(%{reviewers: []} = assigns) do
+    ~H"""
+    <span class="text-gray-500 italic text-sm">none</span>
+    """
+  end
 
+  def reviewers(assigns) do
     assigns =
       assigns
-      |> assign(:tagged, tagged)
+      |> assign(:count, Enum.count(assigns.reviewers))
 
     ~H"""
-    <.icon :if={@tagged} name="at-symbol" type="solid" class="mr-1 text-emerald-600 h-4 w-4" />
+    <.reviewer
+      :for={{reviewer, idx} <- Enum.with_index(@reviewers)}
+      reviewer={reviewer}
+      me={@current_user}
+      comma={idx < @count - 1}
+    />
+    """
+  end
+
+  def reviewer(%{reviewer: %{login: login}, me: %{nickname: login}} = assigns) do
+    ~H"""
+    <span class="text-emerald-600 italic text-sm">
+      <%= username(@reviewer) %><%= if @comma, do: "," %>
+    </span>
+    """
+  end
+
+  def reviewer(assigns) do
+    ~H"""
+    <span class="text-gray-500 italic text-sm">
+      <%= username(@reviewer) %><%= if @comma, do: "," %>
+    </span>
+    """
+  end
+
+  def toggle_reviewer_menu(assigns) do
+    ~H"""
+    <div class="relative">
+      <.dropdown_toggle_link target={"toggle-reviewer-dropdown-#{@pull_request.id}"}>
+        <.icon name="ellipsis-horizontal" class="text-gray-500 mt-1 h-5 w-5" />
+      </.dropdown_toggle_link>
+
+      <.dropdown_menu name={"toggle-reviewer-dropdown-#{@pull_request.id}"}>
+        <:description>
+          Add or Remove Reviewers
+        </:description>
+
+        <.dropdown_toggle_list
+          name="reviewer"
+          items={@members}
+          ctx={"pull-request-#{@pull_request.id}"}
+          value={%{pull_request_id: @pull_request.id}}
+        >
+          <:row :let={member}>
+            <div class="flex items-center">
+              <div class="w-8 text-blue-400 ">
+                <%= if Mrgr.Schema.PullRequest.reviewer_requested?(@pull_request, member) do %>
+                  <.icon name="check" class="text-teal-700 h-5 w-5" />
+                <% end %>
+              </div>
+              <div class="flex">
+                <%= img_tag(member.avatar_url, class: "rounded-xl h-5 w-5 mr-1") %>
+                <%= member.login %>
+              </div>
+            </div>
+          </:row>
+        </.dropdown_toggle_list>
+      </.dropdown_menu>
+    </div>
     """
   end
 
@@ -80,14 +143,8 @@ defmodule MrgrWeb.Components.PullRequest do
   end
 
   def pr_approval_text(assigns) do
-    text =
-      case Mrgr.Schema.PullRequest.required_approvals(assigns.pull_request) do
-        0 ->
-          "no approvals required for this repo"
-
-        num ->
-          "(#{assigns.pull_request.approving_review_count}/#{num}) approvals"
-      end
+    num = Mrgr.Schema.PullRequest.required_approvals(assigns.pull_request)
+    text = "#{assigns.pull_request.approving_review_count}/#{num} approvals"
 
     assigns = assign(assigns, :text, text)
 
