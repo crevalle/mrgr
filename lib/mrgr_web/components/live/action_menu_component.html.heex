@@ -10,7 +10,8 @@
     <div class="flex flex-col">
       <.poke_author_action_menu_item pull_request={@pull_request} />
 
-      <.poke_modal :if={@pull_request.author}
+      <.poke_modal
+        :if={@pull_request.author}
         pull_request={@pull_request}
         target={@myself}
         type="author"

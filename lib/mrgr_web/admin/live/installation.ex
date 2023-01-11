@@ -20,6 +20,7 @@ defmodule MrgrWeb.Admin.Live.Installation do
                 <.th uppercase={true}>App Slug</.th>
                 <.th uppercase={true}>Creator</.th>
                 <.th uppercase={true}>Account</.th>
+                <.th uppercase={true}>Actions</.th>
                 <.th uppercase={true}>Setup Complete</.th>
                 <.th uppercase={true}>Repositories</.th>
                 <.th uppercase={true}>Updated</.th>
@@ -39,6 +40,14 @@ defmodule MrgrWeb.Admin.Live.Installation do
                 <.td><%= i.app_slug %></.td>
                 <.td><%= i.creator.nickname %></.td>
                 <.td><%= i.account.login %></.td>
+                <.td>
+                  <.outline_button
+                    phx-click={JS.push("refresh-prs", value: %{installation_id: i.id})}
+                    class="border-teal-700 text-teal-700 hover:text-teal-500"
+                  >
+                    Refresh PRs
+                  </.outline_button>
+                </.td>
                 <.td><%= tf(i.setup_completed) %></.td>
                 <.td><%= Enum.count(i.repositories) %></.td>
                 <.td><%= ts(i.updated_at, assigns.timezone) %></.td>
@@ -61,6 +70,17 @@ defmodule MrgrWeb.Admin.Live.Installation do
     else
       {:ok, socket}
     end
+  end
+
+  def handle_event("refresh-prs", %{"installation_id" => id}, socket) do
+    Task.start(fn ->
+      installation = Mrgr.Installation.find(id) |> Mrgr.Repo.preload(:repositories)
+      Mrgr.Installation.refresh_pull_requests!(installation)
+    end)
+
+    socket
+    |> Flash.put(:info, "Refreshing")
+    |> noreply()
   end
 
   # def subscribe do

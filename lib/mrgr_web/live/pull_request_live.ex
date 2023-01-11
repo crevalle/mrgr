@@ -135,21 +135,6 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
-  def handle_event("refresh", _params, socket) do
-    user = socket.assigns.current_user
-
-    installation = Mrgr.Repo.preload(user.current_installation, :repositories)
-    Mrgr.Installation.refresh_pull_requests!(installation)
-
-    tabs = Tabs.new(user)
-
-    socket
-    |> assign(:tabs, tabs)
-    |> assign(:selected_tab, hd(tabs))
-    |> assign(:selected_pull_request, nil)
-    |> noreply()
-  end
-
   def handle_event("toggle-check", %{"check-id" => id}, socket) do
     # this will be here since that's how the detail page gets opened
     # should eventually have this state live somewhere else

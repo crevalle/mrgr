@@ -9,13 +9,6 @@
   <div class="relative inline-block text-left">
     <div>
       <.outline_button
-        :if={admin?(@current_user)}
-        phx-click="refresh"
-        class="text-teal-700 border-teal-600 hover:bg-teal-50"
-      >
-        Refresh PRs
-      </.outline_button>
-      <.outline_button
         phx-click={
           JS.toggle(
             to: "#merge-freeze-menu",
