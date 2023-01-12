@@ -79,102 +79,59 @@
   <p class="my-3">To resume merging for these repos, disable the Merge Freeze.</p>
 </div>
 
-<div class="flex mt-4 space-x-4">
-  <div class="basis-10/12">
-    <div class="flex flex-col mt-2 space-y-3">
-      <!-- states -->
-      <div class="flex items-center">
-        <.icon name="queue-list" class="text-gray-400 mr-1 h-5 w-5" />
+<div class="flex flex-col mt-4 space-x-4">
+  <div class="flex flex-col mt-2 space-y-3">
+    <!-- states -->
+    <div class="flex items-center">
+      <.icon name="queue-list" class="text-gray-400 mr-1 h-5 w-5" />
 
-        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
-          <li :for={tab <- Tabs.state_tabs(@tabs)} class="mr-2" role="presentation">
-            <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
-          </li>
-        </ul>
-      </div>
-      <!-- times -->
-      <div class="flex items-center">
-        <.icon name="clock" class="text-gray-400 mr-1 h-5 w-5" />
+      <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
+        <li :for={tab <- Tabs.state_tabs(@tabs)} class="mr-2" role="presentation">
+          <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
+        </li>
+      </ul>
+    </div>
+    <!-- times -->
+    <div class="flex items-center">
+      <.icon name="clock" class="text-gray-400 mr-1 h-5 w-5" />
 
-        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
-          <li :for={tab <- Tabs.time_tabs(@tabs)} class="mr-2" role="presentation">
-            <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
-          </li>
-        </ul>
-      </div>
-      <!-- labels -->
-      <div class="flex items-center">
-        <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />
+      <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
+        <li :for={tab <- Tabs.time_tabs(@tabs)} class="mr-2" role="presentation">
+          <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
+        </li>
+      </ul>
+    </div>
+    <!-- labels -->
+    <div class="flex items-center">
+      <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />
 
-        <div class="relative">
-          <div
-            class="flex flex-wrap -mb-px text-sm font-medium text-center items-center"
-            role="tablist"
-          >
-            <div :for={tab <- Tabs.label_tabs(@tabs)} class="mr-2" role="presentation">
-              <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
-            </div>
-            <div class="relative">
-              <.dropdown_toggle_link target="pr-tab-label-dropdown">
-                <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
-              </.dropdown_toggle_link>
-
-              <.dropdown_menu name="pr-tab-label-dropdown">
-                <:description>
-                  Add or Remove Labels
-                </:description>
-
-                <.dropdown_toggle_list name="label" items={@labels}>
-                  <:row :let={label}>
-                    <div class="flex items-center">
-                      <div class="w-8 text-blue-400 ">
-                        <%= if Tabs.present?(@tabs, label) do %>
-                          <.icon name="check" class="text-teal-700 h-5 w-5" />
-                        <% end %>
-                      </div>
-                      <.badge item={label} />
-                    </div>
-                  </:row>
-                </.dropdown_toggle_list>
-              </.dropdown_menu>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- users -->
-      <div class="flex items-center">
-        <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
-
+      <div class="relative">
         <div
           class="flex flex-wrap -mb-px text-sm font-medium text-center items-center"
           role="tablist"
         >
-          <div :for={tab <- Tabs.author_tabs(@tabs)} class="mr-2" role="presentation">
+          <div :for={tab <- Tabs.label_tabs(@tabs)} class="mr-2" role="presentation">
             <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
           </div>
-
           <div class="relative">
-            <.dropdown_toggle_link target="pr-tab-author-dropdown">
+            <.dropdown_toggle_link target="pr-tab-label-dropdown">
               <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
             </.dropdown_toggle_link>
 
-            <.dropdown_menu name="pr-tab-author-dropdown">
+            <.dropdown_menu name="pr-tab-label-dropdown">
               <:description>
-                Add or Remove Users
+                Add or Remove Labels
               </:description>
 
-              <.dropdown_toggle_list name="author" items={@members}>
-                <:row :let={author}>
+              <.dropdown_toggle_list name="label" items={@labels}>
+                <:row :let={label}>
                   <div class="flex items-center">
                     <div class="w-8 text-blue-400 ">
-                      <%= if Tabs.present?(@tabs, author) do %>
+                      <%= if Tabs.present?(@tabs, label) do %>
                         <.icon name="check" class="text-teal-700 h-5 w-5" />
                       <% end %>
                     </div>
-                    <div class="flex">
-                      <%= img_tag(author.avatar_url, class: "rounded-xl h-5 w-5 mr-1") %>
-                      <%= author.login %>
-                    </div>
+                    <.badge item={label} />
                   </div>
                 </:row>
               </.dropdown_toggle_list>
@@ -183,24 +140,67 @@
         </div>
       </div>
     </div>
+    <!-- users -->
+    <div class="flex items-center">
+      <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
 
-    <div>
-      <.snooze_blurb tab={@selected_tab} />
-      <.page_nav page={pull_requests(@selected_tab)} />
+      <div
+        class="flex flex-wrap -mb-px text-sm font-medium text-center items-center"
+        role="tablist"
+      >
+        <div :for={tab <- Tabs.author_tabs(@tabs)} class="mr-2" role="presentation">
+          <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
+        </div>
+
+        <div class="relative">
+          <.dropdown_toggle_link target="pr-tab-author-dropdown">
+            <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
+          </.dropdown_toggle_link>
+
+          <.dropdown_menu name="pr-tab-author-dropdown">
+            <:description>
+              Add or Remove Users
+            </:description>
+
+            <.dropdown_toggle_list name="author" items={@members}>
+              <:row :let={author}>
+                <div class="flex items-center">
+                  <div class="w-8 text-blue-400 ">
+                    <%= if Tabs.present?(@tabs, author) do %>
+                      <.icon name="check" class="text-teal-700 h-5 w-5" />
+                    <% end %>
+                  </div>
+                  <div class="flex">
+                    <%= img_tag(author.avatar_url, class: "rounded-xl h-5 w-5 mr-1") %>
+                    <%= author.login %>
+                  </div>
+                </div>
+              </:row>
+            </.dropdown_toggle_list>
+          </.dropdown_menu>
+        </div>
+      </div>
     </div>
+  </div>
 
+  <div>
+    <.snooze_blurb tab={@selected_tab} />
+    <.page_nav page={pull_requests(@selected_tab)} />
+  </div>
+
+  <div class="flex space-x-4">
     <%= if pull_requests(@selected_tab) == :not_loaded do %>
-      <p class="mt-8 text-center">loading...</p>
+      <p class="text-center">loading...</p>
     <% else %>
       <%= if Enum.empty?(pull_requests(@selected_tab)) do %>
-        <div class="mt-8 flex justify-center max-w-xl">
+        <div class="flex justify-center max-w-xl">
           <div class="flex flex-col space-y-4">
             <%= img_tag(Routes.static_path(MrgrWeb.Endpoint, "/images/gorbypuff.jpeg")) %>
             <p class="text-center">All done!  Yay!  😊</p>
           </div>
         </div>
       <% else %>
-        <div role="list" class="flex flex-col space-y-4 mt-8" id="pending-pull-request-list">
+        <div role="list" class="flex flex-col space-y-4 basis-4/5" id="pending-pull-request-list">
           <.live_component
             :for={pull_request <- pull_requests(@selected_tab)}
             module={MrgrWeb.Components.Live.PullRequestListItem}
@@ -215,17 +215,14 @@
         </div>
       <% end %>
     <% end %>
-  </div>
 
-  <div id="detail-pane">
-    <.live_component
-      :if={@selected_pull_request}
-      module={MrgrWeb.Components.Live.PullRequestDetail}
-      id="pull_request_detail"
-      pull_request={@selected_pull_request}
-      current_user={@current_user}
-      merge_frozen={merge_frozen?(@frozen_repos, @selected_pull_request)}
-      timezone={@timezone}
-    />
+    <div id="detail-pane">
+      <MrgrWeb.Components.PullRequest.pull_request_detail
+        :if={@selected_pull_request}
+        pull_request={@selected_pull_request}
+        attr={@selected_attr}
+        timezone={@timezone}
+      />
+    </div>
   </div>
 </div>

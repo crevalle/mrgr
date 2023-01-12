@@ -98,7 +98,7 @@ h5 {
 }
 
 #detail-pane {
-  @apply basis-1/2 px-4 py-3 bg-white overflow-hidden shadow rounded-lg;
+  @apply w-80 max-w-sm p-3 bg-white overflow-hidden shadow rounded-lg;
 
   visibility: hidden;
   opacity: 0;

@@ -121,20 +121,6 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
-  def handle_event("select-pull-request", %{"id" => id}, socket) do
-    selected = Tabs.select_pull_request(socket.assigns.selected_tab, id)
-
-    socket
-    |> assign(:selected_pull_request, selected)
-    |> noreply()
-  end
-
-  def handle_event("unselect-pull-request", _params, socket) do
-    socket
-    |> assign(:selected_pull_request, nil)
-    |> noreply()
-  end
-
   def handle_event("toggle-check", %{"check-id" => id}, socket) do
     # this will be here since that's how the detail page gets opened
     # should eventually have this state live somewhere else
@@ -215,8 +201,19 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
-  def handle_event("show-comments", params, socket) do
+  def handle_event("show-detail-" <> attr, %{"id" => id}, socket) do
+    pr = Tabs.select_pull_request(socket.assigns.selected_tab, id)
+
     socket
+    |> assign(:selected_pull_request, pr)
+    |> assign(:selected_attr, attr)
+    |> show_detail()
+    |> noreply()
+  end
+
+  def handle_event("hide-detail", _params, socket) do
+    socket
+    |> assign(:selected_pull_request, nil)
     |> noreply()
   end
 

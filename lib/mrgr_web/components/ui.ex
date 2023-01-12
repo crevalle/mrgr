@@ -639,7 +639,7 @@ defmodule MrgrWeb.Components.UI do
 
   def avatar(assigns) do
     ~H"""
-    <div class="flex">
+    <div class="flex items-center">
       <%= img_tag(@member.avatar_url, class: "rounded-xl h-5 w-5 mr-1") %>
       <%= @member.login %>
     </div>

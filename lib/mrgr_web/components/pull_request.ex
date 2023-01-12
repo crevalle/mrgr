@@ -1,8 +1,72 @@
 defmodule MrgrWeb.Components.PullRequest do
   use MrgrWeb, :component
 
-  alias Mrgr.Schema.PullRequest
   import MrgrWeb.Components.UI
+
+  alias Mrgr.Schema.PullRequest
+  alias Phoenix.LiveView.JS
+
+  def pull_request_detail(%{attr: "comments"} = assigns) do
+    ~H"""
+    <.pull_request_detail_content>
+      <:title>
+        Comments (<%= Enum.count(@pull_request.comments) %>)
+      </:title>
+
+      <div class="flex flex-col space-y-4 divide-y divide-gray-200">
+        <.render_comment :for={comment <- @pull_request.comments} comment={comment} tz={@timezone} />
+      </div>
+    </.pull_request_detail_content>
+    """
+  end
+
+  def pull_request_detail(%{attr: "commits"} = assigns) do
+    ~H"""
+    <.pull_request_detail_content>
+      <:title>
+        Commits (<%= Enum.count(@pull_request.commits) %>)
+      </:title>
+
+      <div class="flex flex-col space-y-4 divide-y divide-gray-200">
+        <.render_commit :for={commit <- @pull_request.commits} commit={commit} tz={@timezone} />
+      </div>
+    </.pull_request_detail_content>
+    """
+  end
+
+  def pull_request_detail(%{attr: "files-changed"} = assigns) do
+    ~H"""
+    <.pull_request_detail_content>
+      <:title>
+        Files Changed (<%= Enum.count(@pull_request.files_changed) %>)
+      </:title>
+      <div class="flex flex-col space-y-0 leading-tight">
+        <.changed_file
+          :for={f <- @pull_request.files_changed}
+          filename={f}
+          alerts={@pull_request.repository.file_change_alerts}
+        />
+      </div>
+    </.pull_request_detail_content>
+    """
+  end
+
+  def pull_request_detail_content(assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-6 bg-white rounded-md">
+      <div class="flex flex-col space-y-4">
+        <div class="flex justify-between items-start">
+          <.h3>
+            <%= render_slot(@title) %>
+          </.h3>
+          <.close_detail_pane phx_click={JS.push("hide-detail")} />
+        </div>
+
+        <%= render_slot(@inner_block) %>
+      </div>
+    </div>
+    """
+  end
 
   def changed_file(assigns) do
     matching_alert =
@@ -194,6 +258,39 @@ defmodule MrgrWeb.Components.PullRequest do
         <p class="pl-2 text-sm text-gray-500"><%= ts(PullRequest.committed_at(@commit)) %></p>
         <p class="pl-2 text-sm text-gray-500 truncate">
           <%= shorten_sha(PullRequest.commit_sha(@commit)) %>
+        </p>
+      </div>
+    </div>
+    """
+  end
+
+  def render_commit(assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-2">
+      <p><%= PullRequest.commit_message(@commit) %></p>
+      <div class="flex flex-col">
+        <div class="flex space-between space-x-2 divide-x divide-gray-500">
+          <p class="text-sm text-gray-500 truncate">
+            <%= shorten_sha(PullRequest.commit_sha(@commit)) %>
+          </p>
+          <p class="pl-2 text-sm text-gray-500"><%= ts(PullRequest.committed_at(@commit)) %></p>
+        </div>
+        <p class="text-sm text-gray-500"><%= PullRequest.commit_author_name(@commit) %></p>
+      </div>
+    </div>
+    """
+  end
+
+  def render_comment(assigns) do
+    ~H"""
+    <div class="flex flex-col pt-2">
+      <div class="flex flex-col">
+        <.avatar member={Mrgr.Schema.Comment.author(@comment)} />
+        <.aside><%= ts(@comment.posted_at, @tz) %></.aside>
+      </div>
+      <div class="pt-1">
+        <p class="text-gray-500 italic">
+          <%= Mrgr.Schema.Comment.body(@comment) %>
         </p>
       </div>
     </div>

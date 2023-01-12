@@ -70,3 +70,14 @@ window.addEventListener(
   "phx:remove-element",
   e => document.getElementById(e.detail.id).remove()
 )
+
+window.addEventListener(
+  "phx:show-element",
+  e =>
+  document.getElementById(e.detail.id).classList.add("show")
+)
+
+window.addEventListener(
+  "phx:hide-element",
+  e => document.getElementById(e.detail.id).classList.remove("show")
+)
