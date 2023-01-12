@@ -1,16 +1,16 @@
-defmodule Mrgr.Schema.LabelPRTab do
+defmodule Mrgr.Schema.AuthorPRTab do
   use Mrgr.Schema
 
-  schema "label_pr_tabs" do
-    belongs_to(:label, Mrgr.Schema.Label)
+  schema "author_pr_tabs" do
     belongs_to(:pr_tab, Mrgr.Schema.PRTab)
+    belongs_to(:author, Mrgr.Schema.Member)
 
     timestamps()
   end
 
   @allowed ~w[
-    label_id
     pr_tab_id
+    author_id
   ]a
 
   def changeset(schema, params \\ %{}) do

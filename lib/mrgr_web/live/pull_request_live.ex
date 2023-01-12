@@ -79,35 +79,29 @@ defmodule MrgrWeb.PullRequestLive do
 
   def handle_event("toggle-author", %{"id" => id}, socket) do
     author = Mrgr.List.find(socket.assigns.members, id)
+    selected_tab = socket.assigns.selected_tab
 
-    tabs =
-      case Tabs.present?(socket.assigns.tabs, author) do
-        true ->
-          Tabs.remove_tab(socket.assigns.tabs, author)
+    updated_tab = Mrgr.PRTab.toggle_author(selected_tab, author)
 
-        false ->
-          Tabs.add_tab(socket.assigns.tabs, author, socket.assigns.current_user)
-      end
+    tabs = Tabs.reload_tab(socket.assigns.tabs, updated_tab)
 
     socket
     |> assign(:tabs, tabs)
+    |> assign(:selected_tab, updated_tab)
     |> noreply()
   end
 
   def handle_event("toggle-label", %{"id" => id}, socket) do
     label = Mrgr.List.find(socket.assigns.labels, id)
+    selected_tab = socket.assigns.selected_tab
 
-    tabs =
-      case Tabs.present?(socket.assigns.tabs, label) do
-        true ->
-          Tabs.remove_tab(socket.assigns.tabs, label)
+    updated_tab = Mrgr.PRTab.toggle_label(selected_tab, label)
 
-        false ->
-          Tabs.add_tab(socket.assigns.tabs, label, socket.assigns.current_user)
-      end
+    tabs = Tabs.reload_tab(socket.assigns.tabs, updated_tab)
 
     socket
     |> assign(:tabs, tabs)
+    |> assign(:selected_tab, updated_tab)
     |> noreply()
   end
 
@@ -380,16 +374,14 @@ defmodule MrgrWeb.PullRequestLive do
       |> Kernel.++(state_tabs_for_user(user))
       |> Kernel.++(custom_tabs_for_user(user))
       # |> Kernel.++(time_tabs_for_user(user))
-      # |> Kernel.++(label_tabs_for_user(user))
-      # |> Kernel.++(author_tabs_for_user(user))
       |> Enum.map(&load_prs_async/1)
     end
 
     def add(tabs, user) do
       new_tab = Mrgr.PRTab.create(user)
-      tabs ++ [new_tab]
+      updated_tabs = tabs ++ [new_tab]
 
-      {tabs, new_tab}
+      {updated_tabs, new_tab}
     end
 
     # assumes the tab being deleted is currently selected.
@@ -402,11 +394,21 @@ defmodule MrgrWeb.PullRequestLive do
 
       newly_selected =
         case Enum.at(updated_tabs, old_idx) do
-          nil -> hd(Enum.reverse(tabs))
+          nil -> hd(Enum.reverse(updated_tabs))
           new_guy -> new_guy
         end
 
       {updated_tabs, newly_selected}
+    end
+
+    def reload_tab(tabs, tab) do
+      idx = Mrgr.List.find_index(tabs, tab)
+
+      # TODO: reload the prs first
+
+      tabs
+      |> Mrgr.List.remove(tab)
+      |> List.insert_at(idx, tab)
     end
 
     def state_tabs_for_user(user) do
@@ -487,107 +489,6 @@ defmodule MrgrWeb.PullRequestLive do
       ]
     end
 
-    def label_tabs_for_user(user) do
-      user
-      |> Mrgr.Label.tabs_for_user()
-      |> Enum.map(&build_tab/1)
-    end
-
-    def author_tabs_for_user(user) do
-      user
-      |> Mrgr.Member.tabs_for_user()
-      |> Enum.map(&build_tab/1)
-    end
-
-    defp build_tab(%Mrgr.Schema.Member{} = member) do
-      %{
-        id: member.login,
-        title: member.login,
-        type: :author,
-        meta: %{subject: member},
-        viewing_snoozed: false,
-        pull_requests: [],
-        snoozed: []
-      }
-    end
-
-    defp build_tab(%Mrgr.Schema.Label{} = label) do
-      %{
-        id: label.name,
-        title: label.name,
-        type: :label,
-        meta: %{subject: label},
-        viewing_snoozed: false,
-        pull_requests: [],
-        snoozed: []
-      }
-    end
-
-    def add_tab(tabs, %Mrgr.Schema.Member{} = member, user) do
-      {:ok, member_tab} =
-        %Mrgr.Schema.MemberPRTab{}
-        |> Mrgr.Schema.MemberPRTab.changeset(%{
-          user_id: user.id,
-          member_id: member.id
-        })
-        |> Mrgr.Repo.insert()
-
-      member = %{member | pr_tab: member_tab}
-
-      new_tab =
-        member
-        |> build_tab()
-        |> load_prs_async()
-
-      tabs ++ [new_tab]
-    end
-
-    def add_tab(tabs, %Mrgr.Schema.Label{} = label, user) do
-      {:ok, label_tab} =
-        %Mrgr.Schema.LabelPRTab{}
-        |> Mrgr.Schema.LabelPRTab.changeset(%{
-          user_id: user.id,
-          label_id: label.id
-        })
-        |> Mrgr.Repo.insert()
-
-      label = %{label | pr_tab: label_tab}
-
-      new_tab =
-        label
-        |> build_tab()
-        |> load_prs_async()
-
-      tabs ++ [new_tab]
-    end
-
-    def present?(tabs, label) do
-      case find_tab(tabs, label) do
-        nil -> false
-        _ -> true
-      end
-    end
-
-    def remove_tab(tabs, subject) do
-      tab = find_tab(tabs, subject)
-      Mrgr.Repo.delete(tab.meta.subject.pr_tab)
-
-      reject_tab(tabs, subject)
-    end
-
-    def subject_id(%Mrgr.Schema.Member{login: login}), do: login
-    def subject_id(%Mrgr.Schema.Label{name: name}), do: name
-
-    def reject_tab(tabs, obj) do
-      id = subject_id(obj)
-      Enum.reject(tabs, fn tab -> tab.id == id end)
-    end
-
-    def find_tab(tabs, subject) do
-      id = subject_id(subject)
-      Enum.find(tabs, fn tab -> tab.id == id end)
-    end
-
     def find_tab_by_ref(tabs, ref) do
       Enum.find(tabs, fn tab -> tab.meta[:ref] == ref end)
     end
@@ -606,14 +507,6 @@ defmodule MrgrWeb.PullRequestLive do
 
     def custom?(%Mrgr.Schema.PRTab{}), do: true
     def custom?(_), do: false
-
-    def label_tabs(tabs) do
-      Enum.filter(tabs, fn t -> t.type == :label end)
-    end
-
-    def author_tabs(tabs) do
-      Enum.filter(tabs, fn t -> t.type == :author end)
-    end
 
     def poke_snoozed_data(tabs, ref, data) when is_list(tabs) do
       case find_tab_by_ref(tabs, ref) do
@@ -748,14 +641,6 @@ defmodule MrgrWeb.PullRequestLive do
 
     def load_pull_requests(%{id: "fix-ci"} = tab, opts) do
       Mrgr.PullRequest.paged_fix_ci_prs(tab.meta.user, opts)
-    end
-
-    def load_pull_requests(%{type: :label, meta: %{subject: subject}}, opts) do
-      Mrgr.PullRequest.paged_for_label(subject, opts)
-    end
-
-    def load_pull_requests(%{type: :author, meta: %{subject: subject}}, opts) do
-      Mrgr.PullRequest.paged_for_author(subject, opts)
     end
 
     def load_pull_requests(_unknown_tab, _params) do

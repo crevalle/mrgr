@@ -465,29 +465,11 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def pr_tab_button(assigns) do
-    selected =
-      case assigns.selected? do
-        true -> "selected"
-        false -> ""
-      end
-
-    assigns =
-      assigns
-      |> assign(:selected, selected)
-
+  def pr_filter(assigns) do
     ~H"""
-    <button
-      class={"flex items-center tab-select-button #{@selected} hover:bg-gray-50 p-1 m-1 rounded-t-lg"}
-      phx-click={JS.push("select-tab", value: %{id: @tab.id})}
-      id={"#{@tab.id}-tab"}
-      type="button"
-      role="tab"
-      aria-selected="false"
-    >
-      <.pr_tab_title tab={@tab} />
-      <.pr_count_badge items={@tab.pull_requests} />
-    </button>
+    <div class="flex items-center p-1 m-1 rounded-t-lg">
+      <.pr_filter_title item={@item} />
+    </div>
     """
   end
 
@@ -497,19 +479,19 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def pr_tab_title(%{tab: %{meta: %{subject: %Mrgr.Schema.Label{}}}} = assigns) do
+  def pr_filter_title(%{item: %Mrgr.Schema.Member{}} = assigns) do
     ~H"""
-    <.badge item={@tab.meta.subject} />
+    <.avatar member={@item} />
     """
   end
 
-  def pr_tab_title(%{tab: %{meta: %{subject: %Mrgr.Schema.Member{}}}} = assigns) do
+  def pr_filter_title(%{item: %Mrgr.Schema.Label{}} = assigns) do
     ~H"""
-    <.avatar member={@tab.meta.subject} />
+    <.badge item={@item} />
     """
   end
 
-  def pr_tab_title(assigns) do
+  def pr_filter_title(assigns) do
     ~H"""
     <%= @tab.title %>
     """

@@ -13,6 +13,12 @@ defmodule Mrgr.Schema.PRTab do
 
     belongs_to(:user, Mrgr.Schema.User)
 
+    has_many(:author_pr_tabs, Mrgr.Schema.AuthorPRTab)
+    has_many(:authors, through: [:author_pr_tabs, :author])
+
+    has_many(:label_pr_tabs, Mrgr.Schema.LabelPRTab)
+    has_many(:labels, through: [:label_pr_tabs, :label])
+
     timestamps()
   end
 
