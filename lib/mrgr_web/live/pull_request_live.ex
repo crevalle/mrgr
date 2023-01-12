@@ -49,6 +49,26 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
+  def handle_event("add-tab", _params, socket) do
+    {tabs, new_tab} = Tabs.add(socket.assigns.tabs, socket.assigns.current_user)
+
+    socket
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, new_tab)
+    |> noreply()
+  end
+
+  def handle_event("delete-tab", _params, socket) do
+    goner = socket.assigns.selected_tab
+
+    {tabs, newly_selected} = Tabs.delete(socket.assigns.tabs, goner)
+
+    socket
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, newly_selected)
+    |> noreply()
+  end
+
   def handle_event("select-tab", %{"id" => id}, socket) do
     selected = Tabs.select(socket.assigns.tabs, id)
 
@@ -350,14 +370,43 @@ defmodule MrgrWeb.PullRequestLive do
     Tabs.get_page(selected)
   end
 
+  def custom?(tab) do
+    Tabs.custom?(tab)
+  end
+
   defmodule Tabs do
     def new(user) do
       []
       |> Kernel.++(state_tabs_for_user(user))
-      |> Kernel.++(time_tabs_for_user(user))
-      |> Kernel.++(label_tabs_for_user(user))
-      |> Kernel.++(author_tabs_for_user(user))
+      |> Kernel.++(custom_tabs_for_user(user))
+      # |> Kernel.++(time_tabs_for_user(user))
+      # |> Kernel.++(label_tabs_for_user(user))
+      # |> Kernel.++(author_tabs_for_user(user))
       |> Enum.map(&load_prs_async/1)
+    end
+
+    def add(tabs, user) do
+      new_tab = Mrgr.PRTab.create(user)
+      tabs ++ [new_tab]
+
+      {tabs, new_tab}
+    end
+
+    # assumes the tab being deleted is currently selected.
+    # Select the next tab to the right.
+    def delete(tabs, tab) do
+      old_idx = Mrgr.List.find_index(tabs, tab)
+      updated_tabs = Mrgr.List.remove(tabs, tab)
+
+      Mrgr.PRTab.delete(tab)
+
+      newly_selected =
+        case Enum.at(updated_tabs, old_idx) do
+          nil -> hd(Enum.reverse(tabs))
+          new_guy -> new_guy
+        end
+
+      {updated_tabs, newly_selected}
     end
 
     def state_tabs_for_user(user) do
@@ -368,8 +417,8 @@ defmodule MrgrWeb.PullRequestLive do
           type: :state,
           meta: %{user: user},
           viewing_snoozed: false,
-          unsnoozed: :not_loaded,
-          snoozed: :not_loaded
+          pull_requests: [],
+          snoozed: []
         },
         %{
           id: "needs-approval",
@@ -377,8 +426,8 @@ defmodule MrgrWeb.PullRequestLive do
           type: :state,
           meta: %{user: user},
           viewing_snoozed: false,
-          unsnoozed: :not_loaded,
-          snoozed: :not_loaded
+          pull_requests: [],
+          snoozed: []
         },
         %{
           id: "fix-ci",
@@ -386,10 +435,15 @@ defmodule MrgrWeb.PullRequestLive do
           type: :state,
           meta: %{user: user},
           viewing_snoozed: false,
-          unsnoozed: :not_loaded,
-          snoozed: :not_loaded
+          pull_requests: [],
+          snoozed: []
         }
       ]
+    end
+
+    def custom_tabs_for_user(user) do
+      user
+      |> Mrgr.PRTab.for_user()
     end
 
     def time_tabs_for_user(user) do
@@ -400,8 +454,8 @@ defmodule MrgrWeb.PullRequestLive do
           type: :time,
           meta: %{user: user},
           viewing_snoozed: false,
-          unsnoozed: :not_loaded,
-          snoozed: :not_loaded
+          pull_requests: [],
+          snoozed: []
         },
         %{
           id: "last-week",
@@ -409,8 +463,8 @@ defmodule MrgrWeb.PullRequestLive do
           type: :time,
           meta: %{user: user},
           viewing_snoozed: false,
-          unsnoozed: :not_loaded,
-          snoozed: :not_loaded
+          pull_requests: [],
+          snoozed: []
         },
         %{
           id: "this-month",
@@ -418,8 +472,8 @@ defmodule MrgrWeb.PullRequestLive do
           type: :time,
           meta: %{user: user},
           viewing_snoozed: false,
-          unsnoozed: :not_loaded,
-          snoozed: :not_loaded
+          pull_requests: [],
+          snoozed: []
         },
         %{
           id: "stale",
@@ -427,8 +481,8 @@ defmodule MrgrWeb.PullRequestLive do
           type: :time,
           meta: %{user: user},
           viewing_snoozed: false,
-          unsnoozed: :not_loaded,
-          snoozed: :not_loaded
+          pull_requests: [],
+          snoozed: []
         }
       ]
     end
@@ -452,8 +506,8 @@ defmodule MrgrWeb.PullRequestLive do
         type: :author,
         meta: %{subject: member},
         viewing_snoozed: false,
-        unsnoozed: :not_loaded,
-        snoozed: :not_loaded
+        pull_requests: [],
+        snoozed: []
       }
     end
 
@@ -464,8 +518,8 @@ defmodule MrgrWeb.PullRequestLive do
         type: :label,
         meta: %{subject: label},
         viewing_snoozed: false,
-        unsnoozed: :not_loaded,
-        snoozed: :not_loaded
+        pull_requests: [],
+        snoozed: []
       }
     end
 
@@ -546,6 +600,13 @@ defmodule MrgrWeb.PullRequestLive do
       Enum.filter(tabs, fn t -> t.type == :state end)
     end
 
+    def custom_tabs(tabs) do
+      Enum.filter(tabs, &custom?/1)
+    end
+
+    def custom?(%Mrgr.Schema.PRTab{}), do: true
+    def custom?(_), do: false
+
     def label_tabs(tabs) do
       Enum.filter(tabs, fn t -> t.type == :label end)
     end
@@ -582,11 +643,11 @@ defmodule MrgrWeb.PullRequestLive do
       # slow, dumb traversal through everything.  ignore snoozed stuff
       tabs =
         Enum.map(tabs, fn tab ->
-          unsnoozed = Mrgr.List.replace(tab.unsnoozed, pr)
-          %{tab | unsnoozed: unsnoozed}
+          pull_requests = Mrgr.List.replace(tab.pull_requests, pr)
+          %{tab | pull_requests: pull_requests}
         end)
 
-      selected = %{selected | unsnoozed: Mrgr.List.replace(selected.unsnoozed, pr)}
+      selected = %{selected | pull_requests: Mrgr.List.replace(selected.pull_requests, pr)}
 
       {tabs, selected}
     end
@@ -595,13 +656,13 @@ defmodule MrgrWeb.PullRequestLive do
       snoozed =
         load_pull_requests(selected, %{snoozed: true, page_number: selected.snoozed.page_number})
 
-      unsnoozed =
+      pull_requests =
         load_pull_requests(selected, %{
           snoozed: false,
-          page_number: selected.unsnoozed.page_number
+          page_number: selected.pull_requests.page_number
         })
 
-      updated = %{selected | snoozed: snoozed, unsnoozed: unsnoozed}
+      updated = %{selected | snoozed: snoozed, pull_requests: pull_requests}
 
       {Mrgr.List.replace(all, updated), updated}
     end
@@ -636,7 +697,7 @@ defmodule MrgrWeb.PullRequestLive do
     def viewing_page(tab) do
       case tab.viewing_snoozed do
         true -> tab.snoozed
-        false -> tab.unsnoozed
+        false -> tab.pull_requests
       end
     end
 
@@ -645,7 +706,7 @@ defmodule MrgrWeb.PullRequestLive do
         Task.async(fn ->
           %{
             snoozed: load_pull_requests(tab, Map.put(opts, :snoozed, true)),
-            unsnoozed: load_pull_requests(tab, Map.put(opts, :snoozed, false))
+            pull_requests: load_pull_requests(tab, Map.put(opts, :snoozed, false))
           }
         end)
 
@@ -705,7 +766,7 @@ defmodule MrgrWeb.PullRequestLive do
       updated =
         case selected.viewing_snoozed do
           true -> Map.put(selected, :snoozed, page)
-          false -> Map.put(selected, :unsnoozed, page)
+          false -> Map.put(selected, :pull_requests, page)
         end
 
       Mrgr.List.replace(all, updated)
@@ -721,7 +782,7 @@ defmodule MrgrWeb.PullRequestLive do
     def toggle_snoozed(%{viewing_snoozed: false} = tab), do: %{tab | viewing_snoozed: true}
 
     def get_page(%{viewing_snoozed: true, snoozed: prs}), do: prs
-    def get_page(%{viewing_snoozed: false, unsnoozed: prs}), do: prs
+    def get_page(%{viewing_snoozed: false, pull_requests: prs}), do: prs
 
     defp this_week do
       # last 7 days

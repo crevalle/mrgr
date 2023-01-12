@@ -347,7 +347,7 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def page_nav(%{page: :not_loaded} = assigns) do
+  def page_nav(%{page: []} = assigns) do
     ~H"""
 
     """
@@ -458,9 +458,9 @@ defmodule MrgrWeb.Components.UI do
       role="presentation"
     >
       <h2>
-        <%= @tab.title %>
+        <%= @tab.title || "untitled" %>
       </h2>
-      <.pr_count_badge items={@tab.unsnoozed} />
+      <.pr_count_badge items={@tab.pull_requests} />
     </div>
     """
   end
@@ -486,7 +486,7 @@ defmodule MrgrWeb.Components.UI do
       aria-selected="false"
     >
       <.pr_tab_title tab={@tab} />
-      <.pr_count_badge items={@tab.unsnoozed} />
+      <.pr_count_badge items={@tab.pull_requests} />
     </button>
     """
   end
@@ -624,7 +624,7 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def pr_count_badge(%{items: :not_loaded} = assigns) do
+  def pr_count_badge(%{items: []} = assigns) do
     ~H"""
     <.pr_count_badge count="-" />
     """
