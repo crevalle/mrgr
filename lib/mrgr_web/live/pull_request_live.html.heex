@@ -1,183 +1,117 @@
-<div class="flex justify-between">
-  <.heading title="Open Pull Requests" />
+<div class="flex flex-col">
+  <div class="flex justify-between">
+    <.heading title="Open Pull Requests" />
 
-  <%= live_render(@socket, MrgrWeb.Live.AnalyticsBox,
-    session: %{"installation_id" => @current_user.current_installation_id},
-    id: "analytics-box"
-  ) %>
+    <%= live_render(@socket, MrgrWeb.Live.AnalyticsBox,
+      session: %{"installation_id" => @current_user.current_installation_id},
+      id: "analytics-box"
+    ) %>
 
-  <div class="relative inline-block text-left">
-    <div>
-      <.outline_button
-        phx-click={
-          JS.toggle(
-            to: "#merge-freeze-menu",
-            in:
-              {"transition ease-out duration-100", "transform opacity-0 scale-95",
-               "transform opacity-100 scale-100"},
-            out:
-              {"transition ease-in duration-75", "transform opacity-100 scale-100",
-               "transform opacity-0 scale-95"}
-          )
-        }
-        class="text-gray-700 border-gray-300 hover:bg-gray-100"
-        id="freeze-menu-button"
-        aria-expanded="false"
-        aria-haspopup="true"
-      >
-        Freeze Merging <.icon name="chevron-down" class="-mr-1 ml-2 h-5 w-5" />
-      </.outline_button>
-    </div>
-
-    <div
-      style="display: none;"
-      id="merge-freeze-menu"
-      class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
-      role="menu"
-      aria-orientation="vertical"
-      aria-labelledby="freeze-menu-button"
-      tabindex="-1"
-    >
-      <div class="py-1" role="none">
-        <.l
-          :for={r <- @repos}
-          id={"repo-menu-item-#{r.id}"}
-          phx_click="toggle-merge-freeze"
-          phx_value_repo_id={r.id}
-          data_confirm="Sure about that?"
-          class="text-gray-700 block my-2 text-sm outline-none"
-          role="menuitem"
-          tabindex="-1"
-        >
-          <div class="flex items-center hover:bg-gray-50">
-            <div class="basis-8 text-blue-400 ml-2">
-              <%= if r.merge_freeze_enabled do %>
-                ❄️
-              <% end %>
-            </div>
-            <%= r.name %>
-          </div>
-        </.l>
-      </div>
-    </div>
+    <.merge_freeze_menu repos={@repos} />
   </div>
-</div>
 
-<div
-  :if={Enum.any?(@frozen_repos)}
-  class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50"
->
-  <.h3 color="text-blue-600">❄️ There is a Merge Freeze in effect❄️</.h3>
-  <p class="my-3">PR merging is disabled for the following repos:</p>
+  <.frozen_repo_list :if={Enum.any?(@frozen_repos)} repos={@frozen_repos} />
 
-  <ul class="list-disc my-3 mx-6">
-    <li :for={r <- @frozen_repos}>
-      <%= r.name %>
-    </li>
-  </ul>
+  <div class="flex flex-col mt-4 space-x-4">
+    <div class="flex flex-col mt-2 space-y-3">
+      <!-- states -->
+      <div class="flex items-center">
+        <.icon name="queue-list" class="text-gray-400 mr-1 h-5 w-5" />
 
-  <p class="my-3">To resume merging for these repos, disable the Merge Freeze.</p>
-</div>
+        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
+          <li :for={tab <- Tabs.state_tabs(@tabs)} class="mr-2" role="presentation">
+            <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
+          </li>
+        </ul>
+      </div>
+      <!-- times -->
+      <div class="flex items-center">
+        <.icon name="clock" class="text-gray-400 mr-1 h-5 w-5" />
 
-<div class="flex flex-col mt-4 space-x-4">
-  <div class="flex flex-col mt-2 space-y-3">
-    <!-- states -->
-    <div class="flex items-center">
-      <.icon name="queue-list" class="text-gray-400 mr-1 h-5 w-5" />
+        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
+          <li :for={tab <- Tabs.time_tabs(@tabs)} class="mr-2" role="presentation">
+            <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
+          </li>
+        </ul>
+      </div>
+      <!-- labels -->
+      <div class="flex items-center">
+        <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />
 
-      <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
-        <li :for={tab <- Tabs.state_tabs(@tabs)} class="mr-2" role="presentation">
-          <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
-        </li>
-      </ul>
-    </div>
-    <!-- times -->
-    <div class="flex items-center">
-      <.icon name="clock" class="text-gray-400 mr-1 h-5 w-5" />
+        <div class="relative">
+          <div
+            class="flex flex-wrap -mb-px text-sm font-medium text-center items-center"
+            role="tablist"
+          >
+            <div :for={tab <- Tabs.label_tabs(@tabs)} class="mr-2" role="presentation">
+              <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
+            </div>
+            <div class="relative">
+              <.dropdown_toggle_link target="pr-tab-label-dropdown">
+                <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
+              </.dropdown_toggle_link>
 
-      <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
-        <li :for={tab <- Tabs.time_tabs(@tabs)} class="mr-2" role="presentation">
-          <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
-        </li>
-      </ul>
-    </div>
-    <!-- labels -->
-    <div class="flex items-center">
-      <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />
+              <.dropdown_menu name="pr-tab-label-dropdown">
+                <:description>
+                  Add or Remove Labels
+                </:description>
 
-      <div class="relative">
+                <.dropdown_toggle_list name="label" items={@labels}>
+                  <:row :let={label}>
+                    <div class="flex items-center">
+                      <div class="w-8 text-blue-400 ">
+                        <%= if Tabs.present?(@tabs, label) do %>
+                          <.icon name="check" class="text-teal-700 h-5 w-5" />
+                        <% end %>
+                      </div>
+                      <.badge item={label} />
+                    </div>
+                  </:row>
+                </.dropdown_toggle_list>
+              </.dropdown_menu>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- users -->
+      <div class="flex items-center">
+        <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
+
         <div
           class="flex flex-wrap -mb-px text-sm font-medium text-center items-center"
           role="tablist"
         >
-          <div :for={tab <- Tabs.label_tabs(@tabs)} class="mr-2" role="presentation">
+          <div :for={tab <- Tabs.author_tabs(@tabs)} class="mr-2" role="presentation">
             <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
           </div>
+
           <div class="relative">
-            <.dropdown_toggle_link target="pr-tab-label-dropdown">
+            <.dropdown_toggle_link target="pr-tab-author-dropdown">
               <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
             </.dropdown_toggle_link>
 
-            <.dropdown_menu name="pr-tab-label-dropdown">
+            <.dropdown_menu name="pr-tab-author-dropdown">
               <:description>
-                Add or Remove Labels
+                Add or Remove Users
               </:description>
 
-              <.dropdown_toggle_list name="label" items={@labels}>
-                <:row :let={label}>
+              <.dropdown_toggle_list name="author" items={@members}>
+                <:row :let={author}>
                   <div class="flex items-center">
                     <div class="w-8 text-blue-400 ">
-                      <%= if Tabs.present?(@tabs, label) do %>
+                      <%= if Tabs.present?(@tabs, author) do %>
                         <.icon name="check" class="text-teal-700 h-5 w-5" />
                       <% end %>
                     </div>
-                    <.badge item={label} />
+                    <div class="flex">
+                      <%= img_tag(author.avatar_url, class: "rounded-xl h-5 w-5 mr-1") %>
+                      <%= author.login %>
+                    </div>
                   </div>
                 </:row>
               </.dropdown_toggle_list>
             </.dropdown_menu>
           </div>
-        </div>
-      </div>
-    </div>
-    <!-- users -->
-    <div class="flex items-center">
-      <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
-
-      <div
-        class="flex flex-wrap -mb-px text-sm font-medium text-center items-center"
-        role="tablist"
-      >
-        <div :for={tab <- Tabs.author_tabs(@tabs)} class="mr-2" role="presentation">
-          <.pr_tab_button tab={tab} selected?={selected?(tab, @selected_tab)} />
-        </div>
-
-        <div class="relative">
-          <.dropdown_toggle_link target="pr-tab-author-dropdown">
-            <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
-          </.dropdown_toggle_link>
-
-          <.dropdown_menu name="pr-tab-author-dropdown">
-            <:description>
-              Add or Remove Users
-            </:description>
-
-            <.dropdown_toggle_list name="author" items={@members}>
-              <:row :let={author}>
-                <div class="flex items-center">
-                  <div class="w-8 text-blue-400 ">
-                    <%= if Tabs.present?(@tabs, author) do %>
-                      <.icon name="check" class="text-teal-700 h-5 w-5" />
-                    <% end %>
-                  </div>
-                  <div class="flex">
-                    <%= img_tag(author.avatar_url, class: "rounded-xl h-5 w-5 mr-1") %>
-                    <%= author.login %>
-                  </div>
-                </div>
-              </:row>
-            </.dropdown_toggle_list>
-          </.dropdown_menu>
         </div>
       </div>
     </div>

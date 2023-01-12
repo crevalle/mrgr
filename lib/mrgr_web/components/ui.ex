@@ -662,6 +662,83 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def frozen_repo_list(assigns) do
+    ~H"""
+    <div class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50">
+      <.h3 color="text-blue-600">❄️ There is a Merge Freeze in effect❄️</.h3>
+      <p class="my-3">PR merging is disabled for the following repos:</p>
+
+      <ul class="list-disc my-3 mx-6">
+        <li :for={r <- @repos}>
+          <%= r.name %>
+        </li>
+      </ul>
+
+      <p class="my-3">To resume merging for these repos, disable the Merge Freeze.</p>
+    </div>
+    """
+  end
+
+  def merge_freeze_menu(assigns) do
+    ~H"""
+    <div class="relative inline-block text-left">
+      <div>
+        <.outline_button
+          phx-click={
+            JS.toggle(
+              to: "#merge-freeze-menu",
+              in:
+                {"transition ease-out duration-100", "transform opacity-0 scale-95",
+                 "transform opacity-100 scale-100"},
+              out:
+                {"transition ease-in duration-75", "transform opacity-100 scale-100",
+                 "transform opacity-0 scale-95"}
+            )
+          }
+          class="text-gray-700 border-gray-300 hover:bg-gray-100"
+          id="freeze-menu-button"
+          aria-expanded="false"
+          aria-haspopup="true"
+        >
+          Freeze Merging <.icon name="chevron-down" class="-mr-1 ml-2 h-5 w-5" />
+        </.outline_button>
+      </div>
+
+      <div
+        style="display: none;"
+        id="merge-freeze-menu"
+        class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+        role="menu"
+        aria-orientation="vertical"
+        aria-labelledby="freeze-menu-button"
+        tabindex="-1"
+      >
+        <div class="py-1" role="none">
+          <.l
+            :for={r <- @repos}
+            id={"repo-menu-item-#{r.id}"}
+            phx_click="toggle-merge-freeze"
+            phx_value_repo_id={r.id}
+            data_confirm="Sure about that?"
+            class="text-gray-700 block my-2 text-sm outline-none"
+            role="menuitem"
+            tabindex="-1"
+          >
+            <div class="flex items-center hover:bg-gray-50">
+              <div class="basis-8 text-blue-400 ml-2">
+                <%= if r.merge_freeze_enabled do %>
+                  ❄️
+                <% end %>
+              </div>
+              <%= r.name %>
+            </div>
+          </.l>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   defp language_icon_url("html" = name) do
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{name}5/#{name}5-original.svg"
   end
