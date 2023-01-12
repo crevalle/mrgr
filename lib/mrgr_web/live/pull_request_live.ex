@@ -364,7 +364,7 @@ defmodule MrgrWeb.PullRequestLive do
       [
         %{
           id: "ready-to-merge",
-          title: "Ready to Merge",
+          title: "🚀 Ready to Merge",
           type: :state,
           meta: %{user: user},
           viewing_snoozed: false,
@@ -373,7 +373,7 @@ defmodule MrgrWeb.PullRequestLive do
         },
         %{
           id: "needs-approval",
-          title: "Needs Approval",
+          title: "⚠️ Needs Approval",
           type: :state,
           meta: %{user: user},
           viewing_snoozed: false,
@@ -382,7 +382,7 @@ defmodule MrgrWeb.PullRequestLive do
         },
         %{
           id: "fix-ci",
-          title: "Fix CI",
+          title: "🛠 Fix CI",
           type: :state,
           meta: %{user: user},
           viewing_snoozed: false,

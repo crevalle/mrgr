@@ -151,7 +151,7 @@ h5 {
 }
 
 .tab-select-button.selected {
-  @apply border-teal-700 border-b-2 text-teal-700;
+  @apply border-teal-700 text-teal-700 bg-transparent;
 }
 
 .dropdown:hover .dropdown-content {display: block;}
