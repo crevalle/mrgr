@@ -60,7 +60,7 @@
         </div>
       </div>
     <% else %>
-      <div role="list" class="flex flex-col space-y-4 basis-4/5" id="pending-pull-request-list">
+      <div role="list" class="flex flex-col space-y-8 basis-4/5" id="pending-pull-request-list">
         <.live_component
           :for={pull_request <- pull_requests(@selected_tab)}
           module={MrgrWeb.Components.Live.PullRequestListItem}
