@@ -105,32 +105,6 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
-  def recent_comment_count(assigns) do
-    recent_comments = filter_recent_comments(assigns.comments)
-
-    assigns =
-      assigns
-      |> assign(:recent_comments, recent_comments)
-
-    ~H"""
-    <.icon name="location-marker" type="solid" class="flex-shrink-0 mr-1.5 h-5 w-5 text-gray-400" />
-    <%= Enum.count(@comments) %> comments <%= Enum.count(@recent_comments) %> in last 24 hours
-    """
-  end
-
-  def filter_recent_comments(comments) do
-    Enum.filter(comments, &recent?/1)
-  end
-
-  defp recent?(comment) do
-    threshold = DateTime.add(DateTime.utc_now(), -24, :hour)
-
-    case DateTime.compare(comment.posted_at, threshold) do
-      :gt -> true
-      _stale_mf -> false
-    end
-  end
-
   def reviewers(%{reviewers: []} = assigns) do
     ~H"""
     <span class="text-gray-500 italic text-sm">none</span>
@@ -188,7 +162,7 @@ defmodule MrgrWeb.Components.PullRequest do
         >
           <:row :let={member}>
             <div class="flex items-center">
-              <div class="w-8 text-blue-400 ">
+              <div class="w-8">
                 <%= if Mrgr.Schema.PullRequest.reviewer_requested?(@pull_request, member) do %>
                   <.icon name="check" class="text-teal-700 h-5 w-5" />
                 <% end %>
@@ -205,22 +179,6 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
-  def pr_approval_badge(%{fully_approved: true} = assigns) do
-    ~H"""
-    <p class="flex">
-      <.icon name="check" class="text-sky-600 mr-1 h-5 w-5" /> Ready to merge
-    </p>
-    """
-  end
-
-  def pr_approval_badge(%{fully_approved: false} = assigns) do
-    ~H"""
-    <p class="flex">
-      <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" /> Awaiting approvals
-    </p>
-    """
-  end
-
   def pr_approval_text(assigns) do
     num = Mrgr.Schema.PullRequest.required_approvals(assigns.pull_request)
     text = "#{assigns.pull_request.approving_review_count}/#{num} approvals"
@@ -229,38 +187,6 @@ defmodule MrgrWeb.Components.PullRequest do
 
     ~H"""
     <%= @text %>
-    """
-  end
-
-  def ci_status(%{ci_status: "success"} = assigns) do
-    ~H"""
-    <p class="flex">
-      <.icon name="check-circle" class="text-sky-600 mr-1 h-5 w-5" /> CI Passing
-    </p>
-    """
-  end
-
-  def ci_status(%{ci_status: "running"} = assigns) do
-    ~H"""
-    <p class="flex">
-      <.icon name="wrench" class="text-gray-500 mr-1 h-5 w-5" /> CI Running
-    </p>
-    """
-  end
-
-  def ci_status(%{ci_status: "failure"} = assigns) do
-    ~H"""
-    <p class="flex">
-      <.icon name="exclamation-circle" class="text-yellow-800 mr-1 h-5 w-5" /> Fix CI
-    </p>
-    """
-  end
-
-  def ci_status(assigns) do
-    ~H"""
-    <p class="flex">
-      <.icon name="question-mark-circle" class="text-gray-500 mr-1 h-5 w-5" /> CI Status Unknown
-    </p>
     """
   end
 
@@ -348,7 +274,7 @@ defmodule MrgrWeb.Components.PullRequest do
                 <.dropdown_toggle_list name="repository" items={@repos}>
                   <:row :let={repo}>
                     <div class="flex items-center">
-                      <div class="w-8 text-blue-400 ">
+                      <div class="w-8">
                         <%= if Mrgr.PRTab.repository_present?(@selected_tab, repo) do %>
                           <.icon name="check" class="text-teal-700 h-5 w-5" />
                         <% end %>
@@ -388,7 +314,7 @@ defmodule MrgrWeb.Components.PullRequest do
                 <.dropdown_toggle_list name="label" items={@labels}>
                   <:row :let={label}>
                     <div class="flex items-center">
-                      <div class="w-8 text-blue-400 ">
+                      <div class="w-8">
                         <%= if Mrgr.PRTab.label_present?(@selected_tab, label) do %>
                           <.icon name="check" class="text-teal-700 h-5 w-5" />
                         <% end %>
@@ -424,7 +350,7 @@ defmodule MrgrWeb.Components.PullRequest do
               <.dropdown_toggle_list name="author" items={@members}>
                 <:row :let={author}>
                   <div class="flex items-center">
-                    <div class="w-8 text-blue-400 ">
+                    <div class="w-8">
                       <%= if Mrgr.PRTab.author_present?(@selected_tab, author) do %>
                         <.icon name="check" class="text-teal-700 h-5 w-5" />
                       <% end %>

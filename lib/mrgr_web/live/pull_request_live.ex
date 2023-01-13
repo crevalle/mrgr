@@ -172,32 +172,6 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
-  def handle_event("toggle-check", %{"check-id" => id}, socket) do
-    # this will be here since that's how the detail page gets opened
-    # should eventually have this state live somewhere else
-    checklist = socket.assigns.detail.checklist
-
-    check = Mrgr.List.find(checklist.checks, id)
-
-    updated = Mrgr.Check.toggle(check, socket.assigns.current_user)
-
-    updated_checks = Mrgr.List.replace(checklist.checks, updated)
-
-    updated_checklist = %{checklist | checks: updated_checks}
-
-    pull_request = %{socket.assigns.detail | checklist: updated_checklist}
-
-    Mrgr.PubSub.broadcast(
-      pull_request,
-      installation_topic(socket.assigns.current_user),
-      @pull_request_edited
-    )
-
-    socket
-    |> assign(:detail, pull_request)
-    |> noreply
-  end
-
   def handle_event("toggle-viewing-snoozed", _params, socket) do
     {tabs, selected_tab} = Tabs.toggle_snoozed(socket)
 
