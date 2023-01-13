@@ -18,6 +18,12 @@ defmodule Mrgr.PRTab do
     |> Mrgr.Repo.preload([:authors, :labels])
   end
 
+  def update(tab, params) do
+    tab
+    |> Schema.edit_changeset(params)
+    |> Mrgr.Repo.update()
+  end
+
   def delete(tab) do
     Mrgr.Repo.delete(tab)
   end
@@ -99,7 +105,9 @@ defmodule Mrgr.PRTab do
 
     def for_user(query, user) do
       from(q in query,
-        where: q.user_id == ^user.id
+        where: q.user_id == ^user.id,
+        join: u in assoc(q, :user),
+        preload: [user: u]
       )
     end
 

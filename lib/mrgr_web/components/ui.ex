@@ -47,6 +47,26 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def dangerous_link(assigns) do
+    default_class = "text-rose-600 hover:text-rose-500 font-light text-sm"
+    class = Map.get(assigns, :class, default_class)
+    href = Map.get(assigns, :href, "#")
+
+    extra = assigns_to_attributes(assigns, [:href, :class])
+
+    assigns =
+      assigns
+      |> assign(:href, href)
+      |> assign(:class, class)
+      |> assign(:extra, extra)
+
+    ~H"""
+    <a href={@href} class={@class} {@extra}>
+      <%= render_slot(@inner_block) %>
+    </a>
+    """
+  end
+
   def aside(assigns) do
     ~H"""
     <span class="text-sm text-gray-400">

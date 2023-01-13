@@ -2,13 +2,30 @@ defmodule MrgrWeb.Components.PullRequest do
   use MrgrWeb, :component
 
   import MrgrWeb.Components.UI
+  import MrgrWeb.Components.Core
 
   alias Mrgr.Schema.PullRequest
   alias Phoenix.LiveView.JS
 
+  def render_detail(%{item: %Mrgr.Schema.PullRequest{}} = assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-6 bg-white rounded-md">
+      <.pull_request_detail pull_request={@item} attr={@attr} timezone={@timezone} />
+    </div>
+    """
+  end
+
+  def render_detail(%{item: %Mrgr.Schema.PRTab{}} = assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-6 bg-white rounded-md">
+      <.pr_tab_form tab={@item} />
+    </div>
+    """
+  end
+
   def pull_request_detail(%{attr: "comments"} = assigns) do
     ~H"""
-    <.pull_request_detail_content>
+    <.detail_content>
       <:title>
         Comments (<%= Enum.count(@pull_request.comments) %>)
       </:title>
@@ -16,13 +33,13 @@ defmodule MrgrWeb.Components.PullRequest do
       <div class="flex flex-col space-y-4 divide-y divide-gray-200">
         <.render_comment :for={comment <- @pull_request.comments} comment={comment} tz={@timezone} />
       </div>
-    </.pull_request_detail_content>
+    </.detail_content>
     """
   end
 
   def pull_request_detail(%{attr: "commits"} = assigns) do
     ~H"""
-    <.pull_request_detail_content>
+    <.detail_content>
       <:title>
         Commits (<%= Enum.count(@pull_request.commits) %>)
       </:title>
@@ -30,13 +47,13 @@ defmodule MrgrWeb.Components.PullRequest do
       <div class="flex flex-col space-y-4 divide-y divide-gray-200">
         <.render_commit :for={commit <- @pull_request.commits} commit={commit} tz={@timezone} />
       </div>
-    </.pull_request_detail_content>
+    </.detail_content>
     """
   end
 
   def pull_request_detail(%{attr: "files-changed"} = assigns) do
     ~H"""
-    <.pull_request_detail_content>
+    <.detail_content>
       <:title>
         Files Changed (<%= Enum.count(@pull_request.files_changed) %>)
       </:title>
@@ -47,23 +64,21 @@ defmodule MrgrWeb.Components.PullRequest do
           alerts={@pull_request.repository.file_change_alerts}
         />
       </div>
-    </.pull_request_detail_content>
+    </.detail_content>
     """
   end
 
-  def pull_request_detail_content(assigns) do
+  def detail_content(assigns) do
     ~H"""
-    <div class="flex flex-col space-y-6 bg-white rounded-md">
-      <div class="flex flex-col space-y-4">
-        <div class="flex justify-between items-start">
-          <.h3>
-            <%= render_slot(@title) %>
-          </.h3>
-          <.close_detail_pane phx_click={JS.push("hide-detail")} />
-        </div>
-
-        <%= render_slot(@inner_block) %>
+    <div class="flex flex-col space-y-4">
+      <div class="flex justify-between items-start">
+        <.h3>
+          <%= render_slot(@title) %>
+        </.h3>
+        <.close_detail_pane phx_click={JS.push("hide-detail")} />
       </div>
+
+      <%= render_slot(@inner_block) %>
     </div>
     """
   end
@@ -297,21 +312,129 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
-  def tab_detail_content(%{tab: "recent"} = assigns) do
+  def filters(assigns) do
     ~H"""
-    you've chosen the recent tab
+    <div class="flex flex-col mt-2 space-y-3">
+      <.h3>Filters</.h3>
+      <.aside>
+        Customize your view by filtering on Author, Label, or Repository.
+        <.l phx-click="edit-tab">
+          Edit Tab Details
+        </.l>
+      </.aside>
+      <!-- labels -->
+      <div class="flex items-center">
+        <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />
+
+        <div class="relative">
+          <div
+            class="flex flex-wrap -mb-px text-sm font-medium text-center items-center"
+            role="tablist"
+          >
+            <div :for={label <- @selected_tab.labels} class="mr-2" role="presentation">
+              <.pr_filter item={label} />
+            </div>
+
+            <div class="relative">
+              <.dropdown_toggle_link target="pr-tab-label-dropdown">
+                <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
+              </.dropdown_toggle_link>
+
+              <.dropdown_menu name="pr-tab-label-dropdown">
+                <:description>
+                  Filter By Label
+                </:description>
+
+                <.dropdown_toggle_list name="label" items={@labels}>
+                  <:row :let={label}>
+                    <div class="flex items-center">
+                      <div class="w-8 text-blue-400 ">
+                        <%= if Mrgr.PRTab.label_present?(@selected_tab, label) do %>
+                          <.icon name="check" class="text-teal-700 h-5 w-5" />
+                        <% end %>
+                      </div>
+                      <.badge item={label} />
+                    </div>
+                  </:row>
+                </.dropdown_toggle_list>
+              </.dropdown_menu>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- authors -->
+      <div class="flex items-center">
+        <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
+
+        <div class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
+          <div :for={author <- @selected_tab.authors} class="mr-2" role="presentation">
+            <.pr_filter item={author} />
+          </div>
+
+          <div class="relative">
+            <.dropdown_toggle_link target="pr-tab-author-dropdown">
+              <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
+            </.dropdown_toggle_link>
+
+            <.dropdown_menu name="pr-tab-author-dropdown">
+              <:description>
+                Filter By Author
+              </:description>
+
+              <.dropdown_toggle_list name="author" items={@members}>
+                <:row :let={author}>
+                  <div class="flex items-center">
+                    <div class="w-8 text-blue-400 ">
+                      <%= if Mrgr.PRTab.author_present?(@selected_tab, author) do %>
+                        <.icon name="check" class="text-teal-700 h-5 w-5" />
+                      <% end %>
+                    </div>
+                    <div class="flex">
+                      <%= img_tag(author.avatar_url, class: "rounded-xl h-5 w-5 mr-1") %>
+                      <%= author.login %>
+                    </div>
+                  </div>
+                </:row>
+              </.dropdown_toggle_list>
+            </.dropdown_menu>
+          </div>
+        </div>
+      </div>
+    </div>
     """
   end
 
-  def tab_detail_content(%{tab: "two-weeks"} = assigns) do
+  def pr_tab_form(assigns) do
     ~H"""
-    you've chosen the two weeks tab
-    """
-  end
+    <.detail_content>
+      <:title>
+        Edit Tab Title
+      </:title>
+    </.detail_content>
+    <div class="flex flex-col">
+      <.form :let={f} for={:tab} phx-submit="update-tab">
+        <div class="flex flex-col space-y-4">
+          <%= text_input(f, :title,
+            placeholder: "give this view a name",
+            value: @tab.title,
+            class: "w-full text-sm font-medium rounded-md text-gray-700 mt-px pt-2"
+          ) %>
 
-  def tab_detail_content(assigns) do
-    ~H"""
-    I have ants in my pants
+          <div class="flex justify-between items-center">
+            <.dangerous_link phx-click="delete-tab" data={[confirm: "Sure about that?"]}>
+              delete tab
+            </.dangerous_link>
+            <.button
+              type="submit"
+              phx-disable-with="Saving..."
+              class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+            >
+              Save
+            </.button>
+          </div>
+        </div>
+      </.form>
+    </div>
     """
   end
 end

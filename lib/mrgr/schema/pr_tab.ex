@@ -32,4 +32,9 @@ defmodule Mrgr.Schema.PRTab do
     |> cast(params, @allowed)
     |> validate_required([:user_id])
   end
+
+  def edit_changeset(schema, params \\ %{}) do
+    schema
+    |> cast(params, [:title])
+  end
 end

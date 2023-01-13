@@ -714,6 +714,14 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
+  def paged_nav_tab_prs(tab, opts \\ %{}) do
+    Schema
+    |> Query.pending_stuff(tab.user.current_installation_id, Map.get(opts, :snoozed, false))
+    |> Query.for_nav_tab(tab)
+    |> Mrgr.Repo.paginate(opts)
+    |> add_pending_preloads()
+  end
+
   def paged_ready_to_merge_prs(%{current_installation_id: id}, opts \\ %{}) do
     # load in two passes because adding the joins messes up my LIMITs
 
@@ -950,6 +958,33 @@ defmodule Mrgr.PullRequest do
     def open(query) do
       from(q in query,
         where: q.status == "open"
+      )
+    end
+
+    def for_nav_tab(query, tab) do
+      query
+      |> filter_authors(tab.authors)
+      |> filter_labels(tab.labels)
+    end
+
+    def filter_authors(query, []), do: query
+
+    def filter_authors(query, authors) do
+      author_ids = Enum.map(authors, & &1.id)
+
+      from(q in query,
+        where: q.author_id in ^author_ids
+      )
+    end
+
+    def filter_labels(query, []), do: query
+
+    def filter_labels(query, labels) do
+      label_ids = Enum.map(labels, & &1.id)
+
+      from(q in query,
+        left_join: l in assoc(q, :labels),
+        where: l.id in ^label_ids
       )
     end
 

@@ -37,109 +37,7 @@
   </div>
 
   <div :if={custom?(@selected_tab)} class="flex flex-col space-y-4">
-    <p class="w-1/2">
-      Add filters to customize your view.  Filter options combined with OR logic within categories and AND logic across categories.  For example, choosing the label
-      <.badge item={%{name: "socks", color: "ff7d7a"}} /> and the author <strong>desmond</strong>
-      will show only PRs opened by desmond which are tagged with the
-      <.badge item={%{name: "socks", color: "ff7d7a"}} /> label.
-    </p>
-
-    <.l phx-click="delete-tab">delete tab</.l>
-
-    <div class="flex flex-col mt-2 space-y-3">
-      <.h3>Filters</.h3>
-      <!-- times -->
-      <div class="flex items-center">
-        <.icon name="clock" class="text-gray-400 mr-1 h-5 w-5" />
-
-        <ul class="flex flex-wrap -mb-px text-sm font-medium text-center" role="tablist">
-          <li :for={tab <- Tabs.time_tabs(@tabs)} class="mr-2" role="presentation">
-            <.pr_filter tab={tab} selected?={selected?(tab, @selected_tab)} />
-          </li>
-        </ul>
-      </div>
-      <!-- labels -->
-      <div class="flex items-center">
-        <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />
-
-        <div class="relative">
-          <div
-            class="flex flex-wrap -mb-px text-sm font-medium text-center items-center"
-            role="tablist"
-          >
-            <div :for={label <- @selected_tab.labels} class="mr-2" role="presentation">
-              <.pr_filter item={label} />
-            </div>
-
-            <div class="relative">
-              <.dropdown_toggle_link target="pr-tab-label-dropdown">
-                <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
-              </.dropdown_toggle_link>
-
-              <.dropdown_menu name="pr-tab-label-dropdown">
-                <:description>
-                  Filter Labels
-                </:description>
-
-                <.dropdown_toggle_list name="label" items={@labels}>
-                  <:row :let={label}>
-                    <div class="flex items-center">
-                      <div class="w-8 text-blue-400 ">
-                        <%= if Mrgr.PRTab.label_present?(@selected_tab, label) do %>
-                          <.icon name="check" class="text-teal-700 h-5 w-5" />
-                        <% end %>
-                      </div>
-                      <.badge item={label} />
-                    </div>
-                  </:row>
-                </.dropdown_toggle_list>
-              </.dropdown_menu>
-            </div>
-          </div>
-        </div>
-      </div>
-      <!-- authors -->
-      <div class="flex items-center">
-        <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
-
-        <div
-          class="flex flex-wrap -mb-px text-sm font-medium text-center items-center"
-          role="tablist"
-        >
-          <div :for={author <- @selected_tab.authors} class="mr-2" role="presentation">
-            <.pr_filter item={author} />
-          </div>
-
-          <div class="relative">
-            <.dropdown_toggle_link target="pr-tab-author-dropdown">
-              <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
-            </.dropdown_toggle_link>
-
-            <.dropdown_menu name="pr-tab-author-dropdown">
-              <:description>
-                Filter Authors
-              </:description>
-
-              <.dropdown_toggle_list name="author" items={@members}>
-                <:row :let={author}>
-                  <div class="flex items-center">
-                    <div class="w-8 text-blue-400 ">
-                      <%= if Mrgr.PRTab.author_present?(@selected_tab, author) do %>
-                        <.icon name="check" class="text-teal-700 h-5 w-5" />
-                      <% end %>
-                    </div>
-                    <div class="flex">
-                      <%= img_tag(author.avatar_url, class: "rounded-xl h-5 w-5 mr-1") %>
-                      <%= author.login %>
-                    </div>
-                  </div>
-                </:row>
-              </.dropdown_toggle_list>
-            </.dropdown_menu>
-          </div>
-        </div>
-      </div>
-    </div>
+    <.filters tabs={@tabs} selected_tab={@selected_tab} labels={@labels} members={@members} />
   </div>
 
   <div>
@@ -162,7 +60,7 @@
           module={MrgrWeb.Components.Live.PullRequestListItem}
           id={"pull_request_#{pull_request.id}"}
           pull_request={pull_request}
-          selected={selected?(pull_request, @selected_pull_request)}
+          selected={selected?(pull_request, @detail)}
           merge_frozen={merge_frozen?(@frozen_repos, pull_request)}
           members={@members}
           current_user={@current_user}
@@ -172,12 +70,7 @@
     <% end %>
 
     <div id="detail-pane">
-      <MrgrWeb.Components.PullRequest.pull_request_detail
-        :if={@selected_pull_request}
-        pull_request={@selected_pull_request}
-        attr={@selected_attr}
-        timezone={@timezone}
-      />
+      <.render_detail :if={@detail} item={@detail} attr={@selected_attr} timezone={@timezone} />
     </div>
   </div>
 </div>

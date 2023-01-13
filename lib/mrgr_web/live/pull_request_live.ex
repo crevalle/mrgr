@@ -2,6 +2,8 @@ defmodule MrgrWeb.PullRequestLive do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
+  import MrgrWeb.Components.PullRequest
+
   alias __MODULE__.Tabs
 
   on_mount MrgrWeb.Plug.Auth
@@ -22,13 +24,14 @@ defmodule MrgrWeb.PullRequestLive do
 
       # id will be `nil` for the index action
       # but present for the show action
-      # selected_pull_request = Mrgr.List.find(pull_requests, params["id"])
+      # detail = Mrgr.List.find(pull_requests, params["id"])
       # not sure how to do this anymore
 
       socket
       |> assign(:tabs, tabs)
       |> assign(:selected_tab, hd(tabs))
-      |> assign(:selected_pull_request, nil)
+      |> assign(:detail, nil)
+      |> assign(:selected_attr, nil)
       |> assign(:repos, repos)
       |> assign(:labels, labels)
       |> assign(:members, members)
@@ -66,6 +69,26 @@ defmodule MrgrWeb.PullRequestLive do
     socket
     |> assign(:tabs, tabs)
     |> assign(:selected_tab, newly_selected)
+    |> assign(:detail, nil)
+    |> hide_detail()
+    |> noreply()
+  end
+
+  def handle_event("edit-tab", _params, socket) do
+    socket
+    |> assign(:detail, socket.assigns.selected_tab)
+    |> show_detail()
+    |> noreply()
+  end
+
+  def handle_event("update-tab", %{"tab" => params}, socket) do
+    {tabs, updated_tab} = Tabs.update(socket.assigns.tabs, socket.assigns.selected_tab, params)
+
+    socket
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, updated_tab)
+    |> assign(:detail, nil)
+    |> hide_detail()
     |> noreply()
   end
 
@@ -83,11 +106,11 @@ defmodule MrgrWeb.PullRequestLive do
 
     updated_tab = Mrgr.PRTab.toggle_author(selected_tab, author)
 
-    tabs = Tabs.reload_tab(socket.assigns.tabs, updated_tab)
+    {tabs, selected} = Tabs.reload_prs(socket.assigns.tabs, updated_tab)
 
     socket
     |> assign(:tabs, tabs)
-    |> assign(:selected_tab, updated_tab)
+    |> assign(:selected_tab, selected)
     |> noreply()
   end
 
@@ -97,11 +120,11 @@ defmodule MrgrWeb.PullRequestLive do
 
     updated_tab = Mrgr.PRTab.toggle_label(selected_tab, label)
 
-    tabs = Tabs.reload_tab(socket.assigns.tabs, updated_tab)
+    {tabs, selected} = Tabs.reload_prs(socket.assigns.tabs, updated_tab)
 
     socket
     |> assign(:tabs, tabs)
-    |> assign(:selected_tab, updated_tab)
+    |> assign(:selected_tab, selected)
     |> noreply()
   end
 
@@ -138,7 +161,7 @@ defmodule MrgrWeb.PullRequestLive do
   def handle_event("toggle-check", %{"check-id" => id}, socket) do
     # this will be here since that's how the detail page gets opened
     # should eventually have this state live somewhere else
-    checklist = socket.assigns.selected_pull_request.checklist
+    checklist = socket.assigns.detail.checklist
 
     check = Mrgr.List.find(checklist.checks, id)
 
@@ -148,7 +171,7 @@ defmodule MrgrWeb.PullRequestLive do
 
     updated_checklist = %{checklist | checks: updated_checks}
 
-    pull_request = %{socket.assigns.selected_pull_request | checklist: updated_checklist}
+    pull_request = %{socket.assigns.detail | checklist: updated_checklist}
 
     Mrgr.PubSub.broadcast(
       pull_request,
@@ -157,7 +180,7 @@ defmodule MrgrWeb.PullRequestLive do
     )
 
     socket
-    |> assign(:selected_pull_request, pull_request)
+    |> assign(:detail, pull_request)
     |> noreply
   end
 
@@ -178,7 +201,7 @@ defmodule MrgrWeb.PullRequestLive do
     {tabs, selected} = Tabs.reload_prs(socket.assigns.tabs, socket.assigns.selected_tab)
 
     socket =
-      case previewing_pull_request?(socket.assigns.selected_pull_request, pull_request) do
+      case previewing_pull_request?(socket.assigns.detail, pull_request) do
         true ->
           hide_detail(socket)
 
@@ -201,9 +224,9 @@ defmodule MrgrWeb.PullRequestLive do
 
     # update in place to reflect new status
     socket =
-      case previewing_pull_request?(socket.assigns.selected_pull_request, pull_request) do
+      case previewing_pull_request?(socket.assigns.detail, pull_request) do
         true ->
-          assign(socket, :selected_pull_request, pull_request)
+          assign(socket, :detail, pull_request)
 
         false ->
           socket
@@ -219,7 +242,7 @@ defmodule MrgrWeb.PullRequestLive do
     pr = Tabs.select_pull_request(socket.assigns.selected_tab, id)
 
     socket
-    |> assign(:selected_pull_request, pr)
+    |> assign(:detail, pr)
     |> assign(:selected_attr, attr)
     |> show_detail()
     |> noreply()
@@ -227,7 +250,7 @@ defmodule MrgrWeb.PullRequestLive do
 
   def handle_event("hide-detail", _params, socket) do
     socket
-    |> assign(:selected_pull_request, nil)
+    |> assign(:detail, nil)
     |> noreply()
   end
 
@@ -277,13 +300,12 @@ defmodule MrgrWeb.PullRequestLive do
     {tabs, selected_tab} =
       Tabs.update_pr_data(socket.assigns.tabs, socket.assigns.selected_tab, hydrated)
 
-    selected_pull_request =
-      maybe_update_selected_pr(hydrated, socket.assigns.selected_pull_request)
+    selected_pull_request = maybe_update_selected_pr(hydrated, socket.assigns.detail)
 
     socket
     |> assign(:tabs, tabs)
     |> assign(:selected_tab, selected_tab)
-    |> assign(:selected_pull_request, selected_pull_request)
+    |> assign(:detail, selected_pull_request)
     |> noreply()
   end
 
@@ -344,8 +366,8 @@ defmodule MrgrWeb.PullRequestLive do
     Mrgr.List.member?(repos, pull_request.repository)
   end
 
-  defp selected?(%{id: id}, %{id: id}), do: true
-  defp selected?(_pull_request, _selected), do: false
+  def selected?(%{id: id}, %{id: id}), do: true
+  def selected?(_pull_request, _selected), do: false
 
   defp translate_snooze("2") do
     Mrgr.DateTime.now() |> DateTime.add(2, :day)
@@ -384,6 +406,14 @@ defmodule MrgrWeb.PullRequestLive do
       {updated_tabs, new_tab}
     end
 
+    def update(tabs, tab, params) do
+      {:ok, updated_tab} = Mrgr.PRTab.update(tab, params)
+
+      updated_tabs = reload_tab(tabs, updated_tab)
+
+      {updated_tabs, updated_tab}
+    end
+
     # assumes the tab being deleted is currently selected.
     # Select the next tab to the right.
     def delete(tabs, tab) do
@@ -403,8 +433,6 @@ defmodule MrgrWeb.PullRequestLive do
 
     def reload_tab(tabs, tab) do
       idx = Mrgr.List.find_index(tabs, tab)
-
-      # TODO: reload the prs first
 
       tabs
       |> Mrgr.List.remove(tab)
@@ -641,6 +669,10 @@ defmodule MrgrWeb.PullRequestLive do
 
     def load_pull_requests(%{id: "fix-ci"} = tab, opts) do
       Mrgr.PullRequest.paged_fix_ci_prs(tab.meta.user, opts)
+    end
+
+    def load_pull_requests(%Mrgr.Schema.PRTab{} = tab, opts) do
+      Mrgr.PullRequest.paged_nav_tab_prs(tab, opts)
     end
 
     def load_pull_requests(_unknown_tab, _params) do
