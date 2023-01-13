@@ -254,11 +254,16 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.update!()
   end
 
-  defp add_members(installation, github_members) do
-    members = Enum.map(github_members, &find_or_create_member/1)
+  defp add_members(installation, github_users) when is_list(github_users) do
+    members = Enum.map(github_users, &find_or_create_member/1)
     Enum.map(members, &create_membership(installation, &1))
 
     members
+  end
+
+  defp add_members(installation, github_user) do
+    # User accounts just have the one member
+    add_members(installation, [github_user])
   end
 
   def create_membership(installation, member) do
@@ -298,9 +303,11 @@ defmodule Mrgr.Installation do
     Map.put(attrs, :user_id, id)
   end
 
-  def add_teams(installation, github_teams) do
+  def add_teams(installation, github_teams) when is_list(github_teams) do
     Enum.map(github_teams, &find_or_create_team(installation, &1))
   end
+
+  def add_teams(installation, github_team), do: add_teams(installation, [github_team])
 
   def find_or_create_team(installation, github_team) do
     case Mrgr.Team.find_by_node_id(github_team.node_id) do
