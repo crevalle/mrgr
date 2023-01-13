@@ -16,7 +16,7 @@ defmodule Mrgr.PRTab do
     %Schema{}
     |> Schema.changeset(%{user_id: user.id})
     |> Mrgr.Repo.insert!()
-    |> Mrgr.Repo.preload([:authors, :labels, :repositories])
+    |> Mrgr.Repo.preload([:authors, :labels, :repositories, :user])
   end
 
   def update(tab, params) do

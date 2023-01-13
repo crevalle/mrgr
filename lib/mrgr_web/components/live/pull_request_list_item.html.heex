@@ -49,13 +49,10 @@
       <h5>At a Glance</h5>
       <div class="sm:flex items-center">
         <span class="mr-2">
-        <.aside><.pr_approval_text pull_request={@pull_request} /></.aside>
+          <.aside><.pr_approval_text pull_request={@pull_request} /></.aside>
         </span>
         <div class="flex space-x-1 items-center">
-          <.reviewers
-            reviewers={@pull_request.requested_reviewers}
-            current_user={@current_user}
-          />
+          <.reviewers reviewers={@pull_request.requested_reviewers} current_user={@current_user} />
           <.toggle_reviewer_menu pull_request={@pull_request} members={@members} />
         </div>
       </div>
@@ -114,8 +111,6 @@
       </div>
     </div>
   </div>
-
-
   <!-- last row -->
   <div class="flex flex-col space-y-4 p-3 rounded-b-md drop-shadow-lg shadow-inner">
     <div class="flex space-x-4 items-center">

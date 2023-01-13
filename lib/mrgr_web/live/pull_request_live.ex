@@ -516,17 +516,28 @@ defmodule MrgrWeb.PullRequestLive do
 
     def reload_prs(all, selected) do
       snoozed =
-        load_pull_requests(selected, %{snoozed: true, page_number: selected.snoozed.page_number})
+        load_pull_requests(selected, %{
+          snoozed: true,
+          page_number: safe_page_number(selected.snoozed)
+        })
 
       pull_requests =
         load_pull_requests(selected, %{
           snoozed: false,
-          page_number: selected.pull_requests.page_number
+          page_number: safe_page_number(selected.pull_requests)
         })
 
       updated = %{selected | snoozed: snoozed, pull_requests: pull_requests}
 
       {Mrgr.List.replace(all, updated), updated}
+    end
+
+    # newly created tabs don't have a hydrated snoozed field
+    def safe_page_number(nil), do: 1
+    def safe_page_number([]), do: 1
+
+    def safe_page_number(snoozed_or_unsnoozed) do
+      snoozed_or_unsnoozed.page_number
     end
 
     def paginate(params, %{assigns: %{tabs: tabs, selected_tab: selected_tab}}) do
