@@ -61,17 +61,18 @@
       <.badges pull_request={@pull_request} />
     </div>
     <!-- 4th row -->
-    <div class="flex justify-between space-x-4 max-h-80 overflow-hidden">
+    <div class="flex justify-between space-x-4 max-h-64 overflow-hidden">
       <div class="flex flex-col basis-1/3">
-        <h5
-          class="text-teal-700 hover:text-teal-500"
+        <div
+          class="flex items-center text-teal-700 hover:text-teal-500"
           phx-click={JS.push("show-detail-comments", value: %{id: @pull_request.id})}
         >
-          Recent Comments
-        </h5>
+          <h6>Recent Comments</h6>
+          <.icon name="chevron-right" class="h-4 w-4" />
+        </div>
 
-        <div class="flex flex-col space-y-3">
-          <.comment_preview
+        <div class="flex flex-col space-y-4">
+          <.preview_comment
             :for={comment <- @pull_request.comments}
             comment={comment}
             tz={@timezone}
@@ -80,13 +81,15 @@
       </div>
 
       <div class="flex flex-col basis-1/3">
-        <h5
-          class="text-teal-700 hover:text-teal-500"
+        <div
+          class="flex items-center text-teal-700 hover:text-teal-500"
           phx-click={JS.push("show-detail-commits", value: %{id: @pull_request.id})}
         >
-          Recent Commits
-        </h5>
-        <div class="flex flex-col space-y-3">
+          <h6>Recent Commits</h6>
+          <.icon name="chevron-right" class="h-4 w-4" />
+        </div>
+
+        <div class="flex flex-col space-y-1">
           <MrgrWeb.Components.PullRequest.preview_commit
             :for={c <- @pull_request.commits}
             commit={c}
@@ -95,12 +98,13 @@
       </div>
 
       <div class="flex flex-col basis-1/3">
-        <h5
-          class="text-teal-700 hover:text-teal-500"
+        <div
+          class="flex items-center text-teal-700 hover:text-teal-500"
           phx-click={JS.push("show-detail-files-changed", value: %{id: @pull_request.id})}
         >
-          Files Changed
-        </h5>
+          <h6>Files Changed</h6>
+          <.icon name="chevron-right" class="h-4 w-4" />
+        </div>
         <div class="flex flex-col space-y-0 leading-tight">
           <.changed_file
             :for={f <- @pull_request.files_changed}

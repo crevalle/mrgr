@@ -192,15 +192,11 @@ defmodule MrgrWeb.Components.PullRequest do
 
   def preview_commit(assigns) do
     ~H"""
-    <div class="flex flex-col">
+    <div class="flex justify-between items-center">
       <p class="truncate"><%= PullRequest.commit_message(@commit) %></p>
-      <div class="flex space-between space-x-2 divide-x divide-gray-500">
-        <p class="text-sm text-gray-500"><%= PullRequest.commit_author_name(@commit) %></p>
-        <p class="pl-2 text-sm text-gray-500"><%= ts(PullRequest.committed_at(@commit)) %></p>
-        <p class="pl-2 text-sm text-gray-500 truncate">
-          <%= shorten_sha(PullRequest.commit_sha(@commit)) %>
-        </p>
-      </div>
+      <p class="text-sm text-gray-500 whitespace-nowrap">
+        <%= PullRequest.commit_author_name(@commit) %>
+      </p>
     </div>
     """
   end

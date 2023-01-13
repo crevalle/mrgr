@@ -690,18 +690,19 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def comment_preview(assigns) do
+  def preview_comment(assigns) do
     ~H"""
-    <div class="flex flex-col">
-      <div class="flex flex-col">
-        <.avatar member={Mrgr.Schema.Comment.author(@comment)} />
-        <.aside><%= ts(@comment.posted_at, @tz) %></.aside>
+    <div>
+      <div class="float-left">
+        <div class="flex">
+          <%= img_tag(Mrgr.Schema.Comment.author(@comment).avatar_url,
+            class: "rounded-xl h-5 w-5 mr-1"
+          ) %>
+        </div>
       </div>
-      <div class="pt-1">
-        <p class="text-gray-500 italic">
-          <%= Mrgr.Schema.Comment.body(@comment) %>
-        </p>
-      </div>
+      <p class="text-gray-500 italic text-sm ">
+        <%= Mrgr.Schema.Comment.body(@comment) %>
+      </p>
     </div>
     """
   end
