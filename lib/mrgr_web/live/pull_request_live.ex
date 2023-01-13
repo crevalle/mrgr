@@ -134,7 +134,7 @@ defmodule MrgrWeb.PullRequestLive do
         socket
       ) do
     reviewer = Mrgr.List.find(socket.assigns.members, member_id)
-    pull_request = Tabs.select_pull_request(socket.assigns.selected_tab, pull_request_id)
+    pull_request = Tabs.find_pull_request(socket.assigns.selected_tab, pull_request_id)
 
     Task.start(fn ->
       Mrgr.PullRequest.toggle_reviewer(pull_request, reviewer)
@@ -194,7 +194,7 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   def handle_event("snooze-pull-request", %{"id" => id, "time" => time}, socket) do
-    pull_request = Tabs.select_pull_request(socket.assigns.selected_tab, id)
+    pull_request = Tabs.find_pull_request(socket.assigns.selected_tab, id)
 
     Mrgr.PullRequest.snooze(pull_request, translate_snooze(time))
 
@@ -216,7 +216,7 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   def handle_event("unsnooze-pull-request", %{"id" => id}, socket) do
-    pull_request = Tabs.select_pull_request(socket.assigns.selected_tab, id)
+    pull_request = Tabs.find_pull_request(socket.assigns.selected_tab, id)
 
     pull_request = Mrgr.PullRequest.unsnooze(pull_request)
 
@@ -239,7 +239,7 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   def handle_event("show-detail-" <> attr, %{"id" => id}, socket) do
-    pr = Tabs.select_pull_request(socket.assigns.selected_tab, id)
+    pr = Tabs.find_pull_request(socket.assigns.selected_tab, id)
 
     socket
     |> assign(:detail, pr)
@@ -395,7 +395,6 @@ defmodule MrgrWeb.PullRequestLive do
       []
       |> Kernel.++(state_tabs_for_user(user))
       |> Kernel.++(custom_tabs_for_user(user))
-      # |> Kernel.++(time_tabs_for_user(user))
       |> Enum.map(&load_prs_async/1)
     end
 
@@ -472,61 +471,15 @@ defmodule MrgrWeb.PullRequestLive do
     end
 
     def custom_tabs_for_user(user) do
-      user
-      |> Mrgr.PRTab.for_user()
-    end
-
-    def time_tabs_for_user(user) do
-      [
-        %{
-          id: "this-week",
-          title: "This Week",
-          type: :time,
-          meta: %{user: user},
-          viewing_snoozed: false,
-          pull_requests: [],
-          snoozed: []
-        },
-        %{
-          id: "last-week",
-          title: "Last Week",
-          type: :time,
-          meta: %{user: user},
-          viewing_snoozed: false,
-          pull_requests: [],
-          snoozed: []
-        },
-        %{
-          id: "this-month",
-          title: "This Month",
-          type: :time,
-          meta: %{user: user},
-          viewing_snoozed: false,
-          pull_requests: [],
-          snoozed: []
-        },
-        %{
-          id: "stale",
-          title: "Stale (> 4 weeks)",
-          type: :time,
-          meta: %{user: user},
-          viewing_snoozed: false,
-          pull_requests: [],
-          snoozed: []
-        }
-      ]
+      Mrgr.PRTab.for_user(user)
     end
 
     def find_tab_by_ref(tabs, ref) do
       Enum.find(tabs, fn tab -> tab.meta[:ref] == ref end)
     end
 
-    def time_tabs(tabs) do
-      Enum.filter(tabs, fn t -> t.type == :time end)
-    end
-
     def state_tabs(tabs) do
-      Enum.filter(tabs, fn t -> t.type == :state end)
+      Enum.reject(tabs, &custom?/1)
     end
 
     def custom_tabs(tabs) do
@@ -608,7 +561,7 @@ defmodule MrgrWeb.PullRequestLive do
       Enum.find(tabs, fn t -> t.id == id end)
     end
 
-    def select_pull_request(tab, id) do
+    def find_pull_request(tab, id) do
       tab
       |> viewing_page()
       |> Map.get(:entries)
@@ -637,27 +590,6 @@ defmodule MrgrWeb.PullRequestLive do
     end
 
     def load_pull_requests(tab, page_params \\ %{})
-
-    def load_pull_requests(%{id: "this-week"} = tab, page_params) do
-      opts = Map.merge(page_params, %{since: this_week()})
-
-      Mrgr.PullRequest.paged_pending_pull_requests(tab.meta.user, opts)
-    end
-
-    def load_pull_requests(%{id: "last-week"} = tab, page_params) do
-      opts = Map.merge(page_params, %{before: this_week(), since: two_weeks_ago()})
-      Mrgr.PullRequest.paged_pending_pull_requests(tab.meta.user, opts)
-    end
-
-    def load_pull_requests(%{id: "this-month"} = tab, page_params) do
-      opts = Map.merge(page_params, %{before: two_weeks_ago(), since: four_weeks_ago()})
-      Mrgr.PullRequest.paged_pending_pull_requests(tab.meta.user, opts)
-    end
-
-    def load_pull_requests(%{id: "stale"} = tab, page_params) do
-      opts = Map.merge(page_params, %{before: four_weeks_ago()})
-      Mrgr.PullRequest.paged_pending_pull_requests(tab.meta.user, opts)
-    end
 
     def load_pull_requests(%{id: "ready-to-merge"} = tab, opts) do
       Mrgr.PullRequest.paged_ready_to_merge_prs(tab.meta.user, opts)
@@ -700,18 +632,5 @@ defmodule MrgrWeb.PullRequestLive do
 
     def get_page(%{viewing_snoozed: true, snoozed: prs}), do: prs
     def get_page(%{viewing_snoozed: false, pull_requests: prs}), do: prs
-
-    defp this_week do
-      # last 7 days
-      Mrgr.DateTime.shift_from_now(-7, :day)
-    end
-
-    defp two_weeks_ago do
-      Mrgr.DateTime.shift_from_now(-14, :day)
-    end
-
-    defp four_weeks_ago do
-      Mrgr.DateTime.shift_from_now(-28, :day)
-    end
   end
 end
