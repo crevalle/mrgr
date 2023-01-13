@@ -162,9 +162,10 @@ defmodule MrgrWeb.Components.Core do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 inline-flex items-center",
-        "border border-transparent shadow-md rounded-r-md bg-zinc-900 hover:bg-zinc-700 px-4",
+        "phx-submit-loading:opacity-75 inline-flex items-center px-4",
+        "border border-transparent shadow-md rounded-r-md",
         "text-sm font-medium text-white",
+        "bg-teal-700 hover:bg-teal-600",
         "focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 focus:border-teal-500",
         @class
       ]}

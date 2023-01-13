@@ -146,12 +146,12 @@ h5 {
 }
 
 .tab-select-button {
-  @apply text-gray-500 p-3 bg-gray-50 hover:bg-gray-100 border-t-2 border-x-2 rounded-t-lg;
+  @apply text-gray-500 p-3 bg-gray-50 hover:bg-gray-100 border-t-2 border-x rounded-t-lg hover:cursor-pointer;
   transition: border-color 150ms ease-out;
 }
 
 .tab-select-button.selected {
-  @apply border-teal-700 text-teal-700 bg-white;
+  @apply border-teal-700 text-teal-700 bg-white border-x-2 border-b-2;
 }
 
 .dropdown:hover .dropdown-content {display: block;}

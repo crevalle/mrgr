@@ -413,9 +413,6 @@ defmodule MrgrWeb.Components.PullRequest do
           ) %>
 
           <div class="flex justify-between items-center">
-            <.dangerous_link phx-click="delete-tab" data={[confirm: "Sure about that?"]}>
-              delete tab
-            </.dangerous_link>
             <.button
               type="submit"
               phx-disable-with="Saving..."
@@ -423,6 +420,9 @@ defmodule MrgrWeb.Components.PullRequest do
             >
               Save
             </.button>
+            <.dangerous_link phx-click="delete-tab" data={[confirm: "Sure about that?"]}>
+              delete tab
+            </.dangerous_link>
           </div>
         </div>
       </.form>
