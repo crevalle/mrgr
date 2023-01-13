@@ -19,6 +19,9 @@ defmodule Mrgr.Schema.PRTab do
     has_many(:label_pr_tabs, Mrgr.Schema.LabelPRTab)
     has_many(:labels, through: [:label_pr_tabs, :label])
 
+    has_many(:repository_pr_tabs, Mrgr.Schema.RepositoryPRTab)
+    has_many(:repositories, through: [:repository_pr_tabs, :repository])
+
     timestamps()
   end
 

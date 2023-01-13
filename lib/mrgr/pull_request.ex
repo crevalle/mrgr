@@ -941,6 +941,7 @@ defmodule Mrgr.PullRequest do
       query
       |> filter_authors(tab.authors)
       |> filter_labels(tab.labels)
+      |> filter_repositories(tab.repositories)
     end
 
     def filter_authors(query, []), do: query
@@ -961,6 +962,16 @@ defmodule Mrgr.PullRequest do
       from(q in query,
         left_join: l in assoc(q, :labels),
         where: l.id in ^label_ids
+      )
+    end
+
+    def filter_repositories(query, []), do: query
+
+    def filter_repositories(query, repositories) do
+      repository_ids = Enum.map(repositories, & &1.id)
+
+      from(q in query,
+        where: q.repository_id in ^repository_ids
       )
     end
 

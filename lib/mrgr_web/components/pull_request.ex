@@ -322,6 +322,46 @@ defmodule MrgrWeb.Components.PullRequest do
           Edit Tab Details
         </.l>
       </.aside>
+      <!-- repositories -->
+      <div class="flex items-center">
+        <%= img_tag("images/repository-32.png", class: "opacity-40 h-5 w-5") %>
+
+        <div class="relative">
+          <div
+            class="flex flex-wrap -mb-px text-sm font-medium text-center items-center"
+            role="tablist"
+          >
+            <div :for={repo <- @selected_tab.repositories} class="mr-2" role="presentation">
+              <.pr_filter item={repo} />
+            </div>
+
+            <div class="relative">
+              <.dropdown_toggle_link target="pr-tab-repository-dropdown">
+                <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
+              </.dropdown_toggle_link>
+
+              <.dropdown_menu name="pr-tab-repository-dropdown">
+                <:description>
+                  Filter By Repository
+                </:description>
+
+                <.dropdown_toggle_list name="repository" items={@repos}>
+                  <:row :let={repo}>
+                    <div class="flex items-center">
+                      <div class="w-8 text-blue-400 ">
+                        <%= if Mrgr.PRTab.repository_present?(@selected_tab, repo) do %>
+                          <.icon name="check" class="text-teal-700 h-5 w-5" />
+                        <% end %>
+                      </div>
+                      <%= repo.name %>
+                    </div>
+                  </:row>
+                </.dropdown_toggle_list>
+              </.dropdown_menu>
+            </div>
+          </div>
+        </div>
+      </div>
       <!-- labels -->
       <div class="flex items-center">
         <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />

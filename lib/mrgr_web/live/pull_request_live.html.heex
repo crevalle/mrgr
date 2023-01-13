@@ -37,7 +37,13 @@
   </div>
 
   <div :if={custom?(@selected_tab)} class="flex flex-col space-y-4">
-    <.filters tabs={@tabs} selected_tab={@selected_tab} labels={@labels} members={@members} />
+    <.filters
+      tabs={@tabs}
+      selected_tab={@selected_tab}
+      labels={@labels}
+      members={@members}
+      repos={@repos}
+    />
   </div>
 
   <div>

@@ -7,6 +7,7 @@ defmodule Mrgr.PRTab do
     |> Query.for_user(user)
     |> Query.with_authors()
     |> Query.with_labels()
+    |> Query.with_repositories()
     |> Query.cron()
     |> Mrgr.Repo.all()
   end
@@ -15,7 +16,7 @@ defmodule Mrgr.PRTab do
     %Schema{}
     |> Schema.changeset(%{user_id: user.id})
     |> Mrgr.Repo.insert!()
-    |> Mrgr.Repo.preload([:authors, :labels])
+    |> Mrgr.Repo.preload([:authors, :labels, :repositories])
   end
 
   def update(tab, params) do
@@ -100,6 +101,42 @@ defmodule Mrgr.PRTab do
     |> Enum.member?(label.id)
   end
 
+  def toggle_repository(tab, repository) do
+    tab
+    |> repository_present?(repository)
+    |> case do
+      true ->
+        remove_repository(tab, repository)
+
+      false ->
+        add_repository(tab, repository)
+    end
+  end
+
+  def add_repository(tab, repository) do
+    params = %{pr_tab_id: tab.id, repository_id: repository.id}
+
+    %Mrgr.Schema.RepositoryPRTab{}
+    |> Ecto.Changeset.change(params)
+    |> Mrgr.Repo.insert!()
+
+    Mrgr.Repo.preload(tab, :repositories, force: true)
+  end
+
+  def remove_repository(tab, repository) do
+    Mrgr.Schema.RepositoryPRTab
+    |> Mrgr.Repo.get_by(pr_tab_id: tab.id, repository_id: repository.id)
+    |> Mrgr.Repo.delete()
+
+    Mrgr.Repo.preload(tab, :repositories, force: true)
+  end
+
+  def repository_present?(%{repositories: repositories}, repository) do
+    repositories
+    |> Enum.map(& &1.id)
+    |> Enum.member?(repository.id)
+  end
+
   defmodule Query do
     use Mrgr.Query
 
@@ -122,6 +159,13 @@ defmodule Mrgr.PRTab do
       from(q in query,
         left_join: l in assoc(q, :labels),
         preload: [labels: l]
+      )
+    end
+
+    def with_repositories(query) do
+      from(q in query,
+        left_join: r in assoc(q, :repositories),
+        preload: [repositories: r]
       )
     end
   end

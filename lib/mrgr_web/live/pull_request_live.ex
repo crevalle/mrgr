@@ -128,6 +128,20 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
+  def handle_event("toggle-repository", %{"id" => id}, socket) do
+    repository = Mrgr.List.find(socket.assigns.repos, id)
+    selected_tab = socket.assigns.selected_tab
+
+    updated_tab = Mrgr.PRTab.toggle_repository(selected_tab, repository)
+
+    {tabs, selected} = Tabs.reload_prs(socket.assigns.tabs, updated_tab)
+
+    socket
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected)
+    |> noreply()
+  end
+
   def handle_event(
         "toggle-reviewer",
         %{"id" => member_id, "pull_request_id" => pull_request_id},

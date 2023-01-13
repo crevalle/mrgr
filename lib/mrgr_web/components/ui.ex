@@ -499,6 +499,12 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def pr_filter_title(%{item: %Mrgr.Schema.Repository{}} = assigns) do
+    ~H"""
+    <%= @item.name %>
+    """
+  end
+
   def pr_filter_title(%{item: %Mrgr.Schema.Member{}} = assigns) do
     ~H"""
     <.avatar member={@item} />
@@ -508,12 +514,6 @@ defmodule MrgrWeb.Components.UI do
   def pr_filter_title(%{item: %Mrgr.Schema.Label{}} = assigns) do
     ~H"""
     <.badge item={@item} />
-    """
-  end
-
-  def pr_filter_title(assigns) do
-    ~H"""
-    <%= @tab.title %>
     """
   end
 
