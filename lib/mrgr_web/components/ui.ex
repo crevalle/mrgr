@@ -455,13 +455,6 @@ defmodule MrgrWeb.Components.UI do
       items-center
       tab-select-button
       #{selected}
-      p-4
-      bg-gray-100
-      hover:bg-gray-50
-      hover:cursor-pointer
-      border-t-2
-      border-x-2
-      rounded-t-lg
     )
 
     assigns =

@@ -107,7 +107,7 @@ defmodule MrgrWeb.Components.PullRequest do
 
   def reviewers(%{reviewers: []} = assigns) do
     ~H"""
-    <span class="text-gray-500 italic text-sm">none</span>
+    <span class="text-gray-500 italic text-sm">no reviewers requested</span>
     """
   end
 
@@ -237,7 +237,6 @@ defmodule MrgrWeb.Components.PullRequest do
   def filters(assigns) do
     ~H"""
     <div class="flex flex-col mt-2 space-y-3">
-      <.h3>Filters</.h3>
       <.aside>
         Customize your view by filtering on Author, Label, or Repository.
         <.l phx-click="edit-tab">
@@ -245,6 +244,7 @@ defmodule MrgrWeb.Components.PullRequest do
         </.l>
       </.aside>
       <!-- repositories -->
+      <.h3>Filters</.h3>
       <div class="flex items-center">
         <%= img_tag("images/repository-32.png", class: "opacity-40 h-5 w-5") %>
 
@@ -362,6 +362,36 @@ defmodule MrgrWeb.Components.PullRequest do
           </div>
         </div>
       </div>
+    </div>
+    """
+  end
+
+  def tab_explanation(%{tab: %{id: "ready-to-merge"}} = assigns) do
+    ~H"""
+    <div class="w-3/5">
+      <.aside>
+        Ready to Merge pull requests have been approved (or need no approvals) and are passing CI.  Merge them!
+      </.aside>
+    </div>
+    """
+  end
+
+  def tab_explanation(%{tab: %{id: "needs-approval"}} = assigns) do
+    ~H"""
+    <div class="w-3/5">
+      <.aside>
+        Needs Approval pull requests are passing CI but require more approvals from your team in order to merge.  Ping your team or assign more reviewers to move them along.
+      </.aside>
+    </div>
+    """
+  end
+
+  def tab_explanation(%{tab: %{id: "fix-ci"}} = assigns) do
+    ~H"""
+    <div class="w-3/5">
+      <.aside>
+        These PRs are failing CI.  They may or may not also be fully approved, but any CI issues need to be resolved before they can be merged and should be resolved before any further approvals.
+      </.aside>
     </div>
     """
   end
