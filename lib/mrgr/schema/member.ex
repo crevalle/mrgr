@@ -82,7 +82,7 @@ defmodule Mrgr.Schema.Member do
     # we'll punt on that for now!
     params = %{
       avatar_url: user.avatar_url,
-      login: user.login,
+      login: user.nickname,
       user_id: user.id
     }
 
