@@ -12,6 +12,8 @@ defmodule MrgrWeb.Live.Flash do
   def mount(_params, %{"user_id" => id}, socket) do
     Mrgr.PubSub.subscribe_to_flash(id)
 
+    set_clear_flash_timer()
+
     socket
     |> assign(:user_id, id)
     |> ok()
@@ -19,27 +21,25 @@ defmodule MrgrWeb.Live.Flash do
 
   def render(assigns) do
     ~H"""
-    <div>
-      <p
-        :if={live_flash(@flash, :info)}
-        id="flash-info"
-        class="alert alert-info"
-        phx-click="lv:clear-flash"
-        role="alert"
-      >
-        <%= live_flash(@flash, :info) %>
-      </p>
+    <p
+      :if={live_flash(@flash, :info)}
+      id="flash-info"
+      class="alert alert-info"
+      phx-click="lv:clear-flash"
+      role="alert"
+    >
+      <%= Phoenix.Flash.get(@flash, :info) %>
+    </p>
 
-      <p
-        :if={live_flash(@flash, :error)}
-        id="flash-error"
-        class="alert alert-danger"
-        phx-click="lv:clear-flash"
-        role="alert"
-      >
-        <%= live_flash(@flash, :error) %>
-      </p>
-    </div>
+    <p
+      :if={live_flash(@flash, :error)}
+      id="flash-error"
+      class="alert alert-danger"
+      phx-click="lv:clear-flash"
+      role="alert"
+    >
+      <%= Phoenix.Flash.get(@flash, :error) %>
+    </p>
     """
   end
 

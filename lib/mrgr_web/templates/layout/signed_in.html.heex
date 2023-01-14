@@ -147,10 +147,12 @@
         </div>
       </div>
     </div>
-    <div>
-      <%= Phoenix.Component.live_render(@conn, MrgrWeb.Live.Flash,
-        session: %{"user_id" => @conn.assigns.current_user.id}
-      ) %>
+    <div class="relative">
+      <div class="fixed right-4 top-4 z-50">
+        <%= Phoenix.Component.live_render(@conn, MrgrWeb.Live.Flash,
+          session: %{"user_id" => @conn.assigns.current_user.id}
+        ) %>
+      </div>
 
       <div class="m-6">
         <%= @inner_content %>
