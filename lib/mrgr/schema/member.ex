@@ -83,7 +83,8 @@ defmodule Mrgr.Schema.Member do
     params = %{
       avatar_url: user.avatar_url,
       login: user.nickname,
-      user_id: user.id
+      user_id: user.id,
+      type: "User"
     }
 
     changeset(params)
