@@ -1,11 +1,15 @@
 defmodule MrgrWeb.JS do
   alias Phoenix.LiveView.JS
 
+  def show_detail do
+    show_detail(%JS{})
+  end
+
   def show_detail(%Phoenix.LiveView.Socket{} = socket) do
     Phoenix.LiveView.push_event(socket, "show-element", %{id: "detail-pane"})
   end
 
-  def show_detail(js \\ %JS{}) do
+  def show_detail(%JS{} = js) do
     js
     |> JS.add_class("show", to: "#detail-pane")
   end
