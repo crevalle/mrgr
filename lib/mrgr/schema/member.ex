@@ -76,6 +76,19 @@ defmodule Mrgr.Schema.Member do
     |> changeset()
   end
 
+  def changeset(%Mrgr.Schema.User{} = user) do
+    # we don't get external ids or node_ids
+    # but Mrgr isn't really for individuals so
+    # we'll punt on that for now!
+    params = %{
+      avatar_url: user.avatar_url,
+      login: user.login,
+      user_id: user.id
+    }
+
+    changeset(params)
+  end
+
   def changeset(params) when is_map(params) do
     changeset(%__MODULE__{}, params)
   end

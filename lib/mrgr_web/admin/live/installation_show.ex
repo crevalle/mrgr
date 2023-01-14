@@ -41,6 +41,18 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
         <div class="px-4 py-5 sm:px-6">
           <div class="my-1">
+            <.h3>Creator</.h3>
+          </div>
+
+          <div class="mt-1">
+            <.admin_user_table users={[@installation.creator]} tz={@timezone} . />
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+        <div class="px-4 py-5 sm:px-6">
+          <div class="my-1">
             <.h3>Users</.h3>
           </div>
 

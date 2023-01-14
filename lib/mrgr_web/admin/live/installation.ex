@@ -18,6 +18,7 @@ defmodule MrgrWeb.Admin.Live.Installation do
                 <.th uppercase={true}>ID</.th>
                 <.th uppercase={true}>App ID</.th>
                 <.th uppercase={true}>App Slug</.th>
+                <.th uppercase={true}>Type</.th>
                 <.th uppercase={true}>Creator</.th>
                 <.th uppercase={true}>Account</.th>
                 <.th uppercase={true}>Actions</.th>
@@ -38,6 +39,7 @@ defmodule MrgrWeb.Admin.Live.Installation do
                 </.td>
                 <.td><%= i.app_id %></.td>
                 <.td><%= i.app_slug %></.td>
+                <.td><%= i.target_type %></.td>
                 <.td><%= i.creator.nickname %></.td>
                 <.td><%= i.account.login %></.td>
                 <.td>

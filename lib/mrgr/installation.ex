@@ -101,17 +101,35 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.update!()
   end
 
-  def create_members(installation) do
+  def create_members(%{target_type: "Organization"} = installation) do
     members = Mrgr.Github.API.fetch_members(installation)
     add_members(installation, members)
 
     installation
   end
 
-  def create_teams(installation) do
+  def create_members(installation) do
+    # set creator as only member
+    creator = Mrgr.User.find(installation.creator_id)
+
+    with cs <- Mrgr.Schema.Member.changeset(creator),
+         {:ok, member} <- Mrgr.Repo.insert(cs),
+         {:ok, _membership} <- create_membership(installation, member) do
+      :ok
+    end
+
+    installation
+  end
+
+  def create_teams(%{target_type: "Organization"} = installation) do
     teams = Mrgr.Github.API.fetch_teams(installation)
     add_teams(installation, teams)
 
+    installation
+  end
+
+  def create_teams(installation) do
+    # users don't have teams
     installation
   end
 
