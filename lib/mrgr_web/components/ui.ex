@@ -777,6 +777,12 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def repository_icon(assigns) do
+    ~H"""
+    <%= img_tag("images/repository-32.png", class: "opacity-40 h-5 w-5") %>
+    """
+  end
+
   defp language_icon_url("html" = name) do
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{name}5/#{name}5-original.svg"
   end

@@ -246,7 +246,7 @@ defmodule MrgrWeb.Components.PullRequest do
       <!-- repositories -->
       <.h3>Filters</.h3>
       <div class="flex items-center">
-        <%= img_tag("images/repository-32.png", class: "opacity-40 h-5 w-5") %>
+        <.repository_icon />
 
         <div class="relative">
           <div

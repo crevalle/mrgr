@@ -21,9 +21,12 @@
           </.l>
         </div>
 
-        <p class="text-sm italic font-light text-gray-400 pb-2">
-          <%= @pull_request.repository.name %>
-        </p>
+        <div class="flex space-x items-center pb-2">
+          <.repository_icon />
+          <p class="text-sm italic font-light text-gray-400">
+            <%= @pull_request.repository.name %>
+          </p>
+        </div>
         <.badges pull_request={@pull_request} />
       </div>
 
