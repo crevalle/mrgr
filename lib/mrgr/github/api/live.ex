@@ -223,6 +223,10 @@ defmodule Mrgr.Github.API.Live do
     request!(&Tentacat.Pulls.Comments.list/4, installation, [owner, name, number])
   end
 
+  def fetch_members(%{target_type: "User"}) do
+    []
+  end
+
   def fetch_members(installation) do
     result =
       request!(
@@ -232,6 +236,10 @@ defmodule Mrgr.Github.API.Live do
       )
 
     parse_into(result, Mrgr.Github.User)
+  end
+
+  def fetch_teams(%{target_type: "User"}) do
+    []
   end
 
   def fetch_teams(installation) do

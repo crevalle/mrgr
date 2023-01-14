@@ -102,7 +102,6 @@ defmodule Mrgr.Installation do
   end
 
   def create_members(installation) do
-    # create memberships
     members = Mrgr.Github.API.fetch_members(installation)
     add_members(installation, members)
 
@@ -261,11 +260,6 @@ defmodule Mrgr.Installation do
     members
   end
 
-  defp add_members(installation, github_user) do
-    # User accounts just have the one member
-    add_members(installation, [github_user])
-  end
-
   def create_membership(installation, member) do
     params = %{member_id: member.id, installation_id: installation.id}
 
@@ -306,8 +300,6 @@ defmodule Mrgr.Installation do
   def add_teams(installation, github_teams) when is_list(github_teams) do
     Enum.map(github_teams, &find_or_create_team(installation, &1))
   end
-
-  def add_teams(installation, github_team), do: add_teams(installation, [github_team])
 
   def find_or_create_team(installation, github_team) do
     case Mrgr.Team.find_by_node_id(github_team.node_id) do
