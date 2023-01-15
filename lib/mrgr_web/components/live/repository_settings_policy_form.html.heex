@@ -1,9 +1,10 @@
 <div>
   <div class="flex justify-between items-start">
-    <.heading
-      title={"#{if creating?(@object), do: "Add Security Policy", else: "Edit Security Policy"}"}
-      description="Policies can enforce consistent rules across repos."
-    />
+    <.heading title={"#{if creating?(@object), do: "Add Security Policy", else: "Edit Security Policy"}"}>
+      <:description>
+        Policies can enforce consistent rules across repos.
+      </:description>
+    </.heading>
     <.close_detail_pane />
   </div>
 

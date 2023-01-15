@@ -98,7 +98,7 @@ h5 {
 }
 
 #detail-pane {
-  @apply w-80 max-w-sm p-3 bg-white overflow-hidden shadow rounded-lg;
+  @apply p-3 w-1/2 bg-white overflow-hidden shadow rounded-lg;
 
   visibility: hidden;
   opacity: 0;
@@ -116,10 +116,7 @@ h5 {
 }
 
 .main-pane {
-  @apply flex flex-col space-y-8 basis-1/2
-}
-
-.section {
+  @apply flex flex-col space-y-8
 }
 
 .two-pane-layout {
@@ -155,6 +152,10 @@ h5 {
 }
 
 .dropdown:hover .dropdown-content {display: block;}
+
+.hide-empty:empty{
+  display: none;
+}
 
 /* Show the tooltip text when you mouse over the tooltip container */
 .tooltip:hover .tooltiptext {

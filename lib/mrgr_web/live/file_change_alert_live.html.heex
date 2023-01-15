@@ -1,10 +1,11 @@
-<.heading
-  title="File Change Alerts"
-  description="Add alerts based on custom file or folder names."
-/>
+<.heading title="High Impact Files">
+  <:description>
+    Designate files and folders as High Impact to get alerts when PRs with changes to them are opened.  They'll also appear in the High Impact tab on your home screen.
+  </:description>
+</.heading>
 
 <div class="two-pane-layout">
-  <div class="main-pane">
+  <div class="main-pane w-1/2">
     <.live_component
       :for={repo <- @repos}
       module={MrgrWeb.Components.Live.FileChangeAlertComponent}

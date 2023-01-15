@@ -1,14 +1,15 @@
 <div class="">
   <div class="flex justify-between items-start">
-    <.heading
-      title={"#{if @form.action == :create, do: "Add new alert", else: "Edit alert"} for #{@form.repo.name}"}
-      description="Add alerts based on custom file or folder names.  Alerts will appear as labels on the Pull Request, and you can optionally get notified when a new Pull Request matches."
-    />
+    <.heading title={"#{if @form.action == :create, do: "Designate new High Impact file or folder", else: "Edit High Impact file or folder"} for #{@form.repo.name}"}>
+      <:description>
+        Designate a file or folder as High Impact based on custom pattern matching.  PRs with High Impact changes will appear with a badge on the Pull Request dashboard.  You can optionally get notified when a Pull Request containing a High Impact change is opened!
+      </:description>
+    </.heading>
     <.close_detail_pane />
   </div>
 
   <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
-    <div class="px-4 py-5 sm:px-6">
+    <div class="px-4 py-5">
       <.form
         :let={f}
         for={@form.changeset}
@@ -16,13 +17,13 @@
         phx-submit="save-file-alert"
         class="space-y-8 divide-y divide-gray-200"
       >
-        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start">
-          <%= label(f, :pattern, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
-          <div class="mt-1 sm:mt-0 sm:col-span-2">
+        <div class="grid grid-cols-3 gap-4 items-start">
+          <%= label(f, :pattern, class: "block text-sm font-medium text-gray-700 mt-px pt-2") %>
+          <div class="col-span-2 flex flex-col mt-1">
             <%= text_input(f, :pattern,
               placeholder: "example: 'foo/bar.ex' or 'foo/**/bar.ex'",
               class:
-                "max-w-lg block w-full shadow-inner focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
+                "block shadow-inner focus:ring-emerald-500 focus:border-emerald-500 max-w-xs text-sm border-gray-300 rounded-md"
             ) %>
             <.error form={f} attr={:pattern} />
             <p class="mt-2 text-sm text-gray-500" id="pattern-description">
@@ -31,13 +32,13 @@
           </div>
         </div>
 
-        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
-          <%= label(f, :name, class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2") %>
-          <div class="mt-1 sm:mt-0 sm:col-span-2">
+        <div class="grid grid-cols-3 gap-4 items-start border-t border-gray-200 pt-5">
+          <%= label(f, :name, class: "block text-sm font-medium text-gray-700 mt-px pt-2") %>
+          <div class="col-span-2 flex flex-col mt-1 ">
             <%= text_input(f, :name,
               placeholder: "example: 'user model'",
               class:
-                "max-w-lg block w-full shadow-inner focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
+                "block shadow-inner focus:ring-emerald-500 focus:border-emerald-500 max-w-xs text-sm border-gray-300 rounded-md"
             ) %>
             <.error form={f} attr={:name} />
             <p class="mt-2 text-sm text-gray-500" id="name-description">
@@ -46,17 +47,17 @@
           </div>
         </div>
 
-        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
+        <div class="grid grid-cols-3 gap-4 items-start border-t border-gray-200 pt-5">
           <%= label(f, :color, "Background Color",
-            class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
+            class: "block text-sm font-medium text-gray-700 mt-px pt-2"
           ) %>
-          <div class="mt-1 sm:mt-0 sm:col-span-2">
+          <div class="col-span-2 flex flex-col mt-1 ">
             <%= color_input(f, :color,
               class:
-                "shadow-sm focus:ring-emerald-500 focus:border-emerald-500 sm:max-w-xs sm:text-sm border-gray-300 rounded-md"
+                "shadow-sm focus:ring-emerald-500 focus:border-emerald-500 max-w-xs text-sm border-gray-300 rounded-md"
             ) %>
             <p class="mt-2 text-sm text-gray-500" id="color-description">
-              Background Color for the Badge
+              Customize the background color for the Badge
             </p>
             <p class="flex items-center mt-2 text-sm text-gray-500">
               <span class="mr-1">Preview: </span>
@@ -65,17 +66,17 @@
           </div>
         </div>
 
-        <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-center sm:border-t sm:border-gray-200 sm:pt-5">
-          <%= label(f, :notify_user, "Notify Me",
-            class: "block text-sm font-medium text-gray-700 sm:mt-px sm:pt-2"
+        <div class="grid grid-cols-3 gap-4 items-center border-t border-gray-200 pt-5">
+          <%= label(f, :notify_user, "Notify Me of new PRs",
+            class: "block text-sm font-medium text-gray-700 mt-px pt-2"
           ) %>
-          <div class="mt-1 sm:mt-0 flex items-center sm:col-span-2">
+          <div class="col-span-2 flex mt-1 items-center">
             <%= checkbox(f, :notify_user,
               class:
                 "shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md"
             ) %>
             <p class="ml-1 text-sm text-gray-500" id="notify_user-description">
-              Send an email to <%= @current_user.email %> when a PR matches this label.
+              Send an email to <%= @current_user.email %> when a PR matching this pattern is opened.
             </p>
           </div>
         </div>
@@ -87,7 +88,7 @@
                 to: "#",
                 phx_click: "delete-alert",
                 data: [confirm: "Sure about that?"],
-                class: "mr-2 text-rose-600 hover:text-rose-500 sm:text-sm"
+                class: "mr-2 text-rose-600 hover:text-rose-500 text-sm"
               ) %>
             <% end %>
             <.button type="submit" class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500">

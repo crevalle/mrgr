@@ -121,15 +121,14 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def heading(assigns) do
-    assigns = assign_new(assigns, :description, fn -> nil end)
+  attr :title, :string, required: true
+  slot :description
 
+  def heading(assigns) do
     ~H"""
-    <div class="">
+    <div class="flex flex-col space-y-2">
       <.h1><%= @title %></.h1>
-      <%= if @description do %>
-        <p class="mt-2 text-sm text-gray-700"><%= @description %></p>
-      <% end %>
+      <p class="mt-2 text-sm text-gray-700 hide-empty"><%= render_slot(@description) %></p>
     </div>
     """
   end

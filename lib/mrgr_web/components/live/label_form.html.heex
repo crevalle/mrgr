@@ -1,9 +1,10 @@
 <div>
   <div class="flex justify-between items-start">
-    <.heading
-      title={"#{if creating?(@object), do: "Add Label", else: "Edit Label"}"}
-      description="Apply Labels across all your repos!"
-    />
+    <.heading title={"#{if creating?(@object), do: "Add Label", else: "Edit Label"}"}>
+      <:description>
+        Apply Labels across all your repos!
+      </:description>
+    </.heading>
     <.close_detail_pane />
   </div>
 
