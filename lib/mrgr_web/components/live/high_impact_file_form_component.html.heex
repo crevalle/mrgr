@@ -14,7 +14,7 @@
         :let={f}
         for={@form.changeset}
         phx-change="form-change"
-        phx-submit="save-file-alert"
+        phx-submit="save-hif"
         class="space-y-8 divide-y divide-gray-200"
       >
         <div class="grid grid-cols-3 gap-4 items-start">
@@ -86,7 +86,7 @@
             <%= if @form.action == :edit do %>
               <%= link("Delete",
                 to: "#",
-                phx_click: "delete-alert",
+                phx_click: "delete-hif",
                 data: [confirm: "Sure about that?"],
                 class: "mr-2 text-rose-600 hover:text-rose-500 text-sm"
               ) %>

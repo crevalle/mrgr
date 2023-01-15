@@ -6,7 +6,7 @@
       <.language_icon language={@repo.language} />
     </div>
     <.l phx-click={
-      JS.push("add-alert", value: %{id: @repo.id})
+      JS.push("add-hif", value: %{id: @repo.id})
       |> show_detail()
     }>
       <div class="flex items-center">
@@ -16,7 +16,7 @@
   </div>
 
   <table class="min-w-full">
-    <thead :if={Enum.any?(@repo.file_change_alerts)}>
+    <thead :if={Enum.any?(@repo.high_impact_files)}>
       <tr class="border-t border-gray-200">
         <th class="pl-6 py-2 text-left text-sm font-light text-gray-400">File Pattern</th>
         <th class="py-2 text-left text-sm font-light text-gray-400">Badge</th>
@@ -28,19 +28,19 @@
     </thead>
 
     <tbody class="bg-white">
-      <tr :for={alert <- @repo.file_change_alerts} class="border-t border-gray-300">
+      <tr :for={hif <- @repo.high_impact_files} class="border-t border-gray-300">
         <td class="whitespace-nowrap pl-6 py-2 text-sm font-medium text-gray-900">
-          <pre><%= alert.pattern %></pre>
+          <pre><%= hif.pattern %></pre>
         </td>
         <td class="whitespace-nowrap py-2 text-sm text-gray-500">
-          <.badge item={alert} />
+          <.badge item={hif} />
         </td>
         <td class="text-center">
-          <%= tf(alert.notify_user) %>
+          <%= tf(hif.notify_user) %>
         </td>
         <td class="whitespace-nowrap pr-4 py-2 text-right text-sm font-medium">
           <.l phx_click={
-            JS.push("edit-alert", value: %{repo: @repo.id, alert: alert.id})
+            JS.push("edit-hif", value: %{repo: @repo.id, hif: hif.id})
             |> show_detail()
           }>
             Edit

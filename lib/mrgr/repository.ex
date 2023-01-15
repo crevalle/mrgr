@@ -9,7 +9,7 @@ defmodule Mrgr.Repository do
          {:ok, repository} <- Mrgr.Repo.insert(cs) do
       repository
       |> sync_data()
-      |> generate_default_file_change_alerts()
+      |> generate_default_high_impact_files()
       |> set_and_enforce_default_policy()
       |> Mrgr.Tuple.ok()
     end
@@ -28,7 +28,7 @@ defmodule Mrgr.Repository do
     %Schema{}
     |> Schema.changeset(params)
     |> Mrgr.Repo.insert!()
-    |> generate_default_file_change_alerts()
+    |> generate_default_high_impact_files()
   end
 
   def sync_data(repository) do
@@ -92,7 +92,7 @@ defmodule Mrgr.Repository do
     Schema
     |> Query.for_user(user)
     |> Query.order_by_insensitive(asc: :name)
-    |> Query.with_alert_rules()
+    |> Query.with_hif_rules()
     |> Mrgr.Repo.all()
   end
 
@@ -206,7 +206,7 @@ defmodule Mrgr.Repository do
   def sync_if_first_pr(%{language: nil} = repository) do
     repository
     |> sync_data()
-    |> generate_default_file_change_alerts()
+    |> generate_default_high_impact_files()
   end
 
   def sync_if_first_pr(repository), do: repository
@@ -215,16 +215,16 @@ defmodule Mrgr.Repository do
     Mrgr.Github.API.fetch_repository(repository.installation, repository)
   end
 
-  @spec generate_default_file_change_alerts(Schema.t()) :: Schema.t()
-  def generate_default_file_change_alerts(%Schema{} = repository) do
-    alerts =
+  @spec generate_default_high_impact_files(Schema.t()) :: Schema.t()
+  def generate_default_high_impact_files(%Schema{} = repository) do
+    hifs =
       repository
-      |> Mrgr.FileChangeAlert.defaults_for_repo()
-      |> Enum.map(&Mrgr.FileChangeAlert.create/1)
-      |> Enum.filter(fn {res, _alert} -> res == :ok end)
+      |> Mrgr.HighImpactFile.defaults_for_repo()
+      |> Enum.map(&Mrgr.HighImpactFile.create/1)
+      |> Enum.filter(fn {res, _hif} -> res == :ok end)
       |> Enum.map(&Mrgr.Tuple.take_value/1)
 
-    %{repository | file_change_alerts: alerts}
+    %{repository | high_impact_files: hifs}
   end
 
   def delete_all_for_installation(installation) do
@@ -451,10 +451,10 @@ defmodule Mrgr.Repository do
       )
     end
 
-    def with_alert_rules(query) do
+    def with_hif_rules(query) do
       from(q in query,
-        left_join: f in assoc(q, :file_change_alerts),
-        preload: [file_change_alerts: f]
+        left_join: f in assoc(q, :high_impact_files),
+        preload: [high_impact_files: f]
       )
     end
   end

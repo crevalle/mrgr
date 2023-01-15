@@ -1,7 +1,7 @@
-defmodule Mrgr.Schema.FileChangeAlert do
+defmodule Mrgr.Schema.HighImpactFile do
   use Mrgr.Schema
 
-  schema "file_change_alerts" do
+  schema "high_impact_files" do
     field(:name, :string)
     field(:color, :string, default: "#f1e5d1")
     field(:notify_user, :boolean)

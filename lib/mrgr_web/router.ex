@@ -59,7 +59,7 @@ defmodule MrgrWeb.Router do
 
     live "/pull-requests", PullRequestLive, :index
     live "/pull-requests/:id", PullRequestLive, :show
-    live "/file-change-alerts", FileChangeAlertLive, :index
+    live "/high-impact-files", HighImpactFileLive, :index
 
     live "/checklists", Live.Checklist, :index, as: :checklist
 

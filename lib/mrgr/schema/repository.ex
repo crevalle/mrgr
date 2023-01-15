@@ -24,7 +24,7 @@ defmodule Mrgr.Schema.Repository do
 
     has_many(:pull_requests, Mrgr.Schema.PullRequest, on_delete: :delete_all)
 
-    has_many(:file_change_alerts, Mrgr.Schema.FileChangeAlert, on_delete: :delete_all)
+    has_many(:high_impact_files, Mrgr.Schema.HighImpactFile, on_delete: :delete_all)
 
     timestamps()
   end

@@ -123,8 +123,8 @@ defmodule Mrgr.Factory do
     }
   end
 
-  def build(:file_change_alert) do
-    %Mrgr.Schema.FileChangeAlert{
+  def build(:high_impact_file) do
+    %Mrgr.Schema.HighImpactFile{
       repository: build(:repository),
       name: "socks",
       notify_user: false,

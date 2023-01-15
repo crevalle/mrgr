@@ -1,6 +1,6 @@
-defmodule Mrgr.FileChangeAlert do
-  alias Mrgr.Schema.FileChangeAlert, as: Schema
-  alias Mrgr.FileChangeAlert.Query
+defmodule Mrgr.HighImpactFile do
+  alias Mrgr.Schema.HighImpactFile, as: Schema
+  alias Mrgr.HighImpactFile.Query
 
   use Mrgr.PubSub.Event
 
@@ -11,20 +11,20 @@ defmodule Mrgr.FileChangeAlert do
     |> Mrgr.Repo.all()
   end
 
-  def for_pull_request(%{repository: %{file_change_alerts: alerts}} = pull_request) do
-    Enum.filter(alerts, &applies_to_pull_request?(&1, pull_request))
+  def for_pull_request(%{repository: %{high_impact_files: hifs}} = pull_request) do
+    Enum.filter(hifs, &applies_to_pull_request?(&1, pull_request))
   end
 
-  def applies_to_pull_request?(alert, pull_request) do
-    alert
+  def applies_to_pull_request?(hif, pull_request) do
+    hif
     |> matching_filenames(pull_request)
     |> Enum.any?()
   end
 
-  def matching_filenames(alert, pull_request) do
+  def matching_filenames(hif, pull_request) do
     filenames = pull_request.files_changed
 
-    Enum.filter(filenames, &pattern_matches_filename?(&1, alert))
+    Enum.filter(filenames, &pattern_matches_filename?(&1, hif))
   end
 
   def pattern_matches_filename?(filename, %Schema{pattern: pattern}) do
@@ -35,12 +35,12 @@ defmodule Mrgr.FileChangeAlert do
     PathGlob.match?(filename, pattern)
   end
 
-  def delete(alert) do
-    alert
+  def delete(hif) do
+    hif
     |> Mrgr.Repo.delete()
     |> case do
       {:ok, deleted} = res ->
-        broadcast(deleted, @file_change_alert_deleted)
+        broadcast(deleted, @high_impact_file_deleted)
         res
 
       {:error, _cs} = error ->
@@ -54,7 +54,7 @@ defmodule Mrgr.FileChangeAlert do
     |> Mrgr.Repo.insert()
     |> case do
       {:ok, created} = res ->
-        broadcast(created, @file_change_alert_created)
+        broadcast(created, @high_impact_file_created)
         res
 
       {:error, _cs} = error ->
@@ -93,13 +93,13 @@ defmodule Mrgr.FileChangeAlert do
 
   def defaults_for_repo(_unsupported), do: []
 
-  def update(alert, params) do
-    alert
+  def update(hif, params) do
+    hif
     |> Schema.update_changeset(params)
     |> Mrgr.Repo.update()
     |> case do
       {:ok, updated} = res ->
-        broadcast(updated, @file_change_alert_updated)
+        broadcast(updated, @high_impact_file_updated)
         res
 
       {:error, _cs} = error ->
@@ -107,13 +107,13 @@ defmodule Mrgr.FileChangeAlert do
     end
   end
 
-  defp broadcast(alert, event) do
-    alert = Mrgr.Repo.preload(alert, :repository)
+  defp broadcast(hif, event) do
+    hif = Mrgr.Repo.preload(hif, :repository)
 
-    installation_id = alert.repository.installation_id
+    installation_id = hif.repository.installation_id
     topic = Mrgr.PubSub.Topic.installation(installation_id)
 
-    Mrgr.PubSub.broadcast(alert, topic, event)
+    Mrgr.PubSub.broadcast(hif, topic, event)
   end
 
   defmodule Query do

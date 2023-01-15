@@ -4,9 +4,9 @@
   <p>A File Change Alert in the <strong><%= @repository_name %></strong> repository was triggered.  Here are the affected files:</p>
 
   <ul>
-    <%= for file_alert <- @file_alerts, filename <- file_alert.filenames do %>
+    <%= for hif_alert <- @hif_alerts, filename <- hif_alert.filenames do %>
       <li>
-        <strong>[<%= file_alert.name %>]</strong> <%= filename %>
+        <strong>[<%= hif_alert.name %>]</strong> <%= filename %>
       </li>
     <% end %>
   </ul>

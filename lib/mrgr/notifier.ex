@@ -3,9 +3,9 @@ defmodule Mrgr.Notifier do
   # bigger fish to fry
   use Phoenix.Swoosh, view: MrgrWeb.NotifierView
 
-  def file_alert(recipient, repository, file_alerts, url) do
+  def hif_alert(recipient, repository, hif_alerts, url) do
     assigns = %{
-      file_alerts: file_alerts,
+      hif_alerts: hif_alerts,
       repository_name: repository.name,
       url: url
     }
@@ -14,6 +14,6 @@ defmodule Mrgr.Notifier do
     |> from("noreply@mrgr.io")
     |> to(recipient.email)
     |> subject("[Mrgr] File Change Alert in #{assigns.repository_name}")
-    |> render_body("file_alert.html", assigns)
+    |> render_body("hif_alert.html", assigns)
   end
 end

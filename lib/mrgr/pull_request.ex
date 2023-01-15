@@ -39,7 +39,7 @@ defmodule Mrgr.PullRequest do
         |> sync_repo_if_first_pr()
         |> synchronize_github_data()
         |> create_checklists()
-        |> notify_file_alert_consumers()
+        |> notify_hif_alert_consumers()
         |> broadcast(@pull_request_created)
         |> ok()
 
@@ -396,31 +396,31 @@ defmodule Mrgr.PullRequest do
     |> ok()
   end
 
-  def notify_file_alert_consumers(pull_request) do
+  def notify_hif_alert_consumers(pull_request) do
     pull_request
-    |> Mrgr.FileChangeAlert.for_pull_request()
+    |> Mrgr.HighImpactFile.for_pull_request()
     |> Enum.filter(& &1.notify_user)
-    |> send_file_alert(pull_request)
+    |> send_hif_alert(pull_request)
   end
 
-  def send_file_alert([], pull_request), do: pull_request
+  def send_hif_alert([], pull_request), do: pull_request
 
-  def send_file_alert(alerts, pull_request) do
+  def send_hif_alert(hifs, pull_request) do
     installation = Mrgr.Repo.preload(pull_request.repository.installation, :creator)
     recipient = installation.creator
     url = build_url_to(pull_request)
 
-    file_alerts =
-      Enum.map(alerts, fn alert ->
-        filenames = Mrgr.FileChangeAlert.matching_filenames(alert, pull_request)
+    hif_alerts =
+      Enum.map(hifs, fn hif ->
+        filenames = Mrgr.HighImpactFile.matching_filenames(hif, pull_request)
 
         %{
           filenames: filenames,
-          name: alert.name
+          name: hif.name
         }
       end)
 
-    mail = Mrgr.Notifier.file_alert(recipient, pull_request.repository, file_alerts, url)
+    mail = Mrgr.Notifier.hif_alert(recipient, pull_request.repository, hif_alerts, url)
     Mrgr.Mailer.deliver(mail)
 
     pull_request
@@ -689,7 +689,7 @@ defmodule Mrgr.PullRequest do
   def find(id) do
     Schema
     |> Query.by_id(id)
-    |> Query.with_file_alert_rules()
+    |> Query.with_hif_rules()
     |> Mrgr.Repo.one()
   end
 
@@ -884,7 +884,7 @@ defmodule Mrgr.PullRequest do
   def ci_failed?(_pull_request), do: false
 
   defp preload_installation(pull_request) do
-    Mrgr.Repo.preload(pull_request, repository: [:installation, :file_change_alerts])
+    Mrgr.Repo.preload(pull_request, repository: [:installation, :high_impact_files])
   end
 
   def create_checklists(pull_request) do
@@ -1018,10 +1018,10 @@ defmodule Mrgr.PullRequest do
       end
     end
 
-    def with_file_alert_rules(query) do
+    def with_hif_rules(query) do
       from([q, repository: r] in with_repository(query),
-        left_join: a in assoc(r, :file_change_alerts),
-        preload: [repository: {r, [file_change_alerts: a]}]
+        left_join: a in assoc(r, :high_impact_files),
+        preload: [repository: {r, [high_impact_files: a]}]
       )
     end
 
@@ -1057,13 +1057,13 @@ defmodule Mrgr.PullRequest do
         :labels,
         :pr_reviews,
         :author,
-        repository: [:file_change_alerts]
+        repository: [:high_impact_files]
       ]
     end
 
     def with_pending_preloads(query) do
       query
-      |> with_file_alert_rules()
+      |> with_hif_rules()
       |> with_comments()
       |> with_pr_reviews()
       |> with_labels()

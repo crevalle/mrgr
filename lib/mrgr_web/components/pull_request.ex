@@ -61,7 +61,7 @@ defmodule MrgrWeb.Components.PullRequest do
         <.changed_file
           :for={f <- @pull_request.files_changed}
           filename={f}
-          alerts={@pull_request.repository.file_change_alerts}
+          hifs={@pull_request.repository.high_impact_files}
         />
       </div>
     </.detail_content>
@@ -84,16 +84,16 @@ defmodule MrgrWeb.Components.PullRequest do
   end
 
   def changed_file(assigns) do
-    matching_alert =
+    matching_file =
       Enum.find(
-        assigns.alerts,
-        &Mrgr.FileChangeAlert.pattern_matches_filename?(assigns.filename, &1)
+        assigns.hifs,
+        &Mrgr.HighImpactFile.pattern_matches_filename?(assigns.filename, &1)
       )
 
     color =
-      case matching_alert do
+      case matching_file do
         nil -> "transparent"
-        alert -> alert.color
+        file -> file.color
       end
 
     assigns =
