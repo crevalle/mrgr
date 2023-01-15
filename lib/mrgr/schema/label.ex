@@ -2,7 +2,7 @@ defmodule Mrgr.Schema.Label do
   use Mrgr.Schema
 
   schema "labels" do
-    field(:color, :string, default: "f1e5d1")
+    field(:color, :string, default: "#f1e5d1")
     field(:description, :string)
     field(:name, :string)
     field(:repo_count, :integer, virtual: true)
@@ -33,23 +33,27 @@ defmodule Mrgr.Schema.Label do
     schema
     |> changeset(params)
     |> cast_assoc(:label_repositories)
+    |> add_hashie_tag_to_color()
   end
 
   def changeset(schema, params) do
     schema
     |> cast(params, @allowed)
     |> validate_required([:name, :color])
-    |> strip_hashie_color_tag()
+    |> add_hashie_tag_to_color()
     |> foreign_key_constraint(:installation_id)
   end
 
-  def strip_hashie_color_tag(changeset) do
+  def add_hashie_tag_to_color(changeset) do
     case get_change(changeset, :color) do
       color when is_bitstring(color) ->
-        put_change(changeset, :color, String.replace(color, "#", ""))
+        put_change(changeset, :color, add_hashie_tag(color))
 
       _ ->
         changeset
     end
   end
+
+  defp add_hashie_tag("#" <> color), do: add_hashie_tag(color)
+  defp add_hashie_tag(color), do: "##{color}"
 end

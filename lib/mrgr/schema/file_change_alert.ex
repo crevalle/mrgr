@@ -32,7 +32,7 @@ defmodule Mrgr.Schema.FileChangeAlert do
     schema
     |> cast(params, @create_params)
     |> validate_required(@create_params)
-    |> strip_hashie_color_tag()
+    |> add_hashie_tag_to_color()
     |> foreign_key_constraint(:repository_id)
   end
 
@@ -40,16 +40,19 @@ defmodule Mrgr.Schema.FileChangeAlert do
     schema
     |> cast(params, @update_params)
     |> validate_required(@update_params)
-    |> strip_hashie_color_tag()
+    |> add_hashie_tag_to_color()
   end
 
-  def strip_hashie_color_tag(changeset) do
+  def add_hashie_tag_to_color(changeset) do
     case get_change(changeset, :color) do
       color when is_bitstring(color) ->
-        put_change(changeset, :color, String.replace(color, "#", ""))
+        put_change(changeset, :color, add_hashie_tag(color))
 
       _ ->
         changeset
     end
   end
+
+  defp add_hashie_tag("#" <> color), do: add_hashie_tag(color)
+  defp add_hashie_tag(color), do: "##{color}"
 end

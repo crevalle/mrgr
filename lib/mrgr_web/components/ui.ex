@@ -657,16 +657,9 @@ defmodule MrgrWeb.Components.UI do
   end
 
   def badge(assigns) do
-    # handle preview.  color input already prepends the #
-    color = String.replace(assigns.item.color, "#", "")
-
-    assigns =
-      assigns
-      |> assign(:color, color)
-
     ~H"""
     <span
-      style={"background-color: ##{@color};"}
+      style={"background-color: #{@item.color};"}
       class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full text-gray-900"
     >
       <%= @item.name %>
