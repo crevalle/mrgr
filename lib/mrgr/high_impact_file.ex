@@ -24,6 +24,15 @@ defmodule Mrgr.HighImpactFile do
     |> Mrgr.Repo.all()
   end
 
+  def for_pull_request(
+        %{repository: %{high_impact_files: %Ecto.Association.NotLoaded{}}} = pull_request
+      ) do
+    repo = Mrgr.Repo.preload(pull_request.repository, :high_impact_files)
+    pull_request = %{pull_request | repository: repo}
+
+    for_pull_request(pull_request)
+  end
+
   def for_pull_request(%{repository: %{high_impact_files: hifs}} = pull_request) do
     hifs
     |> Enum.filter(&applies_to_pull_request?(&1, pull_request))
