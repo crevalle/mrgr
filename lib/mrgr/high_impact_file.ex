@@ -25,7 +25,9 @@ defmodule Mrgr.HighImpactFile do
   end
 
   def for_pull_request(%{repository: %{high_impact_files: hifs}} = pull_request) do
-    Enum.filter(hifs, &applies_to_pull_request?(&1, pull_request))
+    hifs
+    |> Enum.filter(&applies_to_pull_request?(&1, pull_request))
+    |> Enum.uniq_by(& &1.id)
   end
 
   def clear_from_pr(pull_request) do
