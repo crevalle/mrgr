@@ -454,6 +454,15 @@ defmodule MrgrWeb.PullRequestLive do
           viewing_snoozed: false,
           pull_requests: [],
           snoozed: []
+        },
+        %{
+          id: "hifs",
+          title: "💥 High Impact Changes",
+          type: :state,
+          meta: %{user: user},
+          viewing_snoozed: false,
+          pull_requests: [],
+          snoozed: []
         }
       ]
     end
@@ -600,6 +609,10 @@ defmodule MrgrWeb.PullRequestLive do
 
     def load_pull_requests(%{id: "fix-ci"} = tab, opts) do
       Mrgr.PullRequest.paged_fix_ci_prs(tab.meta.user, opts)
+    end
+
+    def load_pull_requests(%{id: "hifs"} = tab, opts) do
+      Mrgr.PullRequest.paged_high_impact_prs(tab.meta.user, opts)
     end
 
     def load_pull_requests(%Mrgr.Schema.PRTab{} = tab, opts) do

@@ -57,11 +57,14 @@ defmodule MrgrWeb.Components.PullRequest do
       <:title>
         Files Changed (<%= Enum.count(@pull_request.files_changed) %>)
       </:title>
+
+      <.hif_badge_list hifs={@pull_request.high_impact_files} />
+
       <div class="flex flex-col space-y-0 leading-tight">
         <.changed_file
           :for={f <- @pull_request.files_changed}
           filename={f}
-          hifs={@pull_request.repository.high_impact_files}
+          hifs={@pull_request.high_impact_files}
         />
       </div>
     </.detail_content>
@@ -79,6 +82,19 @@ defmodule MrgrWeb.Components.PullRequest do
       </div>
 
       <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  def hif_badge_list(%{hifs: []} = assigns) do
+    ~H[]
+  end
+
+  def hif_badge_list(assigns) do
+    ~H"""
+    <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
+      <span>💥</span>
+      <.badge :for={hif <- @hifs} item={hif} />
     </div>
     """
   end
@@ -391,6 +407,16 @@ defmodule MrgrWeb.Components.PullRequest do
     <div class="w-3/5">
       <.aside>
         These PRs are failing CI.  They may or may not also be fully approved, but any CI issues need to be resolved before they can be merged and should be resolved before any further approvals.
+      </.aside>
+    </div>
+    """
+  end
+
+  def tab_explanation(%{tab: %{id: "hifs"}} = assigns) do
+    ~H"""
+    <div class="w-3/5">
+      <.aside>
+        These PRs contain changes to files marked High Impact.  Take an extra look before you merge them!
       </.aside>
     </div>
     """

@@ -4,6 +4,19 @@ defmodule Mrgr.HighImpactFile do
 
   use Mrgr.PubSub.Event
 
+  def socks do
+    Mrgr.Schema.Repository
+    |> Mrgr.Repo.all()
+    |> Enum.map(fn r -> Mrgr.Repo.preload(r, [:high_impact_files, :pull_requests]) end)
+    |> Enum.map(fn r ->
+      Enum.map(r.pull_requests, fn pr ->
+        # reverse preload
+        pr = %{pr | repository: r}
+        Mrgr.PullRequest.associate_high_impact_files(pr)
+      end)
+    end)
+  end
+
   def for_repository(%{id: repo_id}) do
     Schema
     |> Query.for_repository(repo_id)
@@ -13,6 +26,31 @@ defmodule Mrgr.HighImpactFile do
 
   def for_pull_request(%{repository: %{high_impact_files: hifs}} = pull_request) do
     Enum.filter(hifs, &applies_to_pull_request?(&1, pull_request))
+  end
+
+  def clear_from_pr(pull_request) do
+    pull_request = Mrgr.Repo.preload(pull_request, :high_impact_file_pull_requests)
+
+    pull_request.high_impact_file_pull_requests
+    |> Enum.map(&Mrgr.Repo.delete/1)
+
+    %{pull_request | high_impact_file_pull_requests: [], high_impact_files: []}
+  end
+
+  def create_for_pull_request(pull_request, hifs) do
+    assocs =
+      Enum.map(hifs, fn hif ->
+        params = %{
+          pull_request_id: pull_request.id,
+          high_impact_file_id: hif.id
+        }
+
+        %Mrgr.Schema.HighImpactFilePullRequest{}
+        |> Mrgr.Schema.HighImpactFilePullRequest.changeset(params)
+        |> Mrgr.Repo.insert!()
+      end)
+
+    %{pull_request | high_impact_files: hifs, high_impact_file_pull_requests: assocs}
   end
 
   def applies_to_pull_request?(hif, pull_request) do

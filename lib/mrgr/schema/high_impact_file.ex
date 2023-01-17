@@ -9,6 +9,9 @@ defmodule Mrgr.Schema.HighImpactFile do
     field(:source, Ecto.Enum, values: [:user, :system])
 
     belongs_to(:repository, Mrgr.Schema.Repository)
+
+    has_many(:high_impact_file_pull_requests, Mrgr.Schema.HighImpactFilePullRequest)
+    has_many(:pull_requests, through: [:high_impact_file_pull_requests, :pull_request])
     timestamps()
   end
 

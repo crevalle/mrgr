@@ -27,7 +27,9 @@
             <%= @pull_request.repository.name %>
           </p>
         </div>
-        <.badges pull_request={@pull_request} />
+        <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
+          <.badge :for={label <- @pull_request.labels} item={label} />
+        </div>
       </div>
 
       <div class="flex flex-col items-end">
@@ -103,11 +105,12 @@
             <h6>Files Changed</h6>
             <.icon name="chevron-right" class="h-4 w-4" />
           </div>
-          <div class="flex flex-col space-y-0 leading-tight">
+          <.hif_badge_list hifs={@pull_request.high_impact_files} />
+          <div class="flex flex-col space-y-0 leading-tight max-w-xs">
             <.changed_file
               :for={f <- @pull_request.files_changed}
               filename={f}
-              hifs={@pull_request.repository.high_impact_files}
+              hifs={@pull_request.high_impact_files}
             />
           </div>
         </div>

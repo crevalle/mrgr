@@ -39,6 +39,7 @@ defmodule Mrgr.PullRequest do
         |> sync_repo_if_first_pr()
         |> synchronize_github_data()
         |> create_checklists()
+        |> associate_high_impact_files()
         |> notify_hif_alert_consumers()
         |> broadcast(@pull_request_created)
         |> ok()
@@ -97,6 +98,7 @@ defmodule Mrgr.PullRequest do
       pull_request
       |> preload_installation()
       |> synchronize_github_data()
+      |> associate_high_impact_files()
       |> broadcast(@pull_request_synchronized)
       |> ok()
     else
@@ -396,9 +398,20 @@ defmodule Mrgr.PullRequest do
     |> ok()
   end
 
-  def notify_hif_alert_consumers(pull_request) do
+  def associate_high_impact_files(pull_request) do
+    applicable = Mrgr.HighImpactFile.for_pull_request(pull_request)
+
+    # until we get smarter about what's being added/removed for notification purposes,
+    # just blow them all away and replace them
+
+    Mrgr.HighImpactFile.clear_from_pr(pull_request)
+    Mrgr.HighImpactFile.create_for_pull_request(pull_request, applicable)
+
     pull_request
-    |> Mrgr.HighImpactFile.for_pull_request()
+  end
+
+  def notify_hif_alert_consumers(pull_request) do
+    pull_request.high_impact_files
     |> Enum.filter(& &1.notify_user)
     |> send_hif_alert(pull_request)
   end
@@ -748,6 +761,14 @@ defmodule Mrgr.PullRequest do
     |> add_pending_preloads()
   end
 
+  def paged_high_impact_prs(%{current_installation_id: id}, opts \\ %{}) do
+    Schema
+    |> Query.pending_stuff(id, Map.get(opts, :snoozed, false))
+    |> Query.high_impact()
+    |> Mrgr.Repo.paginate(opts)
+    |> add_pending_preloads()
+  end
+
   def paged_pending_pull_requests(user_or_id, opts \\ %{})
 
   def paged_pending_pull_requests(%{current_installation_id: id}, opts) do
@@ -1057,7 +1078,7 @@ defmodule Mrgr.PullRequest do
         :labels,
         :pr_reviews,
         :author,
-        repository: [:high_impact_files]
+        :high_impact_files
       ]
     end
 
@@ -1142,6 +1163,12 @@ defmodule Mrgr.PullRequest do
         where:
           q.approving_review_count <
             fragment("(?->?)::integer", r.settings, "required_approving_review_count")
+      )
+    end
+
+    def high_impact(query) do
+      from(q in query,
+        inner_join: h in assoc(q, :high_impact_files)
       )
     end
 

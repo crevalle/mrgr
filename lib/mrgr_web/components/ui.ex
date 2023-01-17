@@ -624,12 +624,6 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def pr_count_badge(%{items: %{total_entries: 0}} = assigns) do
-    ~H"""
-
-    """
-  end
-
   def pr_count_badge(%{items: %{total_entries: entries}} = assigns) do
     assigns = assign(assigns, :count, entries)
 
@@ -643,15 +637,6 @@ defmodule MrgrWeb.Components.UI do
     <span class="bg-gray-100 group-hover:bg-gray-200 ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full">
       <%= @count %>
     </span>
-    """
-  end
-
-  def badges(assigns) do
-    ~H"""
-    <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
-      <.badge :for={file <- Mrgr.HighImpactFile.for_pull_request(@pull_request)} item={file} />
-      <.badge :for={label <- @pull_request.labels} item={label} />
-    </div>
     """
   end
 
