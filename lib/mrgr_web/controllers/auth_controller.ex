@@ -30,7 +30,7 @@ defmodule MrgrWeb.AuthController do
 
         conn
         |> sign_in(user)
-        |> put_flash(:info, "Hi there! 👋")
+        |> put_flash(:info, "Welcome Back! 👋")
         |> redirect(to: post_sign_in_path(conn, user))
 
       {:error, %OAuth2.Response{body: body}} ->

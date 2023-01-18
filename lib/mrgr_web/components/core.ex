@@ -131,7 +131,7 @@ defmodule MrgrWeb.Components.Core do
       type={@type}
       class={[
         "phx-submit-loading:opacity-75 inline-flex items-center",
-        "border border-transparent shadow-md rounded-md bg-zinc-900 hover:bg-zinc-700 py-2 px-4",
+        "border border-transparent shadow-md rounded-md bg-teal-700 hover:bg-teal-500 py-2 px-4",
         "text-sm font-medium text-white active:text-white/80",
         "focus:outline-none focus:ring-2 focus:ring-offset-2",
         @class

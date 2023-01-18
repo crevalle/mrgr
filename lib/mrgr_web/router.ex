@@ -34,6 +34,7 @@ defmodule MrgrWeb.Router do
 
     get "/", PageController, :index
     get "/sign-in", AuthController, :new
+    get "/sign-up", AuthController, :sign_up
   end
 
   scope "/auth", MrgrWeb do
