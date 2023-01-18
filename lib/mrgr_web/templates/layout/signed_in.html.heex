@@ -5,37 +5,46 @@
         <%= img_tag("/images/logo/Mrgr-B6.png", class: "h-10") %>
       </div>
       <div class="flex-1 px-4 flex justify-between">
-        <div class="ml-4 flex items-center space-x-6">
-          <.nav_item
-            route={Routes.pull_request_path(MrgrWeb.Endpoint, :index)}
-            icon="share"
-            label="Open Pull Requests"
+        <div class="flex">
+          <div
+            :if={
+              Mrgr.Installation.setup_complete?(@conn.assigns.current_user.current_installation)
+            }
+            class="ml-4 flex items-center space-x-6"
           >
-            <%= live_render(@conn, MrgrWeb.Live.OpenPRCountBadge,
-              session: %{"installation_id" => @conn.assigns.current_user.current_installation_id}
-            ) %>
-          </.nav_item>
+            <.nav_item
+              route={Routes.pull_request_path(MrgrWeb.Endpoint, :index)}
+              icon="share"
+              label="Open Pull Requests"
+            >
+              <%= live_render(@conn, MrgrWeb.Live.OpenPRCountBadge,
+                session: %{
+                  "installation_id" => @conn.assigns.current_user.current_installation_id
+                }
+              ) %>
+            </.nav_item>
 
-          <.nav_item
-            route={Routes.high_impact_file_path(MrgrWeb.Endpoint, :index)}
-            icon="megaphone"
-            label="High Impact Files"
-            .
-          />
+            <.nav_item
+              route={Routes.high_impact_file_path(MrgrWeb.Endpoint, :index)}
+              icon="megaphone"
+              label="High Impact Files"
+              .
+            />
 
-          <.nav_item
-            route={Routes.repository_list_path(MrgrWeb.Endpoint, :index)}
-            icon="newspaper"
-            label="Repository Policies"
-            .
-          />
+            <.nav_item
+              route={Routes.repository_list_path(MrgrWeb.Endpoint, :index)}
+              icon="newspaper"
+              label="Repository Policies"
+              .
+            />
 
-          <.nav_item
-            route={Routes.label_list_path(MrgrWeb.Endpoint, :index)}
-            icon="tag"
-            label="Labels"
-            .
-          />
+            <.nav_item
+              route={Routes.label_list_path(MrgrWeb.Endpoint, :index)}
+              icon="tag"
+              label="Labels"
+              .
+            />
+          </div>
         </div>
         <.profile_dropdown_menu
           current_user={@conn.assigns.current_user}

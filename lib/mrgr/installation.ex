@@ -101,6 +101,13 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.update!()
   end
 
+  # before they've installed a github app, users have no installation
+  def setup_complete?(nil), do: false
+
+  def setup_complete?(installation) do
+    installation.setup_complete
+  end
+
   def create_members(%{target_type: "Organization"} = installation) do
     members = Mrgr.Github.API.fetch_members(installation)
     add_members(installation, members)

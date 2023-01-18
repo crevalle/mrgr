@@ -7,6 +7,10 @@ defmodule MrgrWeb.AuthController do
     render(conn)
   end
 
+  def sign_up(conn, _params) do
+    render(conn)
+  end
+
   def delete(conn, _params) do
     conn
     |> sign_out()
