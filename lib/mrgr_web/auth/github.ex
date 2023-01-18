@@ -17,7 +17,7 @@ defmodule Auth.GitHub do
   end
 
   def authorize_url! do
-    OAuth2.Client.authorize_url!(client(), scope: "user:email,repo,read:org")
+    OAuth2.Client.authorize_url!(client(), scope: "user:email")
   end
 
   # you can pass options to the underlying http library via `opts` parameter
@@ -25,7 +25,8 @@ defmodule Auth.GitHub do
     client()
     |> OAuth2.Client.get_token!(params, headers, opts)
     # Github requires API requests to have a user agent header
-    # get_token!/4 resets our headers so we put the user agent here, not in the constructor
+    # OAuth2.Client.get_token!/4 resets our headers so we put
+    # the user agent here, not in the constructor
     |> put_header("User-Agent", "Mrgr")
   end
 
