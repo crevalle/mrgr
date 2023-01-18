@@ -51,8 +51,7 @@ defmodule MrgrWeb.Router do
   scope "/", MrgrWeb do
     pipe_through [:browser, :authenticate]
 
-    get "/onboarding", OnboardingController, :index
-    get "/onboarding/installation-complete", OnboardingController, :installation_complete
+    live "/onboarding", OnboardingLive, :index
   end
 
   scope "/", MrgrWeb do

@@ -34,6 +34,19 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.one()
   end
 
+  def unset_current_installation_for_users(installation) do
+    Schema
+    |> Query.where(current_installation_id: installation.id)
+    |> Mrgr.Repo.all()
+    |> Enum.map(&unset_current_installation/1)
+  end
+
+  def unset_current_installation(user) do
+    user
+    |> Ecto.Changset.change(%{current_installation_id: nil})
+    |> Mrgr.Repo.update!()
+  end
+
   @spec find_or_create_from_github(%{required(String.t()) => any()}, OAuth2.AccessToken.t()) ::
           Schema.t()
   def find_or_create_from_github(user_data, auth_token) do

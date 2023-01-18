@@ -65,7 +65,7 @@ defmodule Mrgr.Installation do
     {:ok, installation} =
       payload
       |> Map.get("installation")
-      |> Map.merge(%{"creator_id" => creator.id})
+      |> Map.merge(%{"creator_id" => creator.id, "state" => "created"})
       |> Mrgr.Schema.Installation.create_changeset()
       |> Mrgr.Repo.insert()
 
@@ -105,7 +105,7 @@ defmodule Mrgr.Installation do
   def setup_complete?(nil), do: false
 
   def setup_complete?(installation) do
-    installation.setup_complete
+    installation.state == "complete"
   end
 
   def create_members(%{target_type: "Organization"} = installation) do
@@ -238,6 +238,7 @@ defmodule Mrgr.Installation do
         nil
 
       installation ->
+        Mrgr.User.unset_current_installation_for_users(installation)
         Mrgr.Repo.delete(installation)
     end
   end

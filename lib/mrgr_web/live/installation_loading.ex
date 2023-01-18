@@ -2,16 +2,17 @@ defmodule MrgrWeb.Live.InstallationLoading do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  on_mount MrgrWeb.Plug.Auth
-
-  def mount(_session, _params, socket) do
+  def mount(session, params, socket) do
     set_dot_clock()
+
+    installation = Mrgr.Installation.find(params["installation_id"])
 
     check_installation_already_set_up()
 
-    Mrgr.PubSub.subscribe_to_installation(socket.assigns.current_user.current_installation)
+    Mrgr.PubSub.subscribe_to_installation(installation)
 
     socket
+    |> assign(:installation, installation)
     |> assign(:dots, cycle_dots())
     |> assign(:events, [])
     |> ok()
@@ -21,9 +22,9 @@ defmodule MrgrWeb.Live.InstallationLoading do
     ~H"""
     <div class="flex flex-col mt-8 space-y-4">
       <p>
-        We've connected Mrgr to your
-        <span class="font-bold"><%= @current_user.current_installation.account.login %></span>
-        account.
+        Alright!  Mrgr has been installed to the
+        <span class="font-bold"><%= @installation.account.login %></span>
+        organization.
       </p>
 
       <p>
@@ -65,7 +66,7 @@ defmodule MrgrWeb.Live.InstallationLoading do
   end
 
   def handle_info("installation_already_set_up", socket) do
-    case socket.assigns.current_user.current_installation.setup_completed do
+    case socket.assigns.installation.setup_completed do
       true ->
         socket
         |> assign(:dots, "OK!")
