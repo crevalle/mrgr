@@ -1,6 +1,13 @@
 defmodule Mrgr.Schema.Installation do
   use Mrgr.Schema
 
+  @states [
+    "created",
+    "syncing_initial_data",
+    "initial_data_sync_complete",
+    "active"
+  ]
+
   schema "installations" do
     field(:access_tokens_url, :string)
     field(:app_id, :integer)
@@ -82,6 +89,12 @@ defmodule Mrgr.Schema.Installation do
     |> Mrgr.Repo.preload(:repositories)
     |> cast(params, [])
     |> cast_assoc(:repositories)
+  end
+
+  def state_changeset(schema, params) do
+    schema
+    |> cast(params, [:state])
+    |> validate_inclusion(:state, @states)
   end
 
   # "access_tokens_url" => "https://api.github.com/app/installations/19872469/access_tokens",

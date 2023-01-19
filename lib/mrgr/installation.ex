@@ -91,21 +91,61 @@ defmodule Mrgr.Installation do
     |> sync_repositories()
     |> broadcast(@installation_loading_pull_requests)
     |> sync_pull_request_data()
-    |> mark_setup_completed()
+    |> initial_data_sync_complete()
     |> broadcast(@installation_setup_completed)
-  end
-
-  def mark_setup_completed(installation) do
-    installation
-    |> Ecto.Changeset.change(%{setup_completed: true})
-    |> Mrgr.Repo.update!()
   end
 
   # before they've installed a github app, users have no installation
   def setup_complete?(nil), do: false
 
   def setup_complete?(installation) do
-    installation.state == "complete"
+    installation.state == "active"
+  end
+
+  def data_synced?(%{state: state}) when state in ["initial_data_sync_complete", "active"],
+    do: true
+
+  def data_synced?(_installation), do: false
+
+  def created(installation) do
+    update_state!(installation, "created")
+  end
+
+  def syncing_initial_data(installation) do
+    update_state!(installation, "syncing_initial_data")
+  end
+
+  def initial_data_sync_complete(installation) do
+    update_state!(installation, "initial_data_sync_complete")
+  end
+
+  def activate(installation) do
+    update_state!(installation, "active")
+  end
+
+  def update_state!(installation, state) do
+    installation
+    |> Schema.state_changeset(%{state: state})
+    |> Mrgr.Repo.update!()
+  end
+
+  def hot_stats(installation) do
+    member_count =
+      installation.id
+      |> Mrgr.Member.for_installation()
+      |> Mrgr.Repo.count()
+
+    repo_count =
+      installation.id
+      |> Mrgr.Repository.for_installation()
+      |> Mrgr.Repo.count()
+
+    pr_count =
+      installation.id
+      |> Mrgr.PullRequest.open_for_installation()
+      |> Mrgr.Repo.count()
+
+    %{members: member_count, repositories: repo_count, pull_requests: pr_count}
   end
 
   def create_members(%{target_type: "Organization"} = installation) do

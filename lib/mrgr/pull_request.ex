@@ -818,6 +818,12 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
+  def open_for_installation(installation_id) do
+    Schema
+    |> Query.for_installation(installation_id)
+    |> Query.open()
+  end
+
   def for_installation(%Mrgr.Schema.Installation{id: installation_id}) do
     Schema
     |> Query.for_installation(installation_id)

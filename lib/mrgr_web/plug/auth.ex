@@ -96,10 +96,7 @@ defmodule MrgrWeb.Plug.Auth do
   def notify_missing_installation(conn, _opts) do
     case conn.assigns.current_user.current_installation_id do
       nil ->
-        message = "<a href=/onboarding>Click here</a> to finish onboarding."
-
-        conn
-        |> Phoenix.Controller.put_flash(:info, Phoenix.HTML.raw(message))
+        Phoenix.Controller.redirect(conn, to: "/onboarding")
 
       _id ->
         conn

@@ -24,11 +24,11 @@ defmodule MrgrWeb.OnboardingLive do
 
   def render(assigns) do
     ~H"""
-    <div class="px-4 pt-4 sm:px-6 lg:px-8">
-      <div class="flex flex-col justify-between">
+    <div class="px-4 pt-4">
+      <div class="flex flex-col space-y-8">
         <.heading title="All Right!👋 Let's get you started" />
 
-        <div class="mt-8 space-y-4">
+        <div class="space-y-4">
           <p>Mrgr onboarding is just 4 simple steps:</p>
 
           <ol>
@@ -37,8 +37,12 @@ defmodule MrgrWeb.OnboardingLive do
             <li>Create your Subscription 💸</li>
             <li>Get to work!</li>
           </ol>
+        </div>
 
-          <.action state={@state} installation={@installation} socket={@socket} />
+        <div class="flex flex-col space-y-4">
+          <div class="w-1/2 p-4 shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+            <.action state={@state} installation={@installation} socket={@socket} />
+          </div>
         </div>
       </div>
     </div>

@@ -2,91 +2,99 @@ defmodule MrgrWeb.Live.InstallationLoading do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  def mount(session, params, socket) do
-    set_dot_clock()
+  @in_progress "in_progress"
+  @done "done"
 
+  def mount(_session, params, socket) do
     installation = Mrgr.Installation.find(params["installation_id"])
-
-    check_installation_already_set_up()
 
     Mrgr.PubSub.subscribe_to_installation(installation)
 
+    stats =
+      case Mrgr.Installation.data_synced?(installation) do
+        true -> compile_stats(installation)
+        false -> %{}
+      end
+
     socket
     |> assign(:installation, installation)
-    |> assign(:dots, cycle_dots())
     |> assign(:events, [])
+    |> assign(:stats, stats)
+    |> assign(:done, @done)
     |> ok()
   end
 
   def render(assigns) do
     ~H"""
-    <div class="flex flex-col mt-8 space-y-4">
+    <div class="flex flex-col space-y-4">
       <p>
-        Alright!  Mrgr has been installed to the
+        Good News!  Mrgr has been installed to the
         <span class="font-bold"><%= @installation.account.login %></span>
-        organization.
+        organization.  Let's pull in your data...
       </p>
 
-      <p>
-        We are currently syncing all of your data.  When that's done, you'll be automatically redirected to get started. 🙂
-      </p>
-
-      <div class="flex flex-col space-y-4">
-        <p><%= @dots %></p>
-
+      <div class="flex flex-col space-y-2">
         <%= for event <- @events do %>
-          <p class="text-gray-500"><%= event %></p>
+          <div class="flex items-center space-x-2">
+            <%= if event.status == "in_progress" do %>
+              <.spinner id="spinner-members" />
+            <% end %>
+
+            <%= if event.status == @done do %>
+              🆗
+            <% end %>
+
+            <p><%= event.name %></p>
+          </div>
+        <% end %>
+
+        <%= if Mrgr.Installation.data_synced?(@installation) do %>
+          <span class="font-bold">Success!</span>
+          <p>We've synced your data.  Here are the stats:</p>
+
+          <table class="w-1/3">
+            <tr>
+              <td>
+                <div class="flex items-center space-x-1">
+                  <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />Members
+                </div>
+              </td>
+              <td class="font-semibold"><%= @stats.members %></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="flex items-center space-x-1"><.repository_icon />Repositories</div>
+              </td>
+              <td class="font-semibold"><%= @stats.repositories %></td>
+            </tr>
+            <tr>
+              <td>
+                <div class="flex items-center space-x-1">
+                  <.icon name="share" class="text-gray-400 mr-1 h-5 w-5" />Pull Requests
+                </div>
+              </td>
+              <td class="font-semibold"><%= @stats.pull_requests %></td>
+            </tr>
+          </table>
+
+          <.l href={Mrgr.Installation.installation_url()} class="btn">
+            Click here to install our Github App 🚀
+          </.l>
         <% end %>
       </div>
     </div>
     """
   end
 
-  def set_dot_clock do
-    Process.send_after(self(), "cycle_dots", 100)
-  end
-
-  def check_installation_already_set_up do
-    # maybe the installation has already been set up by the time the liveview loads
-    # and we will thus never get a broadcast message.  if that's so, wait a few
-    # seconds after page load to make the user think we are Working Very Hard.
-
-    Process.send_after(self(), "installation_already_set_up", 3000)
-  end
-
   defp translate_event(pubsub_event) do
     names = %{
-      @installation_loading_members => "Loading Members...",
-      @installation_loading_repositories => "Loading Repositories...",
-      @installation_loading_pull_requests => "Loading Pull Request Data..."
+      @installation_loading_members => "Loading Members",
+      @installation_loading_repositories => "Loading Repositories",
+      @installation_loading_pull_requests => "Loading Pull Request Data"
     }
 
     # no default, since our handle_info guards against what events it receives
     Map.get(names, pubsub_event)
-  end
-
-  def handle_info("installation_already_set_up", socket) do
-    case socket.assigns.installation.setup_completed do
-      true ->
-        socket
-        |> assign(:dots, "OK!")
-        |> redirect(to: Routes.pull_request_path(MrgrWeb.Endpoint, :index))
-        |> noreply()
-
-      false ->
-        socket
-        |> noreply()
-    end
-  end
-
-  def handle_info("cycle_dots", socket) do
-    dots = cycle_dots(socket.assigns.dots)
-
-    set_dot_clock()
-
-    socket
-    |> assign(:dots, dots)
-    |> noreply()
   end
 
   def handle_info(%{event: loading_event, payload: _installation}, socket)
@@ -95,9 +103,10 @@ defmodule MrgrWeb.Live.InstallationLoading do
              @installation_loading_repositories,
              @installation_loading_pull_requests
            ] do
-    event = translate_event(loading_event)
+    new_event = %{status: @in_progress, name: translate_event(loading_event)}
+    completed_events = complete_events(socket)
 
-    events = [event | socket.assigns.events]
+    events = [new_event | completed_events]
 
     # reverse to keep them chronological
     socket
@@ -105,10 +114,11 @@ defmodule MrgrWeb.Live.InstallationLoading do
     |> noreply()
   end
 
-  def handle_info(%{event: @installation_setup_completed, payload: _installation}, socket) do
+  def handle_info(%{event: @installation_setup_completed, payload: installation}, socket) do
     socket
-    |> assign(:dots, "OK!")
-    |> redirect(to: Routes.pull_request_path(MrgrWeb.Endpoint, :index))
+    |> assign(:installation, installation)
+    |> assign(:stats, compile_stats(installation))
+    |> assign(:events, complete_events(socket))
     |> noreply()
   end
 
@@ -117,10 +127,11 @@ defmodule MrgrWeb.Live.InstallationLoading do
     |> noreply()
   end
 
-  def cycle_dots(), do: "Syncing "
-  def cycle_dots("Syncing "), do: "Syncing ."
-  def cycle_dots("Syncing ."), do: "Syncing .."
-  def cycle_dots("Syncing .."), do: "Syncing ..."
-  def cycle_dots("Syncing ..."), do: "Syncing ...."
-  def cycle_dots("Syncing ...."), do: "Syncing "
+  def complete_events(socket) do
+    Enum.map(socket.assigns.events, fn e -> Map.put(e, :status, @done) end)
+  end
+
+  defp compile_stats(installation) do
+    Mrgr.Installation.hot_stats(installation)
+  end
 end
