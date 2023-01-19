@@ -13,7 +13,6 @@ defmodule Mrgr.Member do
     Schema
     |> Query.for_installation(installation_id)
     |> Query.order(desc: :login)
-    |> Mrgr.Repo.all()
   end
 
   def tabs_for_user(user) do

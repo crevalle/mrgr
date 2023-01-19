@@ -16,7 +16,7 @@ defmodule MrgrWeb.PullRequestLive do
       frozen_repos = filter_frozen_repos(repos)
 
       labels = Mrgr.Label.list_for_user(current_user)
-      members = Mrgr.Member.for_installation(current_user.current_installation_id)
+      members = Mrgr.Repo.all(Mrgr.Member.for_installation(current_user.current_installation_id))
 
       tabs = Tabs.new(current_user)
 

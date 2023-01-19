@@ -120,11 +120,10 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.get_by(name: name)
   end
 
-  def for_installation(installation_id, page \\ []) do
+  def for_installation(installation_id) do
     Schema
     |> Query.for_installation(installation_id)
     |> Query.order_by_insensitive(asc: :name)
-    |> Mrgr.Repo.paginate(page)
   end
 
   def all_for_installation(%{id: id}), do: all_for_installation(id)

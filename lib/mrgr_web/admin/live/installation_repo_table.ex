@@ -51,7 +51,10 @@ defmodule MrgrWeb.Admin.Live.InstallationRepoTable do
 
   def mount(_params, %{"id" => id}, socket) do
     if connected?(socket) do
-      page = Mrgr.Repository.for_installation(id)
+      page =
+        id
+        |> Mrgr.Repository.for_installation()
+        |> Mrgr.Repo.paginate()
 
       socket
       |> put_title("[Admin] Installation #{id}")
@@ -64,7 +67,10 @@ defmodule MrgrWeb.Admin.Live.InstallationRepoTable do
   end
 
   def handle_event("paginate", params, socket) do
-    page = Mrgr.Repository.for_installation(socket.assigns.installation_id, params)
+    page =
+      socket.assigns.installation_id
+      |> Mrgr.Repository.for_installation()
+      |> Mrgr.Repo.paginate(params)
 
     socket
     |> assign(:page, page)
