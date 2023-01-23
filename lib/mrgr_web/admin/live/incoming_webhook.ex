@@ -47,8 +47,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
                 <.td><%= ts(hook.inserted_at, assigns.timezone) %></.td>
                 <.td>
                   <.button
-                    phx-click="fire"
-                    phx-value-id={hook.id}
+                    phx-click={JS.push("fire", value: %{id: hook.id})}
                     phx-disable-with="Firing 🚀..."
                     class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
                   >

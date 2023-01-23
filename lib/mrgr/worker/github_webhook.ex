@@ -1,4 +1,4 @@
-defmodule Mrgr.Worker.Webhook do
+defmodule Mrgr.Worker.GithubWebhook do
   use Oban.Worker
 
   @impl Oban.Worker

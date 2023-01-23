@@ -19,7 +19,7 @@ defmodule Mrgr.Github.Webhook do
 
   def enqueue_webhook_handling(hook) do
     %{id: hook.id}
-    |> Mrgr.Worker.Webhook.new()
+    |> Mrgr.Worker.GithubWebhook.new()
     |> Oban.insert()
   end
 
