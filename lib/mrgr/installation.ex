@@ -42,6 +42,7 @@ defmodule Mrgr.Installation do
     |> Query.with_account()
     |> Query.with_creator()
     |> Query.with_users()
+    |> Query.with_subscription()
     |> Mrgr.Repo.one()
   end
 
@@ -451,6 +452,13 @@ defmodule Mrgr.Installation do
       from(q in query,
         left_join: u in assoc(q, :users),
         preload: [users: u]
+      )
+    end
+
+    def with_subscription(query) do
+      from(q in query,
+        left_join: s in assoc(q, :subscription),
+        preload: [subscription: s]
       )
     end
   end

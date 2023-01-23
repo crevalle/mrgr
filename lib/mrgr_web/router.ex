@@ -76,6 +76,7 @@ defmodule MrgrWeb.Router do
     pipe_through :api
 
     post "/incoming/github", WebhookController, :github
+    post "/incoming/stripe", WebhookController, :stripe
   end
 
   scope "/admin", MrgrWeb.Admin, as: :admin do
@@ -90,8 +91,13 @@ defmodule MrgrWeb.Router do
     live "/incoming-webhooks", Live.IncomingWebhook, :index, as: :incoming_webhook
     live "/incoming-webhooks/:id", Live.IncomingWebhookShow, :show, as: :incoming_webhook
 
+    live "/stripe-webhooks", Live.StripeWebhook, :index, as: :stripe_webhook
+    live "/stripe-webhooks/:id", Live.StripeWebhookShow, :show, as: :stripe_webhook
+
     live "/installations", Live.Installation, :index, as: :installation
     live "/installations/:id", Live.InstallationShow, :show, as: :installation
+
+    live "/subscriptions", Live.Subscription, :index, as: :subscription
 
     live "/repositories/:repository_id/pull-requests", Live.PullRequestList, :index,
       as: :pull_request

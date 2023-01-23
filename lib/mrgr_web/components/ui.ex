@@ -830,9 +830,23 @@ defmodule MrgrWeb.Components.UI do
             />
 
             <.nav_item
+              route={Routes.admin_stripe_webhook_path(MrgrWeb.Endpoint, :index)}
+              icon="currency-dollar"
+              label="Stripe Webhooks"
+              .
+            />
+
+            <.nav_item
               route={Routes.admin_installation_path(MrgrWeb.Endpoint, :index)}
               icon="globe-alt"
               label="Installations"
+              .
+            />
+
+            <.nav_item
+              route={Routes.admin_subscription_path(MrgrWeb.Endpoint, :index)}
+              icon="newspaper"
+              label="Subscriptions"
               .
             />
 

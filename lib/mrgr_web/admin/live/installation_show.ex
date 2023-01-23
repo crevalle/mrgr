@@ -39,6 +39,8 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
         </div>
       </div>
 
+      <.subscription subscription={@installation.subscription} tz={@timezone} />
+
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
         <div class="px-4 py-5 sm:px-6">
           <div class="my-1">
@@ -91,19 +93,10 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
 
   def mount(%{"id" => id}, _session, socket) do
     if connected?(socket) do
-      # subscribe()
-
       installation = Mrgr.Installation.find_admin(id)
       {:ok, assign(socket, :installation, installation)}
     else
       {:ok, socket}
     end
   end
-
-  # def subscribe do
-  # Mrgr.PubSub.subscribe(Mrgr.PubSub.Topic.admin())
-  # end
-
-  # # ignore other messages
-  # def handle_info(%{event: _}, socket), do: {:noreply, socket}
 end

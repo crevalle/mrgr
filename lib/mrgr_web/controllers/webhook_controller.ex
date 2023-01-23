@@ -37,4 +37,12 @@ defmodule MrgrWeb.WebhookController do
     |> put_status(200)
     |> json(%{yo: "momma"})
   end
+
+  def stripe(conn, params) do
+    Mrgr.Stripe.Webhook.receive(params)
+
+    conn
+    |> put_status(200)
+    |> json(%{yo: "momma"})
+  end
 end

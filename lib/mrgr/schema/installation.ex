@@ -30,6 +30,7 @@ defmodule Mrgr.Schema.Installation do
 
     belongs_to(:creator, Mrgr.Schema.User)
     has_one(:account, Mrgr.Schema.Account)
+    has_one(:subscription, Mrgr.Schema.StripeSubscription)
 
     has_many(:repository_settings_policies, Mrgr.Schema.RepositorySettingsPolicy)
 
