@@ -43,7 +43,7 @@ defmodule Mrgr.User do
 
   def unset_current_installation(user) do
     user
-    |> Ecto.Changset.change(%{current_installation_id: nil})
+    |> Ecto.Changeset.change(%{current_installation_id: nil})
     |> Mrgr.Repo.update!()
   end
 
