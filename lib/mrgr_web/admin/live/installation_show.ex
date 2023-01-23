@@ -2,7 +2,8 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  on_mount MrgrWeb.Plug.Auth
+  import MrgrWeb.Components.Admin
+
   on_mount {MrgrWeb.Plug.Auth, :admin}
 
   def render(assigns) do

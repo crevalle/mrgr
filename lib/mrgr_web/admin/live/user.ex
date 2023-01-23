@@ -1,7 +1,6 @@
 defmodule MrgrWeb.Admin.Live.User do
   use MrgrWeb, :live_view
 
-  on_mount MrgrWeb.Plug.Auth
   on_mount {MrgrWeb.Plug.Auth, :admin}
 
   def render(assigns) do

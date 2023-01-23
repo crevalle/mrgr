@@ -2,7 +2,6 @@ defmodule MrgrWeb.Admin.Live.PullRequestList do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  on_mount MrgrWeb.Plug.Auth
   on_mount {MrgrWeb.Plug.Auth, :admin}
 
   def mount(%{"repository_id" => id}, _session, socket) do

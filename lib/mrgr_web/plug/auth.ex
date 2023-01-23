@@ -16,7 +16,12 @@ defmodule MrgrWeb.Plug.Auth do
     end
   end
 
-  def on_mount(:admin, _session, _params, socket) do
+  def on_mount(:admin, _session, params, socket) do
+    socket =
+      Phoenix.Component.assign_new(socket, :current_user, fn ->
+        look_for_user(params["user_id"])
+      end)
+
     case admin?(socket.assigns.current_user) do
       true ->
         {:cont, socket}
