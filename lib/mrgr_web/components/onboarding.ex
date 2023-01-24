@@ -61,6 +61,7 @@ defmodule MrgrWeb.Components.Onboarding do
     class =
       case assigns.state do
         "active" -> done()
+        "initial_data_sync_complete" -> in_progress()
         _ -> todo()
       end
 
