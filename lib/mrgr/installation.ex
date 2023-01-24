@@ -106,6 +106,12 @@ defmodule Mrgr.Installation do
     |> broadcast(@installation_activated)
   end
 
+  def activate_user_type_installations(%{target_type: "User"} = installation) do
+    Mrgr.Installation.activate!(installation)
+  end
+
+  def activate_user_type_installations(installation), do: installation
+
   def hot_stats(installation) do
     member_count =
       installation.id

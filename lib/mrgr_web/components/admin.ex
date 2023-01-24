@@ -136,6 +136,29 @@ defmodule MrgrWeb.Components.Admin do
     link(title, opts)
   end
 
+  def payment_or_activate_button(%{installation: %{target_type: "User"}} = assigns) do
+    ~H"""
+    <.l phx_click="activate" class="btn">
+      Activate your free Mrgr account!
+    </.l>
+    """
+  end
+
+  def payment_or_activate_button(assigns) do
+    ~H"""
+    <.l href={payment_url(@installation)} class="btn">
+      On to payment!
+    </.l>
+    """
+  end
+
   defp current_account(%{current_installation: %{account: %{login: login}}}), do: login
   defp current_account(user), do: user.current_installation_id
+
+  def payment_url(installation) do
+    base_url = Application.get_env(:mrgr, :payments)[:url]
+    creator = Mrgr.User.find(installation.creator_id)
+
+    "#{base_url}?client_reference_id=#{installation.id}&prefilled_email=#{URI.encode_www_form(creator.email)}"
+  end
 end

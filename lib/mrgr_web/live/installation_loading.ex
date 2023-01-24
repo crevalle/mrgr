@@ -2,6 +2,8 @@ defmodule MrgrWeb.Live.InstallationLoading do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
+  import MrgrWeb.Components.Admin
+
   @in_progress "in_progress"
   @done "done"
 
@@ -32,7 +34,7 @@ defmodule MrgrWeb.Live.InstallationLoading do
       <p>
         Good News!  Mrgr has been installed to the
         <span class="font-bold"><%= @installation.account.login %></span>
-        organization.  Let's pull in your data...
+        <%= account_type(@installation) %>.  Let's pull in your data...
       </p>
 
       <div class="flex flex-col space-y-2">
@@ -79,20 +81,18 @@ defmodule MrgrWeb.Live.InstallationLoading do
             </tr>
           </table>
 
-          <.l href={payment_url(@installation)} class="btn">
-            On to payment!
-          </.l>
+          <.payment_or_activate_button installation={@installation} />
         <% end %>
       </div>
     </div>
     """
   end
 
-  def payment_url(installation) do
-    base_url = Application.get_env(:mrgr, :payments)[:url]
-    creator = Mrgr.User.find(installation.creator_id)
+  def handle_event("activate", _params, socket) do
+    Mrgr.Installation.activate_user_type_installations(socket.assigns.installation)
 
-    "#{base_url}?client_reference_id=#{installation.id}&prefilled_email=#{URI.encode_www_form(creator.email)}"
+    socket
+    |> noreply()
   end
 
   defp translate_event(pubsub_event) do
@@ -143,4 +143,7 @@ defmodule MrgrWeb.Live.InstallationLoading do
   defp compile_stats(installation) do
     Mrgr.Installation.hot_stats(installation)
   end
+
+  defp account_type(%{target_type: "User"}), do: "user account"
+  defp account_type(_org_or_app), do: "organization"
 end

@@ -63,7 +63,8 @@ defmodule MrgrWeb.OnboardingLive do
     Mrgr.PubSub.Topic.installation(user)
   end
 
-  def handle_info(%{event: @installation_initial_sync_completed, payload: installation}, socket) do
+  def handle_info(%{event: event, payload: installation}, socket)
+      when event in [@installation_initial_sync_completed, @installation_activated] do
     socket
     |> assign(:installation, installation)
     |> assign(:state, state(installation))
