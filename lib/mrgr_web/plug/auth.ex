@@ -98,13 +98,13 @@ defmodule MrgrWeb.Plug.Auth do
     |> Mrgr.Repo.update!()
   end
 
-  def notify_missing_installation(conn, _opts) do
-    case conn.assigns.current_user.current_installation_id do
-      nil ->
-        Phoenix.Controller.redirect(conn, to: "/onboarding")
-
-      _id ->
+  def redirect_incomplete_installation_to_onboarding(conn, _opts) do
+    case Mrgr.Installation.onboarding_complete?(conn.assigns.current_user.current_installation) do
+      true ->
         conn
+
+      false ->
+        Phoenix.Controller.redirect(conn, to: "/onboarding")
     end
   end
 

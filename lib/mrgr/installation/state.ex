@@ -21,8 +21,8 @@ defmodule Mrgr.Installation.State do
     |> Mrgr.Repo.update!()
   end
 
-  def setup_complete?(%{state: "active"}), do: true
-  def setup_complete?(_installation), do: false
+  def onboarding_complete?(%{state: "active"}), do: true
+  def onboarding_complete?(_installation), do: false
 
   def data_synced?(%{state: state}) when state in ["initial_data_sync_complete", "active"],
     do: true

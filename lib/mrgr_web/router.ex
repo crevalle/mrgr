@@ -18,7 +18,7 @@ defmodule MrgrWeb.Router do
   end
 
   pipeline :require_installation do
-    plug :notify_missing_installation
+    plug :redirect_incomplete_installation_to_onboarding
   end
 
   pipeline :admin do

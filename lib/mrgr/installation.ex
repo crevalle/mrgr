@@ -97,7 +97,7 @@ defmodule Mrgr.Installation do
     |> broadcast(@installation_initial_sync_completed)
   end
 
-  defdelegate setup_complete?(installation), to: State
+  defdelegate onboarding_complete?(installation), to: State
   defdelegate data_synced?(installation), to: State
 
   def activate!(installation) do

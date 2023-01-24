@@ -8,7 +8,9 @@
         <div class="flex">
           <div
             :if={
-              Mrgr.Installation.setup_complete?(@conn.assigns.current_user.current_installation)
+              Mrgr.Installation.onboarding_complete?(
+                @conn.assigns.current_user.current_installation
+              )
             }
             class="ml-4 flex items-center space-x-6"
           >
