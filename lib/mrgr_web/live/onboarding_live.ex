@@ -33,7 +33,7 @@ defmodule MrgrWeb.OnboardingLive do
   def render(assigns) do
     ~H"""
     <div class="px-4 pt-4">
-      <div class="flex flex-col space-y-8 md:w-2/3 sm:w-full">
+      <div class="flex flex-col space-y-8 lg:w-1/2 md:w-full">
         <.heading title="All Right!👋 Let's get you started" />
 
         <div class="space-y-4">
