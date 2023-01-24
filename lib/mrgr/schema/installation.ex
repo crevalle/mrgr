@@ -21,7 +21,6 @@ defmodule Mrgr.Schema.Installation do
     field(:repositories_url, :string)
     field(:repository_selection, :string)
     field(:repos_last_synced_at, :utc_datetime)
-    field(:setup_completed, :boolean)
     field(:state, :string)
     field(:target_id, :integer)
     field(:target_type, :string)
@@ -58,7 +57,6 @@ defmodule Mrgr.Schema.Installation do
     permissions
     repositories_url
     repository_selection
-    setup_completed
     state
     target_id
     target_type
