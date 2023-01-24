@@ -346,9 +346,17 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  attr :id, :string, required: true
+  attr :class, :string, default: nil
+
   def spinner(assigns) do
     ~H"""
-    <div id={@id} class="spinner" data-spinning={show_spinner(@id)} data-done={hide_spinner(@id)}>
+    <div
+      id={@id}
+      class={["spinner", @class]}
+      data-spinning={show_spinner(@id)}
+      data-done={hide_spinner(@id)}
+    >
       <div class="bounce1"></div>
       <div class="bounce2"></div>
       <div class="bounce3"></div>

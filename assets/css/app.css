@@ -166,6 +166,10 @@ h5 {
   @apply flex items-center space-x-1;
 }
 
+.spinner.hidden {
+  display: none;
+}
+
 .spinner > div {
   width: 4px;
   height: 4px;

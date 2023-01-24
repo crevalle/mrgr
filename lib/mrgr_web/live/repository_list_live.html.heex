@@ -129,8 +129,8 @@
               <.approving_review_count count={repo.settings.required_approving_review_count} />
             </td>
             <td><.possible_merge_badges settings={repo.settings} /></td>
-            <td class="pl-3">
-              <.spinner id={"spinner-#{repo.id}"} />
+            <td class="pl-3 text-center">
+              <.spinner id={"spinner-#{repo.id}"} class="hidden" />
 
               <div
                 id={"enforce-policy-#{repo.id}"}
