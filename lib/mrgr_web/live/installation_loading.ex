@@ -12,19 +12,15 @@ defmodule MrgrWeb.Live.InstallationLoading do
 
     Mrgr.Installation.queue_initial_setup(installation)
 
-    # sometimes we land on this page partway through setup
-    {events, stats} =
+    stats =
       case Mrgr.Installation.data_synced?(installation) do
-        true ->
-          {[], compile_stats(installation)}
-
-        false ->
-          {[%{status: "in_progress", name: "initializing"}], %{}}
+        true -> compile_stats(installation)
+        false -> %{}
       end
 
     socket
     |> assign(:installation, installation)
-    |> assign(:events, events)
+    |> assign(:events, [])
     |> assign(:stats, stats)
     |> assign(:done, @done)
     |> ok()
