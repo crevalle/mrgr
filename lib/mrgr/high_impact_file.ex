@@ -4,19 +4,6 @@ defmodule Mrgr.HighImpactFile do
 
   use Mrgr.PubSub.Event
 
-  def socks do
-    Mrgr.Schema.Repository
-    |> Mrgr.Repo.all()
-    |> Enum.map(fn r -> Mrgr.Repo.preload(r, [:high_impact_files, :pull_requests]) end)
-    |> Enum.map(fn r ->
-      Enum.map(r.pull_requests, fn pr ->
-        # reverse preload
-        pr = %{pr | repository: r}
-        Mrgr.PullRequest.associate_high_impact_files(pr)
-      end)
-    end)
-  end
-
   def for_repository(%{id: repo_id}) do
     Schema
     |> Query.for_repository(repo_id)
