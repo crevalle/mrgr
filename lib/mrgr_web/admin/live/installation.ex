@@ -21,7 +21,7 @@ defmodule MrgrWeb.Admin.Live.Installation do
                 <.th uppercase={true}>Creator</.th>
                 <.th uppercase={true}>Account</.th>
                 <.th uppercase={true}>Actions</.th>
-                <.th uppercase={true}>Setup Complete</.th>
+                <.th uppercase={true}>Onboarding Status</.th>
                 <.th uppercase={true}>Repositories</.th>
                 <.th uppercase={true}>Updated</.th>
                 <.th uppercase={true}>Created</.th>
@@ -49,7 +49,7 @@ defmodule MrgrWeb.Admin.Live.Installation do
                     Refresh PRs
                   </.outline_button>
                 </.td>
-                <.td><%= tf(i.setup_completed) %></.td>
+                <.td><%= i.state %></.td>
                 <.td><%= Enum.count(i.repositories) %></.td>
                 <.td><%= ts(i.updated_at, assigns.timezone) %></.td>
                 <.td><%= ts(i.inserted_at, assigns.timezone) %></.td>

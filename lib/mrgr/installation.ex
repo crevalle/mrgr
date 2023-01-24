@@ -2,7 +2,7 @@ defmodule Mrgr.Installation do
   use Mrgr.PubSub.Event
 
   alias Mrgr.Schema.Installation, as: Schema
-  alias Mrgr.Installation.Query
+  alias Mrgr.Installation.{Query, State}
 
   def find(id) do
     Schema
@@ -83,8 +83,9 @@ defmodule Mrgr.Installation do
     installation
   end
 
-  def complete_setup(installation) do
+  def sync_initial_data(installation) do
     installation
+    |> State.set_syncing_initial_data()
     |> broadcast(@installation_loading_members)
     |> create_members()
     |> create_teams()
@@ -92,42 +93,17 @@ defmodule Mrgr.Installation do
     |> sync_repositories()
     |> broadcast(@installation_loading_pull_requests)
     |> sync_pull_request_data()
-    |> initial_data_sync_complete()
-    |> broadcast(@installation_setup_completed)
+    |> State.set_initial_data_sync_complete()
+    |> broadcast(@installation_initial_sync_completed)
   end
 
-  # before they've installed a github app, users have no installation
-  def setup_complete?(nil), do: false
+  defdelegate setup_complete?(installation), to: State
+  defdelegate data_synced?(installation), to: State
 
-  def setup_complete?(installation) do
-    installation.state == "active"
-  end
-
-  def data_synced?(%{state: state}) when state in ["initial_data_sync_complete", "active"],
-    do: true
-
-  def data_synced?(_installation), do: false
-
-  def created(installation) do
-    update_state!(installation, "created")
-  end
-
-  def syncing_initial_data(installation) do
-    update_state!(installation, "syncing_initial_data")
-  end
-
-  def initial_data_sync_complete(installation) do
-    update_state!(installation, "initial_data_sync_complete")
-  end
-
-  def activate(installation) do
-    update_state!(installation, "active")
-  end
-
-  def update_state!(installation, state) do
+  def activate!(installation) do
     installation
-    |> Schema.state_changeset(%{state: state})
-    |> Mrgr.Repo.update!()
+    |> State.set_active()
+    |> broadcast(@installation_activated)
   end
 
   def hot_stats(installation) do

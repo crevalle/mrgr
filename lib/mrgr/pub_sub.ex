@@ -66,7 +66,8 @@ defmodule Mrgr.PubSub do
         @flash_error "flash:error"
 
         @incoming_webhook_created "incoming_webhook:created"
-        @installation_setup_completed "installation:setup_completed"
+        @installation_activated "installation:activated"
+        @installation_initial_sync_completed "installation:initial_sync_completed"
         @installation_loading_members "installation:loading_members"
         @installation_loading_repositories "installation:loading_repositories"
         @installation_loading_pull_requests "installation:loading_pull_requests"

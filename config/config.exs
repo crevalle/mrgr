@@ -25,6 +25,8 @@ config :mrgr, MrgrWeb.Endpoint,
   live_view: [signing_salt: "pI9GZU9j"]
 
 config :mrgr, :installation, url: "https://github.com/apps/mrgr-development/installations/new"
+config :mrgr, :payments, url: "https://buy.stripe.com/test_3cs5nvgkJf8Q6Gs4gg"
+
 # Configures the mailer
 #
 # By default it uses the "Local" adapter which stores the emails

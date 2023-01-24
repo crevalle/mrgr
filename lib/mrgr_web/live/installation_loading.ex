@@ -10,15 +10,21 @@ defmodule MrgrWeb.Live.InstallationLoading do
 
     Mrgr.PubSub.subscribe_to_installation(installation)
 
-    stats =
+    Mrgr.Installation.queue_initial_setup(installation)
+
+    # sometimes we land on this page partway through setup
+    {events, stats} =
       case Mrgr.Installation.data_synced?(installation) do
-        true -> compile_stats(installation)
-        false -> %{}
+        true ->
+          {[], compile_stats(installation)}
+
+        false ->
+          {[%{status: "in_progress", name: "initializing"}], %{}}
       end
 
     socket
     |> assign(:installation, installation)
-    |> assign(:events, [])
+    |> assign(:events, events)
     |> assign(:stats, stats)
     |> assign(:done, @done)
     |> ok()
@@ -77,13 +83,20 @@ defmodule MrgrWeb.Live.InstallationLoading do
             </tr>
           </table>
 
-          <.l href={Mrgr.Installation.installation_url()} class="btn">
-            Click here to install our Github App 🚀
+          <.l href={payment_url(@installation)} class="btn">
+            On to payment!
           </.l>
         <% end %>
       </div>
     </div>
     """
+  end
+
+  def payment_url(installation) do
+    base_url = Application.get_env(:mrgr, :payments)[:url]
+    creator = Mrgr.User.find(installation.creator_id)
+
+    "#{base_url}?client_reference_id=#{installation.id}&prefilled_email=#{URI.encode_www_form(creator.email)}"
   end
 
   defp translate_event(pubsub_event) do
@@ -114,7 +127,7 @@ defmodule MrgrWeb.Live.InstallationLoading do
     |> noreply()
   end
 
-  def handle_info(%{event: @installation_setup_completed, payload: installation}, socket) do
+  def handle_info(%{event: @installation_initial_sync_completed, payload: installation}, socket) do
     socket
     |> assign(:installation, installation)
     |> assign(:stats, compile_stats(installation))

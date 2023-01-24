@@ -5,7 +5,7 @@ defmodule Mrgr.Worker.InstallationSetup do
   def perform(%Oban.Job{args: %{"id" => id}}) do
     installation = Mrgr.Installation.find_for_setup(id)
 
-    Mrgr.Installation.complete_setup(installation)
+    Mrgr.Installation.sync_initial_data(installation)
 
     :ok
   end

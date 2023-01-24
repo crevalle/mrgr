@@ -63,6 +63,8 @@ defmodule Mrgr.Stripe.Webhook do
     with id when is_integer(id) <- client_reference_id(data),
          %Mrgr.Schema.Installation{} = installation <- Mrgr.Installation.find(id) do
       _subscription = create_subscription(hook, installation)
+
+      Mrgr.Installation.activate!(installation)
     else
       error -> error
     end
