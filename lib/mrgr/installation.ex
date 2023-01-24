@@ -27,7 +27,7 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.all()
   end
 
-  def find_for_setup(id) do
+  def find_for_onboarding(id) do
     Schema
     |> Query.by_id(id)
     |> Query.with_account()
@@ -77,13 +77,13 @@ defmodule Mrgr.Installation do
 
   def queue_initial_setup(installation) do
     %{id: installation.id}
-    |> Mrgr.Worker.InstallationSetup.new()
+    |> Mrgr.Worker.InstallationOnboarding.new()
     |> Oban.insert()
 
     installation
   end
 
-  def sync_initial_data(installation) do
+  def sync_data_for_onboarding(installation) do
     installation
     |> State.set_syncing_initial_data()
     |> broadcast(@installation_loading_members)
