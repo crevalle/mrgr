@@ -13,5 +13,8 @@ defmodule Mrgr.Schema.HighImpactFilePullRequest do
     |> cast(params, [:pull_request_id, :high_impact_file_id])
     |> foreign_key_constraint(:pull_request_id)
     |> foreign_key_constraint(:high_impact_file_id)
+    |> unique_constraint(:pull_request_id,
+      name: :high_impact_file_pull_requests_pull_request_id_high_impact_file
+    )
   end
 end

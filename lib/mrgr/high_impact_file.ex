@@ -35,20 +35,29 @@ defmodule Mrgr.HighImpactFile do
     %{pull_request | high_impact_file_pull_requests: [], high_impact_files: []}
   end
 
-  def create_for_pull_request(pull_request, hifs) do
-    assocs =
-      Enum.map(hifs, fn hif ->
-        params = %{
-          pull_request_id: pull_request.id,
-          high_impact_file_id: hif.id
-        }
+  def reset_hifs(hifs, pull_request) do
+    pull_request = clear_from_pr(pull_request)
 
-        %Mrgr.Schema.HighImpactFilePullRequest{}
-        |> Mrgr.Schema.HighImpactFilePullRequest.changeset(params)
-        |> Mrgr.Repo.insert!()
-      end)
+    # since we're clearing PRs these should all be created successfully
+    assocs =
+      hifs
+      |> Enum.map(fn hif -> create_for_pull_request(hif, pull_request) end)
+      |> Enum.map(fn {:ok, a} -> a end)
 
     %{pull_request | high_impact_files: hifs, high_impact_file_pull_requests: assocs}
+  end
+
+  @spec create_for_pull_request(Schema.t(), Mrgr.Schema.PullRequest.t()) ::
+          {:ok, Mrgr.Schema.HighImpactFilePullRequest.t()} | {:error, Ecto.Changeset.t()}
+  def create_for_pull_request(hif, pull_request) do
+    params = %{
+      high_impact_file_id: hif.id,
+      pull_request_id: pull_request.id
+    }
+
+    %Mrgr.Schema.HighImpactFilePullRequest{}
+    |> Mrgr.Schema.HighImpactFilePullRequest.changeset(params)
+    |> Mrgr.Repo.insert()
   end
 
   def applies_to_pull_request?(hif, pull_request) do
@@ -90,12 +99,58 @@ defmodule Mrgr.HighImpactFile do
     |> Mrgr.Repo.insert()
     |> case do
       {:ok, created} = res ->
+        add_to_matching_open_prs(created)
+
         broadcast(created, @high_impact_file_created)
         res
 
       {:error, _cs} = error ->
         error
     end
+  end
+
+  @spec add_to_matching_open_prs(Schema.t()) :: Schema.t()
+  def add_to_matching_open_prs(hif) do
+    prs = find_matching_open_prs(hif)
+
+    Enum.map(prs, fn pull_request -> create_for_pull_request(hif, pull_request) end)
+
+    hif
+  end
+
+  def update_matching_prs(hif) do
+    remove_from_prs_that_no_longer_match(hif)
+
+    add_to_matching_open_prs(hif)
+
+    hif
+  end
+
+  def remove_from_prs_that_no_longer_match(hif) do
+    hif = Mrgr.Repo.preload(hif, :pull_requests)
+
+    hif.pull_requests
+    |> Enum.reject(&applies_to_pull_request?(hif, &1))
+    |> Enum.map(&remove_from_pull_request(hif, &1))
+  end
+
+  def find_matching_open_prs(hif) do
+    hif.repository_id
+    |> Mrgr.PullRequest.open_for_repo_id()
+    |> Mrgr.Repo.all()
+    |> Enum.filter(&applies_to_pull_request?(hif, &1))
+  end
+
+  def remove_from_pull_request(hif, pull_request) do
+    assoc = find_pr_assoc(hif, pull_request)
+
+    Mrgr.Repo.delete(assoc)
+  end
+
+  def find_pr_assoc(hif, pull_request) do
+    Mrgr.Schema.HighImpactFilePullRequest
+    |> Query.for_hif_and_pr(hif, pull_request)
+    |> Mrgr.Repo.one()
   end
 
   def defaults_for_repo(%{language: "Elixir"} = repository) do
@@ -135,6 +190,7 @@ defmodule Mrgr.HighImpactFile do
     |> Mrgr.Repo.update()
     |> case do
       {:ok, updated} = res ->
+        update_matching_prs(updated)
         broadcast(updated, @high_impact_file_updated)
         res
 
@@ -164,6 +220,13 @@ defmodule Mrgr.HighImpactFile do
     def order_by_pattern(query) do
       from(q in query,
         order_by: [desc: q.pattern]
+      )
+    end
+
+    def for_hif_and_pr(query, hif, pr) do
+      from(q in query,
+        where: q.high_impact_file_id == ^hif.id,
+        where: q.pull_request_id == ^pr.id
       )
     end
   end

@@ -404,8 +404,7 @@ defmodule Mrgr.PullRequest do
     # until we get smarter about what's being added/removed for notification purposes,
     # just blow them all away and replace them
 
-    Mrgr.HighImpactFile.clear_from_pr(pull_request)
-    Mrgr.HighImpactFile.create_for_pull_request(pull_request, applicable)
+    Mrgr.HighImpactFile.reset_hifs(applicable, pull_request)
 
     pull_request
   end
@@ -830,12 +829,11 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
-  def open_for_repo_id(repository_id, page \\ []) do
+  def open_for_repo_id(repository_id) do
     Schema
     |> Query.for_repository(repository_id)
     |> Query.open()
     |> Query.with_pending_preloads()
-    |> Mrgr.Repo.paginate(page)
   end
 
   def preload_for_pending_list(pull_request) do
