@@ -92,7 +92,7 @@ defmodule Mrgr.Installation do
     |> broadcast(@installation_loading_repositories)
     |> sync_repositories()
     |> broadcast(@installation_loading_pull_requests)
-    |> sync_pull_request_data()
+    |> refresh_pull_requests!()
     |> State.set_initial_data_sync_complete()
     |> broadcast(@installation_initial_sync_completed)
   end
