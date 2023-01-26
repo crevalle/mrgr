@@ -108,6 +108,19 @@ defmodule MrgrWeb.Plug.Auth do
     end
   end
 
+  def redirect_logged_in_to_dashboard(conn, _opts) do
+    case signed_in?(conn) do
+      true ->
+        conn
+        |> Phoenix.Controller.put_flash(:info, "Hello again.")
+        |> Phoenix.Controller.redirect(to: "/pull-requests")
+        |> halt()
+
+      false ->
+        conn
+    end
+  end
+
   @spec redirect_to_original_url_or(Plug.Conn.t(), String.t()) :: Plug.Conn.t()
   def redirect_to_original_url_or(conn, new_path) do
     case get_session(conn, :headed_to) do

@@ -21,6 +21,10 @@ defmodule MrgrWeb.Router do
     plug :redirect_incomplete_installation_to_onboarding
   end
 
+  pipeline :skip_auth_for_logged_in_folks do
+    plug :redirect_logged_in_to_dashboard
+  end
+
   pipeline :admin do
     plug :require_admin
   end
@@ -33,6 +37,11 @@ defmodule MrgrWeb.Router do
     pipe_through :browser
 
     get "/", PageController, :index
+  end
+
+  scope "/", MrgrWeb do
+    pipe_through [:browser, :skip_auth_for_logged_in_folks]
+
     get "/sign-in", AuthController, :new
     get "/sign-up", AuthController, :sign_up
   end
