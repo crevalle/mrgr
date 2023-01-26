@@ -297,6 +297,8 @@ defmodule Mrgr.Repository do
         repo
 
       pr_data ->
+        repo = Mrgr.Repo.preload(repo, :high_impact_files)
+
         pull_requests =
           repo
           |> create_pull_requests_from_data(pr_data)
@@ -304,6 +306,7 @@ defmodule Mrgr.Repository do
           |> Enum.map(fn pr -> %{pr | repository: repo} end)
           # !!! this makes several API calls.  careful about scaling many onboarding users!
           |> Enum.map(&Mrgr.PullRequest.synchronize_for_creating_the_world/1)
+          |> Enum.map(&Mrgr.HighImpactFile.reset_hifs(repo, &1))
 
         %{repo | pull_requests: pull_requests}
     end

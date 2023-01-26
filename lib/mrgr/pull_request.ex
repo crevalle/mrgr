@@ -268,6 +268,7 @@ defmodule Mrgr.PullRequest do
     |> Enum.any?(&Mrgr.Schema.User.is_github_user?(user, &1))
   end
 
+  @spec sync_comments(Schema.t()) :: Schema.t()
   def sync_comments(pull_request) do
     pull_request
     |> fetch_issue_comments()
@@ -280,6 +281,8 @@ defmodule Mrgr.PullRequest do
     |> Enum.each(fn c ->
       create_comment("pull_request_review_comment", pull_request, c["created_at"], c)
     end)
+
+    pull_request
   end
 
   def fetch_pr_review_comments(pull_request) do
@@ -486,6 +489,7 @@ defmodule Mrgr.PullRequest do
     pull_request
   end
 
+  @spec synchronize_for_creating_the_world(Schema.t()) :: Schema.t()
   def synchronize_for_creating_the_world(pull_request) do
     # fetch comments outside of `synchronize_github_data` since we only
     # need to hit the API when we're creating the world

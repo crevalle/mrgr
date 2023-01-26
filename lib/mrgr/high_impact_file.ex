@@ -21,6 +21,10 @@ defmodule Mrgr.HighImpactFile do
   end
 
   def for_pull_request(%{repository: %{high_impact_files: hifs}} = pull_request) do
+    for_pull_request(hifs, pull_request)
+  end
+
+  def for_pull_request(hifs, pull_request) do
     hifs
     |> Enum.filter(&applies_to_pull_request?(&1, pull_request))
     |> Enum.uniq_by(& &1.id)
@@ -33,6 +37,10 @@ defmodule Mrgr.HighImpactFile do
     |> Enum.map(&Mrgr.Repo.delete/1)
 
     %{pull_request | high_impact_file_pull_requests: [], high_impact_files: []}
+  end
+
+  def reset_hifs(%Mrgr.Schema.Repository{high_impact_files: hifs}, pull_request) do
+    reset_hifs(hifs, pull_request)
   end
 
   def reset_hifs(hifs, pull_request) do
@@ -129,7 +137,11 @@ defmodule Mrgr.HighImpactFile do
   def remove_from_prs_that_no_longer_match(hif) do
     hif = Mrgr.Repo.preload(hif, :pull_requests)
 
-    hif.pull_requests
+    remove_from_prs_that_no_longer_match(hif, hif.pull_requests)
+  end
+
+  def remove_from_prs_that_no_longer_match(hif, prs) do
+    prs
     |> Enum.reject(&applies_to_pull_request?(hif, &1))
     |> Enum.map(&remove_from_pull_request(hif, &1))
   end
