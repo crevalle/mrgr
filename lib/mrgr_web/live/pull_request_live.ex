@@ -20,6 +20,8 @@ defmodule MrgrWeb.PullRequestLive do
 
       tabs = Tabs.new(current_user)
 
+      snooze_options = snooze_options()
+
       subscribe(current_user)
 
       # id will be `nil` for the index action
@@ -35,6 +37,7 @@ defmodule MrgrWeb.PullRequestLive do
       |> assign(:repos, repos)
       |> assign(:labels, labels)
       |> assign(:members, members)
+      |> assign(:snooze_options, snooze_options)
       |> assign(:frozen_repos, frozen_repos)
       |> put_title("Open Pull Requests")
       |> ok()
@@ -181,10 +184,10 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
-  def handle_event("snooze-pull-request", %{"id" => id, "time" => time}, socket) do
-    pull_request = Tabs.find_pull_request(socket.assigns.selected_tab, id)
+  def handle_event("snooze", %{"snooze_id" => snooze_id, "pr_id" => pull_request_id}, socket) do
+    pull_request = Tabs.find_pull_request(socket.assigns.selected_tab, pull_request_id)
 
-    Mrgr.PullRequest.snooze(pull_request, translate_snooze(time))
+    Mrgr.PullRequest.snooze(pull_request, translate_snooze(snooze_id))
 
     {tabs, selected} = Tabs.reload_prs(socket.assigns.tabs, socket.assigns.selected_tab)
 
@@ -200,6 +203,7 @@ defmodule MrgrWeb.PullRequestLive do
     socket
     |> assign(:tabs, tabs)
     |> assign(:selected_tab, selected)
+    |> Flash.put(:info, "PR snoozed 😴")
     |> noreply()
   end
 
@@ -323,9 +327,9 @@ defmodule MrgrWeb.PullRequestLive do
 
   def snooze_options do
     [
-      %{title: "2 Days", value: "2"},
-      %{title: "5 Days", value: "5"},
-      %{title: "Indefinitely", value: "indefinitely"}
+      %{name: "2 Days", id: "2-days"},
+      %{name: "5 Days", id: "5-days"},
+      %{name: "Indefinitely", id: "indefinitely"}
     ]
   end
 
@@ -357,11 +361,11 @@ defmodule MrgrWeb.PullRequestLive do
   def selected?(%{id: id}, %{id: id}), do: true
   def selected?(_pull_request, _selected), do: false
 
-  defp translate_snooze("2") do
+  defp translate_snooze("2-days") do
     Mrgr.DateTime.now() |> DateTime.add(2, :day)
   end
 
-  defp translate_snooze("5") do
+  defp translate_snooze("5-days") do
     Mrgr.DateTime.now() |> DateTime.add(5, :day)
   end
 
@@ -458,6 +462,15 @@ defmodule MrgrWeb.PullRequestLive do
         %{
           id: "hifs",
           title: "💥 High Impact Changes",
+          type: :state,
+          meta: %{user: user},
+          viewing_snoozed: false,
+          pull_requests: [],
+          snoozed: []
+        },
+        %{
+          id: "snoozed",
+          title: "😴 Snoozed",
           type: :state,
           meta: %{user: user},
           viewing_snoozed: false,
@@ -587,8 +600,7 @@ defmodule MrgrWeb.PullRequestLive do
       task =
         Task.async(fn ->
           %{
-            snoozed: load_pull_requests(tab, Map.put(opts, :snoozed, true)),
-            pull_requests: load_pull_requests(tab, Map.put(opts, :snoozed, false))
+            pull_requests: load_pull_requests(tab)
           }
         end)
 
@@ -613,6 +625,10 @@ defmodule MrgrWeb.PullRequestLive do
 
     def load_pull_requests(%{id: "hifs"} = tab, opts) do
       Mrgr.PullRequest.paged_high_impact_prs(tab.meta.user, opts)
+    end
+
+    def load_pull_requests(%{id: "snoozed"} = tab, opts) do
+      Mrgr.PullRequest.paged_snoozed_prs(tab.meta.user, opts)
     end
 
     def load_pull_requests(%Mrgr.Schema.PRTab{} = tab, opts) do
