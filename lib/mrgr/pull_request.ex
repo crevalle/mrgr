@@ -732,7 +732,8 @@ defmodule Mrgr.PullRequest do
 
   def paged_nav_tab_prs(tab, opts \\ %{}) do
     Schema
-    |> Query.pending_stuff(tab.user.current_installation_id, Map.get(opts, :snoozed, false))
+    |> Query.pending_stuff(tab.user.current_installation_id)
+    |> Query.unsnoozed()
     |> Query.for_nav_tab(tab)
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
@@ -742,32 +743,44 @@ defmodule Mrgr.PullRequest do
     # load in two passes because adding the joins messes up my LIMITs
 
     Schema
-    |> Query.pending_stuff(id, Map.get(opts, :snoozed, false))
+    |> Query.pending_stuff(id)
     |> Query.ready_to_merge()
+    |> Query.unsnoozed()
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
 
   def paged_needs_approval_prs(%{current_installation_id: id}, opts \\ %{}) do
     Schema
-    |> Query.pending_stuff(id, Map.get(opts, :snoozed, false))
+    |> Query.pending_stuff(id)
     |> Query.needs_approval()
+    |> Query.unsnoozed()
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
 
   def paged_fix_ci_prs(%{current_installation_id: id}, opts \\ %{}) do
     Schema
-    |> Query.pending_stuff(id, Map.get(opts, :snoozed, false))
+    |> Query.pending_stuff(id)
     |> Query.fix_ci()
+    |> Query.unsnoozed()
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
 
   def paged_high_impact_prs(%{current_installation_id: id}, opts \\ %{}) do
     Schema
-    |> Query.pending_stuff(id, Map.get(opts, :snoozed, false))
+    |> Query.pending_stuff(id)
     |> Query.high_impact()
+    |> Query.unsnoozed()
+    |> Mrgr.Repo.paginate(opts)
+    |> add_pending_preloads()
+  end
+
+  def paged_snoozed_prs(%{current_installation_id: id}, opts \\ %{}) do
+    Schema
+    |> Query.pending_stuff(id)
+    |> Query.snoozed()
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
@@ -781,15 +794,13 @@ defmodule Mrgr.PullRequest do
   def paged_pending_pull_requests(installation_id, opts) do
     before = Map.get(opts, :before)
     since = Map.get(opts, :since)
-    with_snoozed = Map.get(opts, :snoozed)
-
     # load in two passes because adding the joins messes up my LIMITs
 
     Schema
     |> Query.for_installation(installation_id)
     |> Query.open()
     |> Query.order_by_opened()
-    |> Query.maybe_snooze(with_snoozed)
+    |> Query.unsnoozed()
     |> Query.opened_between(before, since)
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
@@ -1121,12 +1132,11 @@ defmodule Mrgr.PullRequest do
       )
     end
 
-    def pending_stuff(schema, installation_id, with_snoozed) do
+    def pending_stuff(schema, installation_id) do
       schema
       |> for_installation(installation_id)
       |> open()
       |> order_by_opened()
-      |> maybe_snooze(with_snoozed)
     end
 
     def fix_ci(query) do

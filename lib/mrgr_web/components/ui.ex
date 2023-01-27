@@ -478,6 +478,8 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  attr :class, :string, default: nil
+
   def dropdown_toggle_link(assigns) do
     ~H"""
     <.inline_link
@@ -485,6 +487,7 @@ defmodule MrgrWeb.Components.UI do
       id={"#{@target}-toggle"}
       aria-expanded="false"
       aria-haspopup="true"
+      class={@class}
     >
       <%= render_slot(@inner_block) %>
     </.inline_link>
@@ -517,6 +520,20 @@ defmodule MrgrWeb.Components.UI do
         <% end %>
       </.l>
     </div>
+    """
+  end
+
+  def snooze_option(assigns) do
+    ~H"""
+    <.l
+      id={"#{@option.id}-#{@ctx}"}
+      phx_click={JS.push("snooze", value: %{snooze_id: @option.id, pr_id: @ctx})}
+      class="text-gray-700 p-2 text-sm w-52 rounded-md hover:bg-gray-50"
+      role="menuitem"
+      tabindex="-1"
+    >
+      <%= @option.name %>
+    </.l>
     """
   end
 
