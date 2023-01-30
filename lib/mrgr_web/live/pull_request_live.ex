@@ -96,7 +96,7 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   def handle_event("select-tab", %{"id" => id}, socket) do
-    selected = Tabs.select(socket.assigns.tabs, id)
+    selected = get_tab(socket.assigns.tabs, id)
 
     socket
     |> assign(:selected_tab, selected)
@@ -183,8 +183,8 @@ defmodule MrgrWeb.PullRequestLive do
       |> Tabs.find_pull_request(pull_request_id)
       |> Mrgr.PullRequest.snooze(translate_snooze(snooze_id))
 
-    updated_tabs = Tabs.snooze(socket.assigns.tabs, selected_tab, pull_request)
-    selected = Tabs.find_tab_by_id(updated_tabs, selected_tab.id)
+    tabs = Tabs.snooze(socket.assigns.tabs, selected_tab, pull_request)
+    selected = get_selected_tab(tabs, socket)
 
     socket =
       case previewing_pull_request?(socket.assigns.detail, pull_request) do
@@ -196,7 +196,7 @@ defmodule MrgrWeb.PullRequestLive do
       end
 
     socket
-    |> assign(:tabs, updated_tabs)
+    |> assign(:tabs, tabs)
     |> assign(:selected_tab, selected)
     |> Flash.put(:info, "PR snoozed 😴")
     |> noreply()
@@ -211,7 +211,7 @@ defmodule MrgrWeb.PullRequestLive do
       |> Mrgr.PullRequest.unsnooze()
 
     tabs = Tabs.unsnooze(socket.assigns.tabs, pull_request)
-    selected = Tabs.find_tab_by_id(tabs, selected_tab.id)
+    selected = get_selected_tab(tabs, socket)
 
     # update in place to reflect new status
     socket =
@@ -257,22 +257,26 @@ defmodule MrgrWeb.PullRequestLive do
     Mrgr.PubSub.Topic.installation(user)
   end
 
-  # repoened will put it at the top, which may not be what we want
   def handle_info(%{event: event, payload: payload}, socket)
       when event in [@pull_request_created, @pull_request_reopened] do
-    pull_requests = socket.assigns.pull_requests
+    hydrated = Mrgr.PullRequest.preload_for_pending_list(payload)
+    tabs = Tabs.receive_opened_pull_request(socket.assigns.tabs, hydrated)
+    selected_tab = get_selected_tab(tabs, socket)
 
     socket
-    |> assign(:pull_requests, [payload | pull_requests])
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected_tab)
     |> noreply()
   end
 
   def handle_info(%{event: @pull_request_closed, payload: payload}, socket) do
-    pull_requests = Mrgr.List.remove(socket.assigns.pull_requests, payload.id)
+    tabs = Tabs.remove_pull_request(socket.assigns.tabs, payload)
+    selected_tab = get_selected_tab(tabs, socket)
 
     socket
     |> put_closed_flash_message(payload)
-    |> assign(:pull_requests, pull_requests)
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected_tab)
     |> noreply()
   end
 
@@ -289,8 +293,8 @@ defmodule MrgrWeb.PullRequestLive do
            ] do
     hydrated = Mrgr.PullRequest.preload_for_pending_list(pull_request)
 
-    {tabs, selected_tab} =
-      Tabs.update_pr_data(socket.assigns.tabs, socket.assigns.selected_tab, hydrated)
+    tabs = Tabs.replace_pull_request(socket.assigns.tabs, hydrated)
+    selected_tab = get_selected_tab(tabs, socket)
 
     selected_pull_request = maybe_update_selected_pr(hydrated, socket.assigns.detail)
 
@@ -378,10 +382,18 @@ defmodule MrgrWeb.PullRequestLive do
     Tabs.custom?(tab)
   end
 
+  def get_selected_tab(tabs, socket) do
+    get_tab(tabs, socket.assigns.selected_tab.id)
+  end
+
+  def get_tab(tabs, tab_id) do
+    Tabs.find_tab_by_id(tabs, tab_id)
+  end
+
   defmodule Tabs do
     def new(user) do
       []
-      |> Kernel.++(state_tabs_for_user(user))
+      |> Kernel.++(system_tabs_for_user(user))
       |> Kernel.++(custom_tabs_for_user(user))
       |> Enum.map(&load_prs_async/1)
     end
@@ -426,40 +438,40 @@ defmodule MrgrWeb.PullRequestLive do
       |> List.insert_at(idx, tab)
     end
 
-    def state_tabs_for_user(user) do
+    def system_tabs_for_user(user) do
       [
         %{
           id: "ready-to-merge",
           title: "🚀 Ready to Merge",
-          type: "state",
+          type: "system",
           meta: %{user: user},
           pull_requests: []
         },
         %{
           id: "needs-approval",
           title: "⚠️ Needs Approval",
-          type: "state",
+          type: "system",
           meta: %{user: user},
           pull_requests: []
         },
         %{
           id: "fix-ci",
           title: "🛠 Fix CI",
-          type: "state",
+          type: "system",
           meta: %{user: user},
           pull_requests: []
         },
         %{
           id: "hifs",
           title: "💥 High Impact Changes",
-          type: "state",
+          type: "system",
           meta: %{user: user},
           pull_requests: []
         },
         %{
           id: "snoozed",
           title: "😴 Snoozed",
-          type: "state",
+          type: "system",
           meta: %{user: user},
           pull_requests: []
         }
@@ -482,7 +494,11 @@ defmodule MrgrWeb.PullRequestLive do
       Enum.find(tabs, &snoozed?/1)
     end
 
-    def state_tabs(tabs) do
+    def find_needs_approval_tab(tabs) do
+      Enum.find(tabs, &needs_approval?/1)
+    end
+
+    def system_tabs(tabs) do
       Enum.reject(tabs, &custom?/1)
     end
 
@@ -495,6 +511,9 @@ defmodule MrgrWeb.PullRequestLive do
 
     def snoozed?(%{id: "snoozed"}), do: true
     def snoozed?(_), do: false
+
+    def needs_approval?(%{id: "needs-approval"}), do: true
+    def needs_approval?(_), do: false
 
     def set_prs_on_tab_from_async(tabs, ref, data) when is_list(tabs) do
       case find_tab_by_ref(tabs, ref) do
@@ -520,22 +539,26 @@ defmodule MrgrWeb.PullRequestLive do
     # data for a different tab
     def set_prs_on_tab_from_async(tab, _ref, _data), do: tab
 
-    def update_pr_data(tabs, selected, pr) do
-      # slow, dumb traversal through everything.
-      tabs =
-        Enum.map(tabs, fn tab ->
-          pull_requests = Mrgr.List.replace(tab.pull_requests, pr)
-          # this and hte below poking is broken,
-          # cause pull_requests is a %Scrivener.Page{}
-          # so you can't just replace stuff.  calling set_prs_on_tab
-          # for now just to clean up these calls even though it is wrong
-          # it should be poke_pr_into_entries or something
-          %{tab | pull_requests: pull_requests}
-        end)
+    def replace_pull_request(tabs, pr) do
+      Enum.map(tabs, &replace_pr_in_tab(&1, pr))
+    end
 
-      selected = %{selected | pull_requests: Mrgr.List.replace(selected.pull_requests, pr)}
+    def remove_pull_request(tabs, pr) do
+      Enum.map(tabs, &excise_pr_from_tab(&1, pr))
+    end
 
-      {tabs, selected}
+    def receive_opened_pull_request(tabs, pr) do
+      needs_approval_tab =
+        tabs
+        |> find_needs_approval_tab()
+        |> poke_pr_into_tab(pr)
+
+      refreshing =
+        tabs
+        |> Enum.custom_tabs()
+        |> Enum.map(&refresh_tab_async/1)
+
+      replace_tabs(tabs, refreshing)
     end
 
     def snooze(tabs, selected, pull_request) do
@@ -550,7 +573,7 @@ defmodule MrgrWeb.PullRequestLive do
       replace_tabs(tabs, [updated, snoozed])
     end
 
-    # hard to be smart about poking in the PR to state tabs
+    # hard to be smart about poking in the PR to system tabs
     # because the pr may not supposed be on the currently viewed page.
     # also, no good way to ask custom tabs if the PR belongs to them other
     # than just re-running the db query.  so let's just reload everything and KISS.
@@ -575,10 +598,7 @@ defmodule MrgrWeb.PullRequestLive do
 
       page = tab.pull_requests
 
-      entries = Mrgr.List.remove(page.entries, pull_request)
-      updated_count = page.total_entries - 1
-
-      updated_page = %{page | total_entries: updated_count, entries: entries}
+      updated_page = remove_pr_from_page(page, pull_request)
 
       set_prs_on_tab(tab, updated_page)
     end
@@ -595,6 +615,11 @@ defmodule MrgrWeb.PullRequestLive do
       updated_page = %{page | total_entries: updated_count, entries: entries}
 
       set_prs_on_tab(tab, updated_page)
+    end
+
+    def replace_pr_in_tab(tab, pull_request) do
+      page = replace_pr_in_page(tab.pull_requests, pull_request)
+      set_prs_on_tab(tab, page)
     end
 
     def refresh_non_snoozed_tabs_async(tabs) do
@@ -637,14 +662,6 @@ defmodule MrgrWeb.PullRequestLive do
       selected = find_tab_by_id(tabs, selected_tab.id)
 
       {tabs, selected}
-    end
-
-    def select(tabs, id) do
-      # Mrgr.List.find currently coerces ids to integers
-      # because of legacy handling in live view params
-      # here we want to tolerate both integers and strings (tabs have
-      # string ids) so just do the search manually
-      Enum.find(tabs, fn t -> t.id == id end)
     end
 
     def find_pull_request(tab, id) do
@@ -701,12 +718,31 @@ defmodule MrgrWeb.PullRequestLive do
       replace_tab(tabs, updated)
     end
 
+    # once a tab's data has been updated, we need to poke it back into its
+    # place among the list of all tabs
     def replace_tabs(all, updated) when is_list(updated) do
       Enum.reduce(updated, all, fn t, a -> replace_tab(a, t) end)
     end
 
     def replace_tab(all, updated) do
       Mrgr.List.replace(all, updated)
+    end
+
+    def remove_pr_from_page(page, pr) do
+      case Mrgr.List.member?(page.entries, pr) do
+        true ->
+          entries = Mrgr.List.remove(page.entries, pr)
+          updated_count = page.total_entries - 1
+
+          %{page | total_entries: updated_count, entries: entries}
+
+        false ->
+          page
+      end
+    end
+
+    def replace_pr_in_page(page, pr) do
+      %{page | entries: Mrgr.List.replace(page.entries, pr)}
     end
   end
 end
