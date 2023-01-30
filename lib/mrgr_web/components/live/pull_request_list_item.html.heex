@@ -97,7 +97,7 @@
             <.icon name="chevron-right" class="h-4 w-4" />
           </div>
 
-          <div class="flex flex-col space-y-1">
+          <div class="flex flex-col space-y-0 leading-tight max-w-xs">
             <MrgrWeb.Components.PullRequest.preview_commit
               :for={c <- @pull_request.commits}
               commit={c}
