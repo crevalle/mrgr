@@ -1,7 +1,6 @@
 defmodule MrgrWeb.Components.Admin do
   use MrgrWeb, :component
 
-  # import MrgrWeb.JS
   import MrgrWeb.Components.UI
 
   def subscription(%{subscription: nil} = assigns) do
@@ -112,7 +111,7 @@ defmodule MrgrWeb.Components.Admin do
               class: "text-teal-700 hover:text-teal-500"
             ) %>
           </.td>
-          <.td><%= link_to_installation(user) %></.td>
+          <.td><.link_to_installation installation={user.current_installation} /></.td>
           <.td><%= user.nickname %></.td>
           <.td><%= user.name %></.td>
           <.td><%= ts(user.last_seen_at, @tz) %></.td>
@@ -122,18 +121,6 @@ defmodule MrgrWeb.Components.Admin do
       <% end %>
     </table>
     """
-  end
-
-  def link_to_installation(user) do
-    title = current_account(user)
-    installation_id = user.current_installation_id
-
-    opts = [
-      to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, installation_id),
-      class: "text-teal-700 hover:text-teal-500"
-    ]
-
-    link(title, opts)
   end
 
   def payment_or_activate_button(%{installation: %{target_type: "User"}} = assigns) do
@@ -152,13 +139,28 @@ defmodule MrgrWeb.Components.Admin do
     """
   end
 
-  defp current_account(%{current_installation: %{account: %{login: login}}}), do: login
-  defp current_account(user), do: user.current_installation_id
-
   def payment_url(installation) do
     base_url = Application.get_env(:mrgr, :payments)[:url]
     creator = Mrgr.User.find(installation.creator_id)
 
     "#{base_url}?client_reference_id=#{installation.id}&prefilled_email=#{URI.encode_www_form(creator.email)}"
+  end
+
+  def link_to_installation(%{installation: nil} = assigns) do
+    ~H[]
+  end
+
+  def link_to_installation(%{installation: %Ecto.Association.NotLoaded{}} = assigns) do
+    ~H"""
+    <.aside>not loaded</.aside>
+    """
+  end
+
+  def link_to_installation(assigns) do
+    ~H"""
+    <.l href={Routes.admin_installation_path(MrgrWeb.Endpoint, :show, @installation.id)}>
+      <%= @installation.account.login %>
+    </.l>
+    """
   end
 end

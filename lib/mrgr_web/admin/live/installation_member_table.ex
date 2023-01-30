@@ -19,6 +19,7 @@ defmodule MrgrWeb.Admin.Live.InstallationMemberTable do
             <tr>
               <.th uppercase={true}>ID</.th>
               <.th uppercase={true}>Node ID</.th>
+              <.th uppercase={true}>External ID</.th>
               <.th uppercase={true}>Login</.th>
               <.th uppercase={true}>Type</.th>
               <.th uppercase={true}>Updated</.th>
@@ -30,6 +31,7 @@ defmodule MrgrWeb.Admin.Live.InstallationMemberTable do
             <.tr striped={true}>
               <.td><%= member.id %></.td>
               <.td><%= member.node_id %></.td>
+              <.td><%= member.external_id %></.td>
               <.td>
                 <div class="flex">
                   <%= img_tag(member.avatar_url, class: "h-5 w-5 mr-2") %>
