@@ -92,9 +92,11 @@ defmodule MrgrWeb.Components.PullRequest do
 
   def hif_badge_list(assigns) do
     ~H"""
-    <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
+    <div class="flex">
       <span>💥</span>
-      <.badge :for={hif <- @hifs} item={hif} />
+      <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
+        <.badge :for={hif <- @hifs} item={hif} />
+      </div>
     </div>
     """
   end
@@ -464,5 +466,31 @@ defmodule MrgrWeb.Components.PullRequest do
       </.form>
     </div>
     """
+  end
+
+  def snooze_option(assigns) do
+    ~H"""
+    <.l
+      id={"#{@option.id}-#{@ctx}"}
+      phx_click={JS.push("snooze", value: %{snooze_id: @option.id, pr_id: @ctx})}
+      class="text-teal-700 hover:text-teal-500 hover:bg-gray-50 p-2 text-sm rounded-md"
+      role="menuitem"
+      tabindex="-1"
+    >
+      <%= @option.name %>
+    </.l>
+    """
+  end
+
+  def merge_action_state_emoji(%{action_state: :ready_to_merge} = assigns) do
+    ~H[🚀]
+  end
+
+  def merge_action_state_emoji(%{action_state: :needs_approval} = assigns) do
+    ~H[⚠️]
+  end
+
+  def merge_action_state_emoji(%{action_state: :fix_ci} = assigns) do
+    ~H[🛠]
   end
 end
