@@ -338,7 +338,7 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   defp put_closed_flash_message(socket, %{merged_at: nil} = pull_request) do
-    Flash.put(socket, :warn, "#{pull_request.title} closed, but not merged")
+    Flash.put(socket, :info, "#{pull_request.title} closed, but not merged")
   end
 
   defp put_closed_flash_message(socket, pull_request) do
