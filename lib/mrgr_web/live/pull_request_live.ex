@@ -555,10 +555,10 @@ defmodule MrgrWeb.PullRequestLive do
 
       refreshing =
         tabs
-        |> Enum.custom_tabs()
+        |> custom_tabs()
         |> Enum.map(&refresh_tab_async/1)
 
-      replace_tabs(tabs, refreshing)
+      replace_tabs(tabs, [needs_approval_tab, refreshing])
     end
 
     def snooze(tabs, selected, pull_request) do
