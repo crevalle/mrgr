@@ -523,48 +523,6 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def snooze_option(assigns) do
-    ~H"""
-    <.l
-      id={"#{@option.id}-#{@ctx}"}
-      phx_click={JS.push("snooze", value: %{snooze_id: @option.id, pr_id: @ctx})}
-      class="text-gray-700 p-2 text-sm w-52 rounded-md hover:bg-gray-50"
-      role="menuitem"
-      tabindex="-1"
-    >
-      <%= @option.name %>
-    </.l>
-    """
-  end
-
-  def snooze_blurb(%{tab: %{viewing_snoozed: true}} = assigns) do
-    ~H"""
-    <div class="p-4 max-w-xl bg-blue-100 rounded-md border border-1">
-      <p class="text-gray-400 italic">
-        😴 You're viewing snoozed PRs.
-        <.l phx-click="toggle-viewing-snoozed">Show Unsnoozed</.l>
-      </p>
-    </div>
-    """
-  end
-
-  def snooze_blurb(%{tab: %{snoozed: %{total_entries: e}}} = assigns) when e > 0 do
-    ~H"""
-    <div class="p-4 max-w-xl bg-blue-100 rounded-md border border-1">
-      <p class="text-gray-400 italic">
-        <%= @tab.snoozed.total_entries %> pull requests are snoozed.
-        <.l phx-click="toggle-viewing-snoozed">Show Them</.l>
-      </p>
-    </div>
-    """
-  end
-
-  def snooze_blurb(assigns) do
-    ~H"""
-
-    """
-  end
-
   def pr_count_badge(%{items: []} = assigns) do
     ~H"""
     <.pr_count_badge count="-" />
@@ -662,7 +620,7 @@ defmodule MrgrWeb.Components.UI do
           aria-expanded="false"
           aria-haspopup="true"
         >
-          Freeze Merging <.icon name="chevron-down" class="-mr-1 ml-2 h-5 w-5" />
+          ❄️ Freeze Merging <.icon name="chevron-down" class="-mr-1 ml-2 h-5 w-5" />
         </.outline_button>
       </div>
 

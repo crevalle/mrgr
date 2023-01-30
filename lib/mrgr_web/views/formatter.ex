@@ -24,8 +24,8 @@ defmodule MrgrWeb.Formatter do
 
     format =
       case timestamp.year == Mrgr.DateTime.now().year do
-        true -> "%-I:%M%p %b %d"
-        false -> "%-I:%M%p %b %d, '%y"
+        true -> "%-I:%M%p %b %-d"
+        false -> "%-I:%M%p %b %-d, '%y"
       end
 
     Calendar.strftime(timestamp, format)
