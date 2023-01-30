@@ -479,6 +479,8 @@ defmodule MrgrWeb.Components.UI do
   end
 
   attr :class, :string, default: nil
+  attr :target, :string, required: true
+  slot :inner_block
 
   def dropdown_toggle_link(assigns) do
     ~H"""
