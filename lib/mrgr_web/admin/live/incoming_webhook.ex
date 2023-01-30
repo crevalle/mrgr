@@ -2,6 +2,8 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
+  import MrgrWeb.Components.Admin
+
   on_mount {MrgrWeb.Plug.Auth, :admin}
 
   def render(assigns) do
@@ -30,10 +32,7 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
               <.tr striped={true}>
                 <.td><%= hook.id %></.td>
                 <.td>
-                  <%= link(hook.installation.account.login,
-                    to: Routes.admin_installation_path(@socket, :show, hook.installation_id),
-                    class: "text-teal-700 hover:text-teal-500"
-                  ) %>
+                  <.link_to_installation installation={hook.installation} />
                 </.td>
                 <.td><%= pr_number(hook) %></.td>
                 <.td>
