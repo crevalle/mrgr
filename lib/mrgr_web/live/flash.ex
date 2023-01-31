@@ -12,7 +12,9 @@ defmodule MrgrWeb.Live.Flash do
   def mount(_params, %{"user_id" => id}, socket) do
     Mrgr.PubSub.subscribe_to_flash(id)
 
-    set_clear_flash_timer()
+    if connected?(socket) do
+      set_clear_flash_timer()
+    end
 
     socket
     |> assign(:user_id, id)
@@ -51,7 +53,7 @@ defmodule MrgrWeb.Live.Flash do
     |> noreply()
   end
 
-  def handle_info("clear_flash", socket) do
+  def handle_info(:clear, socket) do
     socket
     |> put_flash(:info, nil)
     |> put_flash(:error, nil)
@@ -59,6 +61,6 @@ defmodule MrgrWeb.Live.Flash do
   end
 
   defp set_clear_flash_timer do
-    Process.send_after(self(), "clear_flash", 3000)
+    Process.send_after(self(), :clear, 3000)
   end
 end
