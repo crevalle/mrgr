@@ -335,6 +335,7 @@ defmodule Mrgr.Installation do
 
     github_member
     |> Map.from_struct()
+    |> Map.put(:external_id, github_member.id)
     |> maybe_associate_with_existing_user(existing_user)
     |> Mrgr.Schema.Member.changeset()
     |> Mrgr.Repo.insert()
