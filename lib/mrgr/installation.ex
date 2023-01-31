@@ -317,25 +317,25 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.insert()
   end
 
-  def find_or_create_member(github_member) do
+  def find_or_create_member(github_user) do
     Mrgr.Schema.Member
-    |> Mrgr.Repo.get_by(login: github_member.login)
+    |> Mrgr.Repo.get_by(login: github_user.login)
     |> case do
       %Mrgr.Schema.Member{} = member ->
         member
 
       nil ->
-        {:ok, member} = create_member_from_github(github_member)
+        {:ok, member} = create_member_from_github(github_user)
         member
     end
   end
 
-  def create_member_from_github(github_member) do
-    existing_user = Mrgr.User.find(github_member)
+  def create_member_from_github(github_user) do
+    existing_user = Mrgr.User.find(github_user)
 
-    github_member
+    github_user
     |> Map.from_struct()
-    |> Map.put(:external_id, github_member.id)
+    |> Map.put(:external_id, github_user.id)
     |> maybe_associate_with_existing_user(existing_user)
     |> Mrgr.Schema.Member.changeset()
     |> Mrgr.Repo.insert()
