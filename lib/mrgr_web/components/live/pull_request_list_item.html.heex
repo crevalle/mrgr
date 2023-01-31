@@ -10,7 +10,7 @@
         <div class="flex items-center">
           <.h3 color="text-teal-700">
             <.merge_action_state_emoji
-              :if={Mrgr.PullRequest.snoozed?(@pull_request)}
+              :if={@show_action_state_emoji}
               action_state={Mrgr.PullRequest.merge_action_state(@pull_request)}
             /><%= @pull_request.title %>
           </.h3>

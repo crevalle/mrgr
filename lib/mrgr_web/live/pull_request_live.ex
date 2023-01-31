@@ -365,6 +365,12 @@ defmodule MrgrWeb.PullRequestLive do
   def selected?(%{id: id}, %{id: id}), do: true
   def selected?(_pull_request, _selected), do: false
 
+  def show_action_state_emoji?(%{id: id})
+      when id in ["ready-to-merge", "needs-approval", "fix-ci"],
+      do: false
+
+  def show_action_state_emoji?(_current_tab), do: true
+
   defp translate_snooze("2-days") do
     Mrgr.DateTime.now() |> DateTime.add(2, :day)
   end
