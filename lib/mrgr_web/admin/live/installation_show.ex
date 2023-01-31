@@ -11,6 +11,10 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
     <div class="px-4 sm:px-6 lg:px-8">
       <.heading title={"Installation #{@installation.id}"} />
 
+      <.l href={Routes.admin_pull_request_path(@socket, :index, @installation.id)}>
+        Pull Requests
+      </.l>
+
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
         <div class="px-4 py-5 sm:px-6">
           <div class="mt-1">
