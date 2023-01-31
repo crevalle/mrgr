@@ -75,6 +75,7 @@ defmodule Mrgr.Schema.PullRequest do
   @create_fields ~w[
     author_id
     ci_status
+    files_changed
     mergeable
     merge_state_status
     merged_at

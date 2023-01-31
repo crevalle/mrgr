@@ -1,4 +1,6 @@
 defmodule Mrgr.Github.API.Live do
+  @page_size  100
+
   use Mrgr.PubSub.Event
 
   import Mrgr.Github.API.Utils
@@ -20,8 +22,6 @@ defmodule Mrgr.Github.API.Live do
   def fetch_most_pull_request_data(pull_request) do
     # don't feel like paginating today.  if >99 files have changed,
     # you've got other problems.
-    github_limit = 100
-
     query = """
       query {
         node(id:"#{pull_request.node_id}") {
@@ -31,10 +31,10 @@ defmodule Mrgr.Github.API.Live do
             mergeStateStatus
             mergeable
             title
-            files(first: #{github_limit}) {
+            files(first: #{@page_size}) {
               nodes #{Mrgr.Github.PullRequest.GraphQL.files()}
             }
-            labels(first: #{github_limit}, orderBy: {direction: ASC, field: NAME}) {
+            labels(first: #{@page_size}, orderBy: {direction: ASC, field: NAME}) {
               nodes {
                 #{Mrgr.Github.Label.GraphQL.basic()}
               }
@@ -158,6 +158,14 @@ defmodule Mrgr.Github.API.Live do
                 }
                 createdAt
                 databaseId
+                files(first: #{@page_size}) {
+                  nodes #{Mrgr.Github.PullRequest.GraphQL.files()}
+                }
+                labels(first: #{@page_size}, orderBy: {direction: ASC, field: NAME}) {
+                  nodes {
+                    #{Mrgr.Github.Label.GraphQL.basic()}
+                  }
+                }
                 mergeStateStatus
                 mergeable
                 mergedAt

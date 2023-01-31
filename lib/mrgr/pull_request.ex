@@ -49,10 +49,22 @@ defmodule Mrgr.PullRequest do
     end
   end
 
-  def create_from_github_api_data(data) do
-    %Schema{}
-    |> Schema.create_changeset(data)
-    |> Mrgr.Repo.insert!()
+  def create_from_github_api_data(data, installation_id) do
+    files_changed = Enum.map(data["files"]["nodes"], & &1["path"])
+
+    data = Map.put(data, "files_changed", files_changed)
+
+    pull_request =
+      %Schema{}
+      |> Schema.create_changeset(data)
+      |> Mrgr.Repo.insert!()
+
+    data["labels"]["nodes"]
+    |> Mrgr.Github.Label.from_graphql()
+    |> Enum.map(&Mrgr.Github.Label.new/1)
+    |> Enum.map(fn label -> do_add_label(pull_request, label, installation_id) end)
+
+    pull_request
   end
 
   @spec reopen(map()) ::
@@ -495,7 +507,7 @@ defmodule Mrgr.PullRequest do
     # need to hit the API when we're creating the world
 
     pull_request
-    |> synchronize_github_data()
+    |> synchronize_commits()
     |> synchronize_latest_ci_status!()
     |> sync_comments()
   end
@@ -600,6 +612,10 @@ defmodule Mrgr.PullRequest do
   def do_add_label(pull_request, %Mrgr.Github.Label{} = gh_label) do
     installation_id = pull_request.repository.installation_id
 
+    do_add_label(pull_request, gh_label, installation_id)
+  end
+
+  def do_add_label(pull_request, gh_label, installation_id) do
     with %Mrgr.Schema.Label{} = label <-
            Mrgr.Label.find_by_name_for_installation(gh_label.name, installation_id),
          nil <- find_pr_label(pull_request, label),
