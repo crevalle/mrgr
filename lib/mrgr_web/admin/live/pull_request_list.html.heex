@@ -1,4 +1,4 @@
-<.heading title={"Open PRs for #{@repository.name}"} />
+<.heading title={"Open PRs (#{@page.total_entries})"} />
 <.page_nav page={@page} />
 <div class="flex mt-8 space-x-4">
   <div class="basis-1/2 overflow-hidden">
@@ -9,7 +9,8 @@
         id={"pull_request_#{pull_request.id}"}
         pull_request={pull_request}
         selected={false}
-        merge_frozen={false}
+        members={@members}
+        snooze_options={[]}
         current_user={@current_user}
         timezone={@timezone}
       />

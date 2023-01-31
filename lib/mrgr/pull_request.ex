@@ -792,16 +792,12 @@ defmodule Mrgr.PullRequest do
   end
 
   def paged_pending_pull_requests(installation_id, opts) do
-    before = Map.get(opts, :before)
-    since = Map.get(opts, :since)
     # load in two passes because adding the joins messes up my LIMITs
 
     Schema
     |> Query.for_installation(installation_id)
     |> Query.open()
     |> Query.order_by_opened()
-    |> Query.unsnoozed()
-    |> Query.opened_between(before, since)
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end

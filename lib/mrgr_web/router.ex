@@ -105,11 +105,9 @@ defmodule MrgrWeb.Router do
 
     live "/installations", Live.Installation, :index, as: :installation
     live "/installations/:id", Live.InstallationShow, :show, as: :installation
+    live "/installations/:id/pull-requests", Live.PullRequestList, :index, as: :pull_request
 
     live "/subscriptions", Live.Subscription, :index, as: :subscription
-
-    live "/repositories/:repository_id/pull-requests", Live.PullRequestList, :index,
-      as: :pull_request
 
     live "/github_api_requests", Live.GithubAPIRequest, :index, as: :github_api_request
 
