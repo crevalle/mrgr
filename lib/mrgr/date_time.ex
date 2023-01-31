@@ -54,6 +54,6 @@ defmodule Mrgr.DateTime do
   end
 
   def happened_at(%Mrgr.Github.Commit{} = commit) do
-    commit.commit.committer.date
+    commit.author.date
   end
 end

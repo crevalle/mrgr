@@ -381,7 +381,7 @@ defmodule Mrgr.Repository do
   def create_pull_requests_from_data(repo, data) do
     data
     |> Enum.map(&Map.put(&1, "repository_id", repo.id))
-    |> Enum.map(&Mrgr.PullRequest.create_from_github_api_data(&1, repo.installation_id))
+    |> Enum.map(&Mrgr.PullRequest.create_for_onboarding(&1, repo.installation_id))
   end
 
   # expects that you've preloaded it

@@ -81,12 +81,10 @@ defmodule Mrgr.Github.User do
   defmodule GraphQL do
     def git_actor do
       """
-      {
-        avatarUrl
-        date
-        email
-        name
-      }
+      avatarUrl
+      date
+      email
+      name
       """
     end
 

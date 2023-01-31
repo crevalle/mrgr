@@ -102,6 +102,7 @@ defmodule Mrgr.Schema.PullRequest do
     schema
     |> cast(params, @create_fields)
     |> cast_embed(:user)
+    |> cast_embed(:commits)
     |> cast_embed(:assignees)
     |> cast_embed(:requested_reviewers)
     |> cast_embed(:head)
@@ -200,15 +201,15 @@ defmodule Mrgr.Schema.PullRequest do
     pull_request.raw["head"]["ref"]
   end
 
-  def commit_message(%Mrgr.Github.Commit{commit: commit}) do
+  def commit_message(%Mrgr.Github.Commit{} = commit) do
     commit.message
   end
 
-  def commit_author_name(%Mrgr.Github.Commit{commit: commit}) do
+  def commit_author_name(%Mrgr.Github.Commit{} = commit) do
     commit.author.name
   end
 
-  def committed_at(%Mrgr.Github.Commit{commit: commit}) do
+  def committed_at(%Mrgr.Github.Commit{} = commit) do
     commit.author.date
   end
 

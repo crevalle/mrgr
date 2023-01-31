@@ -49,10 +49,14 @@ defmodule Mrgr.PullRequest do
     end
   end
 
-  def create_from_github_api_data(data, installation_id) do
+  def create_for_onboarding(data, installation_id) do
     files_changed = Enum.map(data["files"]["nodes"], & &1["path"])
+    commits = Enum.map(data["commits"]["nodes"], & &1["commit"])
 
-    data = Map.put(data, "files_changed", files_changed)
+    data =
+      data
+      |> Map.put("files_changed", files_changed)
+      |> Map.put("commits", commits)
 
     pull_request =
       %Schema{}
@@ -507,7 +511,6 @@ defmodule Mrgr.PullRequest do
     # need to hit the API when we're creating the world
 
     pull_request
-    |> synchronize_commits()
     |> synchronize_latest_ci_status!()
     |> sync_comments()
   end

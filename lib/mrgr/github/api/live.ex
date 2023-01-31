@@ -1,5 +1,5 @@
 defmodule Mrgr.Github.API.Live do
-  @page_size  100
+  @page_size 100
 
   use Mrgr.PubSub.Event
 
@@ -154,6 +154,13 @@ defmodule Mrgr.Github.API.Live do
                 author {
                   ... on User {
                     #{Mrgr.Github.User.GraphQL.actor()}
+                  }
+                }
+                commits(first: 50) {
+                  nodes {
+                    commit {
+                      #{Mrgr.Github.Commit.GraphQL.full()}
+                    }
                   }
                 }
                 createdAt
