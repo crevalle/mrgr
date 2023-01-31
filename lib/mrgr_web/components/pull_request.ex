@@ -428,7 +428,7 @@ defmodule MrgrWeb.Components.PullRequest do
     ~H"""
     <div class="w-3/5">
       <.aside>
-        Snoozed PRs are hidden from your main workflow.  They may be things you want to deal with later, like in a day or two, or things that are outstanding and just noise.
+        Snoozed PRs are hidden from your main workflow and aren't included in the badge counts.  They may be things you want to deal with later, like in a day or two, or things that are outstanding and just noise.
       </.aside>
     </div>
     """

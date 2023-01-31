@@ -727,6 +727,7 @@ defmodule Mrgr.PullRequest do
   def open_pr_count(installation_id) do
     Schema
     |> Query.count_open(installation_id)
+    |> Query.unsnoozed()
     |> Mrgr.Repo.one()
   end
 
