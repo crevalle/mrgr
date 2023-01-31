@@ -356,12 +356,6 @@ defmodule MrgrWeb.PullRequestLive do
     Enum.filter(repos, & &1.merge_freeze_enabled)
   end
 
-  # look up the repo in hte socket assigns cause those are the ones who have their
-  # merge_freeze_enabled attribute updated
-  defp merge_frozen?(repos, pull_request) do
-    Mrgr.List.member?(repos, pull_request.repository)
-  end
-
   def selected?(%{id: id}, %{id: id}), do: true
   def selected?(_pull_request, _selected), do: false
 
