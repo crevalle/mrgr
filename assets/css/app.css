@@ -124,8 +124,14 @@ h5 {
   display: inline-block;
 }
 
+/* Show the tooltip text when you mouse over the tooltip container */
+.tooltip:hover .tooltiptext {
+  visibility: visible;
+}
+
 /* Tooltip text */
 .tooltip .tooltiptext {
+  @apply text-sm;
   visibility: hidden;
   background-color: black;
   color: #fff;
@@ -135,7 +141,7 @@ h5 {
 
   /* Position the tooltip text - see examples below! */
   position: absolute;
-  z-index: 1;
+  z-index: 10;
 }
 
 .btn {
@@ -159,11 +165,6 @@ h5 {
 
 .hide-empty:empty{
   display: none;
-}
-
-/* Show the tooltip text when you mouse over the tooltip container */
-.tooltip:hover .tooltiptext {
-  visibility: visible;
 }
 
 .spinner {

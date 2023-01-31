@@ -244,6 +244,18 @@ defmodule MrgrWeb.Components.Core do
     """
   end
 
+  slot :text, required: true
+  slot :inner_block, required: true
+
+  def tooltip(assigns) do
+    ~H"""
+    <div class="tooltip">
+      <%= render_slot(@inner_block) %>
+      <span class="tooltiptext"><%= render_slot(@text) %></span>
+    </div>
+    """
+  end
+
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do
