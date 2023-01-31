@@ -770,10 +770,22 @@ defmodule Mrgr.PullRequest do
   end
 
   def paged_high_impact_prs(%{current_installation_id: id}, opts \\ %{}) do
+    # the joins with high impact labels messes with the Scrivener counting,
+    # so we have to fetch the PRs in two passes.  Figure there won't
+    # be so many that pulling in the ids in the first pass is a big deal.
+
+    ids =
+      Schema
+      |> Query.pending_stuff(id)
+      |> Query.high_impact()
+      |> Query.unsnoozed()
+      |> Query.select([:id])
+      |> Mrgr.Repo.all()
+      |> Enum.map(& &1.id)
+
     Schema
-    |> Query.pending_stuff(id)
-    |> Query.high_impact()
-    |> Query.unsnoozed()
+    |> Query.by_ids(ids)
+    |> Query.order_by_opened()
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
@@ -1090,6 +1102,7 @@ defmodule Mrgr.PullRequest do
 
     def pending_preloads do
       [
+        :repository,
         :comments,
         :labels,
         :pr_reviews,

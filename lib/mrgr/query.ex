@@ -67,7 +67,7 @@ defmodule Mrgr.Query do
         |> order_by(^opts)
       end
 
-      def select(queryable, attrs) do
+      def select(queryable, attrs) when is_list(attrs) do
         from(q in queryable,
           select: ^attrs
         )
