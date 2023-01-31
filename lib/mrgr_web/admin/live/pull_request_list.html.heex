@@ -1,7 +1,7 @@
 <.heading title={"Open PRs (#{@page.total_entries})"} />
 <.page_nav page={@page} />
 <div class="flex mt-8 space-x-4">
-  <div class="basis-1/2 overflow-hidden">
+  <div class="basis-4/5 overflow-hidden">
     <div role="list" class="flex flex-col space-y-4" id="pending-pull-request-list">
       <.live_component
         :for={pull_request <- @pull_requests}
