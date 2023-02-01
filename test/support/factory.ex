@@ -192,7 +192,9 @@ defmodule Mrgr.Factory do
       sha: Ecto.UUID.generate(),
       author: build(:github_user),
       committer: build(:github_user),
-      commit: build(:commit_commit)
+      additions: 10,
+      deletions: 12,
+      message: Faker.Company.bs()
     }
   end
 
@@ -217,17 +219,6 @@ defmodule Mrgr.Factory do
       subscriptions_url: Faker.Internet.url(),
       type: "User",
       url: Faker.Internet.url()
-    }
-  end
-
-  def build(:commit_commit) do
-    %Mrgr.Github.Commit.Commit{
-      author: build(:short_user),
-      committer: build(:short_user),
-      comment_count: :rand.uniform(5),
-      message: Faker.Company.bs(),
-      url: Faker.Internet.url(),
-      verification: %{}
     }
   end
 
