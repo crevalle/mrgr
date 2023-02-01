@@ -1069,10 +1069,10 @@ defmodule Mrgr.PullRequest do
       end
     end
 
-    def with_hif_rules(query) do
-      from([q, repository: r] in with_repository(query),
-        left_join: a in assoc(r, :high_impact_files),
-        preload: [repository: {r, [high_impact_files: a]}]
+    def with_hifs(query) do
+      from(q in query,
+        left_join: h in assoc(q, :high_impact_files),
+        preload: [high_impact_files: h]
       )
     end
 
@@ -1115,7 +1115,8 @@ defmodule Mrgr.PullRequest do
 
     def with_pending_preloads(query) do
       query
-      |> with_hif_rules()
+      |> with_repository()
+      |> with_hifs()
       |> with_comments()
       |> with_pr_reviews()
       |> with_labels()

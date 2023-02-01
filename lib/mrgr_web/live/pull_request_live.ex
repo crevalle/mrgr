@@ -264,7 +264,7 @@ defmodule MrgrWeb.PullRequestLive do
     selected_tab = get_selected_tab(tabs, socket)
 
     socket
-    |> Flash.put(:info, "PR Opened: #{hydrated.title}")
+    |> Flash.put(:info, "PR opened: #{hydrated.title}")
     |> assign(:tabs, tabs)
     |> assign(:selected_tab, selected_tab)
     |> noreply()
@@ -300,6 +300,7 @@ defmodule MrgrWeb.PullRequestLive do
     selected_pull_request = maybe_update_selected_pr(hydrated, socket.assigns.detail)
 
     socket
+    |> Flash.put(:info, "PR updated: #{hydrated.title}")
     |> assign(:tabs, tabs)
     |> assign(:selected_tab, selected_tab)
     |> assign(:detail, selected_pull_request)
