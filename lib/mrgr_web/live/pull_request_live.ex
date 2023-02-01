@@ -264,6 +264,7 @@ defmodule MrgrWeb.PullRequestLive do
     selected_tab = get_selected_tab(tabs, socket)
 
     socket
+    |> Flash.put(:info, "PR Opened: #{hydrated.title}")
     |> assign(:tabs, tabs)
     |> assign(:selected_tab, selected_tab)
     |> noreply()
@@ -523,7 +524,7 @@ defmodule MrgrWeb.PullRequestLive do
         tab ->
           updated = set_prs_on_tab_from_async(tab, ref, data)
 
-          replace_tab(tabs, updated)
+          replace_tabs(tabs, updated)
       end
     end
 
@@ -590,7 +591,7 @@ defmodule MrgrWeb.PullRequestLive do
         |> find_snoozed_tab()
         |> excise_pr_from_tab(pull_request)
 
-      replace_tab(tabs, updated_tab)
+      replace_tabs(tabs, updated_tab)
     end
 
     def excise_pr_from_tab(tab, pull_request) do
@@ -645,7 +646,7 @@ defmodule MrgrWeb.PullRequestLive do
 
       updated = set_prs_on_tab(selected, pull_requests)
 
-      {replace_tab(all, updated), updated}
+      {replace_tabs(all, updated), updated}
     end
 
     def safe_page_number([]), do: 1
@@ -715,16 +716,16 @@ defmodule MrgrWeb.PullRequestLive do
     def set_prs_on_tab(tabs, tab, page) do
       updated = set_prs_on_tab(tab, page)
 
-      replace_tab(tabs, updated)
+      replace_tabs(tabs, updated)
     end
 
     # once a tab's data has been updated, we need to poke it back into its
     # place among the list of all tabs
     def replace_tabs(all, updated) when is_list(updated) do
-      Enum.reduce(updated, all, fn t, a -> replace_tab(a, t) end)
+      Enum.reduce(updated, all, fn t, a -> replace_tabs(a, t) end)
     end
 
-    def replace_tab(all, updated) do
+    def replace_tabs(all, updated) do
       Mrgr.List.replace(all, updated)
     end
 
