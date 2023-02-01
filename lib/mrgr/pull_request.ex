@@ -523,9 +523,6 @@ defmodule Mrgr.PullRequest do
 
   @spec create_rest_of_world(Schema.t()) :: Schema.t()
   def create_rest_of_world(pull_request) do
-    # fetch comments outside of `synchronize_github_data` since we only
-    # need to hit the API when we're creating the world
-
     pull_request
     |> synchronize_latest_ci_status!()
     |> sync_pr_review_comments()

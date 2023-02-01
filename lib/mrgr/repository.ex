@@ -282,9 +282,6 @@ defmodule Mrgr.Repository do
         repo
 
       pr_data ->
-        # i don't want to carry this info around on the repo since
-        # it's only really used for analytics.  plus i don't need all
-        # the extensive PR data for closed PRs.
         _prs = create_pull_requests_from_data(repo, pr_data)
         repo
     end
@@ -302,9 +299,7 @@ defmodule Mrgr.Repository do
         pull_requests =
           repo
           |> create_pull_requests_from_data(pr_data)
-          # reverse preloading for API calls
           |> Enum.map(fn pr -> %{pr | repository: repo} end)
-          # !!! this makes several API calls.  careful about scaling many onboarding users!
           |> Enum.map(&Mrgr.PullRequest.create_rest_of_world/1)
           |> Enum.map(&Mrgr.HighImpactFile.reset_hifs(repo, &1))
 
@@ -315,16 +310,16 @@ defmodule Mrgr.Repository do
   def fetch_recently_closed_pull_requests(repo) do
     params = "last: 95, states: [MERGED], orderBy: {direction: DESC, field: CREATED_AT}"
 
-    repo.installation
-    |> Mrgr.Github.API.fetch_pulls_graphql(repo, params)
+    repo
+    |> Mrgr.Github.API.fetch_heavy_pulls(params)
     |> parse_graphql_attrs()
   end
 
   def fetch_open_pull_requests(repo) do
     params = "last: 50, states: [OPEN]"
 
-    repo.installation
-    |> Mrgr.Github.API.fetch_pulls_graphql(repo, params)
+    repo
+    |> Mrgr.Github.API.fetch_heavy_pulls(params)
     |> parse_graphql_attrs()
   end
 

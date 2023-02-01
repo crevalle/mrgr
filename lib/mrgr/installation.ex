@@ -83,6 +83,12 @@ defmodule Mrgr.Installation do
     installation
   end
 
+  def queue_closed_pr_sync(installation) do
+    Mrgr.Worker.InstallationOnboarding.queue_sync_closed_prs(installation)
+
+    installation
+  end
+
   def sync_data_for_onboarding(installation) do
     installation
     |> State.set_syncing_initial_data()
@@ -92,8 +98,10 @@ defmodule Mrgr.Installation do
     |> broadcast(@installation_loading_repositories)
     |> sync_repositories()
     |> broadcast(@installation_loading_pull_requests)
-    |> refresh_pull_requests!()
+    |> clear_pull_requests()
+    |> sync_open_pull_requests()
     |> State.set_initial_data_sync_complete()
+    |> queue_closed_pr_sync()
     |> broadcast(@installation_initial_sync_completed)
   end
 
@@ -267,24 +275,35 @@ defmodule Mrgr.Installation do
   end
 
   def refresh_pull_requests!(installation) do
-    Mrgr.PullRequest.delete_installation_pull_requests(installation)
+    clear_pull_requests(installation)
 
-    sync_pull_request_data(installation)
+    sync_open_pull_requests(installation)
+    sync_closed_pull_requests(installation)
   end
 
-  def sync_pull_request_data(installation) do
-    # assumes PRs have been deleted
-    # and account and repositories have been preloaded
+  def clear_pull_requests(installation) do
+    Mrgr.PullRequest.delete_installation_pull_requests(installation)
 
-    # we already have the installation here, so we reverse preload it onto its children repositories
-    # so they'll have it for their API calls
-    repositories =
-      installation.repositories
-      |> Enum.map(fn r -> %{r | installation: installation} end)
-      |> Enum.map(&Mrgr.Repository.sync_open_pull_requests/1)
-      |> Enum.map(&Mrgr.Repository.sync_recentish_closed_pull_requests/1)
+    installation
+  end
 
-    %{installation | repositories: repositories}
+  # assumes PRs have been deleted
+  # and account and repositories have been preloaded
+  def sync_open_pull_requests(installation) do
+    # ! does NOT return the PRs.
+    installation.repositories
+    |> Enum.map(fn r -> %{r | installation: installation} end)
+    |> Enum.map(&Mrgr.Repository.sync_open_pull_requests/1)
+
+    installation
+  end
+
+  def sync_closed_pull_requests(installation) do
+    installation.repositories
+    |> Enum.map(fn r -> %{r | installation: installation} end)
+    |> Enum.map(&Mrgr.Repository.sync_recentish_closed_pull_requests/1)
+
+    installation
   end
 
   def set_tokens(install, %Mrgr.Github.AccessToken{} = token) do

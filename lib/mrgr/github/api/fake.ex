@@ -328,7 +328,7 @@ defmodule Mrgr.Github.API.Fake do
     %{}
   end
 
-  def fetch_pulls_graphql(_installation, _repo, _params) do
+  def fetch_heavy_pulls(_repo, _params) do
     %{
       "repository" => %{
         "pullRequests" => %{

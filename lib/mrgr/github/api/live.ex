@@ -137,7 +137,7 @@ defmodule Mrgr.Github.API.Live do
     neuron_request!(repository.installation_id, query)
   end
 
-  def fetch_pulls_graphql(installation, repo, params) do
+  def fetch_heavy_pulls(repo, params) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
 
     query = """
@@ -204,7 +204,7 @@ defmodule Mrgr.Github.API.Live do
       }
     """
 
-    neuron_request!(installation, query)
+    neuron_request!(repo.installation_id, query)
   end
 
   def update_repo_settings(repo, params) do
