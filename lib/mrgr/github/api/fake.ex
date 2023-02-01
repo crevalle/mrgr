@@ -538,7 +538,7 @@ defmodule Mrgr.Github.API.Fake do
     }
   end
 
-  def fetch_most_pull_request_data(_pull_request) do
+  def fetch_light_pr_data(_pull_request) do
     %{
       "node" => %{
         "files" => %{
@@ -1036,10 +1036,6 @@ defmodule Mrgr.Github.API.Fake do
   end
 
   def head_commit(_pull_request, _installation) do
-    %{}
-  end
-
-  def commits(_pull_request, _installation) do
     %{}
   end
 end

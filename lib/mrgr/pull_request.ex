@@ -37,8 +37,7 @@ defmodule Mrgr.PullRequest do
         pull_request
         |> preload_installation()
         |> sync_repo_if_first_pr()
-        |> synchronize_github_data()
-        |> create_checklists()
+        |> sync_github_data()
         |> associate_high_impact_files()
         |> notify_hif_alert_consumers()
         |> broadcast(@pull_request_created)
@@ -50,8 +49,8 @@ defmodule Mrgr.PullRequest do
   end
 
   def create_for_onboarding(data, installation_id) do
-    files_changed = Enum.map(data["files"]["nodes"], & &1["path"])
-    commits = Enum.map(data["commits"]["nodes"], & &1["commit"])
+    files_changed = Mrgr.Github.PullRequest.filepaths(data)
+    commits = Mrgr.Github.PullRequest.commit_data(data)
 
     data =
       data
@@ -85,7 +84,7 @@ defmodule Mrgr.PullRequest do
          {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
       updated_pull_request
       |> preload_installation()
-      |> synchronize_github_data()
+      |> sync_github_data()
       |> broadcast(@pull_request_reopened)
       |> ok()
     else
@@ -119,7 +118,7 @@ defmodule Mrgr.PullRequest do
     with {:ok, pull_request} <- find_from_payload(payload) do
       pull_request
       |> preload_installation()
-      |> synchronize_github_data()
+      |> sync_github_data()
       |> associate_high_impact_files()
       |> broadcast(@pull_request_synchronized)
       |> ok()
@@ -408,7 +407,7 @@ defmodule Mrgr.PullRequest do
 
         pull_request
         # see if pull_request is unblocked
-        |> synchronize_most_stuff()
+        |> sync_github_data()
         |> broadcast(@pull_request_reviews_updated)
         |> ok()
 
@@ -428,20 +427,18 @@ defmodule Mrgr.PullRequest do
     pull_request
     |> Mrgr.Repo.preload(:pr_reviews, force: true)
     # see if pull_request is blocked
-    |> synchronize_most_stuff()
+    |> sync_github_data()
     |> broadcast(@pull_request_reviews_updated)
     |> ok()
   end
 
   def associate_high_impact_files(pull_request) do
-    applicable = Mrgr.HighImpactFile.for_pull_request(pull_request)
-
     # until we get smarter about what's being added/removed for notification purposes,
     # just blow them all away and replace them
 
-    Mrgr.HighImpactFile.reset_hifs(applicable, pull_request)
-
     pull_request
+    |> Mrgr.HighImpactFile.for_pull_request()
+    |> Mrgr.HighImpactFile.reset_hifs(pull_request)
   end
 
   def notify_hif_alert_consumers(pull_request) do
@@ -528,16 +525,11 @@ defmodule Mrgr.PullRequest do
     |> sync_pr_review_comments()
   end
 
-  def synchronize_github_data(pull_request) do
-    pull_request
-    |> synchronize_most_stuff()
-    |> synchronize_commits()
-  end
+  def sync_github_data(pull_request) do
+    %{"node" => node} = Mrgr.Github.API.fetch_light_pr_data(pull_request)
 
-  def synchronize_most_stuff(pull_request) do
-    %{"node" => node} = Mrgr.Github.API.fetch_most_pull_request_data(pull_request)
-
-    files_changed = Enum.map(node["files"]["nodes"], & &1["path"])
+    files_changed = Mrgr.Github.PullRequest.filepaths(node)
+    commits = Mrgr.Github.PullRequest.commit_data(node)
 
     labels =
       node["labels"]["nodes"]
@@ -546,6 +538,7 @@ defmodule Mrgr.PullRequest do
 
     translated = %{
       files_changed: files_changed,
+      commits: commits,
       merge_state_status: node["mergeStateStatus"],
       mergeable: node["mergeable"],
       title: node["title"]
@@ -555,22 +548,6 @@ defmodule Mrgr.PullRequest do
     |> update_labels_from_sync(labels)
     |> Schema.most_changeset(translated)
     |> Mrgr.Repo.update!()
-  end
-
-  def synchronize_commits(pull_request) do
-    commits =
-      pull_request
-      |> fetch_commits()
-      # they come in with first commit first, i want most recent first (head)
-      |> Enum.reverse()
-
-    pull_request
-    |> Schema.commits_changeset(%{commits: commits})
-    |> Mrgr.Repo.update!()
-  end
-
-  def fetch_commits(pull_request) do
-    Mrgr.Github.API.commits(pull_request)
   end
 
   def synchronize_latest_ci_status!(pull_request) do
@@ -919,6 +896,7 @@ defmodule Mrgr.PullRequest do
     |> Map.put("repository_id", repo.id)
     |> Map.put("author_id", author_id_from_payload(payload))
     |> Map.put("opened_at", params["created_at"])
+    |> Map.put("commits", [])
     |> Map.put("raw", params)
   end
 
@@ -966,14 +944,6 @@ defmodule Mrgr.PullRequest do
 
   defp preload_installation(pull_request) do
     Mrgr.Repo.preload(pull_request, repository: [:installation, :high_impact_files])
-  end
-
-  def create_checklists(pull_request) do
-    pull_request
-    |> fetch_applicable_checklist_templates()
-    |> Enum.map(&Mrgr.ChecklistTemplate.create_checklist(&1, pull_request))
-
-    pull_request
   end
 
   defp fetch_applicable_checklist_templates(pull_request) do

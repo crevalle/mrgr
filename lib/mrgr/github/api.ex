@@ -3,7 +3,6 @@ defmodule Mrgr.Github.API do
 
   @mod Application.compile_env!(:mrgr, :github)[:implementation]
 
-  defdelegate commits(pull_request), to: @mod
   defdelegate create_comment(pull_request, message), to: @mod
   defdelegate fetch_filtered_pulls(installation, repo, opts), to: @mod
   defdelegate fetch_heavy_pulls(repo, params), to: @mod
@@ -17,7 +16,7 @@ defmodule Mrgr.Github.API do
   defdelegate fetch_repositories(installation), to: @mod
   defdelegate fetch_repository(installation, repository), to: @mod
   defdelegate fetch_all_repository_data(installation, opts \\ %{}), to: @mod
-  defdelegate fetch_most_pull_request_data(pull_request), to: @mod
+  defdelegate fetch_light_pr_data(pull_request), to: @mod
   defdelegate delete_label_from_repo(node_id, repository), to: @mod
   defdelegate get_new_installation_token(installation), to: @mod
   defdelegate head_commit(pull_request, installation), to: @mod

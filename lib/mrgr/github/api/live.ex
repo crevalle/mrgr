@@ -19,13 +19,20 @@ defmodule Mrgr.Github.API.Live do
     parse_into(result, Mrgr.Github.AccessToken)
   end
 
-  def fetch_most_pull_request_data(pull_request) do
+  def fetch_light_pr_data(pull_request) do
     # don't feel like paginating today.  if >99 files have changed,
     # you've got other problems.
     query = """
       query {
         node(id:"#{pull_request.node_id}") {
           ... on PullRequest {
+            commits(first: 50) {
+              nodes {
+                commit {
+                  #{Mrgr.Github.Commit.GraphQL.full()}
+                }
+              }
+            }
             id
             number
             mergeStateStatus
@@ -313,13 +320,6 @@ defmodule Mrgr.Github.API.Live do
     sha = Mrgr.Schema.PullRequest.head(pull_request).sha
 
     request!(&Tentacat.Commits.find/4, installation, [sha, owner, name])
-  end
-
-  def commits(pull_request) do
-    {owner, name} = Mrgr.Schema.Repository.owner_name(pull_request.repository)
-    number = pull_request.number
-
-    request!(&Tentacat.Pulls.commits/4, pull_request.repository, [owner, name, number])
   end
 
   # doesn't get them all, just gets ones for HEAD

@@ -120,12 +120,6 @@ defmodule Mrgr.Schema.PullRequest do
     |> validate_inclusion(:ci_status, @ci_statuses)
   end
 
-  def commits_changeset(schema, attrs) do
-    schema
-    |> cast(attrs, [])
-    |> cast_embed(:commits)
-  end
-
   def close_changeset(schema, %{"merged" => true} = params) do
     schema
     |> cast(params, [])
@@ -166,6 +160,7 @@ defmodule Mrgr.Schema.PullRequest do
   def most_changeset(schema, params) do
     schema
     |> cast(params, @most_params)
+    |> cast_embed(:commits)
     |> validate_inclusion(:mergeable, @mergeable_states)
     |> validate_inclusion(:merge_state_status, @merge_state_statuses)
   end
