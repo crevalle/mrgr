@@ -26,6 +26,14 @@ defmodule Mrgr.Schema.Comment do
     Mrgr.Github.User.new(user)
   end
 
+  def author(%{raw: %{"author" => user}}) do
+    Mrgr.Github.User.new(user)
+  end
+
   def body(%{raw: %{"comment" => %{"body" => body}}}), do: body
   def body(%{raw: %{"body" => body}}), do: body
+
+  def ordered(comments) do
+    Enum.sort_by(comments, & &1.posted_at, DateTime)
+  end
 end

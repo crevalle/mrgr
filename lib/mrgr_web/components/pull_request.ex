@@ -31,7 +31,11 @@ defmodule MrgrWeb.Components.PullRequest do
       </:title>
 
       <div class="flex flex-col space-y-4 divide-y divide-gray-200">
-        <.render_comment :for={comment <- @pull_request.comments} comment={comment} tz={@timezone} />
+        <.render_comment
+          :for={comment <- Mrgr.Schema.Comment.ordered(@pull_request.comments)}
+          comment={comment}
+          tz={@timezone}
+        />
       </div>
     </.detail_content>
     """
@@ -238,7 +242,7 @@ defmodule MrgrWeb.Components.PullRequest do
 
   def render_comment(assigns) do
     ~H"""
-    <div class="flex flex-col pt-2">
+    <div id={"comment-#{@comment.id}"} class="flex flex-col pt-2">
       <div class="flex flex-col">
         <.avatar member={Mrgr.Schema.Comment.author(@comment)} />
         <.aside><%= ts(@comment.posted_at, @tz) %></.aside>

@@ -81,7 +81,7 @@
 
           <div class="flex flex-col space-y-4">
             <.preview_comment
-              :for={comment <- @pull_request.comments}
+              :for={comment <- Mrgr.Schema.Comment.ordered(@pull_request.comments)}
               comment={comment}
               tz={@timezone}
             />

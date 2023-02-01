@@ -236,6 +236,6 @@ defmodule Mrgr.Schema.PullRequest do
 
     pull_request.comments
     |> Enum.filter(&Mrgr.DateTime.after?(&1.posted_at, recently))
-    |> Enum.sort_by(& &1.posted_at, DateTime)
+    |> Mrgr.Schema.Comment.ordered()
   end
 end

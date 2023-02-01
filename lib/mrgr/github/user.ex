@@ -61,11 +61,17 @@ defmodule Mrgr.Github.User do
   end
 
   def changeset(schema, params) do
+    params = fix_names(params)
     cast(schema, params, @fields)
   end
 
   def graphql_to_attrs(list) when is_list(list) do
     Enum.map(list, &graphql_to_attrs/1)
+  end
+
+  def fix_names(params) do
+    params
+    |> Map.put("avatar_url", params["avatarUrl"])
   end
 
   def graphql_to_attrs(map) do
@@ -93,6 +99,13 @@ defmodule Mrgr.Github.User do
       avatarUrl
       login
       id
+      """
+    end
+
+    def actor_sans_id do
+      """
+      avatarUrl
+      login
       """
     end
 

@@ -63,10 +63,16 @@ defmodule Mrgr.PullRequest do
       |> Schema.create_changeset(data)
       |> Mrgr.Repo.insert!()
 
+    # add the labels
     data["labels"]["nodes"]
     |> Mrgr.Github.Label.from_graphql()
     |> Enum.map(&Mrgr.Github.Label.new/1)
     |> Enum.map(fn label -> do_add_label(pull_request, label, installation_id) end)
+
+    # create the comments
+    Enum.map(data["comments"]["nodes"], fn node ->
+      create_comment("issue_comment", pull_request, node["publishedAt"], node)
+    end)
 
     pull_request
   end
@@ -287,11 +293,21 @@ defmodule Mrgr.PullRequest do
   @spec sync_comments(Schema.t()) :: Schema.t()
   def sync_comments(pull_request) do
     pull_request
+    |> sync_issue_comments()
+    |> sync_pr_review_comments()
+  end
+
+  def sync_issue_comments(pull_request) do
+    pull_request
     |> fetch_issue_comments()
     |> Enum.each(fn c ->
       create_comment("issue_comment", pull_request, c["created_at"], c)
     end)
 
+    pull_request
+  end
+
+  def sync_pr_review_comments(pull_request) do
     pull_request
     |> fetch_pr_review_comments()
     |> Enum.each(fn c ->
@@ -505,14 +521,14 @@ defmodule Mrgr.PullRequest do
     pull_request
   end
 
-  @spec synchronize_for_creating_the_world(Schema.t()) :: Schema.t()
-  def synchronize_for_creating_the_world(pull_request) do
+  @spec create_rest_of_world(Schema.t()) :: Schema.t()
+  def create_rest_of_world(pull_request) do
     # fetch comments outside of `synchronize_github_data` since we only
     # need to hit the API when we're creating the world
 
     pull_request
     |> synchronize_latest_ci_status!()
-    |> sync_comments()
+    |> sync_pr_review_comments()
   end
 
   def synchronize_github_data(pull_request) do

@@ -163,6 +163,11 @@ defmodule Mrgr.Github.API.Live do
                     }
                   }
                 }
+                comments(first: 50) {
+                  nodes {
+                    #{Mrgr.Github.Comment.GraphQL.full()}
+                  }
+                }
                 createdAt
                 databaseId
                 files(first: #{@page_size}) {

@@ -305,7 +305,7 @@ defmodule Mrgr.Repository do
           # reverse preloading for API calls
           |> Enum.map(fn pr -> %{pr | repository: repo} end)
           # !!! this makes several API calls.  careful about scaling many onboarding users!
-          |> Enum.map(&Mrgr.PullRequest.synchronize_for_creating_the_world/1)
+          |> Enum.map(&Mrgr.PullRequest.create_rest_of_world/1)
           |> Enum.map(&Mrgr.HighImpactFile.reset_hifs(repo, &1))
 
         %{repo | pull_requests: pull_requests}
