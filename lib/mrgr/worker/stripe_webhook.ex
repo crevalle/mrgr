@@ -1,5 +1,5 @@
 defmodule Mrgr.Worker.StripeWebhook do
-  use Oban.Worker
+  use Oban.Worker, max_attempts: 1
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"id" => id}}) do

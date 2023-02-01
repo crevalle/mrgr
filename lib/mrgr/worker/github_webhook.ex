@@ -1,5 +1,5 @@
 defmodule Mrgr.Worker.GithubWebhook do
-  use Oban.Worker
+  use Oban.Worker, max_attemps: 1
 
   @impl Oban.Worker
   def perform(%Oban.Job{args: %{"id" => id}}) do
