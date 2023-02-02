@@ -711,13 +711,6 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
-  def find(id) do
-    Schema
-    |> Query.by_id(id)
-    |> Query.with_hif_rules()
-    |> Mrgr.Repo.one()
-  end
-
   def find(id, preloads) do
     Schema
     |> Query.by_id(id)
@@ -944,10 +937,6 @@ defmodule Mrgr.PullRequest do
 
   defp preload_installation(pull_request) do
     Mrgr.Repo.preload(pull_request, repository: [:installation, :high_impact_files])
-  end
-
-  defp fetch_applicable_checklist_templates(pull_request) do
-    Mrgr.ChecklistTemplate.for_repository(pull_request.repository)
   end
 
   def fully_approved?(pull_request) do
