@@ -1,9 +1,0 @@
-<div class="px-4 pt-4 sm:px-6 lg:px-8">
-  <div class="flex flex-col justify-between">
-    <.heading title="All Right! 🙌" />
-
-    <%= Phoenix.Component.live_render(@conn, MrgrWeb.Live.InstallationLoading,
-      session: %{"user_id" => @conn.assigns.current_user.id}
-    ) %>
-  </div>
-</div>
