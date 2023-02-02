@@ -17,6 +17,10 @@ defmodule Mrgr.Team do
     |> Mrgr.Repo.all()
   end
 
+  def delete_all_for_installation(installation) do
+    for_installation(installation.id) |> Enum.map(&Mrgr.Repo.delete/1)
+  end
+
   def create!(attrs) do
     %Schema{}
     |> Schema.create_changeset(attrs)

@@ -3,11 +3,6 @@ defmodule MrgrWeb.Components.Onboarding do
 
   import MrgrWeb.Components.UI
 
-  def step_number("install_github_app"), do: 1
-  def step_number("sync_data"), do: 2
-  def step_number("create_subscription"), do: 3
-  def step_number("done"), do: 4
-
   def step(%{name: "install_github_app"} = assigns) do
     class =
       case assigns.state do
@@ -21,6 +16,7 @@ defmodule MrgrWeb.Components.Onboarding do
 
     ~H"""
     <.step_option class={@class} name={@name}>
+      <:number>1</:number>
       <:title>
         Install our Github App
       </:title>
@@ -46,6 +42,7 @@ defmodule MrgrWeb.Components.Onboarding do
 
     ~H"""
     <.step_option class={@class} name={@name}>
+      <:number>2</:number>
       <:title>
         Sync your data
       </:title>
@@ -61,7 +58,7 @@ defmodule MrgrWeb.Components.Onboarding do
     class =
       case assigns.state do
         "active" -> done()
-        "initial_data_sync_complete" -> in_progress()
+        "onboarding_subscription" -> in_progress()
         _ -> todo()
       end
 
@@ -71,6 +68,7 @@ defmodule MrgrWeb.Components.Onboarding do
 
     ~H"""
     <.step_option class={@class} name={@name}>
+      <:number>3</:number>
       <:title>
         Create your Subscription 💸
       </:title>
@@ -95,6 +93,7 @@ defmodule MrgrWeb.Components.Onboarding do
 
     ~H"""
     <.step_option class={@class} name={@name}>
+      <:number>4</:number>
       <:title>
         Get to work!
       </:title>
@@ -117,7 +116,7 @@ defmodule MrgrWeb.Components.Onboarding do
   def step_option(assigns) do
     ~H"""
     <div class="flex items-top space-x-2 p-2 border rounded-md">
-      <span class={@class}><%= step_number(@name) %>.</span>
+      <span class={@class}><%= render_slot(@number) %>.</span>
       <div class="flex flex-col">
         <span class={@class}><%= render_slot(@title) %></span>
         <p class="text-gray-500"><%= render_slot(@description) %></p>

@@ -1,8 +1,12 @@
 defmodule Mrgr.Installation do
   use Mrgr.PubSub.Event
 
+  import Mrgr.Tuple, only: [ok: 1]
+
   alias Mrgr.Schema.Installation, as: Schema
   alias Mrgr.Installation.{Query, State}
+
+  require Logger
 
   def find(id) do
     Schema
@@ -50,7 +54,7 @@ defmodule Mrgr.Installation do
     payload
     |> create_installation()
     |> queue_initial_setup()
-    |> Mrgr.Tuple.ok()
+    |> ok()
   end
 
   defp find_user_from_webhook_sender(payload) do
@@ -66,9 +70,12 @@ defmodule Mrgr.Installation do
     {:ok, installation} =
       payload
       |> Map.get("installation")
-      |> Map.merge(%{"creator_id" => creator.id, "state" => "created"})
+      |> Map.merge(%{"creator_id" => creator.id, "state" => Mrgr.Installation.State.initial()})
       |> Mrgr.Schema.Installation.create_changeset()
       |> Mrgr.Repo.insert()
+
+    topic = Mrgr.PubSub.Topic.onboarding(creator)
+    Mrgr.PubSub.broadcast(installation, topic, @installation_created)
 
     Mrgr.User.set_current_installation(creator, installation)
 
@@ -89,20 +96,77 @@ defmodule Mrgr.Installation do
     installation
   end
 
-  def sync_data_for_onboarding(installation) do
-    installation
-    |> State.set_syncing_initial_data()
-    |> broadcast(@installation_loading_members)
-    |> create_members()
-    |> create_teams()
-    |> broadcast(@installation_loading_repositories)
-    |> sync_repositories()
-    |> broadcast(@installation_loading_pull_requests)
-    |> clear_pull_requests()
-    |> sync_open_pull_requests()
-    |> State.set_initial_data_sync_complete()
-    |> queue_closed_pr_sync()
-    |> broadcast(@installation_initial_sync_completed)
+  def onboard(i) do
+    clear_installation_data(i)
+    # what if there's an error in subscriptioning? or an active subscription?
+    with {:ok, i} <- onboard_members(i),
+         {:ok, i} <- onboard_teams(i),
+         {:ok, i} <- onboard_repos(i),
+         {:ok, i} <- onboard_prs(i) do
+      i
+      # either to active or onboarding_subscription, depending on install type
+      |> State.onboarding_data_complete!()
+      |> broadcast(@installation_onboarding_progressed)
+    end
+  end
+
+  def onboard_members(installation) do
+    try do
+      installation
+      |> State.onboarding_members!()
+      |> broadcast(@installation_onboarding_progressed)
+      |> create_members()
+      |> ok()
+    rescue
+      e ->
+        Logger.error(Exception.format(:error, e, __STACKTRACE__))
+
+        State.onboarding_error!(installation)
+        {:error, :onboarding_members_failed}
+    end
+  end
+
+  def onboard_teams(installation) do
+    try do
+      installation
+      |> State.onboarding_teams!()
+      |> broadcast(@installation_onboarding_progressed)
+      |> create_teams()
+      |> ok()
+    rescue
+      _e ->
+        State.onboarding_error!(installation)
+        {:error, :onboarding_teams_failed}
+    end
+  end
+
+  def onboard_repos(installation) do
+    try do
+      installation
+      |> State.onboarding_repos!()
+      |> broadcast(@installation_onboarding_progressed)
+      |> sync_repos()
+      |> ok()
+    rescue
+      _e ->
+        State.onboarding_error!(installation)
+        {:error, :onboarding_repos_failed}
+    end
+  end
+
+  def onboard_prs(installation) do
+    try do
+      installation
+      |> State.onboarding_prs!()
+      |> broadcast(@installation_onboarding_progressed)
+      |> sync_open_pull_requests()
+      |> queue_closed_pr_sync()
+      |> ok()
+    rescue
+      _e ->
+        State.onboarding_error!(installation)
+        {:error, :onboarding_prs_failed}
+    end
   end
 
   defdelegate onboarding_complete?(installation), to: State
@@ -111,7 +175,6 @@ defmodule Mrgr.Installation do
   def activate!(installation) do
     installation
     |> State.set_active()
-    |> broadcast(@installation_activated)
   end
 
   def activate_user_type_installations(%{target_type: "User"} = installation) do
@@ -171,8 +234,8 @@ defmodule Mrgr.Installation do
     installation
   end
 
-  def sync_repositories(installation) do
-    # DOES NOT create PRs, just repo data
+  # noop if they already exist
+  def sync_repos(installation) do
     data = fetch_all_repository_data(installation)
 
     # look them all up at once, save possibly hundreds of db calls
@@ -224,10 +287,17 @@ defmodule Mrgr.Installation do
   defp safe_policy_id(%{id: id}), do: id
   defp safe_policy_id(_), do: nil
 
+  def clear_installation_data(installation) do
+    clear_pull_requests(installation)
+    Mrgr.Repository.delete_all_for_installation(installation)
+    Mrgr.Team.delete_all_for_installation(installation)
+    Mrgr.Member.delete_all_for_installation(installation)
+  end
+
   def recreate_repositories(installation) do
     # does not load PR data, just repo data
     Mrgr.Repository.delete_all_for_installation(installation)
-    sync_repositories(installation)
+    sync_repos(installation)
   end
 
   def fetch_all_repository_data(_installation, acc, %{

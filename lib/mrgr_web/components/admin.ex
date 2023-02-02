@@ -68,6 +68,17 @@ defmodule MrgrWeb.Components.Admin do
     ~H"""
     <table class="min-w-full">
       <.table_attr obj={@installation} key={:state} . />
+      <.tr striped={true}>
+        <.td class="font-bold">State Changes</.td>
+        <.td>
+          <table>
+            <.tr :for={sc <- Enum.reverse(@installation.state_changes)}>
+              <td><%= sc.state %></td>
+              <td><%= sc.transitioned_at %></td>
+            </.tr>
+          </table>
+        </.td>
+      </.tr>
       <.table_attr obj={@installation} key={:app_id} . />
       <.table_attr obj={@installation} key={:app_slug} . />
       <.table_attr obj={@installation} key={:events} . />

@@ -27,6 +27,13 @@ defmodule Mrgr.Member do
     |> Mrgr.Repo.one()
   end
 
+  def delete_all_for_installation(installation) do
+    installation.id
+    |> for_installation()
+    |> Mrgr.Repo.all()
+    |> Enum.map(&Mrgr.Repo.delete/1)
+  end
+
   defmodule Query do
     use Mrgr.Query
 

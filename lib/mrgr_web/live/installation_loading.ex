@@ -12,8 +12,6 @@ defmodule MrgrWeb.Live.InstallationLoading do
 
     Mrgr.PubSub.subscribe_to_installation(installation)
 
-    Mrgr.Installation.queue_initial_setup(installation)
-
     stats =
       case Mrgr.Installation.data_synced?(installation) do
         true -> compile_stats(installation)
@@ -95,40 +93,33 @@ defmodule MrgrWeb.Live.InstallationLoading do
     |> noreply()
   end
 
-  defp translate_event(pubsub_event) do
-    names = %{
-      @installation_loading_members => "Loading Members",
-      @installation_loading_repositories => "Loading Repositories",
-      @installation_loading_pull_requests => "Loading Pull Request Data"
-    }
+  defp translate_state(%{state: "onboarding_members"}), do: "Loading Members"
+  defp translate_state(%{state: "onboarding_teams"}), do: "Loading Teams"
+  defp translate_state(%{state: "onboarding_repos"}), do: "Loading Repositories"
+  defp translate_state(%{state: "onboarding_prs"}), do: "Loading Pull Requests"
+  defp translate_state(_), do: ""
 
-    # no default, since our handle_info guards against what events it receives
-    Map.get(names, pubsub_event)
-  end
+  def handle_info(%{event: @installation_onboarding_progressed, payload: installation}, socket) do
+    case Mrgr.Installation.data_synced?(installation) do
+      true ->
+        socket
+        |> assign(:installation, installation)
+        |> assign(:stats, compile_stats(installation))
+        |> assign(:events, complete_events(socket))
+        |> noreply()
 
-  def handle_info(%{event: loading_event, payload: _installation}, socket)
-      when loading_event in [
-             @installation_loading_members,
-             @installation_loading_repositories,
-             @installation_loading_pull_requests
-           ] do
-    new_event = %{status: @in_progress, name: translate_event(loading_event)}
-    completed_events = complete_events(socket)
+      false ->
+        new_event = %{status: @in_progress, name: translate_state(installation)}
+        completed_events = complete_events(socket)
 
-    events = [new_event | completed_events]
+        events = [new_event | completed_events]
 
-    # reverse to keep them chronological
-    socket
-    |> assign(:events, Enum.reverse(events))
-    |> noreply()
-  end
-
-  def handle_info(%{event: @installation_initial_sync_completed, payload: installation}, socket) do
-    socket
-    |> assign(:installation, installation)
-    |> assign(:stats, compile_stats(installation))
-    |> assign(:events, complete_events(socket))
-    |> noreply()
+        # reverse to keep them chronological
+        # ❗️this is borked.  they keep jumping around
+        socket
+        |> assign(:events, Enum.reverse(events))
+        |> noreply()
+    end
   end
 
   def handle_info(%{event: _whatevs}, socket) do

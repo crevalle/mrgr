@@ -19,7 +19,7 @@ defmodule Mrgr.Worker.InstallationOnboarding do
   def perform(%Oban.Job{args: %{"id" => id}}) do
     installation = Mrgr.Installation.find_for_onboarding(id)
 
-    Mrgr.Installation.sync_data_for_onboarding(installation)
+    Mrgr.Installation.onboard(installation)
 
     :ok
   end

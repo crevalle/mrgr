@@ -11,6 +11,12 @@ defmodule Mrgr.PubSub do
     |> subscribe()
   end
 
+  def subscribe_to_onboarding(user) do
+    user
+    |> Mrgr.PubSub.Topic.onboarding()
+    |> subscribe()
+  end
+
   def subscribe(topic) do
     Phoenix.PubSub.subscribe(__MODULE__, topic)
   end
@@ -32,10 +38,16 @@ defmodule Mrgr.PubSub do
   end
 
   defmodule Topic do
-    def flash(%{id: id}), do: flash(id)
+    def flash(%Mrgr.Schema.User{id: id}), do: flash(id)
 
     def flash(user_id) do
-      "user:#{user_id}"
+      "flash:#{user_id}"
+    end
+
+    def onboarding(%Mrgr.Schema.User{id: id}), do: onboarding(id)
+
+    def onboarding(user_id) do
+      "onboarding:#{user_id}"
     end
 
     def installation(%Mrgr.Schema.Installation{id: id}), do: installation(id)
@@ -66,12 +78,11 @@ defmodule Mrgr.PubSub do
         @flash_error "flash:error"
 
         @incoming_webhook_created "incoming_webhook:created"
-        @installation_activated "installation:activated"
-        @installation_initial_sync_completed "installation:initial_sync_completed"
-        @installation_loading_members "installation:loading_members"
-        @installation_loading_repositories "installation:loading_repositories"
-        @installation_loading_pull_requests "installation:loading_pull_requests"
+
+        @installation_created "installation:created"
+        @installation_onboarding_progressed "installation:onboarding_progressed"
         @installation_repositories_synced "installation:repositories_synced"
+        @installation_onboarding_progressed "installation:onboarding_progressed"
 
         @label_created "label:created"
         @label_deleted "label:deleted"

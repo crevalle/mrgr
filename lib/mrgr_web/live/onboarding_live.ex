@@ -53,18 +53,33 @@ defmodule MrgrWeb.OnboardingLive do
     """
   end
 
-  def subscribe(user) do
+  def subscribe(%{current_installation_id: nil} = user) do
     user
-    |> installation_topic()
+    |> Mrgr.PubSub.Topic.onboarding()
     |> Mrgr.PubSub.subscribe()
   end
 
-  def installation_topic(user) do
-    Mrgr.PubSub.Topic.installation(user)
+  def subscribe(user) do
+    user
+    |> Mrgr.PubSub.Topic.installation()
+    |> Mrgr.PubSub.subscribe()
   end
 
-  def handle_info(%{event: event, payload: installation}, socket)
-      when event in [@installation_initial_sync_completed, @installation_activated] do
+  def handle_info(%{event: @installation_created, payload: installation}, socket) do
+    # now we can listen for data sync events
+    subscribe(installation)
+
+    # only this user should get this message
+    user = %{socket.assigns.current_user | current_installation_id: installation.id}
+
+    socket
+    |> assign(:current_user, user)
+    |> assign(:installation, installation)
+    |> assign(:state, state(installation))
+    |> noreply()
+  end
+
+  def handle_info(%{event: @installation_onboarding_progressed, payload: installation}, socket) do
     socket
     |> assign(:installation, installation)
     |> assign(:state, state(installation))

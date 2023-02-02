@@ -1,13 +1,6 @@
 defmodule Mrgr.Schema.Installation do
   use Mrgr.Schema
 
-  @states [
-    "created",
-    "syncing_initial_data",
-    "initial_data_sync_complete",
-    "active"
-  ]
-
   schema "installations" do
     field(:access_tokens_url, :string)
     field(:app_id, :integer)
@@ -26,6 +19,11 @@ defmodule Mrgr.Schema.Installation do
     field(:target_type, :string)
     field(:token, :string)
     field(:token_expires_at, :utc_datetime)
+
+    embeds_many :state_changes, StateChange, on_replace: :delete do
+      field(:state, :string)
+      field(:transitioned_at, :utc_datetime)
+    end
 
     belongs_to(:creator, Mrgr.Schema.User)
     has_one(:account, Mrgr.Schema.Account)
@@ -93,7 +91,8 @@ defmodule Mrgr.Schema.Installation do
   def state_changeset(schema, params) do
     schema
     |> cast(params, [:state])
-    |> validate_inclusion(:state, @states)
+    |> put_embed(:state_changes, params.state_changes)
+    |> validate_inclusion(:state, Mrgr.Installation.State.states())
   end
 
   # "access_tokens_url" => "https://api.github.com/app/installations/19872469/access_tokens",
