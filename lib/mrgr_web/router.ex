@@ -35,13 +35,13 @@ defmodule MrgrWeb.Router do
 
   scope "/", MrgrWeb do
     pipe_through :browser
-
-    get "/", PageController, :index
   end
 
   scope "/", MrgrWeb do
     pipe_through [:browser, :skip_auth_for_logged_in_folks]
 
+    # sign in at root
+    get "/", AuthController, :new
     get "/sign-in", AuthController, :new
     get "/sign-up", AuthController, :sign_up
   end
