@@ -22,9 +22,13 @@ defmodule MrgrWeb.Admin.Live.User do
   def mount(_params, _session, socket) do
     if connected?(socket) do
       users = Mrgr.User.all()
-      {:ok, assign(socket, :users, users)}
+
+      socket
+      |> assign(:users, users)
+      |> put_title("Admin - Users")
+      |> ok()
     else
-      {:ok, assign(socket, :users, [])}
+      ok(socket)
     end
   end
 end

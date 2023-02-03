@@ -110,6 +110,7 @@ defmodule MrgrWeb.Admin.Live.UserShow do
 
     socket
     |> assign(user: user)
+    |> put_title("Admin - User #{user.id}")
     |> ok
   end
 end

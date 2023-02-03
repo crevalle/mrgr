@@ -67,9 +67,13 @@ defmodule MrgrWeb.Admin.Live.Installation do
       # subscribe()
 
       installations = Mrgr.Installation.all_admin()
-      {:ok, assign(socket, :installations, installations)}
+
+      socket
+      |> assign(:installations, installations)
+      |> put_title("Admin - Installations")
+      |> ok()
     else
-      {:ok, socket}
+      ok(socket)
     end
   end
 

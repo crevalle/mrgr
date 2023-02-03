@@ -59,7 +59,7 @@ defmodule MrgrWeb.Admin.Live.StripeWebhook do
 
       socket
       |> assign(:page, page)
-      |> put_title("Webhooks")
+      |> put_title("Admin - Stripe Webhooks")
       |> ok()
     else
       {:ok, socket}

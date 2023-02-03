@@ -17,6 +17,7 @@ defmodule MrgrWeb.OnboardingLive do
       socket
       |> assign(:installation, installation)
       |> assign(:stats, stats)
+      |> put_title("Onboarding")
       |> ok()
     else
       ok(socket)
