@@ -46,7 +46,7 @@ defmodule MrgrWeb.PullRequestLive do
     end
   end
 
-  def handle_event("refresh-prs", params, socket) do
+  def handle_event("refresh-prs", _params, socket) do
     Task.async(fn ->
       time = Mrgr.DateTime.now()
 
@@ -327,14 +327,14 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
-  # async data loading
-  def handle_info({ref, {:time, elapsed}}, socket) do
+  def handle_info({_ref, {:time, elapsed}}, socket) do
     IO.inspect(elapsed, label: "ELAPSED")
 
     socket
     |> noreply()
   end
 
+  # async data loading
   def handle_info({ref, result}, socket) do
     # The task succeed so we can cancel the monitoring and discard the DOWN message
     Process.demonitor(ref, [:flush])
