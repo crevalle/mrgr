@@ -7,11 +7,7 @@
       <div class="flex-1 px-4 flex justify-between">
         <div class="flex">
           <div
-            :if={
-              Mrgr.Installation.onboarding_complete?(
-                @conn.assigns.current_user.current_installation
-              )
-            }
+            :if={Mrgr.Installation.subscribed?(@conn.assigns.current_user.current_installation)}
             class="ml-4 flex items-center space-x-6"
           >
             <.nav_item
@@ -46,6 +42,13 @@
               label="Labels"
               .
             />
+
+            <p
+              :if={!Mrgr.Installation.onboarded?(@conn.assigns.current_user.current_installation)}
+              class="alert alert-info"
+            >
+              Hey! We are still onboarding your data, please wait!
+            </p>
           </div>
         </div>
         <.profile_dropdown_menu

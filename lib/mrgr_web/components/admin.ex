@@ -79,6 +79,18 @@ defmodule MrgrWeb.Components.Admin do
           </table>
         </.td>
       </.tr>
+      <.table_attr obj={@installation} key={:subscription_state} . />
+      <.tr striped={true}>
+        <.td class="font-bold">Subscription State Changes</.td>
+        <.td>
+          <table>
+            <.tr :for={sc <- Enum.reverse(@installation.subscription_state_changes)}>
+              <td><%= sc.state %></td>
+              <td><%= sc.transitioned_at %></td>
+            </.tr>
+          </table>
+        </.td>
+      </.tr>
       <.table_attr obj={@installation} key={:app_id} . />
       <.table_attr obj={@installation} key={:app_slug} . />
       <.table_attr obj={@installation} key={:events} . />
@@ -132,29 +144,6 @@ defmodule MrgrWeb.Components.Admin do
       <% end %>
     </table>
     """
-  end
-
-  def payment_or_activate_button(%{installation: %{target_type: "User"}} = assigns) do
-    ~H"""
-    <.l phx_click="activate" class="btn">
-      Activate your free Mrgr account!
-    </.l>
-    """
-  end
-
-  def payment_or_activate_button(assigns) do
-    ~H"""
-    <.l href={payment_url(@installation)} class="btn">
-      On to payment!
-    </.l>
-    """
-  end
-
-  def payment_url(installation) do
-    base_url = Application.get_env(:mrgr, :payments)[:url]
-    creator = Mrgr.User.find(installation.creator_id)
-
-    "#{base_url}?client_reference_id=#{installation.id}&prefilled_email=#{URI.encode_www_form(creator.email)}"
   end
 
   def link_to_installation(%{installation: nil} = assigns) do

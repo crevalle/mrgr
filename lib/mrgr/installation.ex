@@ -4,7 +4,7 @@ defmodule Mrgr.Installation do
   import Mrgr.Tuple, only: [ok: 1]
 
   alias Mrgr.Schema.Installation, as: Schema
-  alias Mrgr.Installation.{Query, State}
+  alias Mrgr.Installation.{Query, State, SubscriptionState}
 
   require Logger
 
@@ -79,6 +79,8 @@ defmodule Mrgr.Installation do
 
     Mrgr.User.set_current_installation(creator, installation)
 
+    installation = activate_subscriptions_on_personal_accounts(installation)
+
     installation
   end
 
@@ -98,14 +100,13 @@ defmodule Mrgr.Installation do
 
   def onboard(i) do
     clear_installation_data(i)
-    # what if there's an error in subscriptioning? or an active subscription?
+
     with {:ok, i} <- onboard_members(i),
          {:ok, i} <- onboard_teams(i),
          {:ok, i} <- onboard_repos(i),
          {:ok, i} <- onboard_prs(i) do
       i
-      # either to active or onboarding_subscription, depending on install type
-      |> State.onboarding_data_complete!()
+      |> State.onboarding_complete!()
       |> broadcast(@installation_onboarding_progressed)
     end
   end
@@ -169,19 +170,20 @@ defmodule Mrgr.Installation do
     end
   end
 
-  defdelegate onboarding_complete?(installation), to: State
-  defdelegate data_synced?(installation), to: State
+  defdelegate subscribed?(i), to: SubscriptionState
+  defdelegate onboarded?(i), to: State
 
-  def activate!(installation) do
+  def activate_subscription!(installation) do
     installation
-    |> State.set_active()
+    |> SubscriptionState.active!()
+    |> broadcast(@installation_onboarding_progressed)
   end
 
-  def activate_user_type_installations(%{target_type: "User"} = installation) do
-    Mrgr.Installation.activate!(installation)
+  def activate_subscriptions_on_personal_accounts(%{target_type: "User"} = installation) do
+    Mrgr.Installation.activate_subscription!(installation)
   end
 
-  def activate_user_type_installations(installation), do: installation
+  def activate_subscriptions_on_personal_accounts(installation), do: installation
 
   def hot_stats(installation) do
     member_count =
@@ -213,7 +215,8 @@ defmodule Mrgr.Installation do
     # set creator as only member
     creator = Mrgr.User.find(installation.creator_id)
 
-    with cs <- Mrgr.Schema.Member.changeset(creator),
+    with nil <- Mrgr.Member.find_by_login(creator.nickname),
+         cs <- Mrgr.Schema.Member.changeset(creator),
          {:ok, member} <- Mrgr.Repo.insert(cs),
          {:ok, _membership} <- create_membership(installation, member) do
       :ok
@@ -407,8 +410,7 @@ defmodule Mrgr.Installation do
   end
 
   def find_or_create_member(github_user) do
-    Mrgr.Schema.Member
-    |> Mrgr.Repo.get_by(login: github_user.login)
+    Mrgr.Member.find_by_login(github_user.login)
     |> case do
       %Mrgr.Schema.Member{} = member ->
         member

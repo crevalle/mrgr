@@ -5,9 +5,8 @@ defmodule Mrgr.Installation.State do
   @onboarding_teams "onboarding_teams"
   @onboarding_repos "onboarding_repos"
   @onboarding_prs "onboarding_prs"
-  @onboarding_subscription "onboarding_subscription"
   @onboarding_error "onboarding_error"
-  @active "active"
+  @onboarding_complete "onboarding_complete"
 
   def states do
     [
@@ -16,11 +15,13 @@ defmodule Mrgr.Installation.State do
       @onboarding_teams,
       @onboarding_repos,
       @onboarding_prs,
-      @onboarding_subscription,
       @onboarding_error,
-      @active
+      @onboarding_complete
     ]
   end
+
+  def onboarded?(%{state: @onboarding_complete}), do: true
+  def onboarded?(_), do: false
 
   def initial, do: @created
 
@@ -40,24 +41,12 @@ defmodule Mrgr.Installation.State do
     update_state!(installation, @onboarding_prs)
   end
 
-  def onboarding_data_complete!(%{target_type: "User"} = installation) do
-    active!(installation)
-  end
-
-  def onboarding_data_complete!(installation) do
-    update_state!(installation, @onboarding_subscription)
+  def onboarding_complete!(installation) do
+    update_state!(installation, @onboarding_complete)
   end
 
   def onboarding_error!(installation) do
     update_state!(installation, @onboarding_error)
-  end
-
-  def active!(installation) do
-    update_state!(installation, @active)
-  end
-
-  def set_active(installation) do
-    update_state!(installation, "active")
   end
 
   def update_state!(installation, state) do
@@ -72,14 +61,6 @@ defmodule Mrgr.Installation.State do
     |> Mrgr.Schema.Installation.state_changeset(attrs)
     |> Mrgr.Repo.update!()
   end
-
-  def onboarding_complete?(%{state: @active}), do: true
-  def onboarding_complete?(_installation), do: false
-
-  def data_synced?(%{state: state}) when state in [@onboarding_subscription, @active],
-    do: true
-
-  def data_synced?(_installation), do: false
 
   defp build_state_change(state) do
     %Mrgr.Schema.Installation.StateChange{

@@ -11,19 +11,12 @@ defmodule MrgrWeb.OnboardingLive do
       current_user = socket.assigns.current_user
       subscribe(current_user)
 
-      ### These states are DIFFERENT from installation states.
-      #
-      # we don't pull directly from the installation's state
-      # because of the initial scenario where the user has not installed
-      # the github app, and thus has no installation.  This scenario is
-      # the state "new"
-      #
-      ###
-      state = state(current_user.current_installation)
+      installation = current_user.current_installation
+      stats = stats(installation)
 
       socket
-      |> assign(:state, state)
-      |> assign(:installation, current_user.current_installation)
+      |> assign(:installation, installation)
+      |> assign(:stats, stats)
       |> ok()
     else
       ok(socket)
@@ -37,17 +30,18 @@ defmodule MrgrWeb.OnboardingLive do
         <.heading title="All Right!👋 Let's get you started" />
 
         <div class="space-y-4">
-          <p>Mrgr onboarding is just 4 simple steps:</p>
+          <p>Mrgr onboarding is just 3 simple steps:</p>
 
           <.step_list>
-            <.step name="install_github_app" state={@state} />
-            <.step name="sync_data" state={@state} />
-            <.step name="create_subscription" state={@state} />
-            <.step name="done" state={@state} />
+            <.step name="install_github_app" installation={@installation} />
+            <.step name="create_subscription" installation={@installation} />
+            <.step name="done" installation={@installation} />
           </.step_list>
         </div>
 
-        <.action state={@state} installation={@installation} socket={@socket} />
+        <.installed_message installation={@installation} />
+        <.render_stats stats={@stats} />
+        <.action installation={@installation} socket={@socket} />
       </div>
     </div>
     """
@@ -59,8 +53,8 @@ defmodule MrgrWeb.OnboardingLive do
     |> Mrgr.PubSub.subscribe()
   end
 
-  def subscribe(user) do
-    user
+  def subscribe(user_or_installation) do
+    user_or_installation
     |> Mrgr.PubSub.Topic.installation()
     |> Mrgr.PubSub.subscribe()
   end
@@ -75,19 +69,21 @@ defmodule MrgrWeb.OnboardingLive do
     socket
     |> assign(:current_user, user)
     |> assign(:installation, installation)
-    |> assign(:state, state(installation))
     |> noreply()
   end
 
   def handle_info(%{event: @installation_onboarding_progressed, payload: installation}, socket) do
     socket
     |> assign(:installation, installation)
-    |> assign(:state, state(installation))
+    |> assign(:stats, stats(installation))
     |> noreply()
   end
 
   def handle_info(_event, socket), do: noreply(socket)
 
-  def state(nil), do: "new"
-  def state(installation), do: installation.state
+  def stats(%{state: "onboarding_complete"} = installation) do
+    Mrgr.Installation.hot_stats(installation)
+  end
+
+  def stats(_), do: %{}
 end

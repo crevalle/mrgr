@@ -15,10 +15,16 @@ defmodule Mrgr.Schema.Installation do
     field(:repository_selection, :string)
     field(:repos_last_synced_at, :utc_datetime)
     field(:state, :string)
+    field(:subscription_state, :string)
     field(:target_id, :integer)
     field(:target_type, :string)
     field(:token, :string)
     field(:token_expires_at, :utc_datetime)
+
+    embeds_many :subscription_state_changes, SubscriptionStateChange, on_replace: :delete do
+      field(:state, :string)
+      field(:transitioned_at, :utc_datetime)
+    end
 
     embeds_many :state_changes, StateChange, on_replace: :delete do
       field(:state, :string)
@@ -93,6 +99,13 @@ defmodule Mrgr.Schema.Installation do
     |> cast(params, [:state])
     |> put_embed(:state_changes, params.state_changes)
     |> validate_inclusion(:state, Mrgr.Installation.State.states())
+  end
+
+  def subscription_state_changeset(schema, params) do
+    schema
+    |> cast(params, [:subscription_state])
+    |> put_embed(:subscription_state_changes, params.subscription_state_changes)
+    |> validate_inclusion(:subscription_state, Mrgr.Installation.SubscriptionState.states())
   end
 
   # "access_tokens_url" => "https://api.github.com/app/installations/19872469/access_tokens",

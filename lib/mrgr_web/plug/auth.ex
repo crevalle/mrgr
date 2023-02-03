@@ -99,7 +99,7 @@ defmodule MrgrWeb.Plug.Auth do
   end
 
   def redirect_incomplete_installation_to_onboarding(conn, _opts) do
-    case Mrgr.Installation.onboarding_complete?(conn.assigns.current_user.current_installation) do
+    case Mrgr.Installation.subscribed?(conn.assigns.current_user.current_installation) do
       true ->
         conn
 

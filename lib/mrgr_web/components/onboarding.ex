@@ -5,8 +5,8 @@ defmodule MrgrWeb.Components.Onboarding do
 
   def step(%{name: "install_github_app"} = assigns) do
     class =
-      case assigns.state do
-        "new" -> in_progress()
+      case assigns.installation do
+        nil -> in_progress()
         _ -> done()
       end
 
@@ -28,12 +28,17 @@ defmodule MrgrWeb.Components.Onboarding do
     """
   end
 
-  def step(%{name: "sync_data"} = assigns) do
+  def step(%{name: "create_subscription"} = assigns) do
     class =
-      case assigns.state do
-        "new" -> todo()
-        "created" -> in_progress()
-        _ -> done()
+      case assigns.installation do
+        nil ->
+          todo()
+
+        i ->
+          case i.subscription_state do
+            nil -> in_progress()
+            _active -> done()
+          end
       end
 
     assigns =
@@ -43,32 +48,6 @@ defmodule MrgrWeb.Components.Onboarding do
     ~H"""
     <.step_option class={@class} name={@name}>
       <:number>2</:number>
-      <:title>
-        Sync your data
-      </:title>
-
-      <:description>
-        We'll do this for you once the app is installed :)
-      </:description>
-    </.step_option>
-    """
-  end
-
-  def step(%{name: "create_subscription"} = assigns) do
-    class =
-      case assigns.state do
-        "active" -> done()
-        "onboarding_subscription" -> in_progress()
-        _ -> todo()
-      end
-
-    assigns =
-      assigns
-      |> assign(:class, class)
-
-    ~H"""
-    <.step_option class={@class} name={@name}>
-      <:number>3</:number>
       <:title>
         Create your Subscription 💸
       </:title>
@@ -82,9 +61,15 @@ defmodule MrgrWeb.Components.Onboarding do
 
   def step(%{name: "done"} = assigns) do
     class =
-      case assigns.state do
-        "active" -> in_progress()
-        _ -> todo()
+      case assigns.installation do
+        nil ->
+          todo()
+
+        i ->
+          case i.subscription_state do
+            nil -> todo()
+            _active_or_cancelled_i_guess -> in_progress()
+          end
       end
 
     assigns =
@@ -93,7 +78,7 @@ defmodule MrgrWeb.Components.Onboarding do
 
     ~H"""
     <.step_option class={@class} name={@name}>
-      <:number>4</:number>
+      <:number>3</:number>
       <:title>
         Get to work!
       </:title>
@@ -129,15 +114,7 @@ defmodule MrgrWeb.Components.Onboarding do
   def in_progress, do: "font-bold"
   def todo, do: ""
 
-  def li(assigns) do
-    ~H"""
-    <li class={["", @class]}>
-      <%= render_slot(@inner_block) %>
-    </li>
-    """
-  end
-
-  def action(%{state: "new"} = assigns) do
+  def action(%{installation: nil} = assigns) do
     ~H"""
     <.l href={Mrgr.Installation.installation_url()} class="btn">
       Click here to install our Github App 🚀
@@ -145,7 +122,8 @@ defmodule MrgrWeb.Components.Onboarding do
     """
   end
 
-  def action(%{state: "active"} = assigns) do
+  def action(%{installation: %{subscription_state: state}} = assigns)
+      when state in ["active", "personal"] do
     ~H"""
     <div class="flex flex-col space-y-4">
       <p>
@@ -158,12 +136,80 @@ defmodule MrgrWeb.Components.Onboarding do
     """
   end
 
-  def action(assigns) do
+  def action(%{installation: %{subscription_state: nil}} = assigns) do
     ~H"""
-    <%= live_render(@socket, MrgrWeb.Live.InstallationLoading,
-      id: "installation-sync-#{@installation.id}",
-      session: %{"installation_id" => @installation.id}
-    ) %>
+    <.l href={payment_url(@installation)} class="btn">
+      On to payment!
+    </.l>
     """
+  end
+
+  def render_stats(%{stats: stats} = assigns) when stats == %{}, do: ~H[]
+
+  def render_stats(assigns) do
+    ~H"""
+    <p>We've synced your data.  Here are the stats:</p>
+
+    <table class="w-1/3">
+      <tr>
+        <td>
+          <div class="flex items-center space-x-1">
+            <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />Members
+          </div>
+        </td>
+        <td class="font-semibold"><%= @stats.members %></td>
+      </tr>
+      <tr>
+        <td>
+          <div class="flex items-center space-x-1"><.repository_icon />Repositories</div>
+        </td>
+        <td class="font-semibold"><%= @stats.repositories %></td>
+      </tr>
+      <tr>
+        <td>
+          <div class="flex items-center space-x-1">
+            <.icon name="share" class="text-gray-400 mr-1 h-5 w-5" />Pull Requests
+          </div>
+        </td>
+        <td class="font-semibold"><%= @stats.pull_requests %></td>
+      </tr>
+    </table>
+    """
+  end
+
+  def installed_message(%{installation: nil} = assigns), do: ~H[]
+
+  def installed_message(assigns) do
+    ~H"""
+    <p>
+      Good News!  Mrgr has been installed to the
+      <span class="font-bold"><%= @installation.account.login %></span>
+      <%= account_type(@installation) %>.
+    </p>
+    """
+  end
+
+  defp account_type(%{target_type: "User"}), do: "user account"
+  defp account_type(_org_or_app), do: "organization"
+
+  def payment_or_activate_button(%{installation: %{target_type: "User"}} = assigns) do
+    ~H"""
+    <.l phx_click="activate" class="btn">
+      Activate your free Mrgr account!
+    </.l>
+    """
+  end
+
+  def payment_or_activate_button(assigns) do
+    ~H"""
+
+    """
+  end
+
+  def payment_url(installation) do
+    base_url = Application.get_env(:mrgr, :payments)[:url]
+    creator = Mrgr.User.find(installation.creator_id)
+
+    "#{base_url}?client_reference_id=#{installation.id}&prefilled_email=#{URI.encode_www_form(creator.email)}"
   end
 end

@@ -64,7 +64,7 @@ defmodule Mrgr.Stripe.Webhook do
          %Mrgr.Schema.Installation{} = installation <- Mrgr.Installation.find(id) do
       _subscription = create_subscription(hook, installation)
 
-      Mrgr.Installation.activate!(installation)
+      Mrgr.Installation.activate_subscription!(installation)
     else
       error -> error
     end

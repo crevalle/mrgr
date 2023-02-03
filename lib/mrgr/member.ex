@@ -27,6 +27,12 @@ defmodule Mrgr.Member do
     |> Mrgr.Repo.one()
   end
 
+  def find_by_login(login) do
+    Schema
+    |> Query.by_login(login)
+    |> Mrgr.Repo.one()
+  end
+
   def delete_all_for_installation(installation) do
     installation.id
     |> for_installation()
@@ -50,6 +56,12 @@ defmodule Mrgr.Member do
         where: t.user_id == ^user_id,
         preload: [pr_tab: t],
         order_by: [asc: t.inserted_at]
+      )
+    end
+
+    def by_login(query, login) do
+      from(q in query,
+        where: q.login == ^login
       )
     end
   end
