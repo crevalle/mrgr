@@ -36,6 +36,10 @@ defmodule Mrgr.DateTime do
     DateTime.utc_now()
   end
 
+  def elapsed(starting, unit \\ :millisecond) do
+    DateTime.diff(now(), starting, unit)
+  end
+
   def safe_truncate(nil), do: nil
 
   def safe_truncate(dt) do

@@ -46,6 +46,26 @@ defmodule MrgrWeb.PullRequestLive do
     end
   end
 
+  def handle_event("refresh-prs", params, socket) do
+    Task.async(fn ->
+      time = Mrgr.DateTime.now()
+
+      socket.assigns.current_user.current_installation
+      |> Mrgr.Repo.preload(:repositories)
+      |> Mrgr.Installation.refresh_pull_requests!()
+
+      elapsed = Mrgr.DateTime.elapsed(time, :second)
+
+      IO.inspect(elapsed, label: "ELASPED TIME")
+
+      {:time, elapsed}
+    end)
+
+    socket
+    |> Flash.put(:info, "Refreshed 🛁")
+    |> noreply()
+  end
+
   def handle_event("paginate", params, socket) do
     {tabs, selected_tab} = Tabs.paginate(params, socket)
 
@@ -308,6 +328,13 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   # async data loading
+  def handle_info({ref, {:time, elapsed}}, socket) do
+    IO.inspect(elapsed, label: "ELAPSED")
+
+    socket
+    |> noreply()
+  end
+
   def handle_info({ref, result}, socket) do
     # The task succeed so we can cancel the monitoring and discard the DOWN message
     Process.demonitor(ref, [:flush])
