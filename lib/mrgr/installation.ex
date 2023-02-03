@@ -486,10 +486,6 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.preload(:account)
   end
 
-  def delete_all do
-    Mrgr.Repo.all(Mrgr.Schema.Installation) |> Enum.map(&Mrgr.Repo.delete/1)
-  end
-
   defmodule Query do
     use Mrgr.Query
 
