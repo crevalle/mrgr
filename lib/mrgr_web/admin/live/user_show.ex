@@ -105,7 +105,7 @@ defmodule MrgrWeb.Admin.Live.UserShow do
     """
   end
 
-  def mount(_params, %{"user_id" => id}, socket) do
+  def mount(%{"id" => id}, _session, socket) do
     user = Mrgr.User.find_full(id)
 
     socket
