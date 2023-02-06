@@ -120,9 +120,8 @@ defmodule Mrgr.Installation do
       |> ok()
     rescue
       e ->
-        Logger.error(Exception.format(:error, e, __STACKTRACE__))
-
         State.onboarding_error!(installation)
+        Appsignal.set_error(e, __STACKTRACE__)
         {:error, :onboarding_members_failed}
     end
   end
@@ -135,8 +134,9 @@ defmodule Mrgr.Installation do
       |> create_teams()
       |> ok()
     rescue
-      _e ->
+      e ->
         State.onboarding_error!(installation)
+        Appsignal.set_error(e, __STACKTRACE__)
         {:error, :onboarding_teams_failed}
     end
   end
@@ -149,8 +149,9 @@ defmodule Mrgr.Installation do
       |> sync_repos()
       |> ok()
     rescue
-      _e ->
+      e ->
         State.onboarding_error!(installation)
+        Appsignal.set_error(e, __STACKTRACE__)
         {:error, :onboarding_repos_failed}
     end
   end
@@ -164,8 +165,9 @@ defmodule Mrgr.Installation do
       |> queue_closed_pr_sync()
       |> ok()
     rescue
-      _e ->
+      e ->
         State.onboarding_error!(installation)
+        Appsignal.set_error(e, __STACKTRACE__)
         {:error, :onboarding_prs_failed}
     end
   end
