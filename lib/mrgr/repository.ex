@@ -31,6 +31,16 @@ defmodule Mrgr.Repository do
     |> generate_default_high_impact_files()
   end
 
+  def update_show_prs(repo, attrs) do
+    with cs <- Schema.show_prs_changeset(repo, attrs),
+         {:ok, repo} <- Mrgr.Repo.update(cs) do
+      broadcast(repo, @repository_updated)
+      {:ok, repo}
+    else
+      error -> error
+    end
+  end
+
   def sync_data(repository) do
     data = Mrgr.Github.API.fetch_repository_data(repository)
 

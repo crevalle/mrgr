@@ -8,6 +8,7 @@ defmodule Mrgr.Schema.Repository do
     field(:name, :string)
     field(:node_id, :string)
     field(:private, :boolean)
+    field(:show_prs, :boolean)
     field(:merge_freeze_enabled, :boolean, default: false)
 
     embeds_one(:settings, Mrgr.Schema.RepositorySettings, on_replace: :update)
@@ -48,6 +49,11 @@ defmodule Mrgr.Schema.Repository do
   def merge_freeze_changeset(schema, attrs) do
     schema
     |> cast(attrs, [:merge_freeze_enabled])
+  end
+
+  def show_prs_changeset(schema, attrs) do
+    schema
+    |> cast(attrs, [:show_prs])
   end
 
   def changeset(schema, params) do

@@ -9,6 +9,7 @@ defmodule MrgrWeb.Components.Core do
   """
   use Phoenix.Component
   import Heroicons.LiveView, only: [icon: 1]
+  import Phoenix.HTML.Form
   alias Phoenix.LiveView.JS
 
   @doc """
@@ -241,6 +242,21 @@ defmodule MrgrWeb.Components.Core do
         </div>
       </div>
     </.form>
+    """
+  end
+
+  attr :f, :any, required: true
+  attr :attr, :any, required: true
+  attr :class, :string, default: nil
+
+  def checkbox(assigns) do
+    ~H"""
+    <%= checkbox(@f, @attr,
+      class: [
+        "shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md",
+        @class
+      ]
+    ) %>
     """
   end
 
