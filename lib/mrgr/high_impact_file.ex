@@ -200,6 +200,48 @@ defmodule Mrgr.HighImpactFile do
     ]
   end
 
+  def defaults_for_repo(%{language: "Ruby"} = repository) do
+    [
+      %{
+        name: "migration",
+        pattern: "db/migrate/*",
+        color: "#dcfce7",
+        notify_user: true,
+        repository_id: repository.id,
+        source: :system
+      },
+      %{
+        name: "router",
+        pattern: "config/routes.rb",
+        color: "#dbeafe",
+        notify_user: true,
+        repository_id: repository.id,
+        source: :system
+      },
+      %{
+        name: "dependencies",
+        pattern: "Gemfile.lock",
+        color: "#fef9c3",
+        notify_user: true,
+        repository_id: repository.id,
+        source: :system
+      }
+    ]
+  end
+
+  def defaults_for_repo(%{language: "Javascript"} = repository) do
+    [
+      %{
+        name: "dependencies",
+        pattern: "package-lock.json",
+        color: "#fef9c3",
+        notify_user: true,
+        repository_id: repository.id,
+        source: :system
+      }
+    ]
+  end
+
   def defaults_for_repo(_unsupported), do: []
 
   def update(hif, params) do
