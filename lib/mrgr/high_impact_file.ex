@@ -11,6 +11,7 @@ defmodule Mrgr.HighImpactFile do
     |> Mrgr.Repo.all()
   end
 
+  @doc "gets all HIFs on the repository and returns those applicable to the PR"
   def for_pull_request(
         %{repository: %{high_impact_files: %Ecto.Association.NotLoaded{}}} = pull_request
       ) do
@@ -39,6 +40,10 @@ defmodule Mrgr.HighImpactFile do
     %{pull_request | high_impact_file_pull_requests: [], high_impact_files: []}
   end
 
+  def reset_hifs(pull_request) do
+    reset_hifs(pull_request.repository, pull_request)
+  end
+
   def reset_hifs(%Mrgr.Schema.Repository{high_impact_files: hifs}, pull_request) do
     reset_hifs(hifs, pull_request)
   end
@@ -49,6 +54,7 @@ defmodule Mrgr.HighImpactFile do
     # since we're clearing PRs these should all be created successfully
     assocs =
       hifs
+      |> for_pull_request(pull_request)
       |> Enum.map(fn hif -> create_for_pull_request(hif, pull_request) end)
       |> Enum.map(fn {:ok, a} -> a end)
 

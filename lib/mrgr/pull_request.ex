@@ -38,7 +38,7 @@ defmodule Mrgr.PullRequest do
         |> preload_installation()
         |> sync_repo_if_first_pr()
         |> sync_github_data()
-        |> associate_high_impact_files()
+        |> reassociate_high_impact_files()
         |> notify_hif_alert_consumers()
         |> broadcast(@pull_request_created)
         |> ok()
@@ -119,7 +119,7 @@ defmodule Mrgr.PullRequest do
       pull_request
       |> preload_installation()
       |> sync_github_data()
-      |> associate_high_impact_files()
+      |> reassociate_high_impact_files()
       |> broadcast(@pull_request_synchronized)
       |> ok()
     else
@@ -432,13 +432,11 @@ defmodule Mrgr.PullRequest do
     |> ok()
   end
 
-  def associate_high_impact_files(pull_request) do
+  def reassociate_high_impact_files(pull_request) do
     # until we get smarter about what's being added/removed for notification purposes,
     # just blow them all away and replace them
 
-    pull_request
-    |> Mrgr.HighImpactFile.for_pull_request()
-    |> Mrgr.HighImpactFile.reset_hifs(pull_request)
+    Mrgr.HighImpactFile.reset_hifs(pull_request)
   end
 
   def notify_hif_alert_consumers(pull_request) do
@@ -711,7 +709,7 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
-  def find(id, preloads) do
+  def find(id, preloads \\ []) do
     Schema
     |> Query.by_id(id)
     |> Mrgr.Repo.one()
