@@ -65,10 +65,13 @@ defmodule Mrgr.Github.User do
     cast(schema, params, @fields)
   end
 
-  def fix_names(params) do
+  # don't ovewrite perfectly fine keys
+  def fix_names(%{"avatarUrl" => _url} = params) do
     params
     |> Map.put("avatar_url", params["avatarUrl"])
   end
+
+  def fix_names(params), do: params
 
   def graphql_to_attrs(list) when is_list(list) do
     Enum.map(list, &graphql_to_attrs/1)
