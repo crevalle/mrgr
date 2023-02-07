@@ -1,6 +1,6 @@
 <div class="two-pane-layout">
   <div class="main-pane">
-    <div class="section">
+    <div class="">
       <div class="flex justify-between mb-2">
         <.h1>Security Policies</.h1>
         <.l phx-click={
@@ -29,17 +29,10 @@
             <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
               Name
             </th>
-            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
-              Repos
-            </th>
-            <th class="p-2 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
-              Required Approvals
-            </th>
-            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
-              allowed merge types
-            </th>
-            <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
-            </th>
+            <.th>Repos</.th>
+            <.th>Required Approvals</.th>
+            <.th>allowed merge types</.th>
+            <.th></.th>
           </thead>
           <tbody class="bg-white">
             <tr
@@ -105,15 +98,9 @@
           <th class="py-3 pl-20 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
             Name
           </th>
-          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
-            Required Approvals
-          </th>
-          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
-            Allowed Merge Types
-          </th>
-          <th class="p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500">
-            Compliant?
-          </th>
+          <.th>Required Approvals</.th>
+          <.th>Allowed Merge Types</.th>
+          <.th>Compliant?</.th>
         </thead>
         <tbody class="divide-y divide-gray-200 bg-white">
           <tr :for={repo <- @repo_list}>

@@ -25,10 +25,10 @@ defmodule MrgrWeb.Components.Admin do
       <table class="w-full">
         <thead class="bg-white">
           <tr>
-            <.th uppercase={true}>ID</.th>
-            <.th uppercase={true}>Node ID</.th>
-            <.th uppercase={true}>Webhook</.th>
-            <.th uppercase={true}>created</.th>
+            <.th>ID</.th>
+            <.th>Node ID</.th>
+            <.th>Webhook</.th>
+            <.th>created</.th>
           </tr>
         </thead>
         <.tr striped={true}>
@@ -116,13 +116,13 @@ defmodule MrgrWeb.Components.Admin do
     <table class="min-w-full">
       <thead class="bg-white">
         <tr>
-          <.th uppercase={true}>ID</.th>
-          <.th uppercase={true}>Current Installation</.th>
-          <.th uppercase={true}>nickname</.th>
-          <.th uppercase={true}>Full Name</.th>
-          <.th uppercase={true}>last Seen</.th>
-          <.th uppercase={true}>created</.th>
-          <.th uppercase={true}>updated</.th>
+          <.th>ID</.th>
+          <.th>Current Installation</.th>
+          <.th>nickname</.th>
+          <.th>Full Name</.th>
+          <.th>last Seen</.th>
+          <.th>created</.th>
+          <.th>updated</.th>
         </tr>
       </thead>
 

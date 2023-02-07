@@ -14,10 +14,10 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhookShow do
             <table class="min-w-full">
               <thead class="bg-white">
                 <tr>
-                  <.th uppercase={true}>Object</.th>
-                  <.th uppercase={true}>Action</.th>
-                  <.th uppercase={true}>Account</.th>
-                  <.th uppercase={true}>Received</.th>
+                  <.th>Object</.th>
+                  <.th>Action</.th>
+                  <.th>Account</.th>
+                  <.th>Received</.th>
                 </tr>
               </thead>
 

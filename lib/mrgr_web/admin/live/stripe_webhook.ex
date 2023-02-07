@@ -16,11 +16,11 @@ defmodule MrgrWeb.Admin.Live.StripeWebhook do
           <table class="min-w-full">
             <thead class="bg-white">
               <tr>
-                <.th uppercase={true}>ID</.th>
-                <.th uppercase={true}>External ID</.th>
-                <.th uppercase={true}>Type</.th>
-                <.th uppercase={true}>Created</.th>
-                <.th uppercase={true}>Received</.th>
+                <.th>ID</.th>
+                <.th>External ID</.th>
+                <.th>Type</.th>
+                <.th>Created</.th>
+                <.th>Received</.th>
               </tr>
             </thead>
 

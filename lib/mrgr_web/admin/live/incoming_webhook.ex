@@ -18,13 +18,13 @@ defmodule MrgrWeb.Admin.Live.IncomingWebhook do
           <table class="min-w-full">
             <thead class="bg-white">
               <tr>
-                <.th uppercase={true}>ID</.th>
-                <.th uppercase={true}>Installation</.th>
-                <.th uppercase={true}>PR Number</.th>
-                <.th uppercase={true}>object</.th>
-                <.th uppercase={true}>action</.th>
-                <.th uppercase={true}>received</.th>
-                <.th uppercase={true}></.th>
+                <.th>ID</.th>
+                <.th>Installation</.th>
+                <.th>PR Number</.th>
+                <.th>object</.th>
+                <.th>action</.th>
+                <.th>received</.th>
+                <.th></.th>
               </tr>
             </thead>
 

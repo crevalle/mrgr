@@ -17,13 +17,13 @@ defmodule MrgrWeb.Admin.Live.InstallationMemberTable do
         <table class="min-w-full">
           <thead class="bg-white">
             <tr>
-              <.th uppercase={true}>ID</.th>
-              <.th uppercase={true}>Node ID</.th>
-              <.th uppercase={true}>External ID</.th>
-              <.th uppercase={true}>Login</.th>
-              <.th uppercase={true}>Type</.th>
-              <.th uppercase={true}>Updated</.th>
-              <.th uppercase={true}>Created</.th>
+              <.th>ID</.th>
+              <.th>Node ID</.th>
+              <.th>External ID</.th>
+              <.th>Login</.th>
+              <.th>Type</.th>
+              <.th>Updated</.th>
+              <.th>Created</.th>
             </tr>
           </thead>
 

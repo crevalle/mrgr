@@ -17,13 +17,13 @@ defmodule MrgrWeb.Admin.Live.InstallationRepoTable do
         <table class="min-w-full">
           <thead class="bg-white">
             <tr>
-              <.th uppercase={true}>ID</.th>
-              <.th uppercase={true}>Node ID</.th>
-              <.th uppercase={true}>Name</.th>
-              <.th uppercase={true}>Private?</.th>
-              <.th uppercase={true}>Language</.th>
-              <.th uppercase={true}>Updated</.th>
-              <.th uppercase={true}>Created</.th>
+              <.th>ID</.th>
+              <.th>Node ID</.th>
+              <.th>Name</.th>
+              <.th>Private?</.th>
+              <.th>Language</.th>
+              <.th>Updated</.th>
+              <.th>Created</.th>
             </tr>
           </thead>
 

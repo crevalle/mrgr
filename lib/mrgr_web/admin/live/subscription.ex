@@ -19,11 +19,11 @@ defmodule MrgrWeb.Admin.Live.Subscription do
             <table class="w-full">
               <thead class="bg-white">
                 <tr>
-                  <.th uppercase={true}>ID</.th>
-                  <.th uppercase={true}>Node ID</.th>
-                  <.th uppercase={true}>Installation</.th>
-                  <.th uppercase={true}>Webhook</.th>
-                  <.th uppercase={true}>created</.th>
+                  <.th>ID</.th>
+                  <.th>Node ID</.th>
+                  <.th>Installation</.th>
+                  <.th>Webhook</.th>
+                  <.th>created</.th>
                 </tr>
               </thead>
               <.tr :for={subscription <- @subscriptions} striped={true}>

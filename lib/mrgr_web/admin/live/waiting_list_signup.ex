@@ -28,10 +28,10 @@ defmodule MrgrWeb.Admin.Live.WaitingListSignup do
           <table class="min-w-full">
             <thead class="bg-white">
               <tr>
-                <.th uppercase={true}>ID</.th>
-                <.th uppercase={true}>email</.th>
-                <.th uppercase={true}>updated</.th>
-                <.th uppercase={true}>created</.th>
+                <.th>ID</.th>
+                <.th>email</.th>
+                <.th>updated</.th>
+                <.th>created</.th>
               </tr>
             </thead>
 

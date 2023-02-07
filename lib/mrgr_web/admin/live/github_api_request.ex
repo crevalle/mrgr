@@ -15,16 +15,16 @@ defmodule MrgrWeb.Admin.Live.GithubAPIRequest do
           <table class="min-w-full">
             <thead class="bg-white">
               <tr>
-                <.th uppercase={true}>ID</.th>
-                <.th uppercase={true}>Installation</.th>
-                <.th uppercase={true}>RateLimit Remaining</.th>
-                <.th uppercase={true}>RateLimit Reset</.th>
-                <.th uppercase={true}>API Call</.th>
-                <.th uppercase={true}>Response Code</.th>
-                <.th uppercase={true}>Elapsed Time (ms)</.th>
-                <.th uppercase={true}>Data</.th>
-                <.th uppercase={true}>Response Headers</.th>
-                <.th uppercase={true}>Created</.th>
+                <.th>ID</.th>
+                <.th>Installation</.th>
+                <.th>RateLimit Remaining</.th>
+                <.th>RateLimit Reset</.th>
+                <.th>API Call</.th>
+                <.th>Response Code</.th>
+                <.th>Elapsed Time (ms)</.th>
+                <.th>Data</.th>
+                <.th>Response Headers</.th>
+                <.th>Created</.th>
               </tr>
             </thead>
 

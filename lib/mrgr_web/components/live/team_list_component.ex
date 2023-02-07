@@ -12,15 +12,15 @@ defmodule MrgrWeb.Components.Live.TeamListComponent do
         <table class="min-w-full">
           <thead class="bg-white">
             <tr>
-              <.th uppercase={true}>ID</.th>
-              <.th uppercase={true}>External ID</.th>
-              <.th uppercase={true}>Node ID</.th>
-              <.th uppercase={true}>Name</.th>
-              <.th uppercase={true}>Permission</.th>
-              <.th uppercase={true}>Privacy</.th>
-              <.th uppercase={true}>URL</.th>
-              <.th uppercase={true}>Updated</.th>
-              <.th uppercase={true}>Created</.th>
+              <.th>ID</.th>
+              <.th>External ID</.th>
+              <.th>Node ID</.th>
+              <.th>Name</.th>
+              <.th>Permission</.th>
+              <.th>Privacy</.th>
+              <.th>URL</.th>
+              <.th>Updated</.th>
+              <.th>Created</.th>
             </tr>
           </thead>
 

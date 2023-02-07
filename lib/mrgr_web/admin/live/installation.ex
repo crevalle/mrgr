@@ -14,17 +14,17 @@ defmodule MrgrWeb.Admin.Live.Installation do
           <table class="min-w-full">
             <thead class="bg-white">
               <tr>
-                <.th uppercase={true}>ID</.th>
-                <.th uppercase={true}>App ID</.th>
-                <.th uppercase={true}>App Slug</.th>
-                <.th uppercase={true}>Type</.th>
-                <.th uppercase={true}>Creator</.th>
-                <.th uppercase={true}>Account</.th>
-                <.th uppercase={true}>Actions</.th>
-                <.th uppercase={true}>Onboarding Status</.th>
-                <.th uppercase={true}>Repositories</.th>
-                <.th uppercase={true}>Updated</.th>
-                <.th uppercase={true}>Created</.th>
+                <.th>ID</.th>
+                <.th>App ID</.th>
+                <.th>App Slug</.th>
+                <.th>Type</.th>
+                <.th>Creator</.th>
+                <.th>Account</.th>
+                <.th>Actions</.th>
+                <.th>Onboarding Status</.th>
+                <.th>Repositories</.th>
+                <.th>Updated</.th>
+                <.th>Created</.th>
               </tr>
             </thead>
 

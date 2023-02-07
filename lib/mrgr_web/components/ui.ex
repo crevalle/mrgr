@@ -180,16 +180,18 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
   def th(assigns) do
-    uppercase = if assigns[:uppercase], do: "uppercase", else: nil
-
-    class = "px-3 py-3.5 text-left text-sm font-semibold text-gray-900 #{uppercase}"
-
-    # <th scope="col" class="py-3.5 pl-4 pr-3 text-left text-sm font-semibold text-gray-900 sm:pl-6">Pattern</th>
-    assigns = assign(assigns, :class, class)
-
     ~H"""
-    <th scope="col" class={@class}>
+    <th
+      scope="col"
+      class={[
+        "p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500",
+        @class
+      ]}
+    >
       <%= render_slot(@inner_block) %>
     </th>
     """
