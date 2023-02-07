@@ -212,6 +212,23 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
+  def preview_comment(assigns) do
+    ~H"""
+    <div id={"comment-preview-#{@comment.id}"}>
+      <div class="float-left">
+        <div class="flex">
+          <%= img_tag(Mrgr.Schema.Comment.author(@comment).avatar_url,
+            class: "rounded-xl h-5 w-5 mr-1"
+          ) %>
+        </div>
+      </div>
+      <p class="text-gray-500 italic text-sm ">
+        <%= Mrgr.Schema.Comment.body(@comment) %>
+      </p>
+    </div>
+    """
+  end
+
   def preview_commit(assigns) do
     ~H"""
     <div class="flex justify-between items-center">

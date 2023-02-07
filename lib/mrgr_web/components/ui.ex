@@ -567,23 +567,6 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def preview_comment(assigns) do
-    ~H"""
-    <div>
-      <div class="float-left">
-        <div class="flex">
-          <%= img_tag(Mrgr.Schema.Comment.author(@comment).avatar_url,
-            class: "rounded-xl h-5 w-5 mr-1"
-          ) %>
-        </div>
-      </div>
-      <p class="text-gray-500 italic text-sm ">
-        <%= Mrgr.Schema.Comment.body(@comment) %>
-      </p>
-    </div>
-    """
-  end
-
   def frozen_repo_list(assigns) do
     ~H"""
     <div class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50">
