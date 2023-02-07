@@ -47,6 +47,47 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def nav_bar(assigns) do
+    ~H"""
+    <div class="ml-4 flex items-center space-x-6">
+      <.nav_item
+        route={Routes.pull_request_path(MrgrWeb.Endpoint, :index)}
+        icon="share"
+        label="Open Pull Requests"
+      >
+        <%= live_render(@conn, MrgrWeb.Live.OpenPRCountBadge,
+          session: %{
+            "installation_id" => @current_user.current_installation_id
+          }
+        ) %>
+      </.nav_item>
+
+      <.nav_item
+        route={Routes.high_impact_file_path(MrgrWeb.Endpoint, :index)}
+        icon="megaphone"
+        label="High Impact Files"
+        .
+      />
+
+      <.nav_item
+        route={Routes.repository_list_path(MrgrWeb.Endpoint, :index)}
+        icon="newspaper"
+        label="Repositories"
+        .
+      />
+
+      <.nav_item route={Routes.label_list_path(MrgrWeb.Endpoint, :index)} icon="tag" label="Labels" . />
+
+      <p
+        :if={!Mrgr.Installation.onboarded?(@current_user.current_installation)}
+        class="alert alert-info"
+      >
+        Hey! We are still onboarding your data, please wait!
+      </p>
+    </div>
+    """
+  end
+
   def dangerous_link(assigns) do
     default_class = "text-rose-600 hover:text-rose-500 font-light text-sm"
     class = Map.get(assigns, :class, default_class)
