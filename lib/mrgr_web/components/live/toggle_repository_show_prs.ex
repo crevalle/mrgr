@@ -1,8 +1,6 @@
 defmodule MrgrWeb.Components.Live.ToggleRepositoryShowPRs do
   use MrgrWeb, :live_component
 
-  import MrgrWeb.Components.Repository
-
   def render(assigns) do
     ~H"""
     <div>
@@ -12,7 +10,7 @@ defmodule MrgrWeb.Components.Live.ToggleRepositoryShowPRs do
         phx-change={JS.push("toggle_show_prs", value: %{id: @repo.id})}
         phx-target={@myself}
       >
-        <.checkbox f={f} , attr={:show_prs} />
+        <.checkbox f={f} attr={:show_prs} />
       </.form>
     </div>
     """
