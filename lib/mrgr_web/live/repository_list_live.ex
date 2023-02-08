@@ -132,6 +132,7 @@ defmodule MrgrWeb.RepositoryListLive do
     policies = replace_repo_in_policy(repository, socket.assigns.policies)
 
     socket
+    |> Flash.put(:info, "#{repository.name} was updated.")
     |> stop_enforce_policy_spinner(repository.id)
     |> assign(:all_repos, all_repos)
     |> assign(:repo_list, repo_list)

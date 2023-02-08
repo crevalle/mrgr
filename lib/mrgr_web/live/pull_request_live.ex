@@ -419,6 +419,10 @@ defmodule MrgrWeb.PullRequestLive do
     Tabs.find_tab_by_id(tabs, tab_id)
   end
 
+  def filter_showing(repos) do
+    Enum.filter(repos, & &1.show_prs)
+  end
+
   defmodule Tabs do
     def new(user) do
       []

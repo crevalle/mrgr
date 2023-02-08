@@ -535,4 +535,13 @@ defmodule MrgrWeb.Components.PullRequest do
     </.tooltip>
     """
   end
+
+  def showing_repos_text(assigns) do
+    ~H"""
+    <p class="text-xs">
+      <%= @showing %>/<%= @total %> repos displayed.
+      <.l href={~p"/repositories"} class="text-xs text-teal-700 hover:text-teal-500">Configure</.l>
+    </p>
+    """
+  end
 end

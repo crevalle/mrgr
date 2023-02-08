@@ -1132,11 +1132,18 @@ defmodule Mrgr.PullRequest do
       )
     end
 
+    def visible(query) do
+      from([q, repository: r] in with_repository(query),
+        where: r.show_prs == true
+      )
+    end
+
     def pending_stuff(schema, installation_id) do
       schema
       |> for_installation(installation_id)
       |> open()
       |> order_by_opened()
+      |> visible()
     end
 
     def fix_ci(query) do
@@ -1227,6 +1234,7 @@ defmodule Mrgr.PullRequest do
         join: r in assoc(q, :repository),
         where: r.installation_id == ^installation_id,
         where: q.status == "open",
+        where: r.show_prs == true,
         select: count(q.id)
       )
     end
