@@ -18,7 +18,7 @@ config :mrgr, MrgrWeb.Endpoint,
   cache_static_manifest: "priv/static/cache_manifest.json"
 
 config :mrgr, :installation, url: "https://github.com/apps/mrgr-app/installations/new"
-config :mrgr, :payments, url: "https://buy.stripe.com/6oEbLO0ZL7fW8YUfYY"
+config :mrgr, :payments, url: "https://buy.stripe.com/cN2bLO6k5as81ws6op"
 
 # Do not print debug messages in production
 config :logger, level: :info
