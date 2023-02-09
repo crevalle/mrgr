@@ -124,13 +124,16 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  attr :class, :string, default: nil
+
+  slot :inner_block, required: true
+
   def h3(assigns) do
-    color = assigns[:color] || "text-gray-900"
-
-    assigns = assign(assigns, :color, color)
-
     ~H"""
-    <h3 class={"text-lg leading-6 font-medium #{@color}"}>
+    <h3 class={[
+      "text-lg leading-6 font-medium",
+      @class
+    ]}>
       <%= render_slot(@inner_block) %>
     </h3>
     """
@@ -628,7 +631,7 @@ defmodule MrgrWeb.Components.UI do
   def frozen_repo_list(assigns) do
     ~H"""
     <div class="flex flex-col my-4 p-4 rounded-md border border-blue-700 bg-blue-50">
-      <.h3 color="text-blue-600">❄️ There is a Merge Freeze in effect❄️</.h3>
+      <.h3 class="text-blue-600">❄️ There is a Merge Freeze in effect❄️</.h3>
       <p class="my-3">PR merging is disabled for the following repos:</p>
 
       <ul class="list-disc my-3 mx-6">
