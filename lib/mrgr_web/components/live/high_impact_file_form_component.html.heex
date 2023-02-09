@@ -71,7 +71,7 @@
             class: "block text-sm font-medium text-gray-700 mt-px pt-2"
           ) %>
           <div class="col-span-2 flex mt-1 items-center">
-            <.checkbox f={@f} attr={@attr} />
+            <.checkbox f={f} attr={:notify_user} />
             <p class="ml-1 text-sm text-gray-500" id="notify_user-description">
               Send an email to <%= @current_user.email %> when a PR matching this pattern is opened.
             </p>
