@@ -107,15 +107,19 @@ h5 {
 }
 
 .major-pane {
-  @apply basis-1/2
+  @apply basis-1/2;
 }
 
 .main-pane {
-  @apply flex flex-col space-y-8
+  @apply flex flex-col space-y-8;
 }
 
 .two-pane-layout {
-  @apply mt-4 flex space-x-4
+  @apply flex space-x-4;
+}
+
+.white-box {
+  @apply p-4 rounded-lg bg-white shadow;
 }
 
 .tooltip {

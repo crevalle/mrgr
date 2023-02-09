@@ -1,11 +1,14 @@
 <div class="flex flex-col space-y-4">
   <div class="flex justify-between">
     <div class="flex flex-col">
-      <.heading title="Open Pull Requests" />
-      <.showing_repos_text
-        showing={Enum.count(filter_showing(@repos))}
-        total={Enum.count(@repos)}
-      />
+      <.heading title="Open Pull Requests">
+        <:description>
+          <.showing_repos_text
+            showing={Enum.count(filter_showing(@repos))}
+            total={Enum.count(@repos)}
+          />
+        </:description>
+      </.heading>
     </div>
 
     <%= live_render(@socket, MrgrWeb.Live.AnalyticsBox,

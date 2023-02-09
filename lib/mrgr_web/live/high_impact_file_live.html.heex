@@ -1,27 +1,29 @@
-<.heading title="High Impact Files">
-  <:description>
-    Designate files and folders as High Impact to get alerts when PRs with changes to them are opened.  They'll also appear in the High Impact tab on your home screen.
-  </:description>
-</.heading>
+<div class="flex flex-col space-y-4">
+  <.heading title="High Impact Files">
+    <:description>
+      Designate files and folders as High Impact to get alerts when PRs with changes to them are opened.  They'll also appear in the High Impact tab on your home screen.
+    </:description>
+  </.heading>
 
-<div class="two-pane-layout">
-  <div class="main-pane w-1/2">
-    <.live_component
-      :for={repo <- @repos}
-      module={MrgrWeb.Components.Live.HighImpactFileComponent}
-      id={"repo_#{repo.id}"}
-      repo={repo}
-      timezone={@timezone}
-    />
-  </div>
-  <div id="detail-pane">
-    <.live_component
-      :if={@form}
-      module={MrgrWeb.Components.Live.HighImpactFileFormComponent}
-      id="fca_form"
-      form={@form}
-      current_user={@current_user}
-      timezone={@timezone}
-    />
+  <div class="two-pane-layout">
+    <div class="main-pane w-1/2">
+      <.live_component
+        :for={repo <- @repos}
+        module={MrgrWeb.Components.Live.HighImpactFileComponent}
+        id={"repo_#{repo.id}"}
+        repo={repo}
+        timezone={@timezone}
+      />
+    </div>
+    <div id="detail-pane">
+      <.live_component
+        :if={@form}
+        module={MrgrWeb.Components.Live.HighImpactFileFormComponent}
+        id="fca_form"
+        form={@form}
+        current_user={@current_user}
+        timezone={@timezone}
+      />
+    </div>
   </div>
 </div>
