@@ -804,6 +804,8 @@ defmodule MrgrWeb.Components.UI do
           </div>
         <% end %>
 
+        <.nav_item route={~p"/profile"} icon="cog-6-tooth" label="Profile" . />
+
         <div class="py-1">
           <.nav_item
             route={Routes.auth_path(MrgrWeb.Endpoint, :delete)}

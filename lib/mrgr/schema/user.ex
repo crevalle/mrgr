@@ -13,6 +13,7 @@ defmodule Mrgr.Schema.User do
     field(:location, :string)
     field(:name, :string)
     field(:nickname, :string)
+    field(:notification_email, :string)
     field(:phone, :string)
     field(:refresh_token, :string)
     field(:token, :string)
@@ -58,6 +59,7 @@ defmodule Mrgr.Schema.User do
     location
     name
     nickname
+    notification_email
     phone
   ]a
 
@@ -98,6 +100,7 @@ defmodule Mrgr.Schema.User do
     %__MODULE__{}
     |> cast(params, @create_params)
     |> accept_login_param()
+    |> set_default_notification_email()
     |> tokens_changeset(params)
     |> cast_embed(:urls, with: &url_changeset/2)
   end
@@ -131,6 +134,12 @@ defmodule Mrgr.Schema.User do
     |> put_timestamp(:last_seen_at)
   end
 
+  def notification_changeset(schema, params) do
+    schema
+    |> cast(params, [:notification_email])
+    |> validate_required(:notification_email)
+  end
+
   def image(%{avatar_url: url}) when is_bitstring(url), do: url
   def image(%{image: url}) when is_bitstring(url), do: url
   def image(_gee_i_dunno), do: ""
@@ -142,6 +151,17 @@ defmodule Mrgr.Schema.User do
       put_change(changeset, :nickname, changeset.params["login"])
     else
       _got_nickname ->
+        changeset
+    end
+  end
+
+  defp set_default_notification_email(changeset) do
+    case get_change(changeset, :notification_email) do
+      nil ->
+        email = get_change(changeset, :email)
+        put_change(changeset, :notification_email, email)
+
+      _set ->
         changeset
     end
   end

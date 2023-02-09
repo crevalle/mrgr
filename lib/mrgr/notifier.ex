@@ -12,7 +12,7 @@ defmodule Mrgr.Notifier do
 
     new()
     |> from("noreply@mrgr.io")
-    |> to(recipient.email)
+    |> to(recipient.notification_email)
     |> subject("[Mrgr] File Change Alert in #{assigns.repository_name}")
     |> render_body("hif_alert.html", assigns)
   end

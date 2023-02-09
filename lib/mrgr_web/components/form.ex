@@ -7,7 +7,7 @@ defmodule MrgrWeb.Components.Form do
 
   def error(assigns) do
     ~H"""
-    <%= MrgrWeb.ErrorHelpers.error_tag(@form, @attr, class: "mt-2 text-sm text-red-600") %>
+    <%= MrgrWeb.ErrorHelpers.error_tag(@form, @attr, class: "mt-1 text-sm text-red-600") %>
     """
   end
 

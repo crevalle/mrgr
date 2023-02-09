@@ -2,6 +2,16 @@ defmodule Mrgr.User do
   alias Mrgr.Schema.User, as: Schema
   alias Mrgr.User.Query, as: Query
 
+  def rt_notification_emails do
+    Schema
+    |> Mrgr.Repo.all()
+    |> Enum.map(fn u ->
+      u
+      |> Schema.notification_changeset(%{notification_email: u.email})
+      |> Mrgr.Repo.update()
+    end)
+  end
+
   def all do
     Schema
     |> Query.with_current_installation()

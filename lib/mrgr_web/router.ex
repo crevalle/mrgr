@@ -66,6 +66,8 @@ defmodule MrgrWeb.Router do
   scope "/", MrgrWeb do
     pipe_through [:browser, :authenticate, :require_installation]
 
+    live "/profile", ProfileLive, :show
+
     live "/pull-requests", PullRequestLive, :index
     live "/pull-requests/:id", PullRequestLive, :show
     live "/high-impact-files", HighImpactFileLive, :index

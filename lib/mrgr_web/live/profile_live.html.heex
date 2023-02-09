@@ -1,0 +1,57 @@
+<div class="flex flex-col space-y-4">
+  <div class="flex justify-between">
+    <.heading title="Your Profile" />
+  </div>
+
+  <div class="two-pane-layout">
+    <div class="main-pane">
+      <div class="white-box">
+        <div class="grid grid-cols-3 gap-4 items-start">
+          <div class="font-semibold">Name</div>
+          <div class="col-span-2"><%= @current_user.name %></div>
+
+          <div class="font-semibold">Organization</div>
+          <div class="col-span-2"><%= @current_user.current_installation.account.login %></div>
+
+          <div class="font-semibold">Handle</div>
+          <div class="col-span-2"><%= @current_user.nickname %></div>
+
+          <div class="font-semibold">Email</div>
+          <div class="col-span-2"><%= @current_user.email %></div>
+
+          <div class="font-semibold">Notification Email</div>
+          <div class="col-span-2 flex flex-col">
+            <%= if @changeset do %>
+              <.form :let={f} for={@changeset} phx-submit="save">
+                <div class="flex flex-col">
+                  <div class="flex items-center space-x-1">
+                    <%= text_input(f, :notification_email,
+                      placeholder: "you@company_email.com",
+                      class: "w-full text-sm font-medium rounded-md text-gray-700 mt-px pt-2"
+                    ) %>
+                    <.button
+                      type="submit"
+                      phx-disable-with="Saving..."
+                      class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+                    >
+                      Save
+                    </.button>
+                  </div>
+                  <.error form={f} attr={:notification_email} />
+                </div>
+              </.form>
+            <% else %>
+              <p>
+                <%= @current_user.notification_email %>
+                <.l phx-click="edit">Edit</.l>
+              </p>
+            <% end %>
+            <p class="text-gray-500 text-sm">
+              Alerts for High Impact Files will go to this address
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
