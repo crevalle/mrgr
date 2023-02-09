@@ -17,7 +17,7 @@ defmodule MrgrWeb.JS do
   def hide_detail(input \\ %JS{})
 
   def hide_detail(%Phoenix.LiveView.Socket{} = socket) do
-    Phoenix.LiveView.push_event(socket, "remove-element", %{id: "detail-pane"})
+    Phoenix.LiveView.push_event(socket, "hide-element", %{id: "detail-pane"})
   end
 
   def hide_detail(js) do

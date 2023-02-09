@@ -75,21 +75,6 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
-  def detail_content(assigns) do
-    ~H"""
-    <div class="flex flex-col space-y-4">
-      <div class="flex justify-between items-start">
-        <.h3>
-          <%= render_slot(@title) %>
-        </.h3>
-        <.close_detail_pane phx_click={JS.push("hide-detail")} />
-      </div>
-
-      <%= render_slot(@inner_block) %>
-    </div>
-    """
-  end
-
   def hif_badge_list(%{hifs: []} = assigns) do
     ~H[]
   end
