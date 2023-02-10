@@ -69,12 +69,13 @@ defmodule MrgrWeb.Components.UI do
         .
       />
 
-      <.nav_item
-        route={Routes.repository_list_path(MrgrWeb.Endpoint, :index)}
-        icon="newspaper"
-        label="Repositories"
-        .
-      />
+      <.l
+        href={Routes.repository_list_path(MrgrWeb.Endpoint, :index)}
+        class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center space-x-2 px-2 py-2 text-sm font-medium rounded-md"
+      >
+        <%= img_tag("images/repository-32.png", class: "opacity-40 h-6 w-6") %>
+        <span>Repositories</span>
+      </.l>
 
       <.nav_item route={Routes.label_list_path(MrgrWeb.Endpoint, :index)} icon="tag" label="Labels" . />
 
