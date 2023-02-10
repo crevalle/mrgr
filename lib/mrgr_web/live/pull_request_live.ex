@@ -46,26 +46,6 @@ defmodule MrgrWeb.PullRequestLive do
     end
   end
 
-  def handle_event("refresh-prs", _params, socket) do
-    Task.async(fn ->
-      time = Mrgr.DateTime.now()
-
-      socket.assigns.current_user.current_installation
-      |> Mrgr.Repo.preload(:repositories)
-      |> Mrgr.Installation.refresh_pull_requests!()
-
-      elapsed = Mrgr.DateTime.elapsed(time, :second)
-
-      IO.inspect(elapsed, label: "ELASPED TIME")
-
-      {:time, elapsed}
-    end)
-
-    socket
-    |> Flash.put(:info, "Refreshed 🛁")
-    |> noreply()
-  end
-
   def handle_event("paginate", params, socket) do
     {tabs, selected_tab} = Tabs.paginate(params, socket)
 

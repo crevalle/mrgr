@@ -19,12 +19,6 @@
     <.merge_freeze_menu repos={@repos} />
   </div>
 
-  <div :if={admin?(@current_user)}>
-    <.l phx-click="refresh-prs" class="btn">
-      Refresh PRS
-    </.l>
-  </div>
-
   <.frozen_repo_list :if={Enum.any?(@frozen_repos)} repos={@frozen_repos} />
 
   <div class="flex items-center items-stretch flex-wrap border-b-2">
