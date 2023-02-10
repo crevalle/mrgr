@@ -122,6 +122,10 @@ h5 {
   @apply p-4 rounded-lg bg-white shadow;
 }
 
+.link {
+  @apply text-teal-700 hover:text-teal-500;
+}
+
 .tooltip {
   position: relative;
   display: inline-block;

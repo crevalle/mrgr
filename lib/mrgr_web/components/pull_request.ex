@@ -264,7 +264,7 @@ defmodule MrgrWeb.Components.PullRequest do
       <.aside>
         Customize your view by filtering on Author, Label, or Repository.
         <.l phx-click="edit-tab">
-          Edit Tab Details
+          Edit / Delete Tab
         </.l>
       </.aside>
       <!-- repositories -->
