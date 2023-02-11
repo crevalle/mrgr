@@ -73,7 +73,8 @@
           <div class="flex mt-1 items-center">
             <.checkbox f={f} attr={:notify_user} />
             <p class="pl-4 text-sm text-gray-500" id="notify_user-description">
-              Send an email to <span class="font-semibold"><%= @current_user.email %></span>
+              Send an email to
+              <span class="font-semibold"><%= @current_user.notification_email %></span>
               when a PR that changes this file/folder is opened.
               <.l href={~p"/profile"}>Use a different email</.l>
             </p>
