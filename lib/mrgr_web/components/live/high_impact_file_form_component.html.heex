@@ -70,10 +70,12 @@
           <%= label(f, :notify_user, "Notify Me of new PRs",
             class: "block text-sm font-medium text-gray-700 mt-px pt-2"
           ) %>
-          <div class="col-span-2 flex mt-1 items-center">
+          <div class="col-span-2 flex mt-1 items-center space-x-1">
             <.checkbox f={f} attr={:notify_user} />
-            <p class="ml-1 text-sm text-gray-500" id="notify_user-description">
-              Send an email to <%= @current_user.email %> when a PR matching this pattern is opened.
+            <p class="pt-2 text-sm text-gray-500" id="notify_user-description">
+              Send an email to <span class="font-semibold"><%= @current_user.email %></span>
+              when a PR matching this pattern is opened.<br />
+              <.l href={~p"/profile"}>Use a different email</.l>
             </p>
           </div>
         </div>
