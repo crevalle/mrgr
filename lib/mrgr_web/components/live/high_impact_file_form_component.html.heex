@@ -67,14 +67,14 @@
         </div>
 
         <div class="grid grid-cols-3 gap-4 items-center border-t border-gray-200 pt-5">
-          <%= label(f, :notify_user, "Notify Me of new PRs",
+          <%= label(f, :notify_user, "Notify me of new PRs",
             class: "block text-sm font-medium text-gray-700 mt-px pt-2"
           ) %>
-          <div class="col-span-2 flex mt-1 items-center space-x-1">
+          <div class="flex mt-1 items-center">
             <.checkbox f={f} attr={:notify_user} />
-            <p class="pt-2 text-sm text-gray-500" id="notify_user-description">
+            <p class="pl-4 text-sm text-gray-500" id="notify_user-description">
               Send an email to <span class="font-semibold"><%= @current_user.email %></span>
-              when a PR matching this pattern is opened.<br />
+              when a PR that changes this file/folder is opened.
               <.l href={~p"/profile"}>Use a different email</.l>
             </p>
           </div>
