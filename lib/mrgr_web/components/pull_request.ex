@@ -488,7 +488,7 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
-  def merge_action_state_emoji(%{action_state: :ready_to_merge} = assigns) do
+  def action_state_emoji(%{action_state: :ready_to_merge} = assigns) do
     ~H"""
     <.tooltip>
       <:text>
@@ -499,7 +499,7 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
-  def merge_action_state_emoji(%{action_state: :needs_approval} = assigns) do
+  def action_state_emoji(%{action_state: :needs_approval} = assigns) do
     ~H"""
     <.tooltip>
       <:text>
@@ -510,7 +510,7 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
-  def merge_action_state_emoji(%{action_state: :fix_ci} = assigns) do
+  def action_state_emoji(%{action_state: :fix_ci} = assigns) do
     ~H"""
     <.tooltip>
       <:text>

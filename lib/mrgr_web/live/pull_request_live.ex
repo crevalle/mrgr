@@ -294,7 +294,7 @@ defmodule MrgrWeb.PullRequestLive do
            ] do
     hydrated = Mrgr.PullRequest.preload_for_pending_list(pull_request)
 
-    tabs = Tabs.replace_pull_request(socket.assigns.tabs, hydrated)
+    tabs = Tabs.update_pull_request(socket.assigns.tabs, hydrated)
     selected_tab = get_selected_tab(tabs, socket)
 
     selected_pull_request = maybe_update_selected_pr(hydrated, socket.assigns.detail)
@@ -404,6 +404,12 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   defmodule Tabs do
+    @ready_to_merge "ready-to-merge"
+    @needs_approval "needs-approval"
+    @fix_ci "fix-ci"
+    @snoozed "snoozed"
+    @hifs "hifs"
+
     def new(user) do
       []
       |> Kernel.++(system_tabs_for_user(user))
@@ -454,35 +460,35 @@ defmodule MrgrWeb.PullRequestLive do
     def system_tabs_for_user(user) do
       [
         %{
-          id: "ready-to-merge",
+          id: @ready_to_merge,
           title: "🚀 Ready to Merge",
-          type: "system",
+          type: "action_state",
           meta: %{user: user},
           pull_requests: []
         },
         %{
-          id: "needs-approval",
+          id: @needs_approval,
           title: "⚠️ Needs Approval",
-          type: "system",
+          type: "action_state",
           meta: %{user: user},
           pull_requests: []
         },
         %{
-          id: "fix-ci",
+          id: @fix_ci,
           title: "🛠 Fix CI",
-          type: "system",
+          type: "action_state",
           meta: %{user: user},
           pull_requests: []
         },
         %{
-          id: "hifs",
+          id: @hifs,
           title: "💥 High Impact Changes",
           type: "system",
           meta: %{user: user},
           pull_requests: []
         },
         %{
-          id: "snoozed",
+          id: @snoozed,
           title: "😴 Snoozed",
           type: "system",
           meta: %{user: user},
@@ -503,14 +509,6 @@ defmodule MrgrWeb.PullRequestLive do
       Enum.find(tabs, fn i -> i.id == id end)
     end
 
-    def find_snoozed_tab(tabs) do
-      Enum.find(tabs, &snoozed?/1)
-    end
-
-    def find_needs_approval_tab(tabs) do
-      Enum.find(tabs, &needs_approval?/1)
-    end
-
     def system_tabs(tabs) do
       Enum.reject(tabs, &custom?/1)
     end
@@ -522,11 +520,8 @@ defmodule MrgrWeb.PullRequestLive do
     def custom?(%Mrgr.Schema.PRTab{}), do: true
     def custom?(_), do: false
 
-    def snoozed?(%{id: "snoozed"}), do: true
+    def snoozed?(%{id: @snoozed}), do: true
     def snoozed?(_), do: false
-
-    def needs_approval?(%{id: "needs-approval"}), do: true
-    def needs_approval?(_), do: false
 
     def set_prs_on_tab_from_async(tabs, ref, data) when is_list(tabs) do
       case find_tab_by_ref(tabs, ref) do
@@ -552,18 +547,47 @@ defmodule MrgrWeb.PullRequestLive do
     # data for a different tab
     def set_prs_on_tab_from_async(tab, _ref, _data), do: tab
 
-    def replace_pull_request(tabs, pr) do
-      Enum.map(tabs, &replace_pr_in_tab(&1, pr))
+    def update_pull_request(tabs, pr) do
+      tabs
+      |> update_action_state_tabs(pr)
+      # replaces the PR again in the action state tabs, but i don't
+      # care about the extra work rn.  this code is simpler than extracting
+      # non action state tabs and just replacing it in those.  can optimize laterz
+      |> Enum.map(&replace_pr_in_tab(&1, pr))
     end
 
     def remove_pull_request(tabs, pr) do
       Enum.map(tabs, &excise_pr_from_tab(&1, pr))
     end
 
+    def update_action_state_tabs(tabs, pull_request) do
+      # pr may move from eg Fix CI to Ready to Merge
+
+      case Mrgr.PullRequest.action_state(pull_request) do
+        :ready_to_merge ->
+          tabs
+          |> excise_pr_from_tab(@needs_approval, pull_request)
+          |> excise_pr_from_tab(@fix_ci, pull_request)
+          |> update_or_poke_pr_in_tab(@ready_to_merge, pull_request)
+
+        :needs_approval ->
+          tabs
+          |> excise_pr_from_tab(@ready_to_merge, pull_request)
+          |> excise_pr_from_tab(@fix_ci, pull_request)
+          |> update_or_poke_pr_in_tab(@needs_approval, pull_request)
+
+        :fix_ci ->
+          tabs
+          |> excise_pr_from_tab(@ready_to_merge, pull_request)
+          |> excise_pr_from_tab(@needs_approval, pull_request)
+          |> update_or_poke_pr_in_tab(@fix_ci, pull_request)
+      end
+    end
+
     def receive_opened_pull_request(tabs, pr) do
       needs_approval_tab =
         tabs
-        |> find_needs_approval_tab()
+        |> find_tab_by_id(@needs_approval)
         |> poke_pr_into_tab(pr)
 
       refreshing =
@@ -580,7 +604,7 @@ defmodule MrgrWeb.PullRequestLive do
 
       snoozed =
         tabs
-        |> find_snoozed_tab()
+        |> find_tab_by_id(@snoozed)
         |> poke_pr_into_tab(pull_request)
 
       replace_tabs(tabs, [updated, snoozed])
@@ -600,7 +624,16 @@ defmodule MrgrWeb.PullRequestLive do
     def remove_pr_from_snoozed_tab(tabs, pull_request) do
       updated_tab =
         tabs
-        |> find_snoozed_tab()
+        |> find_tab_by_id(@snoozed)
+        |> excise_pr_from_tab(pull_request)
+
+      replace_tabs(tabs, updated_tab)
+    end
+
+    def excise_pr_from_tab(tabs, id, pull_request) when is_list(tabs) do
+      updated_tab =
+        tabs
+        |> find_tab_by_id(id)
         |> excise_pr_from_tab(pull_request)
 
       replace_tabs(tabs, updated_tab)
@@ -614,6 +647,22 @@ defmodule MrgrWeb.PullRequestLive do
       updated_page = remove_pr_from_page(page, pull_request)
 
       set_prs_on_tab(tab, updated_page)
+    end
+
+    def update_or_poke_pr_in_tab(tabs, id, pull_request) do
+      updated_tab =
+        tabs
+        |> find_tab_by_id(id)
+        |> update_or_poke_pr_in_tab(pull_request)
+
+      replace_tabs(tabs, updated_tab)
+    end
+
+    def update_or_poke_pr_in_tab(tab, pull_request) do
+      case contains_pr?(tab, pull_request) do
+        true -> replace_pr_in_tab(tab, pull_request)
+        false -> poke_pr_into_tab(tab, pull_request)
+      end
     end
 
     def poke_pr_into_tab(tab, pull_request) do
@@ -693,23 +742,23 @@ defmodule MrgrWeb.PullRequestLive do
 
     def fetch_paged_pull_requests(tab, page_params \\ %{})
 
-    def fetch_paged_pull_requests(%{id: "ready-to-merge"} = tab, opts) do
+    def fetch_paged_pull_requests(%{id: @ready_to_merge} = tab, opts) do
       Mrgr.PullRequest.paged_ready_to_merge_prs(tab.meta.user, opts)
     end
 
-    def fetch_paged_pull_requests(%{id: "needs-approval"} = tab, opts) do
+    def fetch_paged_pull_requests(%{id: @needs_approval} = tab, opts) do
       Mrgr.PullRequest.paged_needs_approval_prs(tab.meta.user, opts)
     end
 
-    def fetch_paged_pull_requests(%{id: "fix-ci"} = tab, opts) do
+    def fetch_paged_pull_requests(%{id: @fix_ci} = tab, opts) do
       Mrgr.PullRequest.paged_fix_ci_prs(tab.meta.user, opts)
     end
 
-    def fetch_paged_pull_requests(%{id: "hifs"} = tab, opts) do
+    def fetch_paged_pull_requests(%{id: @hifs} = tab, opts) do
       Mrgr.PullRequest.paged_high_impact_prs(tab.meta.user, opts)
     end
 
-    def fetch_paged_pull_requests(%{id: "snoozed"} = tab, opts) do
+    def fetch_paged_pull_requests(%{id: @snoozed} = tab, opts) do
       Mrgr.PullRequest.paged_snoozed_prs(tab.meta.user, opts)
     end
 
@@ -742,7 +791,7 @@ defmodule MrgrWeb.PullRequestLive do
     end
 
     def remove_pr_from_page(page, pr) do
-      case Mrgr.List.member?(page.entries, pr) do
+      case contains_pr?(page, pr) do
         true ->
           entries = Mrgr.List.remove(page.entries, pr)
           updated_count = page.total_entries - 1
@@ -756,6 +805,12 @@ defmodule MrgrWeb.PullRequestLive do
 
     def replace_pr_in_page(page, pr) do
       %{page | entries: Mrgr.List.replace(page.entries, pr)}
+    end
+
+    def contains_pr?(%{pull_requests: page} = _tab, pr), do: contains_pr?(page, pr)
+
+    def contains_pr?(%{entries: entries} = _page, pr) do
+      Mrgr.List.member?(entries, pr)
     end
   end
 end

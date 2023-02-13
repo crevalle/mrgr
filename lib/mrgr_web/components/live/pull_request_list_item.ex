@@ -45,7 +45,7 @@ defmodule MrgrWeb.Components.Live.PullRequestListItem do
   def to_message("author", pull_request) do
     author = username(pull_request.author)
 
-    case Mrgr.PullRequest.merge_action_state(pull_request) do
+    case Mrgr.PullRequest.action_state(pull_request) do
       :ready_to_merge -> "#{author} this PR is approved, can you please merge it?"
       :needs_approval -> "#{author} this PR needs approvals, can you poke your teammates?"
       :fix_ci -> "#{author} CI is broken, can you please fix it?"

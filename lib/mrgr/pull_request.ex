@@ -900,7 +900,7 @@ defmodule Mrgr.PullRequest do
     end
   end
 
-  def merge_action_state(pull_request) do
+  def action_state(pull_request) do
     cond do
       ready_to_merge?(pull_request) -> :ready_to_merge
       needs_approval?(pull_request) -> :needs_approval

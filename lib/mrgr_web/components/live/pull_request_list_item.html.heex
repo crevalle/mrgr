@@ -8,9 +8,9 @@
       <!-- title -->
       <div class="flex flex-col">
         <div class="flex items-center space-x-2">
-          <.merge_action_state_emoji
+          <.action_state_emoji
             :if={@show_action_state_emoji}
-            action_state={Mrgr.PullRequest.merge_action_state(@pull_request)}
+            action_state={Mrgr.PullRequest.action_state(@pull_request)}
           />
           <.l
             href={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)}
