@@ -674,7 +674,7 @@ defmodule MrgrWeb.Components.UI do
       <div
         style="display: none;"
         id="merge-freeze-menu"
-        class="origin-top-right absolute right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+        class="origin-top-right absolute on-top right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
         role="menu"
         aria-orientation="vertical"
         aria-labelledby="freeze-menu-button"

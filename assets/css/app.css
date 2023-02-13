@@ -6,6 +6,11 @@ h5 {
   @apply font-medium;
 }
 
+.on-top {
+   -webkit-transform: translate3d(0,0,0);
+   z-index: 999;
+}
+
 .alert {
   padding: 15px;
   border: 1px solid transparent;
