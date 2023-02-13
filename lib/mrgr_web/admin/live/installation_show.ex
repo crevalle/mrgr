@@ -9,10 +9,10 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
   def render(assigns) do
     ~H"""
     <div class="px-4 sm:px-6 lg:px-8">
-      <.heading title={"Installation #{@installation.id}"} />
+      <.heading title={"Installation #{@installation.id} - #{@installation.account.login}"} />
 
       <.l href={Routes.admin_pull_request_path(@socket, :index, @installation.id)}>
-        Pull Requests
+        Pull Requests (<%= @open_pr_count %> open)
       </.l>
 
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
@@ -98,9 +98,14 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
   def mount(%{"id" => id}, _session, socket) do
     if connected?(socket) do
       installation = Mrgr.Installation.find_admin(id)
-      {:ok, assign(socket, :installation, installation)}
+      open_pr_count = Mrgr.PullRequest.open_pr_count(id)
+
+      socket
+      |> assign(:installation, installation)
+      |> assign(:open_pr_count, open_pr_count)
+      |> ok()
     else
-      {:ok, socket}
+      ok(socket)
     end
   end
 end

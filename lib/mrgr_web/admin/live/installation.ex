@@ -15,32 +15,35 @@ defmodule MrgrWeb.Admin.Live.Installation do
             <thead class="bg-white">
               <tr>
                 <.th>ID</.th>
-                <.th>App ID</.th>
-                <.th>App Slug</.th>
                 <.th>Type</.th>
                 <.th>Creator</.th>
                 <.th>Account</.th>
-                <.th>Actions</.th>
                 <.th>Onboarding Status</.th>
+                <.th>Open PRs</.th>
                 <.th>Repositories</.th>
                 <.th>Updated</.th>
                 <.th>Created</.th>
+                <.th>Actions</.th>
               </tr>
             </thead>
 
             <%= for i <- @installations do %>
               <.tr striped={true}>
                 <.td>
-                  <%= link(i.id,
-                    to: Routes.admin_installation_path(MrgrWeb.Endpoint, :show, i.id),
-                    class: "text-teal-700 hover:text-teal-500"
-                  ) %>
+                  <%= i.id %>
                 </.td>
-                <.td><%= i.app_id %></.td>
-                <.td><%= i.app_slug %></.td>
                 <.td><%= i.target_type %></.td>
                 <.td><%= i.creator.nickname %></.td>
-                <.td><%= i.account.login %></.td>
+                <.td>
+                  <.l href={Routes.admin_installation_path(MrgrWeb.Endpoint, :show, i.id)}>
+                    <%= i.account.login %>
+                  </.l>
+                </.td>
+                <.td><%= i.state %></.td>
+                <.td><%= get_pr_count(@open_pr_counts, i) %></.td>
+                <.td><%= Enum.count(i.repositories) %></.td>
+                <.td><%= ts(i.updated_at, assigns.timezone) %></.td>
+                <.td><%= ts(i.inserted_at, assigns.timezone) %></.td>
                 <.td>
                   <.outline_button
                     phx-click={JS.push("refresh-prs", value: %{installation_id: i.id})}
@@ -49,10 +52,6 @@ defmodule MrgrWeb.Admin.Live.Installation do
                     Refresh PRs
                   </.outline_button>
                 </.td>
-                <.td><%= i.state %></.td>
-                <.td><%= Enum.count(i.repositories) %></.td>
-                <.td><%= ts(i.updated_at, assigns.timezone) %></.td>
-                <.td><%= ts(i.inserted_at, assigns.timezone) %></.td>
               </.tr>
             <% end %>
           </table>
@@ -67,14 +66,26 @@ defmodule MrgrWeb.Admin.Live.Installation do
       # subscribe()
 
       installations = Mrgr.Installation.all_admin()
+      open_pr_counts = open_pr_counts(installations)
 
       socket
       |> assign(:installations, installations)
+      |> assign(:open_pr_counts, open_pr_counts)
       |> put_title("Admin - Installations")
       |> ok()
     else
       ok(socket)
     end
+  end
+
+  def open_pr_counts(installations) do
+    Enum.reduce(installations, %{}, fn i, acc ->
+      Map.put(acc, i.id, Mrgr.PullRequest.open_pr_count(i.id))
+    end)
+  end
+
+  def get_pr_count(counts, installation) do
+    Map.get(counts, installation.id)
   end
 
   def handle_event("refresh-prs", %{"installation_id" => id}, socket) do
