@@ -9,7 +9,7 @@ defmodule Mrgr.Github.Commit do
     field(:message, :string)
     field(:message_body, :string)
     field(:sha, :string)
-    field(:status, :string)
+    field(:status, :map)
     field(:url, :string)
 
     embeds_one(:author, Mrgr.Github.GitActor, on_replace: :update)
