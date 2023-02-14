@@ -158,7 +158,7 @@ defmodule MrgrWeb.Components.UI do
   def detail_content(assigns) do
     ~H"""
     <div class="flex flex-col space-y-4">
-      <div class="flex justify-between items-start">
+      <div class="flex justify-between items-center">
         <.h3>
           <%= render_slot(@title) %>
         </.h3>

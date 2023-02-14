@@ -69,7 +69,7 @@
         </div>
       </div>
     <% else %>
-      <div role="list" class="flex flex-col space-y-8 basis-4/5" id="pending-pull-request-list">
+      <div role="list" class="main-pane" id="pending-pull-request-list">
         <.live_component
           :for={pull_request <- @selected_tab.pull_requests}
           module={MrgrWeb.Components.Live.PullRequestListItem}
@@ -85,8 +85,10 @@
       </div>
     <% end %>
 
-    <div id="detail-pane">
-      <.render_detail :if={@detail} item={@detail} attr={@selected_attr} timezone={@timezone} />
+    <div class="w-2/5">
+      <div id="detail-pane">
+        <.render_detail :if={@detail} item={@detail} attr={@selected_attr} timezone={@timezone} />
+      </div>
     </div>
   </div>
 </div>

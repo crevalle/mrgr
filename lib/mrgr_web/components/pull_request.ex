@@ -27,7 +27,7 @@ defmodule MrgrWeb.Components.PullRequest do
     ~H"""
     <.detail_content>
       <:title>
-        Comments (<%= Enum.count(@pull_request.comments) %>)
+        <%= @pull_request.title %> - Comments (<%= Enum.count(@pull_request.comments) %>)
       </:title>
 
       <div class="flex flex-col space-y-4 divide-y divide-gray-200">
@@ -45,7 +45,7 @@ defmodule MrgrWeb.Components.PullRequest do
     ~H"""
     <.detail_content>
       <:title>
-        Commits (<%= Enum.count(@pull_request.commits) %>)
+        <%= @pull_request.title %> - Commits (<%= Enum.count(@pull_request.commits) %>)
       </:title>
 
       <div class="flex flex-col space-y-4 divide-y divide-gray-200">
@@ -59,7 +59,7 @@ defmodule MrgrWeb.Components.PullRequest do
     ~H"""
     <.detail_content>
       <:title>
-        Files Changed (<%= Enum.count(@pull_request.files_changed) %>)
+        <%= @pull_request.title %> - Files Changed (<%= Enum.count(@pull_request.files_changed) %>)
       </:title>
 
       <.hif_badge_list hifs={@pull_request.high_impact_files} />
@@ -108,7 +108,7 @@ defmodule MrgrWeb.Components.PullRequest do
       |> assign(:color, color)
 
     ~H"""
-    <div style={"border-color: #{@color};"} class="border-l-2"><pre><%= @filename %></pre></div>
+    <div style={"border-color: #{@color};"} class="border-l-4"><pre><%= @filename %></pre></div>
     """
   end
 
@@ -207,7 +207,7 @@ defmodule MrgrWeb.Components.PullRequest do
           ) %>
         </div>
       </div>
-      <p class="text-gray-500 italic text-sm ">
+      <p class="text-gray-500 italic text-sm max-h-10">
         <%= Mrgr.Schema.Comment.body(@comment) %>
       </p>
     </div>
@@ -527,6 +527,21 @@ defmodule MrgrWeb.Components.PullRequest do
       <%= @showing %>/<%= @total %> repos displayed.
       <.l href={~p"/repositories"} class="text-xs text-teal-700 hover:text-teal-500">Configure</.l>
     </p>
+    """
+  end
+
+  attr :class, :string, default: nil
+
+  slot :inner_block, required: true
+
+  def glance_column(assigns) do
+    ~H"""
+    <div class={[
+      "flex flex-col h-48 overflow-hidden basis-1/3",
+      @class
+    ]}>
+      <%= render_slot(@inner_block) %>
+    </div>
     """
   end
 end

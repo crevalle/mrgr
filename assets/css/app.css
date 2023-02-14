@@ -98,7 +98,7 @@ h5 {
 }
 
 #detail-pane {
-  @apply p-3 w-1/2 bg-white overflow-hidden shadow rounded-lg;
+  @apply sticky top-6 overflow-visible p-3 bg-white shadow rounded-lg;
 
   visibility: hidden;
   opacity: 0;
@@ -116,7 +116,7 @@ h5 {
 }
 
 .main-pane {
-  @apply flex flex-col space-y-8;
+  @apply flex flex-col space-y-8 w-9/12;
 }
 
 .two-pane-layout {
