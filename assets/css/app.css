@@ -170,7 +170,7 @@ h5 {
 }
 
 .tab-select-button.selected {
-  @apply border-teal-700 text-teal-700 bg-white border-x-2 border-b-2;
+  @apply border-teal-700 text-teal-700 hover:cursor-default bg-white border-x-2 border-b-2;
 }
 
 .dropdown:hover .dropdown-content {display: block;}

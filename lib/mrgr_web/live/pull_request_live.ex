@@ -77,21 +77,32 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
-  def handle_event("edit-tab", _params, socket) do
+  def handle_event("cancel-tab-edit", params, socket) do
+    tabs = Tabs.stop_editing(socket.assigns.tabs, socket.assigns.selected_tab.id)
+    selected = get_selected_tab(tabs, socket)
+
     socket
-    |> assign(:detail, socket.assigns.selected_tab)
-    |> show_detail()
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected)
     |> noreply()
   end
 
-  def handle_event("update-tab", %{"tab" => params}, socket) do
+  def handle_event("save-tab", %{"tab" => params}, socket) do
     {tabs, updated_tab} = Tabs.update(socket.assigns.tabs, socket.assigns.selected_tab, params)
 
     socket
     |> assign(:tabs, tabs)
     |> assign(:selected_tab, updated_tab)
-    |> assign(:detail, nil)
-    |> hide_detail()
+    |> noreply()
+  end
+
+  def handle_event("edit-tab", %{"id" => id}, socket) do
+    tabs = Tabs.edit(socket.assigns.tabs, id)
+    selected = get_selected_tab(tabs, socket)
+
+    socket
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected)
     |> noreply()
   end
 
@@ -424,10 +435,24 @@ defmodule MrgrWeb.PullRequestLive do
       {updated_tabs, new_tab}
     end
 
+    def edit(tabs, id) do
+      tab = find_tab_by_id(tabs, id)
+      editing = %{tab | editing: true}
+
+      replace_tabs(tabs, editing)
+    end
+
+    def stop_editing(tabs, id) do
+      tab = find_tab_by_id(tabs, id)
+      editing = %{tab | editing: false}
+
+      replace_tabs(tabs, editing)
+    end
+
     def update(tabs, tab, params) do
       {:ok, updated_tab} = Mrgr.PRTab.update(tab, params)
 
-      updated_tabs = reload_tab(tabs, updated_tab)
+      updated_tabs = reload_tab(tabs, %{updated_tab | editing: false})
 
       {updated_tabs, updated_tab}
     end

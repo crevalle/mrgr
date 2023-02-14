@@ -434,27 +434,71 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  attr :editing, :boolean, default: false
+  attr :selected?, :boolean, default: false
+  attr :tab, :map
+
+  def pr_tab(%{tab: %{editing: true}} = assigns) do
+    ~H"""
+    <div
+      class="flex items-center tab-select-button selected"
+      id={"#{@tab.id}-tab"}
+      role="tab"
+      aria-selected="false"
+      role="presentation"
+    >
+      <.form :let={f} for={:tab} phx-submit="save-tab" phx-click-away="cancel-tab-edit">
+        <%= text_input(f, :title,
+          value: "#{@tab.title}",
+          placeholder: "name this tab",
+          autofocus: true,
+          class:
+            "text-gray-700 py-1 px-1.5 outline-none focus:outline-none focus:ring-teal-500 focus:border-teal-500 w-40 text-sm rounded-md"
+        ) %>
+      </.form>
+
+      <.pr_count_badge items={@tab.pull_requests} />
+    </div>
+    """
+  end
+
+  def pr_tab(%{tab: %Mrgr.Schema.PRTab{}, selected?: true} = assigns) do
+    ~H"""
+    <div
+      class="flex items-center tab-select-button selected"
+      id={"#{@tab.id}-tab"}
+      role="tab"
+      aria-selected="false"
+      role="presentation"
+    >
+      <h2 class="cursor-text" phx-click={JS.push("edit-tab", value: %{id: @tab.id})}>
+        <%= @tab.title || "untitled" %>
+      </h2>
+      <.pr_count_badge items={@tab.pull_requests} />
+    </div>
+    """
+  end
+
+  def pr_tab(%{selected?: true} = assigns) do
+    ~H"""
+    <div
+      class="flex items-center tab-select-button selected"
+      id={"#{@tab.id}-tab"}
+      role="tab"
+      aria-selected="false"
+      role="presentation"
+    >
+      <h2><%= @tab.title || "untitled" %></h2>
+      <.pr_count_badge items={@tab.pull_requests} />
+    </div>
+    """
+  end
+
   def pr_tab(assigns) do
-    selected =
-      case assigns.selected? do
-        true -> "selected"
-        false -> ""
-      end
-
-    class = ~w(
-      flex
-      items-center
-      tab-select-button
-      #{selected}
-    )
-
-    assigns =
-      assigns
-      |> assign(:class, class)
-
     ~H"""
     <div
       class={@class}
+      class="flex items-center tab-select-button"
       phx-click={JS.push("select-tab", value: %{id: @tab.id})}
       id={"#{@tab.id}-tab"}
       role="tab"

@@ -15,14 +15,6 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
-  def render_detail(%{item: %Mrgr.Schema.PRTab{}} = assigns) do
-    ~H"""
-    <div class="flex flex-col space-y-6 bg-white rounded-md">
-      <.pr_tab_form tab={@item} />
-    </div>
-    """
-  end
-
   def pull_request_detail(%{attr: "comments"} = assigns) do
     ~H"""
     <.detail_content>
@@ -263,8 +255,8 @@ defmodule MrgrWeb.Components.PullRequest do
     <div class="flex flex-col mt-2 space-y-3">
       <.aside>
         Customize your view by filtering on Author, Label, or Repository.
-        <.l phx-click="edit-tab">
-          Edit / Delete Tab
+        <.l phx-click="delete-tab" data={[confirm: "Sure about that?"]}>
+          delete tab
         </.l>
       </.aside>
       <!-- repositories -->
@@ -436,40 +428,6 @@ defmodule MrgrWeb.Components.PullRequest do
       <.aside>
         Snoozed PRs are hidden from your main workflow and aren't included in the badge counts.  They may be things you want to deal with later, like in a day or two, or things that are outstanding and just noise.
       </.aside>
-    </div>
-    """
-  end
-
-  def pr_tab_form(assigns) do
-    ~H"""
-    <.detail_content>
-      <:title>
-        Edit Tab Title
-      </:title>
-    </.detail_content>
-    <div class="flex flex-col">
-      <.form :let={f} for={:tab} phx-submit="update-tab">
-        <div class="flex flex-col space-y-4">
-          <%= text_input(f, :title,
-            placeholder: "give this view a name",
-            value: @tab.title,
-            class: "w-full text-sm font-medium rounded-md text-gray-700 mt-px pt-2"
-          ) %>
-
-          <div class="flex justify-between items-center">
-            <.button
-              type="submit"
-              phx-disable-with="Saving..."
-              class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
-            >
-              Save
-            </.button>
-            <.dangerous_link phx-click="delete-tab" data={[confirm: "Sure about that?"]}>
-              delete tab
-            </.dangerous_link>
-          </div>
-        </div>
-      </.form>
     </div>
     """
   end

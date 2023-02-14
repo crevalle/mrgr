@@ -6,6 +6,7 @@ defmodule Mrgr.Schema.PRTab do
 
     field(:meta, :map, default: %{}, virtual: true)
     field(:type, :string, virtual: true, default: "custom")
+    field(:editing, :boolean, default: false, virtual: true)
 
     field(:pull_requests, {:array, :map}, default: [], virtual: true)
 
