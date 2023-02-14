@@ -77,7 +77,7 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
-  def handle_event("cancel-tab-edit", params, socket) do
+  def handle_event("cancel-tab-edit", _params, socket) do
     tabs = Tabs.stop_editing(socket.assigns.tabs, socket.assigns.selected_tab.id)
     selected = get_selected_tab(tabs, socket)
 
