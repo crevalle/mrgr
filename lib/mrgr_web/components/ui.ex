@@ -497,7 +497,6 @@ defmodule MrgrWeb.Components.UI do
   def pr_tab(assigns) do
     ~H"""
     <div
-      class={@class}
       class="flex items-center tab-select-button"
       phx-click={JS.push("select-tab", value: %{id: @tab.id})}
       id={"#{@tab.id}-tab"}
