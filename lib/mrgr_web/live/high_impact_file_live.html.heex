@@ -15,15 +15,17 @@
         timezone={@timezone}
       />
     </div>
-    <div id="detail-pane">
-      <.live_component
-        :if={@form}
-        module={MrgrWeb.Components.Live.HighImpactFileFormComponent}
-        id="fca_form"
-        form={@form}
-        current_user={@current_user}
-        timezone={@timezone}
-      />
+    <div class="w-2/5">
+      <div id="detail-pane">
+        <.live_component
+          :if={@form}
+          module={MrgrWeb.Components.Live.HighImpactFileFormComponent}
+          id="fca_form"
+          form={@form}
+          current_user={@current_user}
+          timezone={@timezone}
+        />
+      </div>
     </div>
   </div>
 </div>

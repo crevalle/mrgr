@@ -8,7 +8,7 @@
     <.close_detail_pane />
   </div>
 
-  <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+  <div class="mt-8 bg-white overflow-hidden">
     <div class="px-4 py-5">
       <.form
         :let={f}
@@ -52,13 +52,15 @@
             class: "block text-sm font-medium text-gray-700 mt-px pt-2"
           ) %>
           <div class="col-span-2 flex flex-col mt-1 ">
-            <%= color_input(f, :color,
-              class:
-                "shadow-sm focus:ring-emerald-500 focus:border-emerald-500 max-w-xs text-sm border-gray-300 rounded-md"
-            ) %>
-            <p class="mt-2 text-sm text-gray-500" id="color-description">
-              Customize the background color for the Badge
-            </p>
+            <div class="flex space-x-2 items-start">
+              <%= color_input(f, :color,
+                class:
+                  "shadow-sm focus:ring-emerald-500 focus:border-emerald-500 max-w-xs text-sm border-gray-300 rounded-md"
+              ) %>
+              <p class="text-sm text-gray-500" id="color-description">
+                Customize the background color for the Badge
+              </p>
+            </div>
             <p class="flex items-center mt-2 text-sm text-gray-500">
               <span class="mr-1">Preview: </span>
               <.badge item={@form.badge_preview} text="text-gray-800" />
@@ -70,7 +72,7 @@
           <%= label(f, :notify_user, "Notify me of new PRs",
             class: "block text-sm font-medium text-gray-700 mt-px pt-2"
           ) %>
-          <div class="flex mt-1 items-center">
+          <div class="col-span-2 flex mt-1 items-center">
             <.checkbox f={f} attr={:notify_user} />
             <p class="pl-4 text-sm text-gray-500" id="notify_user-description">
               Send an email to
