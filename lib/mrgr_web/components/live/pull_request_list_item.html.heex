@@ -75,7 +75,7 @@
       <div class="flex justify-between space-x-2 divide-x">
         <.glance_column>
           <.link
-            patch={~p"/pull-requests/#{@tab_id}/#{@pull_request.id}/comments"}
+            patch={~p"/pull-requests/#{@tab_permalink}/#{@pull_request.id}/comments"}
             class="flex items-center text-teal-700 hover:text-teal-500 hover:cursor-pointer"
           >
             <h6>Comments</h6>
@@ -93,7 +93,7 @@
 
         <.glance_column class="pl-2">
           <.link
-            patch={~p"/pull-requests/#{@tab_id}/#{@pull_request.id}/commits"}
+            patch={~p"/pull-requests/#{@tab_permalink}/#{@pull_request.id}/commits"}
             class="flex items-center text-teal-700 hover:text-teal-500 hover:cursor-pointer"
           >
             <h6>Commits</h6>
@@ -107,7 +107,7 @@
 
         <.glance_column class="pl-2 overflow-x-auto">
           <.link
-            patch={~p"/pull-requests/#{@tab_id}/#{@pull_request.id}/files-changed"}
+            patch={~p"/pull-requests/#{@tab_permalink}/#{@pull_request.id}/files-changed"}
             class="flex items-center text-teal-700 hover:text-teal-500 hover:cursor-pointer"
           >
             <h6>Files Changed</h6>

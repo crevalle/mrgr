@@ -482,7 +482,7 @@ defmodule MrgrWeb.Components.UI do
   def pr_tab(assigns) do
     ~H"""
     <.link
-      patch={~p"/pull-requests/#{@tab.id}"}
+      patch={~p"/pull-requests/#{@tab.permalink}"}
       class="flex items-center tab-select-button"
       id={"#{@tab.id}-tab"}
       role="tab"

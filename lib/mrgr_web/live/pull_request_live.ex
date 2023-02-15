@@ -25,6 +25,8 @@ defmodule MrgrWeb.PullRequestLive do
       subscribe(current_user)
 
       socket
+      |> assign(:detail, nil)
+      |> assign(:selected_attr, nil)
       |> assign(:tabs, tabs)
       |> assign(:repos, repos)
       |> assign(:labels, labels)
@@ -35,8 +37,6 @@ defmodule MrgrWeb.PullRequestLive do
       |> ok()
     else
       socket
-      |> assign(:detail, nil)
-      |> assign(:selected_attr, nil)
       |> ok()
     end
   end
@@ -46,8 +46,6 @@ defmodule MrgrWeb.PullRequestLive do
     if connected?(socket) do
       socket
       |> assign(:selected_tab, hd(socket.assigns.tabs))
-      |> assign(:detail, nil)
-      |> assign(:selected_attr, nil)
       |> noreply()
     else
       socket
@@ -57,7 +55,6 @@ defmodule MrgrWeb.PullRequestLive do
 
   def handle_params(%{"attr" => attr, "pull_request_id" => pr_id, "tab" => id}, uri, socket) do
     if connected?(socket) do
-      id = parse_tab_id(id)
       selected = get_tab(socket.assigns.tabs, id)
       pr = Tabs.find_pull_request(selected, pr_id)
 
@@ -73,26 +70,8 @@ defmodule MrgrWeb.PullRequestLive do
     end
   end
 
-  def handle_params(%{"pull_request_id" => pr_id, "tab" => id}, uri, socket) do
-    if connected?(socket) do
-      id = parse_tab_id(id)
-      selected = get_tab(socket.assigns.tabs, id)
-      pr = Tabs.find_pull_request(selected, pr_id)
-
-      socket
-      |> assign(:selected_tab, selected)
-      |> assign(:detail, pr)
-      |> assign(:selected_attr, nil)
-      |> noreply()
-    else
-      socket
-      |> noreply()
-    end
-  end
-
   def handle_params(%{"tab" => id}, uri, socket) do
     if connected?(socket) do
-      id = parse_tab_id(id)
       selected = get_tab(socket.assigns.tabs, id)
 
       socket
@@ -152,7 +131,7 @@ defmodule MrgrWeb.PullRequestLive do
 
     socket
     |> assign(:tabs, tabs)
-    |> assign(:selected_tab, updated_tab)
+    |> push_patch(to: ~p"/pull-requests/#{updated_tab.permalink}")
     |> noreply()
   end
 
@@ -439,24 +418,15 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   def get_selected_tab(tabs, socket) do
-    get_tab(tabs, socket.assigns.selected_tab.id)
+    get_tab(tabs, socket.assigns.selected_tab.permalink)
   end
 
-  def get_tab(tabs, tab_id) do
-    Tabs.find_tab_by_id(tabs, tab_id)
+  def get_tab(tabs, permalink) do
+    Tabs.find_tab_by_permalink(tabs, permalink)
   end
 
   def filter_showing(repos) do
     Enum.filter(repos, & &1.show_prs)
-  end
-
-  def parse_tab_id(id) do
-    case Integer.parse(id) do
-      # permalink-type
-      :error -> id
-      # numeric
-      {id, _} -> id
-    end
   end
 
   defmodule Tabs do
@@ -531,6 +501,7 @@ defmodule MrgrWeb.PullRequestLive do
       [
         %{
           id: @ready_to_merge,
+          permalink: @ready_to_merge,
           title: "🚀 Ready to Merge",
           type: "action_state",
           meta: %{user: user},
@@ -538,6 +509,7 @@ defmodule MrgrWeb.PullRequestLive do
         },
         %{
           id: @needs_approval,
+          permalink: @needs_approval,
           title: "⚠️ Needs Approval",
           type: "action_state",
           meta: %{user: user},
@@ -545,6 +517,7 @@ defmodule MrgrWeb.PullRequestLive do
         },
         %{
           id: @fix_ci,
+          permalink: @fix_ci,
           title: "🛠 Fix CI",
           type: "action_state",
           meta: %{user: user},
@@ -552,6 +525,7 @@ defmodule MrgrWeb.PullRequestLive do
         },
         %{
           id: @hifs,
+          permalink: @hifs,
           title: "💥 High Impact Changes",
           type: "system",
           meta: %{user: user},
@@ -559,6 +533,7 @@ defmodule MrgrWeb.PullRequestLive do
         },
         %{
           id: @snoozed,
+          permalink: @snoozed,
           title: "😴 Snoozed",
           type: "system",
           meta: %{user: user},
@@ -577,6 +552,10 @@ defmodule MrgrWeb.PullRequestLive do
 
     def find_tab_by_id(tabs, id) do
       Enum.find(tabs, fn i -> i.id == id end)
+    end
+
+    def find_tab_by_permalink(tabs, permalink) do
+      Enum.find(tabs, fn i -> i.permalink == permalink end)
     end
 
     def system_tabs(tabs) do

@@ -76,7 +76,7 @@
           id={"pull_request_#{pull_request.id}"}
           pull_request={pull_request}
           selected?={selected?(pull_request, @detail)}
-          tab_id={@selected_tab.id}
+          tab_permalink={@selected_tab.permalink}
           show_action_state_emoji={show_action_state_emoji?(@selected_tab)}
           members={@members}
           snooze_options={@snooze_options}
@@ -93,7 +93,7 @@
           pull_request={@detail}
           attr={@selected_attr}
           timezone={@timezone}
-          close={~p"/pull-requests/#{@selected_tab.id}"}
+          close={~p"/pull-requests/#{@selected_tab.permalink}"}
         />
       </div>
     </div>

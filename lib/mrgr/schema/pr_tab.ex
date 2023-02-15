@@ -3,6 +3,7 @@ defmodule Mrgr.Schema.PRTab do
 
   schema "pr_tabs" do
     field(:title, :string)
+    field(:permalink, :string)
 
     field(:meta, :map, default: %{}, virtual: true)
     field(:type, :string, virtual: true, default: "custom")
@@ -26,17 +27,52 @@ defmodule Mrgr.Schema.PRTab do
 
   @allowed ~w[
     title
+    permalink
     user_id
   ]a
 
   def changeset(schema, params \\ %{}) do
     schema
     |> cast(params, @allowed)
+    |> set_default_title()
+    |> set_permalink()
     |> validate_required([:user_id])
   end
 
   def edit_changeset(schema, params \\ %{}) do
     schema
     |> cast(params, [:title])
+    |> set_default_title()
+    |> set_permalink()
+  end
+
+  def set_default_title(changeset) do
+    case get_change(changeset, :title) do
+      empty when empty in [nil, ""] ->
+        put_change(changeset, :title, generate_random_tab_name())
+
+      _title ->
+        changeset
+    end
+  end
+
+  def set_permalink(changeset) do
+    title = get_change(changeset, :title)
+
+    put_change(changeset, :permalink, generate_permalink(title))
+  end
+
+  def generate_permalink(title) do
+    # keep only alphanumerics and the hyphen
+    title
+    |> String.downcase()
+    |> String.replace(" ", "-")
+    |> String.replace(~r"[^a-z0-9-]", "")
+  end
+
+  def generate_random_tab_name do
+    # four digit number
+    random_number = 10000 - :rand.uniform(10000)
+    "Tab #{random_number}"
   end
 end
