@@ -450,26 +450,20 @@ defmodule Mrgr.PullRequest do
   def send_hif_alert(hifs, pull_request) do
     installation = Mrgr.Repo.preload(pull_request.repository.installation, :creator)
     recipient = installation.creator
-    url = build_url_to(pull_request)
 
-    hif_alerts =
-      Enum.map(hifs, fn hif ->
-        filenames = Mrgr.HighImpactFile.matching_filenames(hif, pull_request)
+    hifs
+    |> Enum.map(fn hif ->
+      filenames = Mrgr.HighImpactFile.matching_filenames(hif, pull_request)
 
-        %{
-          filenames: filenames,
-          name: hif.name
-        }
-      end)
-
-    mail = Mrgr.Notifier.hif_alert(recipient, pull_request.repository, hif_alerts, url)
-    Mrgr.Mailer.deliver(mail)
+      %{
+        filenames: filenames,
+        name: hif.name
+      }
+    end)
+    |> Mrgr.Notifier.hif_alert(recipient, pull_request.id, pull_request.repository)
+    |> Mrgr.Mailer.deliver()
 
     pull_request
-  end
-
-  defp build_url_to(pull_request) do
-    MrgrWeb.Router.Helpers.pull_request_url(MrgrWeb.Endpoint, :show, pull_request.id)
   end
 
   def snooze(pull_request, until) do

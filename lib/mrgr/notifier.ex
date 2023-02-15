@@ -2,10 +2,13 @@ defmodule Mrgr.Notifier do
   # weird dependency going to -> MrgrWeb, but oh well
   # bigger fish to fry
   use Phoenix.Swoosh, view: MrgrWeb.NotifierView
+  use Phoenix.VerifiedRoutes, endpoint: MrgrWeb.Endpoint, router: MrgrWeb.Router
 
-  def hif_alert(recipient, repository, hif_alerts, url) do
+  def hif_alert(alerts, recipient, pull_request_id, repository) do
+    url = ~p"/pull-requests/hifs/#{pull_request_id}/files-changed"
+
     assigns = %{
-      hif_alerts: hif_alerts,
+      hif_alerts: alerts,
       repository_name: repository.name,
       url: url
     }
