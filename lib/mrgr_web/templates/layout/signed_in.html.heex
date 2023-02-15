@@ -2,7 +2,9 @@
   <main class="flex-auto">
     <div class="top-0 z-10 flex items-center h-16 bg-white shadow">
       <div class="logo pl-6 pt-2">
-        <%= img_tag("/images/logo/Mrgr-B6.png", class: "h-10") %>
+        <.link href={~p"/pull-requests"}>
+          <%= img_tag("/images/logo/Mrgr-B6.png", class: "h-10") %>
+        </.link>
       </div>
       <div class="flex-1 px-4 flex justify-between">
         <div class="flex">
