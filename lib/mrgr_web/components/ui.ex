@@ -155,21 +155,6 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def detail_content(assigns) do
-    ~H"""
-    <div class="flex flex-col space-y-4">
-      <div class="flex justify-between items-center">
-        <.h3>
-          <%= render_slot(@title) %>
-        </.h3>
-        <.close_detail_pane />
-      </div>
-
-      <%= render_slot(@inner_block) %>
-    </div>
-    """
-  end
-
   def copy_button(assigns) do
     ~H"""
     <.button
@@ -497,7 +482,7 @@ defmodule MrgrWeb.Components.UI do
   def pr_tab(assigns) do
     ~H"""
     <.link
-      patch={Routes.pull_request_path(@socket, :show, @tab.id)}
+      patch={~p"/pull-requests/#{@tab.id}"}
       class="flex items-center tab-select-button"
       id={"#{@tab.id}-tab"}
       role="tab"

@@ -7,63 +7,73 @@ defmodule MrgrWeb.Components.PullRequest do
   alias Mrgr.Schema.PullRequest
   alias Phoenix.LiveView.JS
 
-  def render_detail(%{item: %Mrgr.Schema.PullRequest{}} = assigns) do
+  def render_detail(assigns) do
     ~H"""
-    <div class="flex flex-col space-y-6 bg-white rounded-md">
-      <.pull_request_detail pull_request={@item} attr={@attr} timezone={@timezone} />
+    <div class="bg-white rounded-md">
+      <div class="flex flex-col space-y-4">
+        <div class="flex justify-between items-center">
+          <.h3>
+            <.detail_title pull_request={@pull_request} attr={@attr} />
+          </.h3>
+          <.link patch={@close}>
+            <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
+          </.link>
+        </div>
+        <.detail_content pull_request={@pull_request} attr={@attr} timezone={@timezone} />
+      </div>
     </div>
     """
   end
 
-  def pull_request_detail(%{attr: "comments"} = assigns) do
+  def detail_title(%{attr: "comments"} = assigns) do
     ~H"""
-    <.detail_content>
-      <:title>
-        <%= @pull_request.title %> - Comments (<%= Enum.count(@pull_request.comments) %>)
-      </:title>
-
-      <div class="flex flex-col space-y-4 divide-y divide-gray-200">
-        <.render_comment
-          :for={comment <- Mrgr.Schema.Comment.ordered(@pull_request.comments)}
-          comment={comment}
-          tz={@timezone}
-        />
-      </div>
-    </.detail_content>
+    <%= @pull_request.title %> - Comments (<%= Enum.count(@pull_request.comments) %>)
     """
   end
 
-  def pull_request_detail(%{attr: "commits"} = assigns) do
+  def detail_title(%{attr: "commits"} = assigns) do
     ~H"""
-    <.detail_content>
-      <:title>
-        <%= @pull_request.title %> - Commits (<%= Enum.count(@pull_request.commits) %>)
-      </:title>
-
-      <div class="flex flex-col space-y-4 divide-y divide-gray-200">
-        <.render_commit :for={commit <- @pull_request.commits} commit={commit} tz={@timezone} />
-      </div>
-    </.detail_content>
+    <%= @pull_request.title %> - Commits (<%= Enum.count(@pull_request.commits) %>)
     """
   end
 
-  def pull_request_detail(%{attr: "files-changed"} = assigns) do
+  def detail_title(%{attr: "files-changed"} = assigns) do
     ~H"""
-    <.detail_content>
-      <:title>
-        <%= @pull_request.title %> - Files Changed (<%= Enum.count(@pull_request.files_changed) %>)
-      </:title>
+    <%= @pull_request.title %> - Files Changed (<%= Enum.count(@pull_request.files_changed) %>)
+    """
+  end
 
-      <.hif_badge_list hifs={@pull_request.high_impact_files} />
+  def detail_content(%{attr: "comments"} = assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-4 divide-y divide-gray-200">
+      <.render_comment
+        :for={comment <- Mrgr.Schema.Comment.ordered(@pull_request.comments)}
+        comment={comment}
+        tz={@timezone}
+      />
+    </div>
+    """
+  end
 
-      <div class="flex flex-col space-y-0 leading-tight">
-        <.changed_file
-          :for={f <- @pull_request.files_changed}
-          filename={f}
-          hifs={@pull_request.high_impact_files}
-        />
-      </div>
-    </.detail_content>
+  def detail_content(%{attr: "commits"} = assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-4 divide-y divide-gray-200">
+      <.render_commit :for={commit <- @pull_request.commits} commit={commit} tz={@timezone} />
+    </div>
+    """
+  end
+
+  def detail_content(%{attr: "files-changed"} = assigns) do
+    ~H"""
+    <.hif_badge_list hifs={@pull_request.high_impact_files} />
+
+    <div class="flex flex-col space-y-0 leading-tight">
+      <.changed_file
+        :for={f <- @pull_request.files_changed}
+        filename={f}
+        hifs={@pull_request.high_impact_files}
+      />
+    </div>
     """
   end
 

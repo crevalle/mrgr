@@ -24,8 +24,6 @@ defmodule MrgrWeb.PullRequestLive do
 
       subscribe(current_user)
 
-      IO.inspect("MOUNT")
-
       socket
       |> assign(:tabs, tabs)
       |> assign(:repos, repos)
@@ -36,46 +34,65 @@ defmodule MrgrWeb.PullRequestLive do
       |> put_title("Open Pull Requests")
       |> ok()
     else
-      IO.inspect("MOUNT - DIS CONNECTED")
-
       socket
       |> assign(:detail, nil)
       |> assign(:selected_attr, nil)
       |> ok()
-
-      # ok(socket)
     end
   end
 
   # index action
   def handle_params(params, uri, socket) when params == %{} do
     if connected?(socket) do
-      IO.inspect("HANDLE PARAMS - CONNECTED")
-
       socket
       |> assign(:selected_tab, hd(socket.assigns.tabs))
       |> assign(:detail, nil)
       |> assign(:selected_attr, nil)
       |> noreply()
     else
-      IO.inspect("HANDLE PARAMS - DIS CONNECTED")
+      socket
+      |> noreply()
+    end
+  end
+
+  def handle_params(%{"attr" => attr, "pull_request_id" => pr_id, "tab" => id}, uri, socket) do
+    if connected?(socket) do
+      id = parse_tab_id(id)
+      selected = get_tab(socket.assigns.tabs, id)
+      pr = Tabs.find_pull_request(selected, pr_id)
 
       socket
-      # |> assign(:detail, nil)
-      # |> assign(:selected_attr, nil)
+      |> assign(:selected_tab, selected)
+      |> assign(:detail, pr)
+      |> assign(:selected_attr, attr)
+      |> show_detail()
+      |> noreply()
+    else
+      socket
+      |> noreply()
+    end
+  end
+
+  def handle_params(%{"pull_request_id" => pr_id, "tab" => id}, uri, socket) do
+    if connected?(socket) do
+      id = parse_tab_id(id)
+      selected = get_tab(socket.assigns.tabs, id)
+      pr = Tabs.find_pull_request(selected, pr_id)
+
+      socket
+      |> assign(:selected_tab, selected)
+      |> assign(:detail, pr)
+      |> assign(:selected_attr, nil)
+      |> noreply()
+    else
+      socket
       |> noreply()
     end
   end
 
   def handle_params(%{"tab" => id}, uri, socket) do
     if connected?(socket) do
-      IO.inspect("HANDLE PARAMS - CONNECTED")
-
-      id = case Integer.parse(id) do
-        :error -> id # permalink-type
-        {id, _} -> id # numeric
-      end
-
+      id = parse_tab_id(id)
       selected = get_tab(socket.assigns.tabs, id)
 
       socket
@@ -84,11 +101,7 @@ defmodule MrgrWeb.PullRequestLive do
       |> assign(:selected_attr, nil)
       |> noreply()
     else
-      IO.inspect("HANDLE PARAMS - DIS CONNECTED")
-
       socket
-      # |> assign(:detail, nil)
-      # |> assign(:selected_attr, nil)
       |> noreply()
     end
   end
@@ -280,22 +293,6 @@ defmodule MrgrWeb.PullRequestLive do
     |> noreply()
   end
 
-  def handle_event("show-detail-" <> attr, %{"id" => id}, socket) do
-    pr = Tabs.find_pull_request(socket.assigns.selected_tab, id)
-
-    socket
-    |> assign(:detail, pr)
-    |> assign(:selected_attr, attr)
-    |> show_detail()
-    |> noreply()
-  end
-
-  def handle_event("hide-detail", _params, socket) do
-    socket
-    |> assign(:detail, nil)
-    |> noreply()
-  end
-
   # event bus
   def subscribe(user) do
     user
@@ -453,6 +450,15 @@ defmodule MrgrWeb.PullRequestLive do
     Enum.filter(repos, & &1.show_prs)
   end
 
+  def parse_tab_id(id) do
+    case Integer.parse(id) do
+      # permalink-type
+      :error -> id
+      # numeric
+      {id, _} -> id
+    end
+  end
+
   defmodule Tabs do
     @ready_to_merge "ready-to-merge"
     @needs_approval "needs-approval"
@@ -464,7 +470,7 @@ defmodule MrgrWeb.PullRequestLive do
       []
       |> Kernel.++(system_tabs_for_user(user))
       |> Kernel.++(custom_tabs_for_user(user))
-      |> Enum.map(&load_prs_async/1)
+      |> Enum.map(&load_prs_sync/1)
     end
 
     def add(tabs, user) do
@@ -794,6 +800,13 @@ defmodule MrgrWeb.PullRequestLive do
       tab.pull_requests
       |> Map.get(:entries)
       |> Mrgr.List.find(id)
+    end
+
+    def load_prs_sync(tab, opts \\ %{}) do
+      page = fetch_paged_pull_requests(tab, opts)
+
+      tab
+      |> set_prs_on_tab(page)
     end
 
     def load_prs_async(tab, opts \\ %{}) do

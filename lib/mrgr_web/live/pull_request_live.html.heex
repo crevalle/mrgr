@@ -25,14 +25,12 @@
     <!-- system -->
     <.pr_tab
       :for={tab <- Tabs.system_tabs(@tabs)}
-      socket={@socket}
       tab={tab}
       selected?={selected?(tab, @selected_tab)}
     />
     <!-- custom tabs -->
     <.pr_tab
       :for={tab <- Tabs.custom_tabs(@tabs)}
-      socket={@socket}
       tab={tab}
       selected?={selected?(tab, @selected_tab)}
     />
@@ -77,7 +75,8 @@
           module={MrgrWeb.Components.Live.PullRequestListItem}
           id={"pull_request_#{pull_request.id}"}
           pull_request={pull_request}
-          selected={selected?(pull_request, @detail)}
+          selected?={selected?(pull_request, @detail)}
+          tab_id={@selected_tab.id}
           show_action_state_emoji={show_action_state_emoji?(@selected_tab)}
           members={@members}
           snooze_options={@snooze_options}
@@ -89,7 +88,13 @@
 
     <div class="w-2/5">
       <div id="detail-pane">
-        <.render_detail :if={@detail} item={@detail} attr={@selected_attr} timezone={@timezone} />
+        <.render_detail
+          :if={@detail}
+          pull_request={@detail}
+          attr={@selected_attr}
+          timezone={@timezone}
+          close={~p"/pull-requests/#{@selected_tab.id}"}
+        />
       </div>
     </div>
   </div>

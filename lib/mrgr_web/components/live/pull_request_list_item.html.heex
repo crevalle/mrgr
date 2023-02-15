@@ -1,5 +1,5 @@
 <div
-  class="flex flex-col bg-white border border-gray-200 shadow rounded-lg"
+  class={"flex flex-col bg-white border #{border_color(@selected?)} shadow rounded-lg"}
   id={"pull-request-#{@pull_request.id}"}
 >
   <div class="flex flex-col space-y-3">
@@ -74,13 +74,13 @@
       </div>
       <div class="flex justify-between space-x-2 divide-x">
         <.glance_column>
-          <div
+          <.link
+            patch={~p"/pull-requests/#{@tab_id}/#{@pull_request.id}/comments"}
             class="flex items-center text-teal-700 hover:text-teal-500 hover:cursor-pointer"
-            phx-click={JS.push("show-detail-comments", value: %{id: @pull_request.id})}
           >
             <h6>Comments</h6>
             <.icon name="chevron-right" class="h-4 w-4" />
-          </div>
+          </.link>
 
           <div class="flex flex-col space-y-4">
             <.preview_comment
@@ -92,13 +92,13 @@
         </.glance_column>
 
         <.glance_column class="pl-2">
-          <div
+          <.link
+            patch={~p"/pull-requests/#{@tab_id}/#{@pull_request.id}/commits"}
             class="flex items-center text-teal-700 hover:text-teal-500 hover:cursor-pointer"
-            phx-click={JS.push("show-detail-commits", value: %{id: @pull_request.id})}
           >
             <h6>Commits</h6>
             <.icon name="chevron-right" class="h-4 w-4" />
-          </div>
+          </.link>
 
           <div class="flex flex-col space-y-0 leading-tight">
             <.preview_commit :for={c <- @pull_request.commits} commit={c} />
@@ -106,13 +106,14 @@
         </.glance_column>
 
         <.glance_column class="pl-2 overflow-x-auto">
-          <div
+          <.link
+            patch={~p"/pull-requests/#{@tab_id}/#{@pull_request.id}/files-changed"}
             class="flex items-center text-teal-700 hover:text-teal-500 hover:cursor-pointer"
-            phx-click={JS.push("show-detail-files-changed", value: %{id: @pull_request.id})}
           >
             <h6>Files Changed</h6>
             <.icon name="chevron-right" class="h-4 w-4" />
-          </div>
+          </.link>
+
           <.hif_badge_list hifs={@pull_request.high_impact_files} />
           <div class="flex flex-col space-y-0 leading-tight max-w-xs">
             <.changed_file
