@@ -70,6 +70,12 @@ defmodule MrgrWeb.PullRequestLive do
   def handle_params(%{"tab" => id}, uri, socket) do
     if connected?(socket) do
       IO.inspect("HANDLE PARAMS - CONNECTED")
+
+      id = case Integer.parse(id) do
+        :error -> id # permalink-type
+        {id, _} -> id # numeric
+      end
+
       selected = get_tab(socket.assigns.tabs, id)
 
       socket
