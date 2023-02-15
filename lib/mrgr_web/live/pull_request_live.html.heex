@@ -25,12 +25,14 @@
     <!-- system -->
     <.pr_tab
       :for={tab <- Tabs.system_tabs(@tabs)}
+      socket={@socket}
       tab={tab}
       selected?={selected?(tab, @selected_tab)}
     />
     <!-- custom tabs -->
     <.pr_tab
       :for={tab <- Tabs.custom_tabs(@tabs)}
+      socket={@socket}
       tab={tab}
       selected?={selected?(tab, @selected_tab)}
     />

@@ -24,16 +24,10 @@ defmodule MrgrWeb.PullRequestLive do
 
       subscribe(current_user)
 
-      # id will be `nil` for the index action
-      # but present for the show action
-      # detail = Mrgr.List.find(pull_requests, params["id"])
-      # not sure how to do this anymore
+      IO.inspect("MOUNT")
 
       socket
       |> assign(:tabs, tabs)
-      |> assign(:selected_tab, hd(tabs))
-      |> assign(:detail, nil)
-      |> assign(:selected_attr, nil)
       |> assign(:repos, repos)
       |> assign(:labels, labels)
       |> assign(:members, members)
@@ -42,7 +36,54 @@ defmodule MrgrWeb.PullRequestLive do
       |> put_title("Open Pull Requests")
       |> ok()
     else
-      ok(socket)
+      IO.inspect("MOUNT - DIS CONNECTED")
+
+      socket
+      |> assign(:detail, nil)
+      |> assign(:selected_attr, nil)
+      |> ok()
+
+      # ok(socket)
+    end
+  end
+
+  # index action
+  def handle_params(params, uri, socket) when params == %{} do
+    if connected?(socket) do
+      IO.inspect("HANDLE PARAMS - CONNECTED")
+
+      socket
+      |> assign(:selected_tab, hd(socket.assigns.tabs))
+      |> assign(:detail, nil)
+      |> assign(:selected_attr, nil)
+      |> noreply()
+    else
+      IO.inspect("HANDLE PARAMS - DIS CONNECTED")
+
+      socket
+      # |> assign(:detail, nil)
+      # |> assign(:selected_attr, nil)
+      |> noreply()
+    end
+  end
+
+  def handle_params(%{"tab" => id}, uri, socket) do
+    if connected?(socket) do
+      IO.inspect("HANDLE PARAMS - CONNECTED")
+      selected = get_tab(socket.assigns.tabs, id)
+
+      socket
+      |> assign(:selected_tab, selected)
+      |> assign(:detail, nil)
+      |> assign(:selected_attr, nil)
+      |> noreply()
+    else
+      IO.inspect("HANDLE PARAMS - DIS CONNECTED")
+
+      socket
+      # |> assign(:detail, nil)
+      # |> assign(:selected_attr, nil)
+      |> noreply()
     end
   end
 
@@ -102,14 +143,6 @@ defmodule MrgrWeb.PullRequestLive do
 
     socket
     |> assign(:tabs, tabs)
-    |> assign(:selected_tab, selected)
-    |> noreply()
-  end
-
-  def handle_event("select-tab", %{"id" => id}, socket) do
-    selected = get_tab(socket.assigns.tabs, id)
-
-    socket
     |> assign(:selected_tab, selected)
     |> noreply()
   end

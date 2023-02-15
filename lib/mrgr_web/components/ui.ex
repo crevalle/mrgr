@@ -496,9 +496,9 @@ defmodule MrgrWeb.Components.UI do
 
   def pr_tab(assigns) do
     ~H"""
-    <div
+    <.link
+      patch={Routes.pull_request_path(@socket, :show, @tab.id)}
       class="flex items-center tab-select-button"
-      phx-click={JS.push("select-tab", value: %{id: @tab.id})}
       id={"#{@tab.id}-tab"}
       role="tab"
       aria-selected="false"
@@ -508,7 +508,7 @@ defmodule MrgrWeb.Components.UI do
         <%= @tab.title || "untitled" %>
       </h2>
       <.pr_count_badge items={@tab.pull_requests} />
-    </div>
+    </.link>
     """
   end
 
