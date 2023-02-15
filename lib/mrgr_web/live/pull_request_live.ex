@@ -42,7 +42,7 @@ defmodule MrgrWeb.PullRequestLive do
   end
 
   # index action
-  def handle_params(params, uri, socket) when params == %{} do
+  def handle_params(params, _uri, socket) when params == %{} do
     if connected?(socket) do
       socket
       |> assign(:selected_tab, hd(socket.assigns.tabs))
@@ -53,7 +53,7 @@ defmodule MrgrWeb.PullRequestLive do
     end
   end
 
-  def handle_params(%{"attr" => attr, "pull_request_id" => pr_id, "tab" => id}, uri, socket) do
+  def handle_params(%{"attr" => attr, "pull_request_id" => pr_id, "tab" => id}, _uri, socket) do
     if connected?(socket) do
       selected = get_tab(socket.assigns.tabs, id)
       pr = Tabs.find_pull_request(selected, pr_id)
@@ -70,7 +70,7 @@ defmodule MrgrWeb.PullRequestLive do
     end
   end
 
-  def handle_params(%{"tab" => id}, uri, socket) do
+  def handle_params(%{"tab" => id}, _uri, socket) do
     if connected?(socket) do
       selected = get_tab(socket.assigns.tabs, id)
 

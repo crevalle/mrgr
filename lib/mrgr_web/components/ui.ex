@@ -428,7 +428,6 @@ defmodule MrgrWeb.Components.UI do
     <div
       class="flex items-center tab-select-button selected"
       id={"#{@tab.id}-tab"}
-      role="tab"
       aria-selected="false"
       role="presentation"
     >
@@ -452,7 +451,6 @@ defmodule MrgrWeb.Components.UI do
     <div
       class="flex items-center tab-select-button selected"
       id={"#{@tab.id}-tab"}
-      role="tab"
       aria-selected="false"
       role="presentation"
     >
@@ -469,7 +467,6 @@ defmodule MrgrWeb.Components.UI do
     <div
       class="flex items-center tab-select-button selected"
       id={"#{@tab.id}-tab"}
-      role="tab"
       aria-selected="false"
       role="presentation"
     >
@@ -485,7 +482,6 @@ defmodule MrgrWeb.Components.UI do
       patch={~p"/pull-requests/#{@tab.permalink}"}
       class="flex items-center tab-select-button"
       id={"#{@tab.id}-tab"}
-      role="tab"
       aria-selected="false"
       role="presentation"
     >
