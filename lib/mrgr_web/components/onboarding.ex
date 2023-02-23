@@ -116,7 +116,7 @@ defmodule MrgrWeb.Components.Onboarding do
 
   def action(%{installation: nil} = assigns) do
     ~H"""
-    <.l href={Mrgr.Installation.installation_url()} class="btn">
+    <.l href={Mrgr.Installation.installation_url()} class="btn btn-primary ">
       Click here to install our Github App 🚀
     </.l>
     """
@@ -129,7 +129,7 @@ defmodule MrgrWeb.Components.Onboarding do
       <p>
         <span class="font-semibold">Hot Dog</span> you are all set!
       </p>
-      <.l href="/pull-requests" class="btn">
+      <.l href="/pull-requests" class="btn btn-primary">
         Let's get Mergin'
       </.l>
     </div>
@@ -138,7 +138,7 @@ defmodule MrgrWeb.Components.Onboarding do
 
   def action(%{installation: %{subscription_state: nil}} = assigns) do
     ~H"""
-    <.l href={payment_url(@installation)} class="btn">
+    <.l href={payment_url(@installation)} class="btn btn-primary">
       On to payment!
     </.l>
     """
@@ -194,7 +194,7 @@ defmodule MrgrWeb.Components.Onboarding do
 
   def payment_or_activate_button(%{installation: %{target_type: "User"}} = assigns) do
     ~H"""
-    <.l phx_click="activate" class="btn">
+    <.l phx_click="activate" class="btn btn-primary">
       Activate your free Mrgr account!
     </.l>
     """
