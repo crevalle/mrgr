@@ -1,4 +1,4 @@
-defmodule MrgrWeb.Components.Live.PullRequestListItem do
+defmodule MrgrWeb.Components.Live.PullRequestCard do
   use MrgrWeb, :live_component
   use Mrgr.PubSub.Event
 

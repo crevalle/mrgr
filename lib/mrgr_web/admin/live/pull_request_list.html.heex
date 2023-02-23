@@ -5,7 +5,7 @@
     <div role="list" class="flex flex-col space-y-4" id="pending-pull-request-list">
       <.live_component
         :for={pull_request <- @pull_requests}
-        module={MrgrWeb.Components.Live.PullRequestListItem}
+        module={MrgrWeb.Components.Live.PullRequestCard}
         id={"pull_request_#{pull_request.id}"}
         pull_request={pull_request}
         selected={false}
