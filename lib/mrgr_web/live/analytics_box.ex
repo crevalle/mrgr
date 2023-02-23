@@ -20,7 +20,7 @@ defmodule MrgrWeb.Live.AnalyticsBox do
           <%= @time_open_sparkline %>
           <span class="ml-2"><.to_days hours={@time_open_this_week} /></span>
         </div>
-        <p class="text-sm text-gray-500">Average Time Open</p>
+        <p class="text-sm text-gray-500">Average Time To Close</p>
       </div>
     </div>
     """
