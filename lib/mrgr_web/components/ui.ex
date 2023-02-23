@@ -698,32 +698,39 @@ defmodule MrgrWeb.Components.UI do
       <div
         style="display: none;"
         id="merge-freeze-menu"
+        phx-click-away={JS.hide(transition: toggle_out_transition())}
         class="origin-top-right absolute on-top right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
         role="menu"
         aria-orientation="vertical"
         aria-labelledby="freeze-menu-button"
         tabindex="-1"
       >
-        <div class="py-1" role="none">
-          <.l
-            :for={r <- @repos}
-            id={"repo-menu-item-#{r.id}"}
-            phx_click="toggle-merge-freeze"
-            phx_value_repo_id={r.id}
-            data_confirm="Sure about that?"
-            class="text-gray-700 block my-2 text-sm outline-none"
-            role="menuitem"
-            tabindex="-1"
-          >
-            <div class="flex items-center hover:bg-gray-50">
-              <div class="basis-8 text-blue-400 ml-2">
-                <%= if r.merge_freeze_enabled do %>
-                  ❄️
-                <% end %>
+        <div class="mt-2 flex flex-col text-sm divide-y divide-gray-100">
+          <p class="text-center text-gray-500 p-2">
+            Issuing a Merge Freeze will place a failing check on all PRs in the repo.
+          </p>
+
+          <div class="flex flex-col">
+            <.l
+              :for={r <- @repos}
+              id={"repo-menu-item-#{r.id}"}
+              phx_click="toggle-merge-freeze"
+              phx_value_repo_id={r.id}
+              data_confirm="Sure about that?"
+              class="text-teal-700 hover:text-teal-500 hover:bg-gray-50 p-2 text-sm rounded-md"
+              role="menuitem"
+              tabindex="-1"
+            >
+              <div class="flex items-center">
+                <div class="basis-8 text-blue-400 ml-2">
+                  <%= if r.merge_freeze_enabled do %>
+                    ❄️
+                  <% end %>
+                </div>
+                <%= r.name %>
               </div>
-              <%= r.name %>
-            </div>
-          </.l>
+            </.l>
+          </div>
         </div>
       </div>
     </div>
