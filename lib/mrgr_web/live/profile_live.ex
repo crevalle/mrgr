@@ -39,6 +39,24 @@ defmodule MrgrWeb.ProfileLive do
     end
   end
 
+  def handle_event("update-weekly-summary-preference", %{"user" => params}, socket) do
+    socket.assigns.current_user
+    |> Mrgr.Schema.User.weekly_summary_changeset(params)
+    |> Mrgr.Repo.update()
+    |> case do
+      {:ok, user} ->
+        socket
+        |> Flash.put(:info, "Updated!")
+        |> assign(:current_user, user)
+        |> noreply()
+
+      {:error, cs} ->
+        socket
+        |> Flash.put(:error, "Couldn't perform update : /")
+        |> noreply()
+    end
+  end
+
   def build_changeset(user, params \\ %{}) do
     user
     |> Mrgr.Schema.User.notification_changeset(params)

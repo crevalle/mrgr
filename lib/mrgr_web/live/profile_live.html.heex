@@ -47,7 +47,19 @@
               </p>
             <% end %>
             <p class="text-gray-500 text-sm">
-              Alerts for High Impact Files will go to this address
+              High Impact File Alerts and notification emails will go to this address
+            </p>
+          </div>
+          <div class="font-semibold">Send Weekly PR Summary Email</div>
+          <div class="col-span-2 flex flex-col">
+            <.form :let={f} for={:user} phx-change="update-weekly-summary-preference">
+              <%= checkbox(f, :send_weekly_summary_email,
+                value: @current_user.send_weekly_summary_email,
+                class: "checkbox"
+              ) %>
+            </.form>
+            <p class="text-gray-500 text-sm">
+              On Friday afternoons we'll send you a list of PRs closed that week.
             </p>
           </div>
         </div>

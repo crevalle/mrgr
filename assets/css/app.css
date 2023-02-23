@@ -181,6 +181,10 @@ h5 {
   @apply border-teal-700 text-teal-700 hover:cursor-default bg-white border-x-2 border-b-2;
 }
 
+.checkbox {
+  @apply shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md;
+}
+
 .dropdown:hover .dropdown-content {display: block;}
 
 .hide-empty:empty{
