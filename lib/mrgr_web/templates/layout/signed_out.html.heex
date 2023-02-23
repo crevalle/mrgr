@@ -1,3 +1,50 @@
-<main class="h-full bg-gray-900">
-  <%= @inner_content %>
-</main>
+<div class="flex flex-col h-screen">
+  <main class="flex-auto">
+    <div class="top-0 z-10 flex space-x-4 items-center h-16 bg-white shadow">
+      <div class="logo pl-6 pt-2">
+        <.link href="https://mrgr.io">
+          <%= img_tag("/images/logo/Mrgr-B6.png", class: "h-10") %>
+        </.link>
+      </div>
+      <div class="flex flex-1 px-4 items-center justify-between">
+        <div class="flex space-x-8">
+          <.link href="https://mrgr.io/features">
+            Features
+          </.link>
+          <.link href="https://mrgr.io/pricing">
+            Pricing
+          </.link>
+          <.link href="https://mrgr.io/blog">
+            Blog
+          </.link>
+          <.link href="https://mrgr.io/contact">
+            Contact
+          </.link>
+        </div>
+        <div class="flex items-center space-x-8">
+          <.link href={~p"/sign-in"}>
+            Sign In
+          </.link>
+          <.link href={~p"/sign-up"} class="btn btn-secondary">
+            Get Started
+          </.link>
+        </div>
+      </div>
+    </div>
+    <div class="relative">
+      <div class="m-6">
+        <%= @inner_content %>
+      </div>
+    </div>
+  </main>
+  <footer class="shrink-0">
+    <div class="bg-white text-gray-500 px-6 py-6 flex justify-center space-x-4 divide-x">
+      <p>©<%= Date.utc_today().year %> Crevalle, LLC</p>
+      <p class="pl-4"><a href="https://mrgr.io/terms" class="link" target="_blank">Terms</a></p>
+      <p class="pl-4">
+        <a href="https://mrgr.io/privacy" class="link" target="_blank">Privacy</a>
+      </p>
+      <p class="pl-4">Made with ☀️  in Los Angeles, California 🏝</p>
+    </div>
+  </footer>
+</div>

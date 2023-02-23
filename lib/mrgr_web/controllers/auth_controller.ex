@@ -4,11 +4,15 @@ defmodule MrgrWeb.AuthController do
   require Logger
 
   def new(conn, _params) do
-    render(conn)
+    conn
+    |> assign(:page_title, "Sign In")
+    |> render()
   end
 
   def sign_up(conn, _params) do
-    render(conn)
+    conn
+    |> assign(:page_title, "Sign Up")
+    |> render()
   end
 
   def delete(conn, _params) do
