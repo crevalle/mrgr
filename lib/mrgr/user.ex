@@ -2,14 +2,15 @@ defmodule Mrgr.User do
   alias Mrgr.Schema.User, as: Schema
   alias Mrgr.User.Query, as: Query
 
-  def rt_notification_emails do
+  def send_weekly_pr_summaries do
+    Enum.map(users_with_pr_summaries(), &send_pr_summary/1)
+  end
+
+  def users_with_pr_summaries do
     Schema
+    |> Query.wanting_pr_summary()
+    |> Query.with_current_installation()
     |> Mrgr.Repo.all()
-    |> Enum.map(fn u ->
-      u
-      |> Schema.notification_changeset(%{notification_email: u.email})
-      |> Mrgr.Repo.update()
-    end)
   end
 
   def all do
@@ -152,6 +153,15 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.all()
   end
 
+  def send_pr_summary(user) do
+    closed_last_week_count = Mrgr.PullRequest.closed_last_week_count(user.current_installation_id)
+
+    user.current_installation_id
+    |> Mrgr.PullRequest.closed_this_week()
+    |> Mrgr.Email.send_pr_summary(closed_last_week_count, user)
+    |> Mrgr.Mailer.deliver()
+  end
+
   def member(user) do
     Mrgr.Repo.get_by(Mrgr.Schema.Member, user_id: user.id)
   end
@@ -191,6 +201,12 @@ defmodule Mrgr.User do
       from(q in query,
         left_join: i in assoc(q, :installations),
         preload: [installations: i]
+      )
+    end
+
+    def wanting_pr_summary(query) do
+      from(q in query,
+        where: q.send_weekly_summary_email == true
       )
     end
 

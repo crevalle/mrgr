@@ -36,7 +36,7 @@ defmodule MrgrWeb.Live.AnalyticsBox do
       twelve_weeks_ago =
         d |> Date.add(-84) |> Date.beginning_of_week() |> DateTime.new!(~T[00:00:00])
 
-      closed_prs = Mrgr.PullRequest.closed_for_installation(installation_id, twelve_weeks_ago)
+      closed_prs = Mrgr.PullRequest.closed_summary(installation_id, twelve_weeks_ago)
 
       bucket =
         DasBucket.new()

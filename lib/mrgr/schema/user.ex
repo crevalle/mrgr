@@ -1,6 +1,8 @@
 defmodule Mrgr.Schema.User do
   use Mrgr.Schema
 
+  @derive {Swoosh.Email.Recipient, name: :name, address: :notification_email}
+
   schema "users" do
     field(:avatar_url, :string)
     field(:birthday, :string)

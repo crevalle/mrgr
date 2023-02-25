@@ -50,7 +50,7 @@ defmodule MrgrWeb.ProfileLive do
         |> assign(:current_user, user)
         |> noreply()
 
-      {:error, cs} ->
+      {:error, _cs} ->
         socket
         |> Flash.put(:error, "Couldn't perform update : /")
         |> noreply()

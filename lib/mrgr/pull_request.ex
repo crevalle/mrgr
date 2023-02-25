@@ -460,7 +460,7 @@ defmodule Mrgr.PullRequest do
         name: hif.name
       }
     end)
-    |> Mrgr.Notifier.hif_alert(recipient, pull_request.id, pull_request.repository)
+    |> Mrgr.Email.hif_alert(recipient, pull_request.id, pull_request.repository)
     |> Mrgr.Mailer.deliver()
 
     pull_request
@@ -826,7 +826,33 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
-  def closed_for_installation(installation_id, since) do
+  def closed_this_week(installation_id) do
+    # "this week" is last seven days
+    this_week = Mrgr.DateTime.shift_from_now(-7, :day)
+
+    Schema
+    |> Query.for_installation(installation_id)
+    |> Query.merged()
+    |> Query.merged_since(this_week)
+    |> Query.with_author()
+    |> Query.with_hifs()
+    |> Mrgr.Repo.all()
+  end
+
+  def closed_last_week_count(installation_id) do
+    # "this week" is last seven days
+    this_week = Mrgr.DateTime.shift_from_now(-7, :day)
+    last_week = Mrgr.DateTime.shift_from_now(-14, :day)
+
+    Schema
+    |> Query.for_installation(installation_id)
+    |> Query.merged()
+    |> Query.merged_since(last_week)
+    |> Query.merged_before(this_week)
+    |> Mrgr.Repo.aggregate(:count)
+  end
+
+  def closed_summary(installation_id, since) do
     Schema
     |> Query.for_installation(installation_id)
     |> Query.merged()
@@ -1221,6 +1247,10 @@ defmodule Mrgr.PullRequest do
 
     def merged_since(query, since) do
       from(q in query, where: q.merged_at >= ^since)
+    end
+
+    def merged_before(query, before) do
+      from(q in query, where: q.merged_at <= ^before)
     end
 
     def count_open(query, installation_id) do
