@@ -53,16 +53,17 @@ defmodule Mrgr.Email do
 
   defmodule PRSummary do
     def new(pull_requests) do
-      bucket = build_bucket()
+      bucket =
+        Enum.reduce(pull_requests, build_bucket(), fn pr, acc ->
+          acc
+          |> increment_total()
+          |> maybe_put_high_impact(pr)
+          |> put_pr_in_date_bucket(pr)
+        end)
 
-      Enum.reduce(pull_requests, bucket, fn pr, acc ->
-        acc
-        |> increment_total()
-        |> maybe_put_high_impact(pr)
-        |> put_pr_in_date_bucket(pr)
-        |> put_last_week_keys()
-        |> put_this_week_key()
-      end)
+      bucket
+      |> put_last_week_keys()
+      |> put_this_week_key()
     end
 
     def build_bucket do
