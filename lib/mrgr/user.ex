@@ -59,7 +59,7 @@ defmodule Mrgr.User do
   end
 
   @spec find_or_create_from_github(%{required(String.t()) => any()}, OAuth2.AccessToken.t()) ::
-          Schema.t() | {:error, :bad_data, map()}
+  {:ok, Schema.t()} | {:error, :bad_data, map()}
   def find_or_create_from_github(user_data, auth_token) do
     params = Mrgr.User.Github.generate_params(user_data, auth_token)
 
@@ -74,10 +74,10 @@ defmodule Mrgr.User do
             |> welcome_back(params)
             |> associate_member()
             |> set_tokens(params)
+            |> Mrgr.Tuple.ok()
 
           nil ->
-            {:ok, user} = create(params)
-            user
+            create(params)
         end
     end
   end

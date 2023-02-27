@@ -128,14 +128,15 @@ defmodule MrgrWeb.Components.Admin do
 
       <%= for user <- @users do %>
         <.tr striped={true}>
+          <.td><%= user.id %>
+          </.td>
+          <.td><.link_to_installation installation={user.current_installation} /></.td>
           <.td>
-            <%= link(user.id,
+            <%= link(user.nickname,
               to: Routes.admin_user_path(MrgrWeb.Endpoint, :show, user.id),
               class: "text-teal-700 hover:text-teal-500"
             ) %>
           </.td>
-          <.td><.link_to_installation installation={user.current_installation} /></.td>
-          <.td><%= user.nickname %></.td>
           <.td><%= user.name %></.td>
           <.td><%= ts(user.last_seen_at, @tz) %></.td>
           <.td><%= ts(user.inserted_at, @tz) %></.td>

@@ -15,6 +15,8 @@ defmodule Mrgr.Schema.User do
     field(:location, :string)
     field(:name, :string)
     field(:nickname, :string)
+    # the same node_id as the member
+    field(:node_id, :string)
     field(:notification_email, :string)
     field(:phone, :string)
     field(:refresh_token, :string)
@@ -62,6 +64,7 @@ defmodule Mrgr.Schema.User do
     location
     name
     nickname
+    node_id
     notification_email
     phone
   ]a
@@ -72,6 +75,7 @@ defmodule Mrgr.Schema.User do
     last_name
     name
     nickname
+    node_id
     image
     location
   ]a
