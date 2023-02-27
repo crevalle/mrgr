@@ -34,22 +34,33 @@ defmodule MrgrWeb.AuthController do
     # Request the user's data with the access token
     case OAuth2.Client.get(client, "/user") do
       {:ok, %OAuth2.Response{body: data}} ->
-        user = Mrgr.User.find_or_create_from_github(data, token)
+        case Mrgr.User.find_or_create_from_github(data, token) do
+          {:ok, user} ->
+            conn
+            |> sign_in(user)
+            |> put_flash(:info, "Welcome Back! 👋")
+            |> redirect(to: post_sign_in_path(conn, user))
 
-        conn
-        |> sign_in(user)
-        |> put_flash(:info, "Welcome Back! 👋")
-        |> redirect(to: post_sign_in_path(conn, user))
+          {:error, :bad_data, params} ->
+            Logger.warn("OAuth error: #{inspect(params)}")
+
+            conn
+            |> put_flash(
+              :info,
+              "Sorry, we couldn't parse your Github data.  Is your email set up?"
+            )
+            |> redirect(to: Routes.auth_path(conn, :new))
+        end
 
       {:error, %OAuth2.Response{body: body}} ->
-        Logger.warn(inspect(body))
+        Logger.warn("OAuth error: #{inspect(body)}")
 
         conn
         |> put_flash(:info, "Sorry, OAuth expired.  Please log in again.")
         |> redirect(to: Routes.auth_path(conn, :new))
 
       {:error, %OAuth2.Error{reason: reason}} ->
-        Logger.warn(inspect(reason))
+        Logger.warn("OAuth error: #{inspect(reason)}")
 
         conn
         |> put_flash(:info, "Sorry, OAuth failed.  Please try again later.")

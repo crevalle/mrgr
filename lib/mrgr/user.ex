@@ -59,20 +59,26 @@ defmodule Mrgr.User do
   end
 
   @spec find_or_create_from_github(%{required(String.t()) => any()}, OAuth2.AccessToken.t()) ::
-          Schema.t()
+          Schema.t() | {:error, :bad_data, map()}
   def find_or_create_from_github(user_data, auth_token) do
     params = Mrgr.User.Github.generate_params(user_data, auth_token)
 
-    case find_by_email(params["email"]) do
-      %Schema{} = user ->
-        user
-        |> welcome_back(params)
-        |> associate_member()
-        |> set_tokens(params)
-
+    case Map.get(params, "email") do
       nil ->
-        {:ok, user} = create(params)
-        user
+        {:error, :bad_data, params}
+
+      email ->
+        case find_by_email(email) do
+          %Schema{} = user ->
+            user
+            |> welcome_back(params)
+            |> associate_member()
+            |> set_tokens(params)
+
+          nil ->
+            {:ok, user} = create(params)
+            user
+        end
     end
   end
 
