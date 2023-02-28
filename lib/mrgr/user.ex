@@ -54,26 +54,21 @@ defmodule Mrgr.User do
   end
 
   @spec find_or_create_from_github(%{required(String.t()) => any()}, OAuth2.AccessToken.t()) ::
-  {:ok, Schema.t()} | {:error, :bad_data, map()}
+          {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
   def find_or_create_from_github(user_data, auth_token) do
     params = Mrgr.User.Github.generate_params(user_data, auth_token)
 
-    case Map.get(params, "email") do
+    case find_from_github_params(params) do
+      %Schema{} = user ->
+        user
+        |> welcome_back(params)
+        |> associate_member()
+        |> set_tokens(params)
+        |> Mrgr.Tuple.ok()
+
       nil ->
-        {:error, :bad_data, params}
-
-      email ->
-        case find_by_email(email) do
-          %Schema{} = user ->
-            user
-            |> welcome_back(params)
-            |> associate_member()
-            |> set_tokens(params)
-            |> Mrgr.Tuple.ok()
-
-          nil ->
-            create(params)
-        end
+        Logger.warn("create user: #{inspect(params)}")
+        create(params)
     end
   end
 
@@ -89,7 +84,17 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.update!()
   end
 
-  @spec find_by_email(String.t()) :: Schema.t() | nil
+  def find_from_github_params(params) do
+    find_by_node_id(params["node_id"]) || find_by_email(params["email"])
+  end
+
+  def find_by_node_id(node_id) do
+    Mrgr.Repo.get_by(Schema, node_id: node_id)
+  end
+
+  @spec find_by_email(String.t() | nil) :: Schema.t() | nil
+  def find_by_email(nil), do: nil
+
   def find_by_email(email) do
     Mrgr.Repo.get_by(Schema, email: email)
   end

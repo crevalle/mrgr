@@ -41,8 +41,8 @@ defmodule MrgrWeb.AuthController do
             |> put_flash(:info, "Welcome Back! 👋")
             |> redirect(to: post_sign_in_path(conn, user))
 
-          {:error, :bad_data, params} ->
-            Logger.warn("OAuth error: #{inspect(params)}")
+          {:error, _changeset} ->
+            Logger.warn("OAuth error: [DATA] #{inspect(data)} \r [TOKEN] #{inspect(token)}")
 
             conn
             |> put_flash(
