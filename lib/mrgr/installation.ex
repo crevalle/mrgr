@@ -179,6 +179,15 @@ defmodule Mrgr.Installation do
   end
 
   defdelegate subscribed?(i), to: SubscriptionState
+  defdelegate trial_period?(i), to: SubscriptionState
+
+  def trial_period_length_in_days, do: 14
+
+  def trial_time_left(installation) do
+    elapsed = DateTime.diff(Mrgr.DateTime.now(), installation.inserted_at, :day)
+    trial_period_length_in_days - elapsed
+  end
+
   defdelegate onboarded?(i), to: State
 
   def activate_subscription!(installation) do

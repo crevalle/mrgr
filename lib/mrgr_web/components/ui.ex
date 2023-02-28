@@ -80,6 +80,16 @@ defmodule MrgrWeb.Components.UI do
       <.nav_item route={Routes.label_list_path(MrgrWeb.Endpoint, :index)} icon="tag" label="Labels" . />
 
       <p
+        :if={Mrgr.Installation.trial_period?(@current_user.current_installation)}
+        class="alert alert-info font-light text-sm"
+      >
+        Your trial expires in <%= Mrgr.Installation.trial_time_left(
+          @current_user.current_installation
+        ) %> days.
+        <.link href={~p"/account"} class="text-teal-700 hover:text-teal-500 underline">Upgrade</.link>
+      </p>
+
+      <p
         :if={!Mrgr.Installation.onboarded?(@current_user.current_installation)}
         class="alert alert-info"
       >
@@ -748,7 +758,7 @@ defmodule MrgrWeb.Components.UI do
 
   def profile_dropdown_menu(assigns) do
     ~H"""
-    <div class="ml-3 relative">
+    <div class="relative">
       <div>
         <button
           phx-click={
@@ -858,6 +868,7 @@ defmodule MrgrWeb.Components.UI do
         <% end %>
 
         <.nav_item route={~p"/profile"} icon="cog-6-tooth" label="Profile" . />
+        <.nav_item route={~p"/account"} icon="banknotes" label="Account" . />
 
         <div class="py-1">
           <.nav_item

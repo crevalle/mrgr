@@ -12,7 +12,7 @@ h5 {
 }
 
 .alert {
-  padding: 15px;
+  @apply p-2;
   border: 1px solid transparent;
   border-radius: 4px;
 }

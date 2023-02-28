@@ -1,0 +1,24 @@
+<div class="flex flex-col space-y-4">
+  <div class="flex justify-between">
+    <.heading title={"Account Settings for #{account_name(@current_user)}"} />
+  </div>
+
+  <div class="two-pane-layout">
+    <div class="main-pane">
+      <div class="white-box">
+        <div class="grid grid-cols-3 gap-4 items-start">
+          <div class="font-semibold">Subscription Status</div>
+          <div class="col-span-2"><%= format_subscription_state(@installation) %></div>
+
+          <%= if Mrgr.Installation.trial_period?(@installation) do %>
+            <div class="font-semibold">Time Remaining in Trial Period</div>
+            <div class="col-span-2">
+              <%= Mrgr.Installation.trial_time_left(@installation) %> days
+            </div>
+          <% else %>
+          <% end %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

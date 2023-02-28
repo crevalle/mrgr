@@ -23,6 +23,9 @@ defmodule Mrgr.Installation.SubscriptionState do
   def subscribed?(%{subscription_state: state}) when state in [@active, @personal], do: true
   def subscribed?(_), do: false
 
+  def trial_period?(%{subscription_state: state}) when state in [@trial], do: true
+  def trial_period?(_), do: false
+
   def active!(%{target_type: "User"} = installation) do
     update_state!(installation, @personal)
   end

@@ -6,7 +6,7 @@
           <%= img_tag("/images/logo/Mrgr-B6.png", class: "h-10") %>
         </.link>
       </div>
-      <div class="flex-1 px-4 flex justify-between">
+      <div class="flex-1 px-4 flex items-center justify-between">
         <div class="flex">
           <.nav_bar
             :if={Mrgr.Installation.onboarded?(@conn.assigns.current_user.current_installation)}

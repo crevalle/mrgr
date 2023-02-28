@@ -6,6 +6,10 @@ defmodule MrgrWeb.Formatter do
   @three_days 259_200
   @one_day 86_400
 
+  def account_name(%{current_installation: %{account: %{login: login}}}), do: login
+  def account_name(%{account: %{login: login}}), do: login
+  def account_name(_), do: ""
+
   def shorten_sha(sha) do
     String.slice(sha, 0..6)
   end
