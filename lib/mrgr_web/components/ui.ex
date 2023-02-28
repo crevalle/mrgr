@@ -28,7 +28,7 @@ defmodule MrgrWeb.Components.UI do
 
   def l(assigns) do
     default_colors = "text-teal-700 hover:text-teal-500"
-    default_class = "#{Map.get(assigns, :colors, default_colors)} font-light text-sm"
+    default_class = "#{Map.get(assigns, :colors, default_colors)} text-sm"
     class = Map.get(assigns, :class, default_class)
     href = Map.get(assigns, :href, "#")
 

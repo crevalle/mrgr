@@ -41,7 +41,7 @@
         <td class="text-center">
           <%= tf(hif.notify_user) %>
         </td>
-        <td class="whitespace-nowrap pr-4 py-2 text-right text-sm font-medium">
+        <td class="whitespace-nowrap pr-4 py-2 text-right text-sm">
           <.l phx_click={
             JS.push("edit-hif", value: %{repo: @repo.id, hif: hif.id})
             |> show_detail()
