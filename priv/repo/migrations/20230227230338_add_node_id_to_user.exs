@@ -5,6 +5,5 @@ defmodule Mrgr.Repo.Migrations.AddNodeIDToUser do
     alter table(:users) do
       add(:node_id, :string)
     end
-
   end
 end

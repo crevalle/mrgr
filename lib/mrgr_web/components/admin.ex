@@ -128,8 +128,7 @@ defmodule MrgrWeb.Components.Admin do
 
       <%= for user <- @users do %>
         <.tr striped={true}>
-          <.td><%= user.id %>
-          </.td>
+          <.td><%= user.id %></.td>
           <.td><.link_to_installation installation={user.current_installation} /></.td>
           <.td>
             <%= link(user.nickname,
