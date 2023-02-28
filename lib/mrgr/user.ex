@@ -2,14 +2,9 @@ defmodule Mrgr.User do
   alias Mrgr.Schema.User, as: Schema
   alias Mrgr.User.Query, as: Query
 
-  def send_weekly_pr_summaries do
-    Enum.map(users_with_pr_summaries(), &send_pr_summary/1)
-  end
-
-  def users_with_pr_summaries do
+  def wanting_pr_summary do
     Schema
     |> Query.wanting_pr_summary()
-    |> Query.with_current_installation()
     |> Mrgr.Repo.all()
   end
 
