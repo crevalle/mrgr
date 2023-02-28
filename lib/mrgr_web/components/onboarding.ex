@@ -167,11 +167,4 @@ defmodule MrgrWeb.Components.Onboarding do
 
     """
   end
-
-  def payment_url(installation) do
-    base_url = Application.get_env(:mrgr, :payments)[:url]
-    creator = Mrgr.User.find(installation.creator_id)
-
-    "#{base_url}?client_reference_id=#{installation.id}&prefilled_email=#{URI.encode_www_form(creator.email)}"
-  end
 end

@@ -6,17 +6,23 @@
   <div class="two-pane-layout">
     <div class="main-pane">
       <div class="white-box">
-        <div class="grid grid-cols-3 gap-4 items-start">
+        <div class="grid grid-cols-3 gap-4 items-center">
           <div class="font-semibold">Subscription Status</div>
-          <div class="col-span-2"><%= format_subscription_state(@installation) %></div>
-
-          <%= if Mrgr.Installation.trial_period?(@installation) do %>
-            <div class="font-semibold">Time Remaining in Trial Period</div>
-            <div class="col-span-2">
-              <%= Mrgr.Installation.trial_time_left(@installation) %> days
-            </div>
-          <% else %>
-          <% end %>
+          <div class="col-span-2 flex items-center space-x-4">
+            <span><%= format_subscription_state(@installation) %></span>
+            <%= if Mrgr.Installation.trial_period?(@installation) do %>
+              <.l
+                href={payment_url(@installation, @current_user)}
+                class="btn btn-primary"
+                data={[
+                  confirm:
+                    "You'll be redirected to Stripe to enter your payment information.  Ready?"
+                ]}
+              >
+                Activate Now!
+              </.l>
+            <% end %>
+          </div>
         </div>
       </div>
     </div>

@@ -7,13 +7,11 @@
         </.link>
       </div>
       <div class="flex-1 px-4 flex items-center justify-between">
-        <div class="flex">
-          <.nav_bar
-            :if={Mrgr.Installation.onboarded?(@conn.assigns.current_user.current_installation)}
-            conn={@conn}
-            current_user={@conn.assigns.current_user}
-          />
-        </div>
+        <.nav_bar
+          :if={Mrgr.Installation.onboarded?(@conn.assigns.current_user.current_installation)}
+          conn={@conn}
+          current_user={@conn.assigns.current_user}
+        />
         <.profile_dropdown_menu
           current_user={@conn.assigns.current_user}
           admin={admin?(@conn.assigns.current_user)}

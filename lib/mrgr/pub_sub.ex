@@ -82,7 +82,7 @@ defmodule Mrgr.PubSub do
         @installation_created "installation:created"
         @installation_onboarding_progressed "installation:onboarding_progressed"
         @installation_repositories_synced "installation:repositories_synced"
-        @installation_onboarding_progressed "installation:onboarding_progressed"
+        @installation_subscription_updated "installation:subscription_updated"
 
         @label_created "label:created"
         @label_deleted "label:deleted"

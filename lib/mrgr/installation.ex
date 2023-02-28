@@ -185,7 +185,7 @@ defmodule Mrgr.Installation do
 
   def trial_time_left(installation) do
     elapsed = DateTime.diff(Mrgr.DateTime.now(), installation.inserted_at, :day)
-    trial_period_length_in_days - elapsed
+    trial_period_length_in_days() - elapsed
   end
 
   defdelegate onboarded?(i), to: State
@@ -193,7 +193,7 @@ defmodule Mrgr.Installation do
   def activate_subscription!(installation) do
     installation
     |> SubscriptionState.active!()
-    |> broadcast(@installation_onboarding_progressed)
+    |> broadcast(@installation_subscription_updated)
   end
 
   def activate_subscriptions_on_personal_accounts(%{target_type: "User"} = installation) do

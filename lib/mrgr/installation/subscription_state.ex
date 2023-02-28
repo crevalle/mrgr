@@ -34,6 +34,10 @@ defmodule Mrgr.Installation.SubscriptionState do
     update_state!(installation, @active)
   end
 
+  def trial!(installation) do
+    update_state!(installation, @trial)
+  end
+
   def update_state!(installation, state) do
     state_change = build_state_change(state)
 
