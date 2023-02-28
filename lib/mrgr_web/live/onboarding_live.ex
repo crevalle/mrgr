@@ -34,14 +34,18 @@ defmodule MrgrWeb.OnboardingLive do
           <p>Mrgr onboarding is just 3 simple steps:</p>
 
           <.step_list>
-            <.step name="install_github_app" installation={@installation} />
-            <.step name="done" installation={@installation} />
+            <.step name="install_github_app" number={1} installation={@installation} />
+            <.step name="sync_data" number={2} installation={@installation} />
+            <.step name="done" number={3} installation={@installation} />
           </.step_list>
         </div>
 
-        <.installed_message installation={@installation} />
-        <.render_stats stats={@stats} />
-        <.action installation={@installation} socket={@socket} />
+        <div class="flex flex-col space-y-4">
+          <.installed_message installation={@installation} />
+          <.syncing_message installation={@installation} />
+          <.render_stats stats={@stats} />
+          <.action installation={@installation} socket={@socket} />
+        </div>
       </div>
     </div>
     """

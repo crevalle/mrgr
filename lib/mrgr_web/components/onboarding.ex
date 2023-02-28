@@ -16,13 +16,45 @@ defmodule MrgrWeb.Components.Onboarding do
 
     ~H"""
     <.step_option class={@class} name={@name}>
-      <:number>1</:number>
+      <:number><%= @number %></:number>
       <:title>
         Install our Github App
       </:title>
 
       <:description>
-        This integration loads your Pull Request data and sets up webhooks so we have the latest data.
+        This is how we pull in your pull request data and stay up to date.  Requires admin privileges on your organization.
+      </:description>
+    </.step_option>
+    """
+  end
+
+  def step(%{name: "sync_data"} = assigns) do
+    class =
+      case assigns.installation do
+        nil ->
+          todo()
+
+        i ->
+          case i.state do
+            "created" -> todo()
+            "onboarding_complete" -> done()
+            _the_midst_of_onboarding -> in_progress()
+          end
+      end
+
+    assigns =
+      assigns
+      |> assign(:class, class)
+
+    ~H"""
+    <.step_option class={@class} name={@name}>
+      <:number>2</:number>
+      <:title>
+        Sync your data
+      </:title>
+
+      <:description>
+        We'll do this for you once the app is installed :)
       </:description>
     </.step_option>
     """
@@ -36,8 +68,8 @@ defmodule MrgrWeb.Components.Onboarding do
 
         i ->
           case i.subscription_state do
-            nil -> todo()
-            _active_or_cancelled_i_guess -> in_progress()
+            "onboarding_complete" -> in_progress()
+            _not_yet_pal -> todo()
           end
       end
 
@@ -47,7 +79,7 @@ defmodule MrgrWeb.Components.Onboarding do
 
     ~H"""
     <.step_option class={@class} name={@name}>
-      <:number>3</:number>
+      <:number><%= @number %></:number>
       <:title>
         Get to work!
       </:title>
@@ -91,9 +123,8 @@ defmodule MrgrWeb.Components.Onboarding do
     """
   end
 
-  # TODO: this should key off onboarding state, not subscription state
-  def action(%{installation: %{subscription_state: state}} = assigns)
-      when state in ["active", "personal"] do
+  def action(%{installation: %{state: state}} = assigns)
+      when state in ["onboarding_complete"] do
     ~H"""
     <div class="flex flex-col space-y-4">
       <p>
@@ -105,6 +136,8 @@ defmodule MrgrWeb.Components.Onboarding do
     </div>
     """
   end
+
+  def action(assigns), do: ~H[]
 
   def render_stats(%{stats: stats} = assigns) when stats == %{}, do: ~H[]
 
@@ -150,6 +183,31 @@ defmodule MrgrWeb.Components.Onboarding do
     </p>
     """
   end
+
+  def syncing_message(%{installation: %{state: state}} = assigns)
+      when state in [
+             "onboarding_members",
+             "onboarding_teams",
+             "onboarding_repos",
+             "onboarding_prs"
+           ] do
+    [_, syncing] = String.split(state, "_")
+
+    assigns = assign(assigns, :syncing, syncing)
+
+    ~H"""
+    <div class="flex flex-col">
+      <div class="flex items-center space-x-2">
+        <p class="font-bold">Syncing in Progress.</p>
+        <p>This can take up to a minute.</p>
+        <p>Syncing your <%= @syncing %></p>
+        <.spinner id="syncing-spinner" />
+      </div>
+    </div>
+    """
+  end
+
+  def syncing_message(assigns), do: ~H[]
 
   defp account_type(%{target_type: "User"}), do: "user account"
   defp account_type(_org_or_app), do: "organization"
