@@ -207,6 +207,17 @@ defmodule MrgrWeb.Components.Onboarding do
     """
   end
 
+  def syncing_message(%{installation: %{state: "onboarding_error"}} = assigns) do
+    ~H"""
+    <div class="flex flex-col">
+      <div class="flex items-center space-x-2">
+        <p class="font-bold">Uh Oh!</p>
+        <p>We ran into an issue syncing your data.  Our Customer Support team will be in touch!</p>
+      </div>
+    </div>
+    """
+  end
+
   def syncing_message(assigns), do: ~H[]
 
   defp account_type(%{target_type: "User"}), do: "user account"
