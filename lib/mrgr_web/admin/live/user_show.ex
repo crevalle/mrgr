@@ -81,7 +81,11 @@ defmodule MrgrWeb.Admin.Live.UserShow do
             <.h3>Current Installation</.h3>
           </div>
 
-          <.installation_table installation={@user.current_installation} tz={@timezone} . />
+          <%= if @user.current_installation do %>
+            <.installation_table installation={@user.current_installation} tz={@timezone} . />
+          <% else %>
+            none!
+          <% end %>
         </div>
       </div>
 
