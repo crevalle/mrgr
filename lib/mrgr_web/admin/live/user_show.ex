@@ -22,6 +22,7 @@ defmodule MrgrWeb.Admin.Live.UserShow do
               <.table_attr obj={@user} key={:nickname} . />
               <.table_attr obj={@user} key={:birthday} . />
               <.table_attr obj={@user} key={:email} . />
+              <.table_attr obj={@user} key={:notification_email} . />
               <.table_attr obj={@user} key={:name} . />
               <.table_attr obj={@user} key={:first_name} . />
               <.table_attr obj={@user} key={:last_name} . />
@@ -29,6 +30,7 @@ defmodule MrgrWeb.Admin.Live.UserShow do
               <.table_attr obj={@user} key={:node_id} . />
               <.table_attr obj={@user} key={:avatar_url} . />
               <.table_attr obj={@user} key={:phone} . />
+              <.table_attr obj={@user} key={:send_weekly_summary_email} . />
               <.table_attr obj={@user} key={:refresh_token} . />
               <.table_attr obj={@user} key={:token} . />
               <.table_attr obj={@user} key={:token_expires_at} tz={@timezone} . />

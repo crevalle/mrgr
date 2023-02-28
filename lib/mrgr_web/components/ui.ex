@@ -243,6 +243,9 @@ defmodule MrgrWeb.Components.UI do
         map when is_map(map) ->
           Jason.encode!(map, pretty: true)
 
+        bool when is_boolean(bool) ->
+          tf(bool)
+
         list when is_list(list) ->
           Enum.join(list, ", ")
 
