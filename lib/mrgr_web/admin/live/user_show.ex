@@ -49,24 +49,28 @@ defmodule MrgrWeb.Admin.Live.UserShow do
           </div>
 
           <div class="mt-1">
-            <table class="min-w-full">
-              <.table_attr obj={@user.member} key={:login} . />
-              <.table_attr obj={@user.member} key={:type} . />
-              <.table_attr obj={@user.member} key={:site_admin} . />
-              <.table_attr obj={@user.member} key={:node_id} . />
-              <.table_attr obj={@user.member} key={:url} . />
-              <.table_attr obj={@user.member} key={:avatar_url} . />
-              <.table_attr obj={@user.member} key={:events_url} . />
-              <.table_attr obj={@user.member} key={:followers_url} . />
-              <.table_attr obj={@user.member} key={:following_url} . />
-              <.table_attr obj={@user.member} key={:gists_url} . />
-              <.table_attr obj={@user.member} key={:gravatar_id} . />
-              <.table_attr obj={@user.member} key={:html_url} . />
-              <.table_attr obj={@user.member} key={:organizations_url} . />
-              <.table_attr obj={@user.member} key={:received_events_url} . />
-              <.table_attr obj={@user.member} key={:starred_url} . />
-              <.table_attr obj={@user.member} key={:subscriptions_url} . />
-            </table>
+            <%= if @user.member do %>
+              <table class="min-w-full">
+                <.table_attr obj={@user.member} key={:login} . />
+                <.table_attr obj={@user.member} key={:type} . />
+                <.table_attr obj={@user.member} key={:site_admin} . />
+                <.table_attr obj={@user.member} key={:node_id} . />
+                <.table_attr obj={@user.member} key={:url} . />
+                <.table_attr obj={@user.member} key={:avatar_url} . />
+                <.table_attr obj={@user.member} key={:events_url} . />
+                <.table_attr obj={@user.member} key={:followers_url} . />
+                <.table_attr obj={@user.member} key={:following_url} . />
+                <.table_attr obj={@user.member} key={:gists_url} . />
+                <.table_attr obj={@user.member} key={:gravatar_id} . />
+                <.table_attr obj={@user.member} key={:html_url} . />
+                <.table_attr obj={@user.member} key={:organizations_url} . />
+                <.table_attr obj={@user.member} key={:received_events_url} . />
+                <.table_attr obj={@user.member} key={:starred_url} . />
+                <.table_attr obj={@user.member} key={:subscriptions_url} . />
+              </table>
+            <% else %>
+              No Member for user!
+            <% end %>
           </div>
         </div>
       </div>
