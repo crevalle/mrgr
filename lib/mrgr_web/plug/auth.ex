@@ -98,16 +98,6 @@ defmodule MrgrWeb.Plug.Auth do
     |> Mrgr.Repo.update!()
   end
 
-  def redirect_missing_installation_to_onboarding(conn, _opts) do
-    case conn.assigns.current_user.current_installation_id do
-      nil ->
-        Phoenix.Controller.redirect(conn, to: "/onboarding")
-
-      _id ->
-        conn
-    end
-  end
-
   def redirect_logged_in_to_dashboard(conn, _opts) do
     case signed_in?(conn) do
       true ->

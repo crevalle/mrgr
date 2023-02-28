@@ -104,6 +104,7 @@ defmodule MrgrWeb do
       import Phoenix.Controller
       import Phoenix.LiveView.Router
       import MrgrWeb.Plug.Auth
+      import MrgrWeb.Plug.Installation
     end
   end
 

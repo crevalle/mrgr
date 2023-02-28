@@ -21,6 +21,10 @@ defmodule MrgrWeb.Router do
     plug :redirect_missing_installation_to_onboarding
   end
 
+  pipeline :redirect_onboarded_users do
+    plug :redirect_onboarded_users_to_dashboard
+  end
+
   pipeline :skip_auth_for_logged_in_folks do
     plug :redirect_logged_in_to_dashboard
   end
@@ -58,7 +62,7 @@ defmodule MrgrWeb.Router do
   end
 
   scope "/", MrgrWeb do
-    pipe_through [:browser, :authenticate]
+    pipe_through [:browser, :authenticate, :redirect_onboarded_users]
 
     live "/onboarding", OnboardingLive, :index
   end
