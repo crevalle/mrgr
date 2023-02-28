@@ -2,6 +2,8 @@ defmodule Mrgr.User do
   alias Mrgr.Schema.User, as: Schema
   alias Mrgr.User.Query, as: Query
 
+  require Logger
+
   def wanting_pr_summary do
     Schema
     |> Query.wanting_pr_summary()
