@@ -62,6 +62,7 @@ defmodule Mrgr.Schema.Installation do
     repositories_url
     repository_selection
     state
+    subscription_state
     target_id
     target_type
   ]a
@@ -74,6 +75,8 @@ defmodule Mrgr.Schema.Installation do
     |> foreign_key_constraint(:creator_id)
     |> put_external_id()
     |> put_data_map()
+    |> validate_inclusion(:state, Mrgr.Installation.State.states())
+    |> validate_inclusion(:subscription_state, Mrgr.Installation.SubscriptionState.states())
   end
 
   @tokens ~w[

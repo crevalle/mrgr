@@ -35,7 +35,6 @@ defmodule MrgrWeb.OnboardingLive do
 
           <.step_list>
             <.step name="install_github_app" installation={@installation} />
-            <.step name="create_subscription" installation={@installation} />
             <.step name="done" installation={@installation} />
           </.step_list>
         </div>

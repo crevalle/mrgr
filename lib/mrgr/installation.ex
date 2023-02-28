@@ -67,10 +67,16 @@ defmodule Mrgr.Installation do
   defp create_installation(payload) do
     creator = find_user_from_webhook_sender(payload)
 
+    default_params = %{
+      "creator_id" => creator.id,
+      "state" => State.initial(),
+      "subscription_state" => SubscriptionState.initial()
+    }
+
     {:ok, installation} =
       payload
       |> Map.get("installation")
-      |> Map.merge(%{"creator_id" => creator.id, "state" => Mrgr.Installation.State.initial()})
+      |> Map.merge(default_params)
       |> Mrgr.Schema.Installation.create_changeset()
       |> Mrgr.Repo.insert()
 

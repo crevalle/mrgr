@@ -18,7 +18,7 @@ defmodule MrgrWeb.Router do
   end
 
   pipeline :require_installation do
-    plug :redirect_incomplete_installation_to_onboarding
+    plug :redirect_missing_installation_to_onboarding
   end
 
   pipeline :skip_auth_for_logged_in_folks do

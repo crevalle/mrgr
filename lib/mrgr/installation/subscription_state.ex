@@ -1,14 +1,24 @@
 defmodule Mrgr.Installation.SubscriptionState do
   # yon states
+  @trial "trial"
+  @trial_expired_grace "trial_expired_grace"
+  @trial_expired "trial_expired"
   @active "active"
+  @cancelled "cancelled"
   @personal "personal"
 
   def states do
     [
+      @trial,
+      @trial_expired_grace,
+      @trial_expired,
       @active,
+      @cancelled,
       @personal
     ]
   end
+
+  def initial, do: @trial
 
   def subscribed?(%{subscription_state: state}) when state in [@active, @personal], do: true
   def subscribed?(_), do: false

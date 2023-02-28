@@ -28,37 +28,6 @@ defmodule MrgrWeb.Components.Onboarding do
     """
   end
 
-  def step(%{name: "create_subscription"} = assigns) do
-    class =
-      case assigns.installation do
-        nil ->
-          todo()
-
-        i ->
-          case i.subscription_state do
-            nil -> in_progress()
-            _active -> done()
-          end
-      end
-
-    assigns =
-      assigns
-      |> assign(:class, class)
-
-    ~H"""
-    <.step_option class={@class} name={@name}>
-      <:number>2</:number>
-      <:title>
-        Create your Subscription 💸
-      </:title>
-
-      <:description>
-        Mrgr is free for personal (ie, non-Organization) accounts
-      </:description>
-    </.step_option>
-    """
-  end
-
   def step(%{name: "done"} = assigns) do
     class =
       case assigns.installation do
@@ -122,6 +91,7 @@ defmodule MrgrWeb.Components.Onboarding do
     """
   end
 
+  # TODO: this should key off onboarding state, not subscription state
   def action(%{installation: %{subscription_state: state}} = assigns)
       when state in ["active", "personal"] do
     ~H"""
@@ -133,14 +103,6 @@ defmodule MrgrWeb.Components.Onboarding do
         Let's get Mergin'
       </.l>
     </div>
-    """
-  end
-
-  def action(%{installation: %{subscription_state: nil}} = assigns) do
-    ~H"""
-    <.l href={payment_url(@installation)} class="btn btn-primary">
-      On to payment!
-    </.l>
     """
   end
 
