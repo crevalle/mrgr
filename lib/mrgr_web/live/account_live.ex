@@ -6,15 +6,26 @@ defmodule MrgrWeb.AccountLive do
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
-      subscribe(socket.assigns.current_user)
+      user = Mrgr.User.find_full(socket.assigns.current_user.id)
+
+      subscribe(user)
 
       socket
       |> put_title("Your Account")
-      |> assign(:installation, socket.assigns.current_user.current_installation)
+      |> assign(:current_user, user)
       |> ok()
     else
       ok(socket)
     end
+  end
+
+  def handle_event("switch-installation", %{"id" => id}, socket) do
+    i = Mrgr.List.find(socket.assigns.current_user.installations, id)
+    user = Mrgr.User.set_current_installation(socket.assigns.current_user, i)
+
+    socket
+    |> assign(:current_user, user)
+    |> noreply()
   end
 
   def format_subscription_state(%{subscription_state: "trial"}), do: "Trial"

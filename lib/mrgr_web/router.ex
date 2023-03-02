@@ -62,7 +62,7 @@ defmodule MrgrWeb.Router do
   end
 
   scope "/", MrgrWeb do
-    pipe_through [:browser, :authenticate, :redirect_onboarded_users]
+    pipe_through [:browser, :authenticate]
 
     live "/onboarding", OnboardingLive, :index
   end

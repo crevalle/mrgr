@@ -51,24 +51,39 @@ defmodule MrgrWeb.OnboardingLive do
     """
   end
 
-  def subscribe(%{current_installation_id: nil} = user) do
+  def subscribe(user) do
+    subscribe_to_onboarding_events(user)
+    subscribe_to_installation_events(user.current_installation)
+  end
+
+  def subscribe_to_onboarding_events(user) do
     user
     |> Mrgr.PubSub.Topic.onboarding()
     |> Mrgr.PubSub.subscribe()
   end
 
-  def subscribe(user_or_installation) do
-    user_or_installation
+  # first time through
+  def subscribe_to_installation_events(nil) do
+    :ok
+  end
+
+  def subscribe_to_installation_events(installation) do
+    installation
     |> Mrgr.PubSub.Topic.installation()
     |> Mrgr.PubSub.subscribe()
   end
 
   def handle_info(%{event: @installation_created, payload: installation}, socket) do
     # now we can listen for data sync events
-    subscribe(installation)
+    subscribe_to_installation_events(installation)
 
     # only this user should get this message
-    user = %{socket.assigns.current_user | current_installation_id: installation.id}
+    # this attr is set in the installation module, but our in-memory user doesn't get the update
+    user = %{
+      socket.assigns.current_user
+      | current_installation_id: installation.id,
+        current_installation: installation
+    }
 
     socket
     |> assign(:current_user, user)

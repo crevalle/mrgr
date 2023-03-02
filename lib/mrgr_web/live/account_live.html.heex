@@ -1,29 +1,69 @@
 <div class="flex flex-col space-y-4">
   <div class="flex justify-between">
-    <.heading title={"Account Settings for #{account_name(@current_user)}"} />
+    <.heading title="Account Settings" />
   </div>
 
   <div class="two-pane-layout">
     <div class="main-pane">
       <div class="white-box">
-        <div class="grid grid-cols-3 gap-4 items-center">
-          <div class="font-semibold">Subscription Status</div>
-          <div class="col-span-2 flex items-center space-x-4">
-            <span><%= format_subscription_state(@installation) %></span>
-            <%= if Mrgr.Installation.trial_period?(@installation) do %>
-              <.l
-                href={payment_url(@installation, @current_user)}
-                class="btn btn-primary"
-                data={[
-                  confirm:
-                    "You'll be redirected to Stripe to enter your payment information.  Ready?"
-                ]}
-              >
-                Activate Now!
-              </.l>
+        <table class="w-full">
+          <thead class="bg-white">
+            <tr>
+              <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                Organization
+              </th>
+              <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                Subscription Status
+              </th>
+              <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <%= for installation <- @current_user.installations do %>
+              <.tr>
+                <.td>
+                  <%= account_name(installation) %>
+                </.td>
+                <.td>
+                  <div class="flex items-center space-x-4">
+                    <.subscription_state_badge state={installation.subscription_state} />
+                    <%= if Mrgr.Installation.trial_period?(installation) do %>
+                      <.l
+                        href={payment_url(installation, @current_user)}
+                        class="btn btn-primary"
+                        data={[
+                          confirm:
+                            "You'll be redirected to Stripe to enter your payment information.  Ready?"
+                        ]}
+                      >
+                        Upgrade Now!
+                      </.l>
+                    <% end %>
+                  </div>
+                </.td>
+                <.td>
+                  <%= if @current_user.current_installation_id == installation.id do %>
+                    currently active! ✌️
+                  <% else %>
+                    <.l phx-click={JS.push("switch-installation", value: %{id: installation.id})}>
+                      Switch to this Organization
+                    </.l>
+                  <% end %>
+                </.td>
+              </.tr>
             <% end %>
-          </div>
-        </div>
+            <.tr>
+              <.td>
+                <.l href={Mrgr.Installation.installation_url()}>
+                  Install Mrgr in a new Organization 🚀
+                </.l>
+              </.td>
+              <.td></.td>
+              <.td></.td>
+            </.tr>
+          </tbody>
+        </table>
       </div>
     </div>
   </div>

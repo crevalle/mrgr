@@ -1,4 +1,6 @@
 defmodule Mrgr.User do
+  use Mrgr.PubSub.Event
+
   alias Mrgr.Schema.User, as: Schema
   alias Mrgr.User.Query, as: Query
 
@@ -118,9 +120,15 @@ defmodule Mrgr.User do
   def set_current_installation(user, installation) do
     params = %{current_installation_id: installation.id}
 
-    user
-    |> Schema.current_installation_changeset(params)
-    |> Mrgr.Repo.update()
+    user =
+      user
+      |> Schema.current_installation_changeset(params)
+      |> Mrgr.Repo.update!()
+
+    topic = Mrgr.PubSub.Topic.user(user)
+    Mrgr.PubSub.broadcast(installation, topic, @installation_switched)
+
+    %{user | current_installation: installation}
   end
 
   def installations(user) do
@@ -208,7 +216,8 @@ defmodule Mrgr.User do
     def with_installations(query) do
       from(q in query,
         left_join: i in assoc(q, :installations),
-        preload: [installations: i]
+        join: a in assoc(i, :account),
+        preload: [installations: {i, account: a}]
       )
     end
 

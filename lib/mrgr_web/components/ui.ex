@@ -57,7 +57,8 @@ defmodule MrgrWeb.Components.UI do
       >
         <%= live_render(@conn, MrgrWeb.Live.OpenPRCountBadge,
           session: %{
-            "installation_id" => @current_user.current_installation_id
+            "installation_id" => @current_user.current_installation_id,
+            "user_id" => @current_user.id
           }
         ) %>
       </.nav_item>
@@ -642,6 +643,30 @@ defmodule MrgrWeb.Components.UI do
     ~H"""
     <span class="bg-gray-100 group-hover:bg-gray-200 ml-3 inline-block py-0.5 px-3 text-xs font-medium rounded-full">
       <%= @count %>
+    </span>
+    """
+  end
+
+  attr :state, :string, required: true
+
+  def subscription_state_badge(assigns) do
+    color =
+      case assigns.state do
+        "trial" -> "alert-info"
+        "active" -> "alert-sweet"
+        "cancelled" -> "alert-warning"
+        "personal" -> "alert-sweet"
+        _ -> "alert-warning"
+      end
+
+    assigns = assign(assigns, :color, color)
+
+    ~H"""
+    <span class={[
+      "px-2 inline-flex text-xs leading-5 font-semibold rounded-full",
+      @color
+    ]}>
+      <%= @state %>
     </span>
     """
   end

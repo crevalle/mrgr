@@ -17,6 +17,12 @@ defmodule Mrgr.PubSub do
     |> subscribe()
   end
 
+  def subscribe_to_user(user) do
+    user
+    |> Mrgr.PubSub.Topic.user()
+    |> subscribe()
+  end
+
   def subscribe(topic) do
     Phoenix.PubSub.subscribe(__MODULE__, topic)
   end
@@ -50,6 +56,12 @@ defmodule Mrgr.PubSub do
       "onboarding:#{user_id}"
     end
 
+    def user(%Mrgr.Schema.User{id: id}), do: user(id)
+
+    def user(user_id) do
+      "user:#{user_id}"
+    end
+
     def installation(%Mrgr.Schema.Installation{id: id}), do: installation(id)
 
     def installation(%{current_installation_id: id}), do: installation(id)
@@ -80,6 +92,7 @@ defmodule Mrgr.PubSub do
         @incoming_webhook_created "incoming_webhook:created"
 
         @installation_created "installation:created"
+        @installation_switched "installation:switched"
         @installation_onboarding_progressed "installation:onboarding_progressed"
         @installation_repositories_synced "installation:repositories_synced"
         @installation_subscription_updated "installation:subscription_updated"
