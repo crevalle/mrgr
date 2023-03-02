@@ -51,10 +51,23 @@ defmodule Mrgr.Installation do
   end
 
   def create_from_webhook(payload) do
-    payload
-    |> create_installation()
-    |> queue_initial_setup()
-    |> ok()
+    case debounce_duplicate_create_webhook(payload) do
+      :ok ->
+        payload
+        |> create_installation()
+        |> queue_initial_setup()
+        |> ok()
+
+      {:error, _reason, installation} ->
+        {:ok, installation}
+    end
+  end
+
+  def debounce_duplicate_create_webhook(payload) do
+    case find_by_external_id(payload["installation"]["id"]) do
+      nil -> :ok
+      installation -> {:error, :installation_exists, installation}
+    end
   end
 
   defp find_user_from_webhook_sender(payload) do
