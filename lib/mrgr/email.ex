@@ -4,7 +4,7 @@ defmodule Mrgr.Email do
   import Swoosh.Email
 
   def hif_alert(alerts, recipient, pull_request_id, repository) do
-    url = ~p"/pull-requests/hifs/#{pull_request_id}/files-changed"
+    url = url(MrgrWeb.Endpoint, ~p"/pull-requests/hifs/#{pull_request_id}/files-changed")
 
     assigns = %{
       hif_alerts: alerts,
@@ -13,7 +13,7 @@ defmodule Mrgr.Email do
     }
 
     new()
-    |> from("noreply@mrgr.io")
+    |> from({"Mrgr", "noreply@mrgr.io"})
     |> to(recipient)
     |> subject("File Change Alert in #{assigns.repository_name}")
     |> render_with_layout(MrgrWeb.Email.Renderer.hif_alert(assigns))
