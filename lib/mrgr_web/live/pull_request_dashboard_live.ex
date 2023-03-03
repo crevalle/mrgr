@@ -1,4 +1,4 @@
-defmodule MrgrWeb.PullRequestLive do
+defmodule MrgrWeb.PullRequestDashboardLive do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 

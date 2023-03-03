@@ -50,11 +50,7 @@ defmodule MrgrWeb.Components.UI do
   def nav_bar(assigns) do
     ~H"""
     <div class="ml-4 flex items-center space-x-6">
-      <.nav_item
-        route={Routes.pull_request_path(MrgrWeb.Endpoint, :index)}
-        icon="share"
-        label="Open Pull Requests"
-      >
+      <.nav_item route={~p"/pull-requests"} icon="share" label="Open Pull Requests">
         <%= live_render(@conn, MrgrWeb.Live.OpenPRCountBadge,
           session: %{
             "installation_id" => @current_user.current_installation_id,
