@@ -54,7 +54,7 @@
           </div>
           <div class="font-semibold">Send Weekly PR Summary Email</div>
           <div class="col-span-2 flex flex-col">
-            <.form :let={f} for={:user} phx-change="update-weekly-summary-preference">
+            <.form :let={f} for={%{}} as={:user} phx-change="update-weekly-summary-preference">
               <%= checkbox(f, :send_weekly_summary_email,
                 value: @current_user.send_weekly_summary_email,
                 class: "checkbox"
