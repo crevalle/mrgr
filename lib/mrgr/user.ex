@@ -212,9 +212,8 @@ defmodule Mrgr.User do
     |> Mrgr.Mailer.deliver()
   end
 
-  def member(user) do
-    Mrgr.Repo.get_by(Mrgr.Schema.Member, user_id: user.id)
-  end
+  def admin_at_installation?(%{id: id, current_installation: %{creator_id: id}}), do: true
+  def admin_at_installation?(_user), do: false
 
   def desmond do
     Mrgr.Repo.get_by(Schema, nickname: "desmondmonster")

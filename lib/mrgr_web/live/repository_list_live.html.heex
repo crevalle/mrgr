@@ -3,10 +3,13 @@
     <div class="">
       <div class="flex justify-between mb-2">
         <.h1>Security Policies</.h1>
-        <.l phx-click={
-          JS.push("add-policy")
-          |> show_detail()
-        }>
+        <.l
+          :if={Mrgr.User.admin_at_installation?(@current_user)}
+          phx-click={
+            JS.push("add-policy")
+            |> show_detail()
+          }
+        >
           Add New
         </.l>
       </div>
@@ -15,12 +18,16 @@
           <p>
             <strong>None Yet!</strong>
             Why don't you
-            <.inline_link phx-click={
-              JS.push("add-policy")
-              |> show_detail()
-            }>
-              Add One
-            </.inline_link>?
+            <%= if Mrgr.User.admin_at_installation?(@current_user) do %>
+              <.inline_link phx-click={
+                JS.push("add-policy")
+                |> show_detail()
+              }>
+                Add One
+              </.inline_link>?
+            <% else %>
+              ask an admin to set one up?
+            <% end %>
           </p>
         </div>
       <% else %>
@@ -48,7 +55,11 @@
                   compliant={Mrgr.RepositorySettingsPolicy.compliant_repos(policy)}
                   repos={repos_for_policy(@all_repos, policy)}
                 />
-                <.l phx-click={JS.push("select-policy", value: %{policy_id: policy.id})}>
+
+                <.l
+                  :if={Mrgr.User.admin_at_installation?(@current_user)}
+                  phx-click={JS.push("select-policy", value: %{policy_id: policy.id})}
+                >
                   Remediate
                 </.l>
               </td>
@@ -58,6 +69,7 @@
               <td class="p-3"><.possible_merge_badges settings={policy.settings} /></td>
               <td class="p-3">
                 <.l
+                  :if={Mrgr.User.admin_at_installation?(@current_user)}
                   phx_click={
                     JS.push("edit-policy")
                     |> show_detail()
@@ -79,6 +91,7 @@
           <.heading title={"Repositories assigned to policy #{@selected_policy.name}"} />
 
           <.inline_link
+            :if={Mrgr.User.admin_at_installation?(@current_user)}
             phx-click={
               JS.push("enforce-policy-to-repos", value: %{policy_id: @selected_policy.id})
             }
@@ -118,12 +131,16 @@
             </td>
             <td><.possible_merge_badges settings={repo.settings} /></td>
             <td class="pl-3 text-center">
-              <.live_component
-                module={MrgrWeb.Components.Live.EnforceRepositoryPolicy}
-                id={"enforce-repo-policy-#{repo.id}"}
-                repo={repo}
-                policies={@policies}
-              />
+              <%= if Mrgr.User.admin_at_installation?(@current_user) do %>
+                <.live_component
+                  module={MrgrWeb.Components.Live.EnforceRepositoryPolicy}
+                  id={"enforce-repo-policy-#{repo.id}"}
+                  repo={repo}
+                  policies={@policies}
+                />
+              <% else %>
+                <.repo_policy_name repo={repo} />
+              <% end %>
             </td>
             <td class="text-center">
               <.live_component

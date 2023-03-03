@@ -16,7 +16,7 @@
       id: "analytics-box"
     ) %>
 
-    <.merge_freeze_menu repos={@repos} />
+    <.merge_freeze_menu :if={Mrgr.User.admin_at_installation?(@current_user)} repos={@repos} />
   </div>
 
   <.frozen_repo_list :if={Enum.any?(@frozen_repos)} repos={@frozen_repos} />

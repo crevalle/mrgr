@@ -67,4 +67,10 @@ defmodule MrgrWeb.AccountLive do
   end
 
   def handle_info(_event, socket), do: noreply(socket)
+
+  def show_payment_button(%{id: id}, %{creator_id: id} = installation) do
+    Mrgr.Installation.trial_period?(installation)
+  end
+
+  def show_payment_button(_non_admin_user, _installation), do: false
 end

@@ -28,7 +28,7 @@
                 <.td>
                   <div class="flex items-center space-x-4">
                     <.subscription_state_badge state={installation.subscription_state} />
-                    <%= if Mrgr.Installation.trial_period?(installation) do %>
+                    <%= if show_payment_button(@current_user, installation) do %>
                       <.l
                         href={payment_url(installation, @current_user)}
                         class="btn btn-primary"

@@ -37,19 +37,7 @@ defmodule MrgrWeb.Components.Live.EnforceRepositoryPolicy do
           aria-haspopup="true"
           class="flex items-center px-2 py-1 text-gray-700 hover:bg-gray-50 rounded-md font-light text-sm"
         >
-          <%= if Mrgr.Repository.has_policy?(@repo) do %>
-            <%= if Mrgr.Repository.settings_match_policy?(@repo) do %>
-              <.icon name="check" class="text-emerald-500 mr-1 h-5 w-5" />
-            <% else %>
-              <.icon name="exclamation-circle" class="text-red-700 mr-1 h-5 w-5" />
-            <% end %>
-            <span class="text-gray-500 font-light">
-              <%= Mrgr.Schema.Repository.policy_name(@repo) %>
-            </span>
-          <% else %>
-            <p class="text-gray-500 font-light italic">no policy</p>
-          <% end %>
-
+          <.repo_policy_name repo={@repo} />
           <.icon name="chevron-down" class="ml-1 h-3 w-3" />
         </.l>
 

@@ -117,4 +117,21 @@ defmodule MrgrWeb.Components.Repository do
     </span>
     """
   end
+
+  def repo_policy_name(assigns) do
+    ~H"""
+    <%= if Mrgr.Repository.has_policy?(@repo) do %>
+      <%= if Mrgr.Repository.settings_match_policy?(@repo) do %>
+        <.icon name="check" class="text-emerald-500 mr-1 h-5 w-5" />
+      <% else %>
+        <.icon name="exclamation-circle" class="text-red-700 mr-1 h-5 w-5" />
+      <% end %>
+      <span class="text-gray-500 font-light text-sm">
+        <%= Mrgr.Schema.Repository.policy_name(@repo) %>
+      </span>
+    <% else %>
+      <p class="text-gray-500 font-light texts-sm italic">no policy</p>
+    <% end %>
+    """
+  end
 end
