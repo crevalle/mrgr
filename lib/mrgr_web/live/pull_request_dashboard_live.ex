@@ -633,6 +633,8 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       end
     end
 
+    # TODO: pull from snoozed tab
+    # poke into HIF tab
     def receive_opened_pull_request(tabs, pr) do
       needs_approval_tab =
         tabs
