@@ -36,7 +36,13 @@ defmodule MrgrWeb.AccountLive do
   def payment_url(installation, user) do
     base_url = Application.get_env(:mrgr, :payments)[:url]
 
-    "#{base_url}?client_reference_id=#{installation.id}&prefilled_email=#{URI.encode_www_form(user.email)}"
+    "#{base_url}?client_reference_id=#{installation.id}&prefilled_email=#{user_email(user)}"
+  end
+
+  def user_email(%{email: nil}), do: nil
+
+  def user_email(%{email: email}) do
+    URI.encode_www_form(email)
   end
 
   def subscribe(user) do

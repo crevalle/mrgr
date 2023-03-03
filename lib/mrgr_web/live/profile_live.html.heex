@@ -16,9 +16,6 @@
           <div class="font-semibold">Handle</div>
           <div class="col-span-2"><%= @current_user.nickname %></div>
 
-          <div class="font-semibold">Email</div>
-          <div class="col-span-2"><%= @current_user.email %></div>
-
           <div class="font-semibold">Notification Email</div>
           <div class="col-span-2 flex flex-col">
             <%= if @changeset do %>
@@ -41,10 +38,15 @@
                 </div>
               </.form>
             <% else %>
-              <p>
-                <%= @current_user.notification_email %>
-                <.l phx-click="edit">Edit</.l>
-              </p>
+              <div class="flex items-center space-x-4">
+                <p>
+                  <%= @current_user.notification_email %>
+                  <.l phx-click="edit">Edit</.l>
+                </p>
+                <p :if={is_nil(@current_user.notification_email)} class="text-red-800 text-sm">
+                  * Required for HIF alerts and weekly summary emails.
+                </p>
+              </div>
             <% end %>
             <p class="text-gray-500 text-sm">
               High Impact File Alerts and notification emails will go to this address
