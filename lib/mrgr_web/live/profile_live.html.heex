@@ -11,7 +11,7 @@
           <div class="col-span-2"><%= @current_user.name %></div>
 
           <div class="font-semibold">Organization</div>
-          <div class="col-span-2"><%= @current_user.current_installation.account.login %></div>
+          <div class="col-span-2"><%= account_name(@current_user) %></div>
 
           <div class="font-semibold">Handle</div>
           <div class="col-span-2"><%= @current_user.nickname %></div>

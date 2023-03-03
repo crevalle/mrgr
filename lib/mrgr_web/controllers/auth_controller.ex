@@ -35,11 +35,10 @@ defmodule MrgrWeb.AuthController do
     case OAuth2.Client.get(client, "/user") do
       {:ok, %OAuth2.Response{body: data}} ->
         case Mrgr.User.find_or_create_from_github(data, token) do
-          {:ok, user} ->
+          {:ok, user, action} ->
             conn
             |> sign_in(user)
-            |> put_flash(:info, "Welcome Back! 👋")
-            |> redirect(to: post_sign_in_path(conn, user))
+            |> signed_in_destination(user, action)
 
           {:error, _changeset} ->
             Logger.warn("OAuth error: [DATA] #{inspect(data)} \r [TOKEN] #{inspect(token)}")
@@ -68,12 +67,24 @@ defmodule MrgrWeb.AuthController do
     end
   end
 
-  # will change when members whom we know about sign up.
-  def post_sign_in_path(conn, %{current_installation_id: nil}) do
-    Routes.onboarding_path(conn, :index)
+  def signed_in_destination(conn, user, :new) do
+    conn
+    |> put_flash(:info, "Welcome to Mrgr! 👋")
+    |> redirect(to: Routes.onboarding_path(conn, :index))
   end
 
-  def post_sign_in_path(conn, _user) do
-    Routes.pull_request_path(conn, :index)
+  def signed_in_destination(conn, user, :returning) do
+    conn
+    |> put_flash(:info, "Welcome Back! 👋")
+    |> redirect(to: Routes.pull_request_path(conn, :index))
+  end
+
+  def signed_in_destination(conn, user, :invited) do
+    conn
+    |> put_flash(
+      :info,
+      "Welcome to Mrgr!  We've automatically added you to the #{MrgrWeb.Formatter.account_name(user)} account! 👋"
+    )
+    |> redirect(to: Routes.pull_request_path(conn, :index))
   end
 end

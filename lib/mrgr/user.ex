@@ -58,22 +58,43 @@ defmodule Mrgr.User do
   end
 
   @spec find_or_create_from_github(%{required(String.t()) => any()}, OAuth2.AccessToken.t()) ::
-          {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Schema.t(), atom()} | {:error, Ecto.Changeset.t()}
   def find_or_create_from_github(user_data, auth_token) do
     params = Mrgr.User.Github.generate_params(user_data, auth_token)
 
     case find_from_github_params(params) do
       %Schema{} = user ->
-        user
-        |> welcome_back(params)
-        |> associate_member()
-        |> set_tokens(params)
-        |> Mrgr.Tuple.ok()
+        user =
+          user
+          |> preload_current_installation()
+          |> welcome_back(params)
+          |> associate_user_with_member()
+          |> set_tokens(params)
+
+        {:ok, user, :returning}
 
       nil ->
         Logger.warn("create user: #{inspect(params)}")
-        create(params)
+
+        case create(params) do
+          {:ok, user} ->
+            case find_member(user) do
+              nil ->
+                {:ok, user, :new}
+
+              member ->
+                user = associate_user_with_member(user, member)
+                {:ok, user, :invited}
+            end
+
+          error ->
+            error
+        end
     end
+  end
+
+  def find_member(%Schema{node_id: node_id}) do
+    Mrgr.Member.find_by_node_id(node_id)
   end
 
   def find_member(member_id) do
@@ -110,13 +131,23 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.insert()
   end
 
-  def set_current_installation(user, nil) do
-    # first one is "current".  assume we have only one
-    [current | _rest] = installations(user)
-
-    set_current_installation(user, current)
+  def preload_current_installation(user) do
+    Mrgr.Repo.preload(user, current_installation: :account)
   end
 
+  @spec set_current_installation(Schema.t()) :: Schema.t()
+  def set_current_installation(user) do
+    case installations(user) do
+      [] ->
+        user
+
+      # first one is "current"
+      [current | _rest] ->
+        set_current_installation(user, current)
+    end
+  end
+
+  @spec set_current_installation(Schema.t(), Mrgr.Schema.Installation.t()) :: Schema.t()
   def set_current_installation(user, installation) do
     params = %{current_installation_id: installation.id}
 
@@ -143,23 +174,26 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.update!()
   end
 
-  def associate_member(user) do
-    case Mrgr.Repo.get_by(Mrgr.Schema.Member, login: user.nickname) do
+  def associate_user_with_member(user) do
+    case find_member(user) do
       %Mrgr.Schema.Member{user_id: nil} = member ->
-        member
-        |> Mrgr.Schema.Member.changeset(%{user_id: user.id})
-        |> Mrgr.Repo.update!()
+        associate_user_with_member(user, member)
 
       nil ->
         # TODO: create_member!()
-        nil
         user
 
       _associated_member ->
-        nil
-
         user
     end
+  end
+
+  def associate_user_with_member(user, member) do
+    member
+    |> Mrgr.Schema.Member.changeset(%{user_id: user.id})
+    |> Mrgr.Repo.update!()
+
+    set_current_installation(user)
   end
 
   def repos(user) do
@@ -201,7 +235,9 @@ defmodule Mrgr.User do
     def installations(%{id: user_id}) do
       from(q in Mrgr.Schema.Installation,
         join: u in assoc(q, :users),
-        where: u.id == ^user_id
+        join: a in assoc(q, :account),
+        where: u.id == ^user_id,
+        preload: [account: a]
       )
     end
 

@@ -65,13 +65,12 @@ defmodule MrgrWeb.Router do
     pipe_through [:browser, :authenticate]
 
     live "/onboarding", OnboardingLive, :index
+    live "/profile", ProfileLive, :show
+    live "/account", AccountLive, :show
   end
 
   scope "/", MrgrWeb do
     pipe_through [:browser, :authenticate, :require_installation]
-
-    live "/profile", ProfileLive, :show
-    live "/account", AccountLive, :show
 
     live "/pull-requests", PullRequestLive, :index
     live "/pull-requests/:tab", PullRequestLive, :show
