@@ -11,6 +11,7 @@ defmodule Mrgr.Repository do
       |> sync_data()
       |> generate_default_high_impact_files()
       |> set_and_enforce_default_policy()
+      |> make_visible_to_all_users()
       |> Mrgr.Tuple.ok()
     end
   end
@@ -29,6 +30,7 @@ defmodule Mrgr.Repository do
     |> Schema.changeset(params)
     |> Mrgr.Repo.insert!()
     |> generate_default_high_impact_files()
+    |> make_visible_to_all_users()
   end
 
   def update_show_prs(repo, attrs) do
@@ -235,6 +237,35 @@ defmodule Mrgr.Repository do
       |> Enum.map(&Mrgr.Tuple.take_value/1)
 
     %{repository | high_impact_files: hifs}
+  end
+
+  def make_visible_to_all_users(repository) do
+    repository.installation_id
+    |> Mrgr.User.for_installation()
+    |> Enum.map(&make_repo_visible_to_user(repository, &1))
+  end
+
+  def make_repo_visible_to_user(repo, user) do
+    # expects it not to exist.  also that the user has access to the repo
+    params = %{user_id: user.id, repository_id: repo.id}
+
+    %Mrgr.Schema.UserVisibleRepository{}
+    |> Mrgr.Schema.UserVisibleRepository.changeset(params)
+    |> Mrgr.Repo.insert!()
+
+    Mrgr.PubSub.broadcast_to_installation(repo, @repository_visibility_updated)
+  end
+
+  def hide_repo_from_user(user, repo) do
+    with %Mrgr.Schema.UserVisibleRepository{} = v <- find_uvr(repo, user) do
+      Mrgr.Repo.delete(v)
+      Mrgr.PubSub.broadcast_to_installation(repo, @repository_visibility_updated)
+      repo
+    end
+  end
+
+  def find_uvr(repo, user) do
+    Mrgr.Repo.one(Query.uvr(repo, user))
   end
 
   def delete_all_for_installation(installation) do
@@ -471,6 +502,13 @@ defmodule Mrgr.Repository do
       from(q in query,
         left_join: f in assoc(q, :high_impact_files),
         preload: [high_impact_files: f]
+      )
+    end
+
+    def uvr(user, repo) do
+      from(q in Mrgr.Schema.UserVisibleRepository,
+        where: q.user_id == ^user.id,
+        where: q.repository_id == ^repo.id
       )
     end
   end

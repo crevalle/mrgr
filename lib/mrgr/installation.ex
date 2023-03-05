@@ -485,6 +485,12 @@ defmodule Mrgr.Installation do
     end
   end
 
+  def for_user(user) do
+    Schema
+    |> Query.for_user(user.id)
+    |> Mrgr.Repo.all()
+  end
+
   def find_by_external_id(external_id) do
     Schema
     |> Query.by_external_id(external_id)
@@ -559,6 +565,15 @@ defmodule Mrgr.Installation do
       from(q in query,
         left_join: s in assoc(q, :subscription),
         preload: [subscription: s]
+      )
+    end
+
+    def for_user(query, user_id) do
+      from(q in query,
+        join: u in assoc(q, :users),
+        join: a in assoc(q, :account),
+        where: u.id == ^user_id,
+        preload: [account: a]
       )
     end
   end

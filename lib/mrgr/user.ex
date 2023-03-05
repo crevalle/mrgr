@@ -83,7 +83,11 @@ defmodule Mrgr.User do
                 {:ok, user, :new}
 
               member ->
-                user = associate_user_with_member(user, member)
+                user =
+                  user
+                  |> associate_user_with_member(member)
+                  |> make_all_repos_visible()
+
                 {:ok, user, :invited}
             end
 
@@ -137,7 +141,7 @@ defmodule Mrgr.User do
 
   @spec set_current_installation(Schema.t()) :: Schema.t()
   def set_current_installation(user) do
-    case installations(user) do
+    case Mrgr.Installation.for_user(user) do
       [] ->
         user
 
@@ -162,16 +166,26 @@ defmodule Mrgr.User do
     %{user | current_installation: installation}
   end
 
-  def installations(user) do
-    user
-    |> Query.installations()
-    |> Mrgr.Repo.all()
-  end
-
   def set_tokens(user, params) do
     user
     |> Schema.tokens_changeset(params)
     |> Mrgr.Repo.update!()
+  end
+
+  def make_all_repos_visible(user) do
+    # expects none to be visible, ie a new user
+    user
+    |> Mrgr.Installation.for_user()
+    |> Enum.map(fn i ->
+      i
+      |> Mrgr.Repo.preload(:repositories)
+      |> Map.get(:repositories)
+      |> Enum.each(fn repo ->
+        Mrgr.Repository.make_repo_visible_to_user(repo, user)
+      end)
+    end)
+
+    user
   end
 
   def associate_user_with_member(user) do
@@ -216,29 +230,6 @@ defmodule Mrgr.User do
     Query.uvrs_visible_to_user(user)
   end
 
-  def make_repo_visible_to_user(user, repo) do
-    # expects it not to exist.  also that the user has access to the repo
-    params = %{user_id: user.id, repository_id: repo.id}
-
-    %Mrgr.Schema.UserVisibleRepository{}
-    |> Mrgr.Schema.UserVisibleRepository.changeset(params)
-    |> Mrgr.Repo.insert!()
-
-    Mrgr.PubSub.broadcast_to_installation(repo, @repository_visibility_updated)
-  end
-
-  def hide_repo_from_user(user, repo) do
-    with %Mrgr.Schema.UserVisibleRepository{} = v <- find_uvr(user, repo) do
-      Mrgr.Repo.delete(v)
-      Mrgr.PubSub.broadcast_to_installation(repo, @repository_visibility_updated)
-      repo
-    end
-  end
-
-  def find_uvr(user, repo) do
-    Mrgr.Repo.one(Query.uvr(user, repo))
-  end
-
   def admin_at_installation?(%{id: id, current_installation: %{creator_id: id}}), do: true
   def admin_at_installation?(_user), do: false
 
@@ -266,19 +257,10 @@ defmodule Mrgr.User do
       )
     end
 
-    def uvr(user, repo) do
-      from(q in Mrgr.Schema.UserVisibleRepository,
-        where: q.user_id == ^user.id,
-        where: q.repository_id == ^repo.id
-      )
-    end
-
-    def installations(%{id: user_id}) do
-      from(q in Mrgr.Schema.Installation,
-        join: u in assoc(q, :users),
-        join: a in assoc(q, :account),
-        where: u.id == ^user_id,
-        preload: [account: a]
+    def for_installation(query, installation_id) do
+      from(q in query,
+        left_join: i in assoc(q, :installations),
+        where: i.id == ^installation_id
       )
     end
 
@@ -317,5 +299,4 @@ defmodule Mrgr.User do
       )
     end
   end
-
 end

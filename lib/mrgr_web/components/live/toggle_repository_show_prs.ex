@@ -33,7 +33,7 @@ defmodule MrgrWeb.Components.Live.ToggleRepositoryShowPRs do
   end
 
   def handle_event("toggle_show_prs", %{"repository" => %{"show_prs" => "true"}}, socket) do
-    Mrgr.User.make_repo_visible_to_user(socket.assigns.current_user, socket.assigns.repo)
+    Mrgr.Repository.make_repo_visible_to_user(socket.assigns.repo, socket.assigns.current_user)
 
     socket
     |> Flash.put(:info, "Updated!")
@@ -42,7 +42,7 @@ defmodule MrgrWeb.Components.Live.ToggleRepositoryShowPRs do
   end
 
   def handle_event("toggle_show_prs", %{"repository" => %{"show_prs" => "false"}}, socket) do
-    Mrgr.User.hide_repo_from_user(socket.assigns.current_user, socket.assigns.repo)
+    Mrgr.Repository.hide_repo_from_user(socket.assigns.repo, socket.assigns.current_user)
 
     socket
     |> Flash.put(:info, "Updated!")
