@@ -799,7 +799,7 @@ defmodule Mrgr.PullRequest do
     |> add_pending_preloads()
   end
 
-  def admin_paged_pending_pull_requests(installation_id, opts) do
+  def admin_paged_pending_pull_requests(installation_id, opts \\ %{}) do
     # load in two passes because adding the joins messes up my LIMITs
 
     Schema

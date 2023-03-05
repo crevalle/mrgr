@@ -67,16 +67,16 @@ defmodule MrgrWeb.AuthController do
     end
   end
 
-  def signed_in_destination(conn, user, :new) do
+  def signed_in_destination(conn, _user, :new) do
     conn
     |> put_flash(:info, "Welcome to Mrgr! 👋")
-    |> redirect(to: Routes.onboarding_path(conn, :index))
+    |> redirect(to: ~p"/onboarding")
   end
 
-  def signed_in_destination(conn, user, :returning) do
+  def signed_in_destination(conn, _user, :returning) do
     conn
     |> put_flash(:info, "Welcome Back! 👋")
-    |> redirect(to: Routes.pull_request_path(conn, :index))
+    |> redirect(to: ~p"/pull-requests")
   end
 
   def signed_in_destination(conn, user, :invited) do
@@ -85,6 +85,6 @@ defmodule MrgrWeb.AuthController do
       :info,
       "Welcome to Mrgr!  We've automatically added you to the #{MrgrWeb.Formatter.account_name(user)} account! 👋"
     )
-    |> redirect(to: Routes.pull_request_path(conn, :index))
+    |> redirect(to: ~p"/pull-requests")
   end
 end
