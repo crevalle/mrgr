@@ -93,6 +93,7 @@ defmodule Mrgr.Repository do
   def for_user_with_policy(user) do
     Schema
     |> Query.for_user(user)
+    |> Query.with_uvrs()
     |> Query.order_by_insensitive(asc: :name)
     |> Query.with_policy()
     |> Mrgr.Repo.all()
@@ -436,6 +437,14 @@ defmodule Mrgr.Repository do
     def for_policy(query, id) do
       from(q in query,
         where: q.repository_settings_policy_id == ^id
+      )
+    end
+
+    # !!! NOT scoped to a user.  all of them
+    def with_uvrs(query) do
+      from(q in query,
+        left_join: uvrs in assoc(q, :user_visible_repositories),
+        preload: [user_visible_repositories: uvrs]
       )
     end
 

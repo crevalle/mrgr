@@ -15,6 +15,9 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       repos = Mrgr.Repository.for_user_with_rules(current_user)
       frozen_repos = filter_frozen_repos(repos)
 
+      visible_repo_count =
+        Mrgr.Repo.aggregate(Mrgr.User.visible_repos_at_current_installation(current_user), :count)
+
       labels = Mrgr.Label.list_for_user(current_user)
       members = Mrgr.Repo.all(Mrgr.Member.for_installation(current_user.current_installation_id))
 
@@ -33,6 +36,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       |> assign(:members, members)
       |> assign(:snooze_options, snooze_options)
       |> assign(:frozen_repos, frozen_repos)
+      |> assign(:visible_repo_count, visible_repo_count)
       |> put_title("Open Pull Requests")
       |> ok()
     else

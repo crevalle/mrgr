@@ -20,6 +20,9 @@ defmodule Mrgr.Schema.Repository do
       foreign_key: :repository_settings_policy_id
     )
 
+    has_many(:user_visible_repositories, Mrgr.Schema.UserVisibleRepository)
+    has_many(:visible_user, through: [:user_visible_repositories, :user])
+
     has_many(:members, through: [:installation, :member])
     has_many(:users, through: [:installation, :users])
 

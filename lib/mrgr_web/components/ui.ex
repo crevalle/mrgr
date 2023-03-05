@@ -53,7 +53,6 @@ defmodule MrgrWeb.Components.UI do
       <.nav_item route={~p"/pull-requests"} icon="share" label="Open Pull Requests">
         <%= live_render(@conn, MrgrWeb.Live.OpenPRCountBadge,
           session: %{
-            "installation_id" => @current_user.current_installation_id,
             "user_id" => @current_user.id
           }
         ) %>

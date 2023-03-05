@@ -4,15 +4,15 @@ defmodule MrgrWeb.Admin.Live.PullRequestList do
 
   on_mount {MrgrWeb.Plug.Auth, :admin}
 
-  def mount(%{"id" => id}, _session, socket) do
+  def mount(%{"id" => installation_id}, _session, socket) do
     if connected?(socket) do
-      page = Mrgr.PullRequest.paged_pending_pull_requests(id)
+      page = Mrgr.PullRequest.admin_paged_pending_pull_requests(installation_id)
 
-      members = Mrgr.Repo.all(Mrgr.Member.for_installation(id))
+      members = Mrgr.Repo.all(Mrgr.Member.for_installation(installation_id))
 
       socket
       |> put_title("[Admin] Pull Requests")
-      |> assign(:installation_id, id)
+      |> assign(:installation_id, installation_id)
       |> assign(:page, page)
       |> assign(:pull_requests, page.entries)
       |> assign(:members, members)
@@ -23,7 +23,8 @@ defmodule MrgrWeb.Admin.Live.PullRequestList do
   end
 
   def handle_event("paginate", params, socket) do
-    page = Mrgr.PullRequest.paged_pending_pull_requests(socket.assigns.installation_id, params)
+    page =
+      Mrgr.PullRequest.admin_paged_pending_pull_requests(socket.assigns.installation_id, params)
 
     socket
     |> assign(:page, page)

@@ -10,7 +10,12 @@ defmodule MrgrWeb.Components.Live.ToggleRepositoryShowPRs do
         phx-change={JS.push("toggle_show_prs", value: %{id: @repo.id})}
         phx-target={@myself}
       >
-        <.checkbox f={f} attr={:show_prs} />
+        <%= checkbox(f, :show_prs,
+          class: [
+            "shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md"
+          ],
+          value: @checked
+        ) %>
       </.form>
     </div>
     """
@@ -27,10 +32,21 @@ defmodule MrgrWeb.Components.Live.ToggleRepositoryShowPRs do
     Mrgr.Schema.Repository.show_prs_changeset(repo, params)
   end
 
-  def handle_event("toggle_show_prs", %{"repository" => params}, socket) do
-    Mrgr.Repository.update_show_prs(socket.assigns.repo, params)
+  def handle_event("toggle_show_prs", %{"repository" => %{"show_prs" => "true"}}, socket) do
+    Mrgr.User.make_repo_visible_to_user(socket.assigns.current_user, socket.assigns.repo)
 
     socket
+    |> Flash.put(:info, "Updated!")
+    |> assign(:checked, true)
+    |> noreply()
+  end
+
+  def handle_event("toggle_show_prs", %{"repository" => %{"show_prs" => "false"}}, socket) do
+    Mrgr.User.hide_repo_from_user(socket.assigns.current_user, socket.assigns.repo)
+
+    socket
+    |> Flash.put(:info, "Updated!")
+    |> assign(:checked, false)
     |> noreply()
   end
 end

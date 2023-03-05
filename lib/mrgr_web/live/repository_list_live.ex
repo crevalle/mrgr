@@ -13,12 +13,14 @@ defmodule MrgrWeb.RepositoryListLive do
       Mrgr.PubSub.subscribe_to_installation(current_user)
 
       repos = Mrgr.Repository.for_user_with_policy(current_user)
+      visible_repo_ids = fetch_visible_repo_ids(current_user)
 
       policies = Mrgr.RepositorySettingsPolicy.for_installation(current_user.current_installation)
 
       socket
       |> assign(:all_repos, repos)
       |> assign(:repo_list, repos)
+      |> assign(:visible_repo_ids, visible_repo_ids)
       |> assign(:form_object, %Mrgr.Schema.RepositorySettingsPolicy{})
       |> assign(:selected_policy, nil)
       |> assign(:policies, policies)
@@ -188,5 +190,16 @@ defmodule MrgrWeb.RepositoryListLive do
     Enum.filter(repos, fn r ->
       r.repository_settings_policy_id == policy.id
     end)
+  end
+
+  def fetch_visible_repo_ids(user) do
+    user
+    |> Mrgr.User.visible_repos_at_current_installation()
+    |> Mrgr.Repo.all()
+    |> Enum.map(& &1.repository_id)
+  end
+
+  def repo_visible_to_user?(repo, visible_repo_ids) do
+    Enum.member?(visible_repo_ids, repo.id)
   end
 end

@@ -2,24 +2,25 @@ defmodule MrgrWeb.Live.OpenPRCountBadge do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
-  def mount(_params, %{"installation_id" => id, "user_id" => user_id}, socket) do
+  def mount(_params, %{"user_id" => user_id}, socket) do
     if connected?(socket) do
-      subscribe_to_installation_switched(user_id)
+      user = Mrgr.User.find_with_current_installation(user_id)
+      subscribe_to_installation_switched(user.id)
 
-      case id do
+      case user.current_installation do
         nil ->
           # onboarding, no current installation
           socket
-          |> assign(:id, id)
+          |> assign(:user, user)
           |> assign(:count, 0)
           |> ok()
 
         _installation ->
-          subscribe(id)
+          subscribe(user)
 
           socket
-          |> assign(:id, id)
-          |> assign(:count, Mrgr.PullRequest.open_pr_count(id))
+          |> assign(:user, user)
+          |> assign(:count, fetch_count(user))
           |> ok()
       end
     else
@@ -33,8 +34,8 @@ defmodule MrgrWeb.Live.OpenPRCountBadge do
     """
   end
 
-  def subscribe(installation_id) do
-    Mrgr.PubSub.subscribe_to_installation(installation_id)
+  def subscribe(user) do
+    Mrgr.PubSub.subscribe_to_installation(user)
   end
 
   def subscribe_to_installation_switched(user_id) do
@@ -42,30 +43,37 @@ defmodule MrgrWeb.Live.OpenPRCountBadge do
   end
 
   def handle_info(%{event: event}, socket)
-      when event in [@pull_request_created, @pull_request_reopened] do
-    count = socket.assigns.count
+      when event in [
+             @pull_request_created,
+             @pull_request_reopened,
+             @pull_request_closed,
+             @repository_visibility_updated
+           ] do
+    # can't just do naive increment/decrement because the PRs may be in hidden repos
 
     socket
-    |> assign(:count, count + 1)
-    |> noreply()
-  end
-
-  def handle_info(%{event: @pull_request_closed}, socket) do
-    count = socket.assigns.count
-
-    socket
-    |> assign(:count, count - 1)
+    |> assign(:count, fetch_count(socket.assigns.user))
     |> noreply()
   end
 
   def handle_info(%{event: @installation_switched, payload: installation}, socket) do
+    user = %{
+      socket.assigns.user
+      | current_installation_id: installation.id,
+        installation: installation
+    }
+
     socket
-    |> assign(:id, installation.id)
-    |> assign(:count, Mrgr.PullRequest.open_pr_count(installation.id))
+    |> assign(:user, user)
+    |> assign(:count, fetch_count(user))
     |> noreply()
   end
 
   def handle_info(%{event: _who_cares}, socket) do
     noreply(socket)
+  end
+
+  def fetch_count(user) do
+    Mrgr.PullRequest.open_pr_count(user)
   end
 end

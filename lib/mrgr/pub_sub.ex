@@ -114,6 +114,7 @@ defmodule Mrgr.PubSub do
         @pull_request_synchronized "pull_request:synchronized"
 
         @repository_updated "repository:updated"
+        @repository_visibility_updated "repository:visibility_updated"
 
         @repository_settings_policy_created "repository_settings_policy:created"
         @repository_settings_policy_updated "repository_settings_policy:updated"

@@ -212,6 +212,33 @@ defmodule Mrgr.User do
     |> Mrgr.Mailer.deliver()
   end
 
+  def visible_repos_at_current_installation(user) do
+    Query.uvrs_visible_to_user(user)
+  end
+
+  def make_repo_visible_to_user(user, repo) do
+    # expects it not to exist.  also that the user has access to the repo
+    params = %{user_id: user.id, repository_id: repo.id}
+
+    %Mrgr.Schema.UserVisibleRepository{}
+    |> Mrgr.Schema.UserVisibleRepository.changeset(params)
+    |> Mrgr.Repo.insert!()
+
+    Mrgr.PubSub.broadcast_to_installation(repo, @repository_visibility_updated)
+  end
+
+  def hide_repo_from_user(user, repo) do
+    with %Mrgr.Schema.UserVisibleRepository{} = v <- find_uvr(user, repo) do
+      Mrgr.Repo.delete(v)
+      Mrgr.PubSub.broadcast_to_installation(repo, @repository_visibility_updated)
+      repo
+    end
+  end
+
+  def find_uvr(user, repo) do
+    Mrgr.Repo.one(Query.uvr(user, repo))
+  end
+
   def admin_at_installation?(%{id: id, current_installation: %{creator_id: id}}), do: true
   def admin_at_installation?(_user), do: false
 
@@ -228,6 +255,21 @@ defmodule Mrgr.User do
         join: u in assoc(q, :users),
         preload: [pull_requests: m],
         where: u.id == ^user_id
+      )
+    end
+
+    def uvrs_visible_to_user(user) do
+      from(q in Mrgr.Schema.UserVisibleRepository,
+        join: r in assoc(q, :repository),
+        where: q.user_id == ^user.id,
+        where: r.installation_id == ^user.current_installation_id
+      )
+    end
+
+    def uvr(user, repo) do
+      from(q in Mrgr.Schema.UserVisibleRepository,
+        where: q.user_id == ^user.id,
+        where: q.repository_id == ^repo.id
       )
     end
 
@@ -275,4 +317,5 @@ defmodule Mrgr.User do
       )
     end
   end
+
 end

@@ -718,6 +718,13 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
+  def open_pr_count(%Mrgr.Schema.User{} = user) do
+    Schema
+    |> Query.pending_stuff(user)
+    |> Query.unsnoozed()
+    |> Mrgr.Repo.aggregate(:count)
+  end
+
   def open_pr_count(installation_id) do
     Schema
     |> Query.count_open(installation_id)
@@ -727,50 +734,50 @@ defmodule Mrgr.PullRequest do
 
   def paged_nav_tab_prs(tab, opts \\ %{}) do
     Schema
-    |> Query.pending_stuff(tab.user.current_installation_id)
+    |> Query.pending_stuff(tab.user)
     |> Query.unsnoozed()
     |> Query.for_nav_tab(tab)
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
 
-  def paged_ready_to_merge_prs(%{current_installation_id: id}, opts \\ %{}) do
+  def paged_ready_to_merge_prs(user, opts \\ %{}) do
     # load in two passes because adding the joins messes up my LIMITs
 
     Schema
-    |> Query.pending_stuff(id)
+    |> Query.pending_stuff(user)
     |> Query.ready_to_merge()
     |> Query.unsnoozed()
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
 
-  def paged_needs_approval_prs(%{current_installation_id: id}, opts \\ %{}) do
+  def paged_needs_approval_prs(user, opts \\ %{}) do
     Schema
-    |> Query.pending_stuff(id)
+    |> Query.pending_stuff(user)
     |> Query.needs_approval()
     |> Query.unsnoozed()
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
 
-  def paged_fix_ci_prs(%{current_installation_id: id}, opts \\ %{}) do
+  def paged_fix_ci_prs(user, opts \\ %{}) do
     Schema
-    |> Query.pending_stuff(id)
+    |> Query.pending_stuff(user)
     |> Query.fix_ci()
     |> Query.unsnoozed()
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
 
-  def paged_high_impact_prs(%{current_installation_id: id}, opts \\ %{}) do
+  def paged_high_impact_prs(user, opts \\ %{}) do
     # the joins with high impact labels messes with the Scrivener counting,
     # so we have to fetch the PRs in two passes.  Figure there won't
     # be so many that pulling in the ids in the first pass is a big deal.
 
     ids =
       Schema
-      |> Query.pending_stuff(id)
+      |> Query.pending_stuff(user)
       |> Query.high_impact()
       |> Query.unsnoozed()
       |> Query.select([:id])
@@ -784,21 +791,15 @@ defmodule Mrgr.PullRequest do
     |> add_pending_preloads()
   end
 
-  def paged_snoozed_prs(%{current_installation_id: id}, opts \\ %{}) do
+  def paged_snoozed_prs(user, opts \\ %{}) do
     Schema
-    |> Query.pending_stuff(id)
+    |> Query.pending_stuff(user)
     |> Query.snoozed()
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
 
-  def paged_pending_pull_requests(user_or_id, opts \\ %{})
-
-  def paged_pending_pull_requests(%{current_installation_id: id}, opts) do
-    paged_pending_pull_requests(id, opts)
-  end
-
-  def paged_pending_pull_requests(installation_id, opts) do
+  def admin_paged_pending_pull_requests(installation_id, opts) do
     # load in two passes because adding the joins messes up my LIMITs
 
     Schema
@@ -973,6 +974,13 @@ defmodule Mrgr.PullRequest do
     def for_installation(query, installation_id) do
       from([q, repository: r] in with_repository(query),
         where: r.installation_id == ^installation_id
+      )
+    end
+
+    def for_visible_repos(query, user_id) do
+      from([q, repository: r] in with_repository(query),
+        join: uvr in assoc(r, :user_visible_repositories),
+        where: uvr.user_id == ^user_id
       )
     end
 
@@ -1152,18 +1160,12 @@ defmodule Mrgr.PullRequest do
       )
     end
 
-    def visible(query) do
-      from([q, repository: r] in with_repository(query),
-        where: r.show_prs == true
-      )
-    end
-
-    def pending_stuff(schema, installation_id) do
-      schema
-      |> for_installation(installation_id)
+    def pending_stuff(query, user) do
+      query
+      |> for_visible_repos(user.id)
+      |> for_installation(user.current_installation_id)
       |> open()
       |> order_by_opened()
-      |> visible()
     end
 
     def fix_ci(query) do
@@ -1258,7 +1260,6 @@ defmodule Mrgr.PullRequest do
         join: r in assoc(q, :repository),
         where: r.installation_id == ^installation_id,
         where: q.status == "open",
-        where: r.show_prs == true,
         select: count(q.id)
       )
     end

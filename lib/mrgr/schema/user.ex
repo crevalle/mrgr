@@ -30,6 +30,9 @@ defmodule Mrgr.Schema.User do
     has_many(:installations, through: [:memberships, :installation])
     has_many(:repositories, through: [:installations, :repositories])
 
+    has_many(:user_visible_repositories, Mrgr.Schema.UserVisibleRepository)
+    has_many(:visible_repositories, through: [:user_visible_repositories, :repository])
+
     has_many(:check_approvals, Mrgr.Schema.CheckApproval, on_delete: :delete_all)
 
     belongs_to(:current_installation, Mrgr.Schema.Installation)

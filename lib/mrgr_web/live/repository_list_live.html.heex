@@ -146,6 +146,8 @@
               <.live_component
                 module={MrgrWeb.Components.Live.ToggleRepositoryShowPRs}
                 id={"toggle-repo-show-prs-#{repo.id}"}
+                checked={repo_visible_to_user?(repo, @visible_repo_ids)}
+                current_user={@current_user}
                 repo={repo}
               />
             </td>
