@@ -217,6 +217,12 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.all()
   end
 
+  def for_installation(installation_id) do
+    Schema
+    |> Query.for_installation(installation_id)
+    |> Mrgr.Repo.all()
+  end
+
   def send_pr_summary(user) do
     closed_last_week_count = Mrgr.PullRequest.closed_last_week_count(user.current_installation_id)
 
