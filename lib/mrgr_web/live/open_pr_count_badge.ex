@@ -52,7 +52,8 @@ defmodule MrgrWeb.Live.OpenPRCountBadge do
     # can't just do naive increment/decrement because the PRs may be in hidden repos
 
     socket
-    |> assign(:count, fetch_count(socket.assigns.user))
+    # TODO: re-enable after release task
+    # |> assign(:count, fetch_count(socket.assigns.user))
     |> noreply()
   end
 
