@@ -45,17 +45,19 @@ defmodule Mrgr.Installation.State do
     update_state!(installation, @onboarding_complete)
   end
 
-  def onboarding_error!(installation) do
-    update_state!(installation, @onboarding_error)
+  def onboarding_error!(installation, stacktrace) do
+    update_state!(installation, @onboarding_error, %{onboarding_error: stacktrace})
   end
 
-  def update_state!(installation, state) do
+  def update_state!(installation, state, params \\ %{}) do
     state_change = build_state_change(state)
 
     attrs = %{
       state: state,
       state_changes: [state_change | installation.state_changes]
     }
+
+    attrs = Map.merge(attrs, params)
 
     installation
     |> Mrgr.Schema.Installation.state_changeset(attrs)

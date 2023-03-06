@@ -120,6 +120,8 @@ defmodule Mrgr.Installation do
   def onboard(i) do
     clear_installation_data(i)
 
+    i = find_for_onboarding(i.id)
+
     with {:ok, i} <- onboard_members(i),
          {:ok, i} <- onboard_teams(i),
          {:ok, i} <- onboard_repos(i),
@@ -139,7 +141,8 @@ defmodule Mrgr.Installation do
       |> ok()
     rescue
       e ->
-        State.onboarding_error!(installation)
+        str = Exception.format_stacktrace(__STACKTRACE__)
+        State.onboarding_error!(installation, str)
         Appsignal.set_error(e, __STACKTRACE__)
         {:error, :onboarding_members_failed}
     end
@@ -154,7 +157,8 @@ defmodule Mrgr.Installation do
       |> ok()
     rescue
       e ->
-        State.onboarding_error!(installation)
+        str = Exception.format_stacktrace(__STACKTRACE__)
+        State.onboarding_error!(installation, str)
         Appsignal.set_error(e, __STACKTRACE__)
         {:error, :onboarding_teams_failed}
     end
@@ -169,7 +173,8 @@ defmodule Mrgr.Installation do
       |> ok()
     rescue
       e ->
-        State.onboarding_error!(installation)
+        str = Exception.format_stacktrace(__STACKTRACE__)
+        State.onboarding_error!(installation, str)
         Appsignal.set_error(e, __STACKTRACE__)
         {:error, :onboarding_repos_failed}
     end
@@ -185,7 +190,8 @@ defmodule Mrgr.Installation do
       |> ok()
     rescue
       e ->
-        State.onboarding_error!(installation)
+        str = Exception.format_stacktrace(__STACKTRACE__)
+        State.onboarding_error!(installation, str)
         Appsignal.set_error(e, __STACKTRACE__)
         {:error, :onboarding_prs_failed}
     end

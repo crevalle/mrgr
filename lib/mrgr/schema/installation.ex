@@ -10,6 +10,7 @@ defmodule Mrgr.Schema.Installation do
     field(:external_id, :integer)
     field(:html_url, :string)
     field(:installation_created_at, :utc_datetime)
+    field(:onboarding_error, :string)
     field(:permissions, :map)
     field(:repositories_url, :string)
     field(:repository_selection, :string)
@@ -99,7 +100,7 @@ defmodule Mrgr.Schema.Installation do
 
   def state_changeset(schema, params) do
     schema
-    |> cast(params, [:state])
+    |> cast(params, [:state, :onboarding_error])
     |> put_embed(:state_changes, params.state_changes)
     |> validate_inclusion(:state, Mrgr.Installation.State.states())
   end

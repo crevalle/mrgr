@@ -79,6 +79,7 @@ defmodule MrgrWeb.Components.Admin do
           </table>
         </.td>
       </.tr>
+      <.table_attr obj={@installation} key={:onboarding_error} . />
       <.table_attr obj={@installation} key={:subscription_state} . />
       <.tr striped={true}>
         <.td class="font-bold">Subscription State Changes</.td>

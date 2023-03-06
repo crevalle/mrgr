@@ -233,6 +233,8 @@ defmodule Mrgr.Repository do
     repository.installation_id
     |> Mrgr.User.for_installation()
     |> Enum.map(&make_repo_visible_to_user(repository, &1))
+
+    repository
   end
 
   def make_repo_visible_to_user(repo, user) do
