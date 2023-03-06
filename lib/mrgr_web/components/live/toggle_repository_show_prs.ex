@@ -6,7 +6,7 @@ defmodule MrgrWeb.Components.Live.ToggleRepositoryShowPRs do
     <div>
       <.form
         :let={f}
-        for={@cs}
+        for={%{}}
         phx-change={JS.push("toggle_show_prs", value: %{id: @repo.id})}
         phx-target={@myself}
       >
@@ -24,15 +24,10 @@ defmodule MrgrWeb.Components.Live.ToggleRepositoryShowPRs do
   def update(assigns, socket) do
     socket
     |> assign(assigns)
-    |> assign(:cs, changeset(assigns.repo))
     |> ok()
   end
 
-  def changeset(repo, params \\ %{}) do
-    Mrgr.Schema.Repository.show_prs_changeset(repo, params)
-  end
-
-  def handle_event("toggle_show_prs", %{"repository" => %{"show_prs" => "true"}}, socket) do
+  def handle_event("toggle_show_prs", %{"show_prs" => "true"}, socket) do
     Mrgr.Repository.make_repo_visible_to_user(socket.assigns.repo, socket.assigns.current_user)
 
     socket
@@ -41,7 +36,7 @@ defmodule MrgrWeb.Components.Live.ToggleRepositoryShowPRs do
     |> noreply()
   end
 
-  def handle_event("toggle_show_prs", %{"repository" => %{"show_prs" => "false"}}, socket) do
+  def handle_event("toggle_show_prs", %{"show_prs" => "false"}, socket) do
     Mrgr.Repository.hide_repo_from_user(socket.assigns.repo, socket.assigns.current_user)
 
     socket

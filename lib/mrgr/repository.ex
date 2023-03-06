@@ -4,25 +4,6 @@ defmodule Mrgr.Repository do
   alias Mrgr.Repository.Query
   alias Mrgr.Schema.Repository, as: Schema
 
-  def rt_migrate_visibility_settings do
-    Mrgr.Repo.delete_all(Mrgr.Schema.UserVisibleRepository)
-
-    Mrgr.User.all()
-    |> Enum.map(fn user ->
-      user
-      |> Mrgr.Installation.for_user()
-      |> Enum.map(fn i ->
-        i
-        |> Mrgr.Repo.preload(:repositories)
-        |> Map.get(:repositories)
-        |> Enum.filter(fn repo -> repo.show_prs end)
-        |> Enum.each(fn repo ->
-          Mrgr.Repository.make_repo_visible_to_user(repo, user)
-        end)
-      end)
-    end)
-  end
-
   def create(params) do
     with cs <- Schema.basic_changeset(%Schema{}, params),
          {:ok, repository} <- Mrgr.Repo.insert(cs) do
@@ -50,16 +31,6 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.insert!()
     |> generate_default_high_impact_files()
     |> make_visible_to_all_users()
-  end
-
-  def update_show_prs(repo, attrs) do
-    with cs <- Schema.show_prs_changeset(repo, attrs),
-         {:ok, repo} <- Mrgr.Repo.update(cs) do
-      broadcast(repo, @repository_updated)
-      {:ok, repo}
-    else
-      error -> error
-    end
   end
 
   def sync_data(repository) do

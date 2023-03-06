@@ -53,7 +53,7 @@ defmodule MrgrWeb.Live.OpenPRCountBadge do
 
     socket
     # TODO: re-enable after release task
-    # |> assign(:count, fetch_count(socket.assigns.user))
+    |> assign(:count, fetch_count(socket.assigns.user))
     |> noreply()
   end
 

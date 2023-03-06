@@ -429,10 +429,6 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     Tabs.find_tab_by_permalink(tabs, permalink)
   end
 
-  def filter_showing(repos) do
-    Enum.filter(repos, & &1.show_prs)
-  end
-
   defmodule Tabs do
     @ready_to_merge "ready-to-merge"
     @needs_approval "needs-approval"
