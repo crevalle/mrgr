@@ -2,24 +2,6 @@ defmodule Mrgr.PRTab do
   alias Mrgr.Schema.PRTab, as: Schema
   alias __MODULE__.Query
 
-  def rt_fill_permalinks do
-    Schema
-    |> Mrgr.Repo.all()
-    |> Enum.map(fn tab ->
-      case tab.title do
-        nil ->
-          tab
-          |> Schema.edit_changeset(%{title: Schema.generate_random_tab_name()})
-          |> Mrgr.Repo.update()
-
-        _title ->
-          tab
-          |> Ecto.Changeset.change(%{permalink: Schema.generate_permalink(tab.title)})
-          |> Mrgr.Repo.update()
-      end
-    end)
-  end
-
   def for_user(user) do
     Schema
     |> Query.for_user(user)
