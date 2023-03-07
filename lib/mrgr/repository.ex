@@ -75,13 +75,6 @@ defmodule Mrgr.Repository do
 
   def update_labels_from_graphql(repo, _some_data), do: repo
 
-  def find_by_name_for_user(user, name) do
-    Schema
-    |> Query.by_name(name)
-    |> Query.at_current_installation(user)
-    |> Mrgr.Repo.one()
-  end
-
   def for_user_with_policy(user) do
     Schema
     |> Query.at_current_installation(user)
