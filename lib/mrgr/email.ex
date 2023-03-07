@@ -29,7 +29,7 @@ defmodule Mrgr.Email do
     }
 
     new()
-    |> from("noreply@mrgr.io")
+    |> from({"Mrgr", "noreply@mrgr.io"})
     |> to(recipient)
     |> subject("Weekly Merged Pull Request Summary - #{summary.total}")
     |> render("weekly_pr_summary", assigns)
