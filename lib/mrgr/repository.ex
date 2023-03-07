@@ -78,13 +78,13 @@ defmodule Mrgr.Repository do
   def find_by_name_for_user(user, name) do
     Schema
     |> Query.by_name(name)
-    |> Query.for_user(user)
+    |> Query.at_current_installation(user)
     |> Mrgr.Repo.one()
   end
 
   def for_user_with_policy(user) do
     Schema
-    |> Query.for_user(user)
+    |> Query.at_current_installation(user)
     |> Query.with_uvrs()
     |> Query.order_by_insensitive(asc: :name)
     |> Query.with_policy()
@@ -93,7 +93,7 @@ defmodule Mrgr.Repository do
 
   def for_user_with_rules(user) do
     Schema
-    |> Query.for_user(user)
+    |> Query.at_current_installation(user)
     |> Query.order_by_insensitive(asc: :name)
     |> Query.with_hif_rules()
     |> Mrgr.Repo.all()
@@ -442,6 +442,10 @@ defmodule Mrgr.Repository do
       from(q in query,
         where: q.name == ^name
       )
+    end
+
+    def at_current_installation(query, %{current_installation_id: id}) do
+      for_installation(query, id)
     end
 
     def for_user(query, %{id: user_id}) do
