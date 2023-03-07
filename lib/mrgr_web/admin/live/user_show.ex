@@ -95,8 +95,8 @@ defmodule MrgrWeb.Admin.Live.UserShow do
             <.h3>All Installations</.h3>
           </div>
 
-          <%= for _install <- @user.installations do %>
-            <.installation_table installation={@user.current_installation} tz={@timezone} . />
+          <%= for install <- @user.installations do %>
+            <.installation_table installation={install} tz={@timezone} . />
           <% end %>
         </div>
       </div>
