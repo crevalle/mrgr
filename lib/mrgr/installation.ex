@@ -72,7 +72,7 @@ defmodule Mrgr.Installation do
 
   defp find_user_from_webhook_sender(payload) do
     payload
-    |> Map.get("sender")
+    |> Map.get("requester")
     |> Mrgr.Github.User.new()
     |> Mrgr.User.find()
   end
