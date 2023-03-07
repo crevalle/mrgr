@@ -141,10 +141,22 @@ defmodule Mrgr.Github.Webhook do
       source: "github",
       object: obj,
       action: action,
-      data: data,
+      data: sanitize_data(data),
       headers: headers
     }
 
     Mrgr.IncomingWebhook.create(attrs)
+  end
+
+  defp sanitize_data(data) do
+    data
+    |> replace_null_chars()
+  end
+
+  defp replace_null_chars(map) do
+    map
+    |> Jason.encode!(map)
+    |> String.replace("\\u0000", "null")
+    |> Jason.decode!()
   end
 end
