@@ -71,8 +71,9 @@ defmodule Mrgr.Installation do
   end
 
   defp find_user_from_webhook_sender(payload) do
-    payload
-    |> Map.get("requester")
+    user_attrs = payload["requester"] || payload["sender"]
+
+    user_attrs
     |> Mrgr.Github.User.new()
     |> Mrgr.User.find()
   end
