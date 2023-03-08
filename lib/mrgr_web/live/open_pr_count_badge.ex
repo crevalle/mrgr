@@ -61,7 +61,7 @@ defmodule MrgrWeb.Live.OpenPRCountBadge do
     user = %{
       socket.assigns.user
       | current_installation_id: installation.id,
-        installation: installation
+        current_installation: installation
     }
 
     socket
