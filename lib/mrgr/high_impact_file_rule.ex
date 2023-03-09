@@ -40,12 +40,12 @@ defmodule Mrgr.HighImpactFileRule do
     for_pull_request(pull_request)
   end
 
-  def for_pull_request(%{repository: %{high_impact_file_rules: hifs}} = pull_request) do
-    for_pull_request(hifs, pull_request)
+  def for_pull_request(%{repository: %{high_impact_file_rules: rules}} = pull_request) do
+    for_pull_request(rules, pull_request)
   end
 
-  def for_pull_request(hifs, pull_request) do
-    hifs
+  def for_pull_request(rules, pull_request) do
+    rules
     |> Enum.filter(&applies_to_pull_request?(&1, pull_request))
     |> Enum.uniq_by(& &1.id)
   end
@@ -59,25 +59,25 @@ defmodule Mrgr.HighImpactFileRule do
     %{pull_request | high_impact_file_rule_pull_requests: [], high_impact_file_rules: []}
   end
 
-  def reset_hifs(pull_request) do
-    reset_hifs(pull_request.repository, pull_request)
+  def reset(%Mrgr.Schema.PullRequest{} = pull_request) do
+    reset(pull_request.repository, pull_request)
   end
 
-  def reset_hifs(%Mrgr.Schema.Repository{high_impact_file_rules: hifs}, pull_request) do
-    reset_hifs(hifs, pull_request)
+  def reset(%Mrgr.Schema.Repository{high_impact_file_rules: rules}, pull_request) do
+    reset(rules, pull_request)
   end
 
-  def reset_hifs(hifs, pull_request) do
+  def reset(rules, pull_request) do
     pull_request = clear_from_pr(pull_request)
 
     # since we're clearing PRs these should all be created successfully
     assocs =
-      hifs
+      rules
       |> for_pull_request(pull_request)
       |> Enum.map(fn hif -> create_for_pull_request(hif, pull_request) end)
       |> Enum.map(fn {:ok, a} -> a end)
 
-    %{pull_request | high_impact_file_rules: hifs, high_impact_file_rule_pull_requests: assocs}
+    %{pull_request | high_impact_file_rules: rules, high_impact_file_rule_pull_requests: assocs}
   end
 
   @spec create_for_pull_request(Schema.t(), Mrgr.Schema.PullRequest.t()) ::

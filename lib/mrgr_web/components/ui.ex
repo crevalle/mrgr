@@ -620,14 +620,16 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def pr_count_badge(%{items: []} = assigns) do
+  def pr_count_badge(%{items: %{total_entries: entries}} = assigns) do
+    assigns = assign(assigns, :count, entries)
+
     ~H"""
-    <.pr_count_badge count="-" />
+    <.pr_count_badge count={@count} />
     """
   end
 
-  def pr_count_badge(%{items: %{total_entries: entries}} = assigns) do
-    assigns = assign(assigns, :count, entries)
+  def pr_count_badge(%{items: items} = assigns) do
+    assigns = assign(assigns, :count, Enum.count(items))
 
     ~H"""
     <.pr_count_badge count={@count} />

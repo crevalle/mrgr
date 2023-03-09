@@ -808,6 +808,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
 
     def fetch_paged_pull_requests(%{id: @needs_approval} = tab, opts) do
       Mrgr.PullRequest.paged_needs_approval_prs(tab.meta.user, opts)
+      ### NOT PAGED!
     end
 
     def fetch_paged_pull_requests(%{id: @fix_ci} = tab, opts) do

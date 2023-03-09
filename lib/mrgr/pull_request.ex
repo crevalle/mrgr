@@ -436,7 +436,7 @@ defmodule Mrgr.PullRequest do
     # until we get smarter about what's being added/removed for notification purposes,
     # just blow them all away and replace them
 
-    Mrgr.HighImpactFileRule.reset_hifs(pull_request)
+    Mrgr.HighImpactFileRule.reset(pull_request)
   end
 
   def notify_hif_alert_consumers(pull_request) do
@@ -749,11 +749,10 @@ defmodule Mrgr.PullRequest do
 
   def paged_needs_approval_prs(user, opts \\ %{}) do
     Schema
-    |> Query.pending_stuff(user)
+    |> Query.socks(user)
     |> Query.needs_approval()
     |> Query.unsnoozed(user)
-    |> Mrgr.Repo.paginate(opts)
-    |> add_pending_preloads()
+    |> Mrgr.Repo.all()
   end
 
   def paged_fix_ci_prs(user, opts \\ %{}) do
@@ -766,24 +765,18 @@ defmodule Mrgr.PullRequest do
   end
 
   def paged_high_impact_prs(user, opts \\ %{}) do
-    # the joins with high impact labels messes with the Scrivener counting,
-    # so we have to fetch the PRs in two passes.  Figure there won't
-    # be so many that pulling in the ids in the first pass is a big deal.
-
-    ids =
-      Schema
-      |> Query.pending_stuff(user)
-      |> Query.high_impact()
-      |> Query.unsnoozed(user)
-      |> Query.select([:id])
-      |> Mrgr.Repo.all()
-      |> Enum.map(& &1.id)
-
     Schema
-    |> Query.by_ids(ids)
+    |> Query.for_visible_repos(user.id)
+    |> Query.for_installation(user.current_installation_id)
+    |> Query.open()
     |> Query.order_by_opened()
-    |> Mrgr.Repo.paginate(opts)
-    |> add_pending_preloads()
+    |> Query.high_impact(user)
+    |> Query.with_comments()
+    |> Query.with_pr_reviews()
+    |> Query.with_labels()
+    |> Query.with_author()
+    |> Query.unsnoozed(user)
+    |> Mrgr.Repo.all()
   end
 
   def paged_snoozed_prs(user, opts \\ %{}) do
@@ -1081,6 +1074,36 @@ defmodule Mrgr.PullRequest do
       )
     end
 
+    def with_hifs_for_user(query, user) do
+      sq = scoped_hifs_for_user(user)
+
+      from(q in query,
+        left_join: h in assoc(q, :high_impact_file_rules),
+        left_lateral_join: for_pr in ^sq,
+        on: for_pr.id == h.id,
+        preload: [high_impact_file_rules: ^Ecto.Queryable.to_query(sq)]
+      )
+    end
+
+    def high_impact(query, user) do
+      sq = scoped_hifs_for_user(user)
+
+      from(q in query,
+        join: h in assoc(q, :high_impact_file_rules),
+        inner_lateral_join: for_pr in ^sq,
+        on: for_pr.id == h.id,
+        preload: [high_impact_file_rules: ^Ecto.Queryable.to_query(sq)]
+      )
+    end
+
+    def scoped_hifs_for_user(user) do
+      subquery(
+        from(q in Mrgr.Schema.HighImpactFileRule,
+          where: q.user_id == ^user.id
+        )
+      )
+    end
+
     def with_checklist(query) do
       from(q in query,
         left_join: checklist in assoc(q, :checklist),
@@ -1150,6 +1173,19 @@ defmodule Mrgr.PullRequest do
       )
     end
 
+    def socks(query, user) do
+      query
+      |> for_visible_repos(user.id)
+      |> for_installation(user.current_installation_id)
+      |> open()
+      |> order_by_opened()
+      |> with_hifs_for_user(user)
+      |> with_comments()
+      |> with_pr_reviews()
+      |> with_labels()
+      |> with_author()
+    end
+
     def pending_stuff(query, user) do
       query
       |> for_visible_repos(user.id)
@@ -1200,12 +1236,6 @@ defmodule Mrgr.PullRequest do
         where:
           q.approving_review_count <
             fragment("(?->?)::integer", r.settings, "required_approving_review_count")
-      )
-    end
-
-    def high_impact(query) do
-      from(q in query,
-        inner_join: h in assoc(q, :high_impact_file_rules)
       )
     end
 

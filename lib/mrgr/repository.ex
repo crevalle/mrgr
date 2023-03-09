@@ -338,7 +338,7 @@ defmodule Mrgr.Repository do
           |> create_pull_requests_from_data(pr_data)
           |> Enum.map(fn pr -> %{pr | repository: repo} end)
           |> Enum.map(&Mrgr.PullRequest.create_rest_of_world/1)
-          |> Enum.map(&Mrgr.HighImpactFileRule.reset_hifs(repo, &1))
+          |> Enum.map(&Mrgr.HighImpactFileRule.reset(repo, &1))
 
         %{repo | pull_requests: pull_requests}
     end

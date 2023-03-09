@@ -53,10 +53,6 @@
     />
   </div>
 
-  <div>
-    <.page_nav page={@selected_tab.pull_requests} />
-  </div>
-
   <div class="two-pane-layout">
     <%= if Enum.empty?(@selected_tab.pull_requests) do %>
       <div class="flex justify-center max-w-xl">
