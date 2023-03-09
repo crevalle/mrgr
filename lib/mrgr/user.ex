@@ -226,7 +226,7 @@ defmodule Mrgr.User do
   def send_pr_summary(user) do
     closed_last_week_count = Mrgr.PullRequest.closed_last_week_count(user.current_installation_id)
 
-    user.current_installation_id
+    user
     |> Mrgr.PullRequest.closed_this_week()
     |> Mrgr.Email.send_pr_summary(closed_last_week_count, user)
     |> Mrgr.Mailer.deliver()

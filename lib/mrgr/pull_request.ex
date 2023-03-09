@@ -798,16 +798,16 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
-  def closed_this_week(installation_id) do
+  def closed_this_week(user) do
     # "this week" is last seven days
     this_week = Mrgr.DateTime.shift_from_now(-7, :day)
 
     Schema
-    |> Query.for_installation(installation_id)
+    |> Query.for_installation(user.current_installation_id)
     |> Query.merged()
     |> Query.merged_since(this_week)
     |> Query.with_author()
-    |> Query.with_hifs()
+    |> Query.with_hifs_for_user(user)
     |> Mrgr.Repo.all()
   end
 
