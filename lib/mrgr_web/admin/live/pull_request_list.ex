@@ -6,15 +6,14 @@ defmodule MrgrWeb.Admin.Live.PullRequestList do
 
   def mount(%{"id" => installation_id}, _session, socket) do
     if connected?(socket) do
-      page = Mrgr.PullRequest.admin_paged_pending_pull_requests(installation_id)
+      pull_requests = Mrgr.PullRequest.admin_open_pull_requests(installation_id)
 
       members = Mrgr.Repo.all(Mrgr.Member.for_installation(installation_id))
 
       socket
       |> put_title("[Admin] Pull Requests")
       |> assign(:installation_id, installation_id)
-      |> assign(:page, page)
-      |> assign(:pull_requests, page.entries)
+      |> assign(:pull_requests, pull_requests)
       |> assign(:members, members)
       |> ok
     else

@@ -716,7 +716,7 @@ defmodule Mrgr.PullRequest do
 
   def nav_tab_prs(tab, opts \\ %{}) do
     Schema
-    |> Query.new_pending_stuff(tab.user)
+    |> Query.dashboard_preloads(tab.user)
     |> Query.unsnoozed(tab.user)
     |> Query.for_nav_tab(tab)
     |> Mrgr.Repo.all()
@@ -725,7 +725,7 @@ defmodule Mrgr.PullRequest do
   def ready_to_merge_prs(user) do
     Schema
     |> Query.ready_to_merge()
-    |> Query.new_pending_stuff(user)
+    |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
     |> Mrgr.Repo.all()
   end
@@ -733,7 +733,7 @@ defmodule Mrgr.PullRequest do
   def needs_approval_prs(user) do
     Schema
     |> Query.needs_approval()
-    |> Query.new_pending_stuff(user)
+    |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
     |> Mrgr.Repo.all()
   end
@@ -741,7 +741,7 @@ defmodule Mrgr.PullRequest do
   def fix_ci_prs(user) do
     Schema
     |> Query.fix_ci()
-    |> Query.new_pending_stuff(user)
+    |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
     |> Mrgr.Repo.all()
   end
@@ -765,36 +765,23 @@ defmodule Mrgr.PullRequest do
 
   def snoozed_prs(user) do
     Schema
-    |> Query.new_pending_stuff(user)
+    |> Query.dashboard_preloads(user)
     |> Query.snoozed(user)
     |> Mrgr.Repo.all()
   end
 
-  def admin_paged_pending_pull_requests(installation_id, opts \\ %{}) do
-    # load in two passes because adding the joins messes up my LIMITs
-
+  def admin_open_pull_requests(installation_id, opts \\ %{}) do
+    # returns snoozed and unsnoozed, but we can't tell which is which
+    # based on this query
     Schema
     |> Query.for_installation(installation_id)
     |> Query.open()
     |> Query.order_by_opened()
-    |> Mrgr.Repo.paginate(opts)
-    |> add_pending_preloads()
-  end
-
-  def pending_pull_requests(%Mrgr.Schema.Installation{id: id}) do
-    pending_pull_requests(id)
-  end
-
-  def pending_pull_requests(%Mrgr.Schema.User{current_installation_id: id}) do
-    pending_pull_requests(id)
-  end
-
-  def pending_pull_requests(installation_id) do
-    Schema
-    |> Query.for_installation(installation_id)
-    |> Query.open()
-    |> Query.order_by_opened()
-    |> Query.with_pending_preloads()
+    |> Query.with_hifs()
+    |> Query.with_comments()
+    |> Query.with_pr_reviews()
+    |> Query.with_labels()
+    |> Query.with_author()
     |> Mrgr.Repo.all()
   end
 
@@ -849,13 +836,14 @@ defmodule Mrgr.PullRequest do
     Schema
     |> Query.for_repository(repository_id)
     |> Query.open()
-    |> Query.with_pending_preloads()
+    |> Query.with_repository()
+    |> Query.with_hifs()
   end
 
-  def preload_for_pending_list(pull_request) do
+  def preload_for_dashboard(pull_request, user) do
     Schema
     |> Query.by_id(pull_request.id)
-    |> Query.with_pending_preloads()
+    |> Query.dashboard_preloads(user)
     |> Mrgr.Repo.one()
   end
 
@@ -1124,16 +1112,6 @@ defmodule Mrgr.PullRequest do
       ]
     end
 
-    def with_pending_preloads(query) do
-      query
-      |> with_repository()
-      |> with_hifs()
-      |> with_comments()
-      |> with_pr_reviews()
-      |> with_labels()
-      |> with_author()
-    end
-
     def for_label(query, label) do
       from(q in query,
         join: l in assoc(q, :labels),
@@ -1156,7 +1134,7 @@ defmodule Mrgr.PullRequest do
       )
     end
 
-    def new_pending_stuff(query, user) do
+    def dashboard_preloads(query, user) do
       ### IF YOU ADD SOMETHING HERE MAKE SURE THE HIF TAB
       ### GETS IT TOO
       query

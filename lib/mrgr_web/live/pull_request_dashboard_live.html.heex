@@ -68,7 +68,7 @@
           module={MrgrWeb.Components.Live.PullRequestCard}
           id={"pull_request_#{pull_request.id}"}
           pull_request={pull_request}
-          selected?={selected?(pull_request, @detail)}
+          selected={selected?(pull_request, @detail)}
           tab_permalink={@selected_tab.permalink}
           show_action_state_emoji={show_action_state_emoji?(@selected_tab)}
           members={@members}

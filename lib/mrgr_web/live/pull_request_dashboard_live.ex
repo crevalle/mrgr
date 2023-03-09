@@ -266,7 +266,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
 
   def handle_info(%{event: event, payload: payload}, socket)
       when event in [@pull_request_created, @pull_request_reopened] do
-    hydrated = Mrgr.PullRequest.preload_for_pending_list(payload)
+    hydrated = Mrgr.PullRequest.preload_for_dashboard(payload, socket.assigns.current_user)
     tabs = Tabs.receive_opened_pull_request(socket.assigns.tabs, hydrated)
     selected_tab = get_selected_tab(tabs, socket)
 
@@ -289,7 +289,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
   end
 
   def handle_info(%{event: @pull_request_unsnoozed, payload: pull_request}, socket) do
-    hydrated = Mrgr.PullRequest.preload_for_pending_list(pull_request)
+    hydrated = Mrgr.PullRequest.preload_for_dashboard(pull_request, socket.assigns.current_user)
 
     tabs = Tabs.unsnooze(socket.assigns.tabs, hydrated)
     selected_tab = get_selected_tab(tabs, socket)
@@ -315,7 +315,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
              @pull_request_labels_updated,
              @pull_request_ci_status_updated
            ] do
-    hydrated = Mrgr.PullRequest.preload_for_pending_list(pull_request)
+    hydrated = Mrgr.PullRequest.preload_for_dashboard(pull_request, socket.assigns.current_user)
 
     tabs = Tabs.update_pull_request(socket.assigns.tabs, hydrated)
     selected_tab = get_selected_tab(tabs, socket)

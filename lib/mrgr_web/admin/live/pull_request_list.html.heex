@@ -1,4 +1,4 @@
-<.heading title={"Open PRs (#{@page.total_entries})"} />
+<.heading title={"Open PRs (#{Enum.count(@pull_requests)})"} />
 <div class="flex mt-8 space-x-4">
   <div class="basis-4/5 overflow-hidden">
     <div role="list" class="flex flex-col space-y-4" id="pending-pull-request-list">
@@ -9,6 +9,7 @@
         pull_request={pull_request}
         selected={false}
         members={@members}
+        tab_permalink=""
         show_action_state_emoji={true}
         snooze_options={[]}
         current_user={@current_user}
