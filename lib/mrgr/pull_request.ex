@@ -466,23 +466,12 @@ defmodule Mrgr.PullRequest do
     pull_request
   end
 
-  def snooze(pull_request, until) do
-    pull_request
-    |> Schema.snooze_changeset(until)
-    |> Mrgr.Repo.update!()
-  end
-
-  def unsnooze(pull_request) do
-    pull_request
-    |> Schema.snooze_changeset(nil)
-    |> Mrgr.Repo.update!()
-  end
-
-  def snoozed?(%{snoozed_until: nil}), do: false
-
-  def snoozed?(%{snoozed_until: until}) do
-    Mrgr.DateTime.in_the_future?(until)
-  end
+  # see lib/mrgr/snoozer.ex for details on how snoozing works
+  defdelegate snooze_for_user(pull_request, user, until), to: Mrgr.PullRequest.Snoozer
+  defdelegate snoozed?(pull_request), to: Mrgr.PullRequest.Snoozer
+  defdelegate snoozed_until(pull_request), to: Mrgr.PullRequest.Snoozer
+  defdelegate unsnooze(pull_request), to: Mrgr.PullRequest.Snoozer
+  defdelegate unsnooze_for_user(pull_request, user), to: Mrgr.PullRequest.Snoozer
 
   @spec find_from_payload(Mrgr.Github.Webhook.t() | map()) ::
           {:ok, Schema.t()} | {:error, :not_found}
@@ -695,6 +684,13 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
+  def find_by_ids_with_repository(ids) when is_list(ids) do
+    Schema
+    |> Query.by_ids(ids)
+    |> Query.with_repository()
+    |> Mrgr.Repo.all()
+  end
+
   def find_by_node_id(id) do
     Schema
     |> Query.by_node_id(id)
@@ -721,21 +717,20 @@ defmodule Mrgr.PullRequest do
   def open_pr_count(%Mrgr.Schema.User{} = user) do
     Schema
     |> Query.pending_stuff(user)
-    |> Query.unsnoozed()
+    |> Query.unsnoozed(user)
     |> Mrgr.Repo.aggregate(:count)
   end
 
   def open_pr_count(installation_id) do
     Schema
     |> Query.count_open(installation_id)
-    |> Query.unsnoozed()
     |> Mrgr.Repo.one()
   end
 
   def paged_nav_tab_prs(tab, opts \\ %{}) do
     Schema
     |> Query.pending_stuff(tab.user)
-    |> Query.unsnoozed()
+    |> Query.unsnoozed(tab.user)
     |> Query.for_nav_tab(tab)
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
@@ -747,7 +742,7 @@ defmodule Mrgr.PullRequest do
     Schema
     |> Query.pending_stuff(user)
     |> Query.ready_to_merge()
-    |> Query.unsnoozed()
+    |> Query.unsnoozed(user)
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
@@ -756,7 +751,7 @@ defmodule Mrgr.PullRequest do
     Schema
     |> Query.pending_stuff(user)
     |> Query.needs_approval()
-    |> Query.unsnoozed()
+    |> Query.unsnoozed(user)
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
@@ -765,7 +760,7 @@ defmodule Mrgr.PullRequest do
     Schema
     |> Query.pending_stuff(user)
     |> Query.fix_ci()
-    |> Query.unsnoozed()
+    |> Query.unsnoozed(user)
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
@@ -779,7 +774,7 @@ defmodule Mrgr.PullRequest do
       Schema
       |> Query.pending_stuff(user)
       |> Query.high_impact()
-      |> Query.unsnoozed()
+      |> Query.unsnoozed(user)
       |> Query.select([:id])
       |> Mrgr.Repo.all()
       |> Enum.map(& &1.id)
@@ -794,7 +789,7 @@ defmodule Mrgr.PullRequest do
   def paged_snoozed_prs(user, opts \\ %{}) do
     Schema
     |> Query.pending_stuff(user)
-    |> Query.snoozed()
+    |> Query.snoozed(user)
     |> Mrgr.Repo.paginate(opts)
     |> add_pending_preloads()
   end
@@ -1041,24 +1036,19 @@ defmodule Mrgr.PullRequest do
       )
     end
 
-    def maybe_snooze(query, :all), do: query
-
-    def maybe_snooze(query, true), do: snoozed(query)
-    def maybe_snooze(query, false), do: unsnoozed(query)
-
-    def unsnoozed(query) do
-      now = Mrgr.DateTime.safe_truncate(Mrgr.DateTime.now())
+    def unsnoozed(query, user) do
+      snoozed_pr_ids = Mrgr.PullRequest.Snoozer.snoozed_pr_ids_for_user(user)
 
       from(q in query,
-        where: is_nil(q.snoozed_until) or q.snoozed_until < ^now
+        where: q.id not in ^snoozed_pr_ids
       )
     end
 
-    def snoozed(query) do
-      now = Mrgr.DateTime.safe_truncate(Mrgr.DateTime.now())
-
+    def snoozed(query, user) do
       from(q in query,
-        where: not is_nil(q.snoozed_until) and q.snoozed_until > ^now
+        join: uspr in assoc(q, :user_snoozed_pull_requests),
+        where: uspr.user_id == ^user.id,
+        preload: [user_snoozed_pull_requests: uspr]
       )
     end
 

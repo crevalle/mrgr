@@ -40,7 +40,7 @@
         </div>
         <div :if={Mrgr.PullRequest.snoozed?(@pull_request)}>
           <p class="italic text-gray-500">
-            😴 Snoozed until <%= ts(@pull_request.snoozed_until, @timezone) %>
+            😴 Snoozed until <%= ts(Mrgr.PullRequest.snoozed_until(@pull_request), @timezone) %>
           </p>
         </div>
       </div>
