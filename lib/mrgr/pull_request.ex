@@ -716,7 +716,9 @@ defmodule Mrgr.PullRequest do
 
   def open_pr_count(%Mrgr.Schema.User{} = user) do
     Schema
-    |> Query.pending_stuff(user)
+    |> Query.for_visible_repos(user.id)
+    |> Query.for_installation(user.current_installation_id)
+    |> Query.open()
     |> Query.unsnoozed(user)
     |> Mrgr.Repo.aggregate(:count)
   end
@@ -727,44 +729,41 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
-  def paged_nav_tab_prs(tab, opts \\ %{}) do
+  def nav_tab_prs(tab, opts \\ %{}) do
     Schema
-    |> Query.pending_stuff(tab.user)
+    |> Query.new_pending_stuff(tab.user)
     |> Query.unsnoozed(tab.user)
     |> Query.for_nav_tab(tab)
-    |> Mrgr.Repo.paginate(opts)
-    |> add_pending_preloads()
+    |> Mrgr.Repo.all()
   end
 
-  def paged_ready_to_merge_prs(user, opts \\ %{}) do
-    # load in two passes because adding the joins messes up my LIMITs
-
+  def ready_to_merge_prs(user) do
     Schema
-    |> Query.pending_stuff(user)
     |> Query.ready_to_merge()
-    |> Query.unsnoozed(user)
-    |> Mrgr.Repo.paginate(opts)
-    |> add_pending_preloads()
-  end
-
-  def paged_needs_approval_prs(user, opts \\ %{}) do
-    Schema
-    |> Query.socks(user)
-    |> Query.needs_approval()
+    |> Query.new_pending_stuff(user)
     |> Query.unsnoozed(user)
     |> Mrgr.Repo.all()
   end
 
-  def paged_fix_ci_prs(user, opts \\ %{}) do
+  def needs_approval_prs(user) do
     Schema
-    |> Query.pending_stuff(user)
-    |> Query.fix_ci()
+    |> Query.needs_approval()
+    |> Query.new_pending_stuff(user)
     |> Query.unsnoozed(user)
-    |> Mrgr.Repo.paginate(opts)
-    |> add_pending_preloads()
+    |> Mrgr.Repo.all()
   end
 
-  def paged_high_impact_prs(user, opts \\ %{}) do
+  def fix_ci_prs(user) do
+    Schema
+    |> Query.fix_ci()
+    |> Query.new_pending_stuff(user)
+    |> Query.unsnoozed(user)
+    |> Mrgr.Repo.all()
+  end
+
+  def high_impact_prs(user) do
+    ### unwrap all the pending stuff because we need to specify
+    # that the HIF join is inner (ie, required)
     Schema
     |> Query.for_visible_repos(user.id)
     |> Query.for_installation(user.current_installation_id)
@@ -779,12 +778,11 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
-  def paged_snoozed_prs(user, opts \\ %{}) do
+  def snoozed_prs(user) do
     Schema
-    |> Query.pending_stuff(user)
+    |> Query.new_pending_stuff(user)
     |> Query.snoozed(user)
-    |> Mrgr.Repo.paginate(opts)
-    |> add_pending_preloads()
+    |> Mrgr.Repo.all()
   end
 
   def admin_paged_pending_pull_requests(installation_id, opts \\ %{}) do
@@ -1173,25 +1171,20 @@ defmodule Mrgr.PullRequest do
       )
     end
 
-    def socks(query, user) do
+    def new_pending_stuff(query, user) do
+      ### IF YOU ADD SOMETHING HERE MAKE SURE THE HIF TAB
+      ### GETS IT TOO
       query
       |> for_visible_repos(user.id)
       |> for_installation(user.current_installation_id)
       |> open()
       |> order_by_opened()
+      ### these are left-joined, the HIF tab is inner-joined
       |> with_hifs_for_user(user)
       |> with_comments()
       |> with_pr_reviews()
       |> with_labels()
       |> with_author()
-    end
-
-    def pending_stuff(query, user) do
-      query
-      |> for_visible_repos(user.id)
-      |> for_installation(user.current_installation_id)
-      |> open()
-      |> order_by_opened()
     end
 
     def fix_ci(query) do

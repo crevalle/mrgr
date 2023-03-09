@@ -754,9 +754,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
 
     def reload_prs(all, selected) do
       pull_requests =
-        fetch_paged_pull_requests(selected, %{
-          page_number: safe_page_number(selected.pull_requests)
-        })
+        fetch_pull_requests(selected, %{page_number: safe_page_number(selected.pull_requests)})
 
       updated = set_prs_on_tab(selected, pull_requests)
 
@@ -770,7 +768,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
 
     def paginate(params, %{assigns: %{tabs: tabs, selected_tab: selected_tab}}) do
-      page = fetch_paged_pull_requests(selected_tab, params)
+      page = fetch_pull_requests(selected_tab, params)
 
       tabs = set_prs_on_tab(tabs, selected_tab, page)
 
@@ -781,53 +779,51 @@ defmodule MrgrWeb.PullRequestDashboardLive do
 
     def find_pull_request(tab, id) do
       tab.pull_requests
-      |> Map.get(:entries)
       |> Mrgr.List.find(id)
     end
 
     def load_prs_sync(tab, opts \\ %{}) do
-      page = fetch_paged_pull_requests(tab, opts)
+      page = fetch_pull_requests(tab, opts)
 
       tab
       |> set_prs_on_tab(page)
     end
 
-    def load_prs_async(tab, opts \\ %{}) do
-      task = Task.async(fn -> fetch_paged_pull_requests(tab, opts) end)
+    def load_prs_async(tab) do
+      task = Task.async(fn -> fetch_pull_requests(tab) end)
 
       meta = tab.meta
 
       %{tab | meta: Map.put(meta, :ref, task.ref)}
     end
 
-    def fetch_paged_pull_requests(tab, page_params \\ %{})
+    def fetch_pull_requests(tab)
 
-    def fetch_paged_pull_requests(%{id: @ready_to_merge} = tab, opts) do
-      Mrgr.PullRequest.paged_ready_to_merge_prs(tab.meta.user, opts)
+    def fetch_pull_requests(%{id: @ready_to_merge} = tab) do
+      Mrgr.PullRequest.ready_to_merge_prs(tab.meta.user)
     end
 
-    def fetch_paged_pull_requests(%{id: @needs_approval} = tab, opts) do
-      Mrgr.PullRequest.paged_needs_approval_prs(tab.meta.user, opts)
-      ### NOT PAGED!
+    def fetch_pull_requests(%{id: @needs_approval} = tab) do
+      Mrgr.PullRequest.needs_approval_prs(tab.meta.user)
     end
 
-    def fetch_paged_pull_requests(%{id: @fix_ci} = tab, opts) do
-      Mrgr.PullRequest.paged_fix_ci_prs(tab.meta.user, opts)
+    def fetch_pull_requests(%{id: @fix_ci} = tab) do
+      Mrgr.PullRequest.fix_ci_prs(tab.meta.user)
     end
 
-    def fetch_paged_pull_requests(%{id: @hifs} = tab, opts) do
-      Mrgr.PullRequest.paged_high_impact_prs(tab.meta.user, opts)
+    def fetch_pull_requests(%{id: @hifs} = tab) do
+      Mrgr.PullRequest.high_impact_prs(tab.meta.user)
     end
 
-    def fetch_paged_pull_requests(%{id: @snoozed} = tab, opts) do
-      Mrgr.PullRequest.paged_snoozed_prs(tab.meta.user, opts)
+    def fetch_pull_requests(%{id: @snoozed} = tab) do
+      Mrgr.PullRequest.snoozed_prs(tab.meta.user)
     end
 
-    def fetch_paged_pull_requests(%Mrgr.Schema.PRTab{} = tab, opts) do
-      Mrgr.PullRequest.paged_nav_tab_prs(tab, opts)
+    def fetch_pull_requests(%Mrgr.Schema.PRTab{} = tab) do
+      Mrgr.PullRequest.nav_tab_prs(tab)
     end
 
-    def fetch_paged_pull_requests(_unknown_tab, _params) do
+    def fetch_pull_requests(_unknown_tab) do
       []
     end
 
@@ -851,23 +847,19 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       Mrgr.List.replace(all, updated)
     end
 
-    def remove_pr_from_page(page, pr) do
-      case contains_pr?(page, pr) do
-        true ->
-          entries = Mrgr.List.remove(page.entries, pr)
-          updated_count = page.total_entries - 1
-
-          %{page | total_entries: updated_count, entries: entries}
-
-        false ->
-          page
-      end
+    def remove_pr_from_page(pull_requests, pr) do
+      Mrgr.List.remove(pull_requests, pr)
     end
 
-    def replace_pr_in_page(page, pr) do
-      %{page | entries: Mrgr.List.replace(page.entries, pr)}
+    def replace_pr_in_page(pull_requests, pr) do
+      Mrgr.List.replace(pull_requests, pr)
     end
 
+    def contains_pr?(%{pull_requests: prs}, pr) when is_list(prs) do
+      Mrgr.List.member?(prs, pr)
+    end
+
+    # TODO remove when paging is excised vvv
     def contains_pr?(%{pull_requests: page} = _tab, pr), do: contains_pr?(page, pr)
 
     def contains_pr?(%{entries: entries} = _page, pr) do
