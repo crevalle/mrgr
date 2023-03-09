@@ -20,14 +20,4 @@ defmodule MrgrWeb.Admin.Live.PullRequestList do
       {:ok, socket}
     end
   end
-
-  def handle_event("paginate", params, socket) do
-    page =
-      Mrgr.PullRequest.admin_paged_pending_pull_requests(socket.assigns.installation_id, params)
-
-    socket
-    |> assign(:page, page)
-    |> assign(:pull_requests, page.entries)
-    |> noreply()
-  end
 end

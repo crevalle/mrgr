@@ -714,7 +714,7 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
-  def nav_tab_prs(tab, opts \\ %{}) do
+  def nav_tab_prs(tab) do
     Schema
     |> Query.dashboard_preloads(tab.user)
     |> Query.unsnoozed(tab.user)
@@ -770,7 +770,7 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
-  def admin_open_pull_requests(installation_id, opts \\ %{}) do
+  def admin_open_pull_requests(installation_id) do
     # returns snoozed and unsnoozed, but we can't tell which is which
     # based on this query
     Schema
