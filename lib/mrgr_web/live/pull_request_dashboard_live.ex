@@ -89,15 +89,6 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
   end
 
-  def handle_event("paginate", params, socket) do
-    {tabs, selected_tab} = Tabs.paginate(params, socket)
-
-    socket
-    |> assign(:tabs, tabs)
-    |> assign(:selected_tab, selected_tab)
-    |> noreply()
-  end
-
   def handle_event("add-tab", _params, socket) do
     {tabs, new_tab} = Tabs.add(socket.assigns.tabs, socket.assigns.current_user)
 
@@ -587,11 +578,11 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
 
     # data for the currently visible tab
-    def set_prs_on_tab_from_async(%{meta: %{ref: ref}} = tab, ref, page) do
+    def set_prs_on_tab_from_async(%{meta: %{ref: ref}} = tab, ref, prs) do
       meta = Map.drop(tab.meta, [:ref])
 
       tab
-      |> set_prs_on_tab(page)
+      |> set_prs_on_tab(prs)
       |> Map.put(:meta, meta)
     end
 
@@ -664,7 +655,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
 
     # hard to be smart about poking in the PR to system tabs
-    # because the pr may not supposed be on the currently viewed page.
+    # because the pr may not supposed be on the currently viewed list.
     # also, no good way to ask custom tabs if the PR belongs to them other
     # than just re-running the db query.  so let's just reload everything and KISS.
     # I don't think people will be unsnoozing things very often anyway.
@@ -693,13 +684,9 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
 
     def excise_pr_from_tab(tab, pull_request) do
-      # funky stuff
+      updated_list = remove_pr_from_list(tab.pull_requests, pull_request)
 
-      page = tab.pull_requests
-
-      updated_page = remove_pr_from_page(page, pull_request)
-
-      set_prs_on_tab(tab, updated_page)
+      set_prs_on_tab(tab, updated_list)
     end
 
     def update_or_poke_pr_in_tab(tabs, id, pull_request) do
@@ -719,22 +706,14 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
 
     def poke_pr_into_tab(tab, pull_request) do
-      # I can't get enough
-      # of that funky stuff
+      prs = [pull_request | tab.pull_requests]
 
-      page = tab.pull_requests
-
-      entries = [pull_request | page.entries]
-      updated_count = page.total_entries + 1
-
-      updated_page = %{page | total_entries: updated_count, entries: entries}
-
-      set_prs_on_tab(tab, updated_page)
+      set_prs_on_tab(tab, prs)
     end
 
     def replace_pr_in_tab(tab, pull_request) do
-      page = replace_pr_in_page(tab.pull_requests, pull_request)
-      set_prs_on_tab(tab, page)
+      prs = replace_pr_in_list(tab.pull_requests, pull_request)
+      set_prs_on_tab(tab, prs)
     end
 
     def refresh_non_snoozed_tabs_async(tabs) do
@@ -747,34 +726,15 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
 
     def refresh_tab_async(tab) do
-      # refresh the current page
-      opts = %{page_number: safe_page_number(tab.pull_requests)}
-      load_prs_async(tab, opts)
+      load_prs_async(tab)
     end
 
     def reload_prs(all, selected) do
-      pull_requests =
-        fetch_pull_requests(selected, %{page_number: safe_page_number(selected.pull_requests)})
+      pull_requests = fetch_pull_requests(selected)
 
       updated = set_prs_on_tab(selected, pull_requests)
 
       {replace_tabs(all, updated), updated}
-    end
-
-    def safe_page_number([]), do: 1
-
-    def safe_page_number(page) do
-      page.page_number
-    end
-
-    def paginate(params, %{assigns: %{tabs: tabs, selected_tab: selected_tab}}) do
-      page = fetch_pull_requests(selected_tab, params)
-
-      tabs = set_prs_on_tab(tabs, selected_tab, page)
-
-      selected = find_tab_by_id(tabs, selected_tab.id)
-
-      {tabs, selected}
     end
 
     def find_pull_request(tab, id) do
@@ -782,11 +742,11 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       |> Mrgr.List.find(id)
     end
 
-    def load_prs_sync(tab, opts \\ %{}) do
-      page = fetch_pull_requests(tab, opts)
+    def load_prs_sync(tab) do
+      prs = fetch_pull_requests(tab)
 
       tab
-      |> set_prs_on_tab(page)
+      |> set_prs_on_tab(prs)
     end
 
     def load_prs_async(tab) do
@@ -827,12 +787,12 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       []
     end
 
-    def set_prs_on_tab(tab, page) do
-      Map.put(tab, :pull_requests, page)
+    def set_prs_on_tab(tab, prs) do
+      Map.put(tab, :pull_requests, prs)
     end
 
-    def set_prs_on_tab(tabs, tab, page) do
-      updated = set_prs_on_tab(tab, page)
+    def set_prs_on_tab(tabs, tab, prs) do
+      updated = set_prs_on_tab(tab, prs)
 
       replace_tabs(tabs, updated)
     end
@@ -847,23 +807,16 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       Mrgr.List.replace(all, updated)
     end
 
-    def remove_pr_from_page(pull_requests, pr) do
+    def remove_pr_from_list(pull_requests, pr) do
       Mrgr.List.remove(pull_requests, pr)
     end
 
-    def replace_pr_in_page(pull_requests, pr) do
+    def replace_pr_in_list(pull_requests, pr) do
       Mrgr.List.replace(pull_requests, pr)
     end
 
     def contains_pr?(%{pull_requests: prs}, pr) when is_list(prs) do
       Mrgr.List.member?(prs, pr)
-    end
-
-    # TODO remove when paging is excised vvv
-    def contains_pr?(%{pull_requests: page} = _tab, pr), do: contains_pr?(page, pr)
-
-    def contains_pr?(%{entries: entries} = _page, pr) do
-      Mrgr.List.member?(entries, pr)
     end
   end
 end
