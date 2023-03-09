@@ -288,7 +288,8 @@ defmodule Mrgr.User do
 
     def wanting_pr_summary(query) do
       from(q in query,
-        where: q.send_weekly_summary_email == true
+        where: q.send_weekly_summary_email == true,
+        where: not is_nil(q.current_installation_id)
       )
     end
 
