@@ -62,11 +62,3 @@ config :appsignal, :config, active: true
 config :mrgr, Mrgr.Mailer,
   adapter: Swoosh.Adapters.Sendgrid,
   api_key: System.get_env("SENDGRID_API_KEY")
-
-config :mrgr, Oban,
-  plugins: [
-    {Oban.Plugins.Cron,
-     crontab: [
-       {"*/5 * * * *", Mrgr.Worker.SnoozeAlarm}
-     ]}
-  ]

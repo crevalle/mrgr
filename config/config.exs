@@ -86,7 +86,10 @@ config :mrgr, Oban,
     Oban.Web.Plugins.Stats,
     {
       Oban.Plugins.Cron,
-      crontab: [{"0 0 * * *", Mrgr.Worker.RepositoriesSync, args: %{"type" => "all"}}]
+      crontab: [
+        {"0 0 * * *", Mrgr.Worker.RepositoriesSync, args: %{"type" => "all"}},
+        {"*/5 * * * *", Mrgr.Worker.SnoozeAlarm}
+      ]
     }
   ],
   queues: [default: 10]
