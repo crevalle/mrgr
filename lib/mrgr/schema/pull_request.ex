@@ -32,7 +32,6 @@ defmodule Mrgr.Schema.PullRequest do
     field(:number, :integer)
     field(:opened_at, :utc_datetime)
     field(:raw, :map)
-    field(:snoozed_until, :utc_datetime)
     field(:status, :string, default: "open")
     field(:title, :string)
     field(:url, :string)
@@ -146,12 +145,6 @@ defmodule Mrgr.Schema.PullRequest do
     schema
     |> change()
     |> put_embed(:requested_reviewers, reviewers)
-  end
-
-  def snooze_changeset(schema, ts) do
-    schema
-    |> change()
-    |> put_timestamp(:snoozed_until, ts)
   end
 
   def edit_changeset(schema, params) do

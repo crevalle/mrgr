@@ -20,26 +20,6 @@ defmodule Mrgr.PullRequest.Snoozer do
   alias __MODULE__.Query
   alias Mrgr.Schema.UserSnoozedPullRequest, as: Schema
 
-  import Ecto.Query
-
-  def rt_migrate_snoozed do
-    query =
-      from(q in Mrgr.Schema.PullRequest,
-        where: not is_nil(q.snoozed_until)
-      )
-
-    query
-    |> Mrgr.PullRequest.Query.with_installation()
-    |> Mrgr.Repo.all()
-    |> Enum.map(fn pr ->
-      users = Mrgr.User.for_installation(pr.repository.installation_id)
-
-      Enum.map(users, fn user ->
-        snooze_for_user(pr, user, pr.snoozed_until)
-      end)
-    end)
-  end
-
   @spec snoozed_pr_ids_for_user(Mrgr.Schema.User.t()) :: [integer()]
   def snoozed_pr_ids_for_user(user) do
     Schema
