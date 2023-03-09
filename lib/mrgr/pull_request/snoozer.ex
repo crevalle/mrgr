@@ -20,6 +20,7 @@ defmodule Mrgr.PullRequest.Snoozer do
   alias __MODULE__.Query
   alias Mrgr.Schema.UserSnoozedPullRequest, as: Schema
 
+  @spec snoozed_pr_ids_for_user(Mrgr.Schema.User.t()) :: [integer()]
   def snoozed_pr_ids_for_user(user) do
     Schema
     |> Query.for_user(user)
@@ -28,16 +29,20 @@ defmodule Mrgr.PullRequest.Snoozer do
   end
 
   # ask this question with caution.  see notes at top of file
+  @spec snoozed?(Mrgr.Schema.UserSnoozedPullRequest.t()) :: boolean()
   def snoozed?(%{user_snoozed_pull_requests: []}), do: false
   def snoozed?(%{user_snoozed_pull_requests: %Ecto.Association.NotLoaded{}}), do: false
   def snoozed?(_pull_request), do: true
 
+  @spec snoozed_until(Mrgr.Schema.PullRequest.t()) :: DateTime.t() | nil
   def snoozed_until(%{user_snoozed_pull_requests: [uspr | _rest]}) do
     uspr.snoozed_until
   end
 
   def snoozed_until(_), do: nil
 
+  @spec snooze_for_user(Mrgr.Schema.PullRequest.t(), Mrgr.Schema.User.t(), DateTime.t()) ::
+          Mrgr.Schema.PullRequest.t()
   def snooze_for_user(pull_request, user, until) do
     params = %{
       pull_request_id: pull_request.id,
@@ -55,6 +60,8 @@ defmodule Mrgr.PullRequest.Snoozer do
     %{pull_request | user_snoozed_pull_requests: [uspr]}
   end
 
+  @spec unsnooze_for_user(Mrgr.Schema.PullRequest.t(), Mrgr.Schema.User.t()) ::
+          Mrgr.Schema.PullRequest.t()
   def unsnooze_for_user(pull_request, user) do
     snoozed = find_uspr(pull_request, user)
 
@@ -65,6 +72,7 @@ defmodule Mrgr.PullRequest.Snoozer do
     %{pull_request | user_snoozed_pull_requests: []}
   end
 
+  @spec unsnooze(Mrgr.Schema.PullRequest.t()) :: Mrgr.Schema.PullRequest.t()
   def unsnooze(pull_request) do
     Schema
     |> Query.for_pull_request(pull_request)
@@ -76,12 +84,31 @@ defmodule Mrgr.PullRequest.Snoozer do
     %{pull_request | user_snoozed_pull_requests: []}
   end
 
-  # %UserSnoozedPullRequest{}
+  @spec find_uspr(Mrgr.Schema.PullRequest.t(), Mrgr.Schema.User.t()) ::
+          Mrgr.Schema.UserSnoozedPullRequest.t() | nil
   def find_uspr(pull_request, user) do
     Schema
     |> Query.for_pull_request(pull_request)
     |> Query.for_user(user)
     |> Mrgr.Repo.one()
+  end
+
+  @spec expire_past_due_snoozes() :: [Mrgr.Schema.UserSnoozedPullRequest.t()]
+  def expire_past_due_snoozes do
+    expired =
+      Schema
+      |> Query.expired_snoozes()
+      |> Mrgr.Repo.all()
+
+    Enum.map(expired, &Mrgr.Repo.delete/1)
+
+    expired
+    |> Enum.map(& &1.pull_request_id)
+    |> Enum.uniq()
+    |> Mrgr.PullRequest.find_by_ids_with_repository()
+    |> Enum.map(&Mrgr.PullRequest.broadcast(&1, @pull_request_unsnoozed))
+
+    expired
   end
 
   defmodule Query do
@@ -96,6 +123,14 @@ defmodule Mrgr.PullRequest.Snoozer do
     def for_pull_request(query, pull_request) do
       from(q in query,
         where: q.pull_request_id == ^pull_request.id
+      )
+    end
+
+    def expired_snoozes(query) do
+      now = Mrgr.DateTime.safe_truncate(Mrgr.DateTime.now())
+
+      from(q in query,
+        where: q.snoozed_until < ^now
       )
     end
   end

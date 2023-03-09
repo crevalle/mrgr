@@ -252,30 +252,13 @@ defmodule MrgrWeb.PullRequestDashboardLive do
   end
 
   def handle_event("unsnooze", %{"pr_id" => id}, socket) do
-    selected_tab = socket.assigns.selected_tab
-
-    pull_request =
-      selected_tab
-      |> Tabs.find_pull_request(id)
-      |> Mrgr.PullRequest.unsnooze_for_user(socket.assigns.current_user)
-
-    tabs = Tabs.unsnooze(socket.assigns.tabs, pull_request)
-    selected = get_selected_tab(tabs, socket)
-
-    # update in place to reflect new status
-    socket =
-      case previewing_pull_request?(socket.assigns.detail, pull_request) do
-        true ->
-          assign(socket, :detail, pull_request)
-
-        false ->
-          socket
-      end
+    # updating state in the socket happens when the event bus is called
+    # because the system may unsnooze PRs
+    socket.assigns.selected_tab
+    |> Tabs.find_pull_request(id)
+    |> Mrgr.PullRequest.unsnooze_for_user(socket.assigns.current_user)
 
     socket
-    |> Flash.put(:info, "PR unsnoozed! ☀️")
-    |> assign(:tabs, tabs)
-    |> assign(:selected_tab, selected)
     |> noreply()
   end
 
@@ -311,6 +294,22 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     |> put_closed_flash_message(payload)
     |> assign(:tabs, tabs)
     |> assign(:selected_tab, selected_tab)
+    |> noreply()
+  end
+
+  def handle_info(%{event: @pull_request_unsnoozed, payload: pull_request}, socket) do
+    hydrated = Mrgr.PullRequest.preload_for_pending_list(pull_request)
+
+    tabs = Tabs.unsnooze(socket.assigns.tabs, hydrated)
+    selected_tab = get_selected_tab(tabs, socket)
+
+    selected_pull_request = maybe_update_selected_pr(hydrated, socket.assigns.detail)
+
+    socket
+    |> Flash.put(:info, "PR unsnoozed! ☀️")
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected_tab)
+    |> assign(:detail, selected_pull_request)
     |> noreply()
   end
 

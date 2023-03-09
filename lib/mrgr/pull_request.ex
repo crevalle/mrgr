@@ -684,6 +684,13 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
+  def find_by_ids_with_repository(ids) when is_list(ids) do
+    Schema
+    |> Query.by_ids(ids)
+    |> Query.with_repository()
+    |> Mrgr.Repo.all()
+  end
+
   def find_by_node_id(id) do
     Schema
     |> Query.by_node_id(id)
