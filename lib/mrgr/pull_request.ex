@@ -440,28 +440,13 @@ defmodule Mrgr.PullRequest do
   end
 
   def notify_hif_alert_consumers(pull_request) do
+    pull_request = Mrgr.Repo.preload(pull_request, :author)
+
     pull_request.high_impact_file_rules
     |> Enum.filter(& &1.notify_user)
-    |> send_hif_alert(pull_request)
-  end
-
-  def send_hif_alert([], pull_request), do: pull_request
-
-  def send_hif_alert(hifs, pull_request) do
-    installation = Mrgr.Repo.preload(pull_request.repository.installation, :creator)
-    recipient = installation.creator
-
-    hifs
-    |> Enum.map(fn hif ->
-      filenames = Mrgr.HighImpactFileRule.matching_filenames(hif, pull_request)
-
-      %{
-        filenames: filenames,
-        name: hif.name
-      }
-    end)
-    |> Mrgr.Email.hif_alert(recipient, pull_request.id, pull_request.repository)
-    |> Mrgr.Mailer.deliver()
+    # don't send alerts to whomever opened the PR
+    |> Enum.reject(&(&1.user_id == pull_request.author.user_id))
+    |> Mrgr.HighImpactFileRule.send_alert(pull_request)
 
     pull_request
   end

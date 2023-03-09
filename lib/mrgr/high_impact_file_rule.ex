@@ -99,10 +99,30 @@ defmodule Mrgr.HighImpactFileRule do
     |> Enum.any?()
   end
 
-  def matching_filenames(hif, pull_request) do
+  def send_alert(rules, pull_request) when is_list(rules) do
+    # each user gets one email per pull request of all applicable rules
+    rules
+    |> Enum.group_by(& &1.user_id)
+    |> Enum.map(&do_send_alert(&1, pull_request))
+  end
+
+  defp do_send_alert({user_id, rules}, pull_request) do
+    user = Mrgr.User.find(user_id)
+
+    Enum.map(rules, fn rule ->
+      %{
+        filenames: matching_filenames(rule, pull_request),
+        name: rule.name
+      }
+    end)
+    |> Mrgr.Email.hif_alert(user, pull_request.id, pull_request.repository)
+    |> Mrgr.Mailer.deliver()
+  end
+
+  def matching_filenames(rule, pull_request) do
     filenames = pull_request.files_changed
 
-    Enum.filter(filenames, &pattern_matches_filename?(&1, hif))
+    Enum.filter(filenames, &pattern_matches_filename?(&1, rule))
   end
 
   def pattern_matches_filename?(filename, %Schema{pattern: pattern}) do
@@ -113,8 +133,8 @@ defmodule Mrgr.HighImpactFileRule do
     PathGlob.match?(filename, pattern)
   end
 
-  def delete(hif) do
-    hif
+  def delete(rule) do
+    rule
     |> Mrgr.Repo.delete()
     |> case do
       {:ok, deleted} = res ->
