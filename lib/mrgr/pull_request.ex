@@ -38,7 +38,7 @@ defmodule Mrgr.PullRequest do
         |> preload_installation()
         |> sync_repo_if_first_pr()
         |> sync_github_data()
-        |> reassociate_high_impact_files()
+        |> reassociate_high_impact_file_rules()
         |> notify_hif_alert_consumers()
         |> broadcast(@pull_request_created)
         |> ok()
@@ -119,7 +119,7 @@ defmodule Mrgr.PullRequest do
       pull_request
       |> preload_installation()
       |> sync_github_data()
-      |> reassociate_high_impact_files()
+      |> reassociate_high_impact_file_rules()
       |> broadcast(@pull_request_synchronized)
       |> ok()
     else
@@ -432,15 +432,15 @@ defmodule Mrgr.PullRequest do
     |> ok()
   end
 
-  def reassociate_high_impact_files(pull_request) do
+  def reassociate_high_impact_file_rules(pull_request) do
     # until we get smarter about what's being added/removed for notification purposes,
     # just blow them all away and replace them
 
-    Mrgr.HighImpactFile.reset_hifs(pull_request)
+    Mrgr.HighImpactFileRule.reset_hifs(pull_request)
   end
 
   def notify_hif_alert_consumers(pull_request) do
-    pull_request.high_impact_files
+    pull_request.high_impact_file_rules
     |> Enum.filter(& &1.notify_user)
     |> send_hif_alert(pull_request)
   end
@@ -453,7 +453,7 @@ defmodule Mrgr.PullRequest do
 
     hifs
     |> Enum.map(fn hif ->
-      filenames = Mrgr.HighImpactFile.matching_filenames(hif, pull_request)
+      filenames = Mrgr.HighImpactFileRule.matching_filenames(hif, pull_request)
 
       %{
         filenames: filenames,
@@ -950,7 +950,7 @@ defmodule Mrgr.PullRequest do
   def ci_failed?(_pull_request), do: false
 
   defp preload_installation(pull_request) do
-    Mrgr.Repo.preload(pull_request, repository: [:installation, :high_impact_files])
+    Mrgr.Repo.preload(pull_request, repository: [:installation, :high_impact_file_rules])
   end
 
   def fully_approved?(pull_request) do
@@ -1076,8 +1076,8 @@ defmodule Mrgr.PullRequest do
 
     def with_hifs(query) do
       from(q in query,
-        left_join: h in assoc(q, :high_impact_files),
-        preload: [high_impact_files: h]
+        left_join: h in assoc(q, :high_impact_file_rules),
+        preload: [high_impact_file_rules: h]
       )
     end
 
@@ -1114,7 +1114,7 @@ defmodule Mrgr.PullRequest do
         :labels,
         :pr_reviews,
         :author,
-        :high_impact_files
+        :high_impact_file_rules
       ]
     end
 
@@ -1205,7 +1205,7 @@ defmodule Mrgr.PullRequest do
 
     def high_impact(query) do
       from(q in query,
-        inner_join: h in assoc(q, :high_impact_files)
+        inner_join: h in assoc(q, :high_impact_file_rules)
       )
     end
 

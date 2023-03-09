@@ -9,7 +9,7 @@ defmodule Mrgr.Repository do
          {:ok, repository} <- Mrgr.Repo.insert(cs) do
       repository
       |> sync_data()
-      |> generate_default_high_impact_files()
+      |> generate_default_high_impact_file_rules()
       |> set_and_enforce_default_policy()
       |> make_visible_to_all_users()
       |> Mrgr.Tuple.ok()
@@ -29,7 +29,7 @@ defmodule Mrgr.Repository do
     %Schema{}
     |> Schema.changeset(params)
     |> Mrgr.Repo.insert!()
-    |> generate_default_high_impact_files()
+    |> generate_default_high_impact_file_rules()
     |> make_visible_to_all_users()
   end
 
@@ -88,7 +88,7 @@ defmodule Mrgr.Repository do
     # this will pull in hifs for repos at other installations,
     # but who cares
     grouped_hifs_by_repo =
-      Mrgr.HighImpactFile.for_user(user)
+      Mrgr.HighImpactFileRule.for_user(user)
       |> Enum.group_by(& &1.repository_id)
 
     Schema
@@ -98,7 +98,7 @@ defmodule Mrgr.Repository do
     |> Enum.map(fn repo ->
       hifs = Map.get(grouped_hifs_by_repo, repo.id, [])
 
-      %{repo | high_impact_files: hifs}
+      %{repo | high_impact_file_rules: hifs}
     end)
   end
 
@@ -211,7 +211,7 @@ defmodule Mrgr.Repository do
   def sync_if_first_pr(%{language: nil} = repository) do
     repository
     |> sync_data()
-    |> generate_default_high_impact_files()
+    |> generate_default_high_impact_file_rules()
   end
 
   def sync_if_first_pr(repository), do: repository
@@ -220,16 +220,16 @@ defmodule Mrgr.Repository do
     Mrgr.Github.API.fetch_repository(repository.installation, repository)
   end
 
-  @spec generate_default_high_impact_files(Schema.t()) :: Schema.t()
-  def generate_default_high_impact_files(%Schema{} = repository) do
+  @spec generate_default_high_impact_file_rules(Schema.t()) :: Schema.t()
+  def generate_default_high_impact_file_rules(%Schema{} = repository) do
     hifs =
       repository
-      |> Mrgr.HighImpactFile.defaults_for_repo()
-      |> Enum.map(&Mrgr.HighImpactFile.create/1)
+      |> Mrgr.HighImpactFileRule.defaults_for_repo()
+      |> Enum.map(&Mrgr.HighImpactFileRule.create/1)
       |> Enum.filter(fn {res, _hif} -> res == :ok end)
       |> Enum.map(&Mrgr.Tuple.take_value/1)
 
-    %{repository | high_impact_files: hifs}
+    %{repository | high_impact_file_rules: hifs}
   end
 
   def make_visible_to_all_users(repository) do
@@ -331,14 +331,14 @@ defmodule Mrgr.Repository do
         repo
 
       pr_data ->
-        repo = Mrgr.Repo.preload(repo, :high_impact_files)
+        repo = Mrgr.Repo.preload(repo, :high_impact_file_rules)
 
         pull_requests =
           repo
           |> create_pull_requests_from_data(pr_data)
           |> Enum.map(fn pr -> %{pr | repository: repo} end)
           |> Enum.map(&Mrgr.PullRequest.create_rest_of_world/1)
-          |> Enum.map(&Mrgr.HighImpactFile.reset_hifs(repo, &1))
+          |> Enum.map(&Mrgr.HighImpactFileRule.reset_hifs(repo, &1))
 
         %{repo | pull_requests: pull_requests}
     end
@@ -499,8 +499,8 @@ defmodule Mrgr.Repository do
 
     def with_hif_rules(query, user) do
       from(q in query,
-        left_join: f in assoc(q, :high_impact_files),
-        preload: [high_impact_files: f]
+        left_join: f in assoc(q, :high_impact_file_rules),
+        preload: [high_impact_file_rules: f]
       )
     end
 

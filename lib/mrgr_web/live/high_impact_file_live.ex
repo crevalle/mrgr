@@ -33,7 +33,7 @@ defmodule MrgrWeb.HighImpactFileLive do
 
   def handle_event("edit-hif", %{"repo" => repo_id, "hif" => hif_id}, socket) do
     repo = Mrgr.List.find(socket.assigns.repos, repo_id)
-    hif = Mrgr.List.find(repo.high_impact_files, hif_id)
+    hif = Mrgr.List.find(repo.high_impact_file_rules, hif_id)
     changeset = %{build_changeset(hif) | action: :update}
 
     form = build_form(:edit, repo, changeset, hif)
@@ -43,7 +43,7 @@ defmodule MrgrWeb.HighImpactFileLive do
     |> noreply()
   end
 
-  def handle_event("form-change", %{"high_impact_file" => params}, socket) do
+  def handle_event("form-change", %{"high_impact_file_rule" => params}, socket) do
     # used to trigger updates to label preview
     form = socket.assigns.form
 
@@ -66,20 +66,20 @@ defmodule MrgrWeb.HighImpactFileLive do
     |> noreply()
   end
 
-  def handle_event("save-hif", %{"high_impact_file" => params}, socket) do
+  def handle_event("save-hif", %{"high_impact_file_rule" => params}, socket) do
     form = socket.assigns.form
 
     res =
       case form.action do
         :edit ->
-          Mrgr.HighImpactFile.update(form.changeset.data, params)
+          Mrgr.HighImpactFileRule.update(form.changeset.data, params)
 
         :create ->
           params
           |> Map.put("repository_id", form.repo.id)
           |> Map.put("user_id", socket.assigns.current_user.id)
           |> Map.put("source", :user)
-          |> Mrgr.HighImpactFile.create()
+          |> Mrgr.HighImpactFileRule.create()
       end
 
     case res do
@@ -118,7 +118,7 @@ defmodule MrgrWeb.HighImpactFileLive do
     end
   end
 
-  def handle_info(%{event: @high_impact_file_created, payload: hif}, socket) do
+  def handle_info(%{event: @high_impact_file_rule_created, payload: hif}, socket) do
     repos = add_hif_to_its_repo(socket.assigns.repos, hif)
 
     socket
@@ -126,7 +126,7 @@ defmodule MrgrWeb.HighImpactFileLive do
     |> noreply()
   end
 
-  def handle_info(%{event: @high_impact_file_updated, payload: hif}, socket) do
+  def handle_info(%{event: @high_impact_file_rule_updated, payload: hif}, socket) do
     repos = update_hif_in_its_repo(socket.assigns.repos, hif)
 
     socket
@@ -141,7 +141,7 @@ defmodule MrgrWeb.HighImpactFileLive do
   defp remove_hif_from_its_repo(repos, hif) do
     repo = find_hif_repo(repos, hif)
 
-    updated_hifs = Mrgr.List.remove(repo.high_impact_files, hif)
+    updated_hifs = Mrgr.List.remove(repo.high_impact_file_rules, hif)
 
     rebuild_repo_list_with_new_hifs(updated_hifs, repo, repos)
   end
@@ -149,7 +149,7 @@ defmodule MrgrWeb.HighImpactFileLive do
   defp add_hif_to_its_repo(repos, hif) do
     repo = find_hif_repo(repos, hif)
 
-    updated_hifs = [hif | repo.high_impact_files]
+    updated_hifs = [hif | repo.high_impact_file_rules]
 
     rebuild_repo_list_with_new_hifs(updated_hifs, repo, repos)
   end
@@ -157,7 +157,7 @@ defmodule MrgrWeb.HighImpactFileLive do
   defp update_hif_in_its_repo(repos, hif) do
     repo = find_hif_repo(repos, hif)
 
-    updated_hifs = Mrgr.List.replace(repo.high_impact_files, hif)
+    updated_hifs = Mrgr.List.replace(repo.high_impact_file_rules, hif)
 
     rebuild_repo_list_with_new_hifs(updated_hifs, repo, repos)
   end
@@ -167,17 +167,17 @@ defmodule MrgrWeb.HighImpactFileLive do
   end
 
   defp rebuild_repo_list_with_new_hifs(hifs, repo, repos) do
-    updated_repo = %{repo | high_impact_files: hifs}
+    updated_repo = %{repo | high_impact_file_rules: hifs}
 
     Mrgr.List.replace(repos, updated_repo)
   end
 
   defp build_changeset(schema, params \\ %{}) do
-    Mrgr.Schema.HighImpactFile.changeset(schema, params)
+    Mrgr.Schema.HighImpactFileRule.changeset(schema, params)
   end
 
   defp empty_changeset do
-    %Mrgr.Schema.HighImpactFile{}
+    %Mrgr.Schema.HighImpactFileRule{}
     |> build_changeset()
   end
 

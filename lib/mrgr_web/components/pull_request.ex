@@ -65,13 +65,13 @@ defmodule MrgrWeb.Components.PullRequest do
 
   def detail_content(%{attr: "files-changed"} = assigns) do
     ~H"""
-    <.hif_badge_list hifs={@pull_request.high_impact_files} />
+    <.hif_badge_list hifs={@pull_request.high_impact_file_rules} />
 
     <div class="flex flex-col space-y-0 leading-tight">
       <.changed_file
         :for={f <- @pull_request.files_changed}
         filename={f}
-        hifs={@pull_request.high_impact_files}
+        hifs={@pull_request.high_impact_file_rules}
       />
     </div>
     """
@@ -96,7 +96,7 @@ defmodule MrgrWeb.Components.PullRequest do
     matching_file =
       Enum.find(
         assigns.hifs,
-        &Mrgr.HighImpactFile.pattern_matches_filename?(assigns.filename, &1)
+        &Mrgr.HighImpactFileRule.pattern_matches_filename?(assigns.filename, &1)
       )
 
     color =

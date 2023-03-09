@@ -82,9 +82,9 @@ defmodule Mrgr.PubSub do
 
         @branch_pushed "branch:pushed"
 
-        @high_impact_file_created "high_impact_file:created"
-        @high_impact_file_updated "high_impact_file:updated"
-        @high_impact_file_deleted "high_impact_file:deleted"
+        @high_impact_file_rule_created "high_impact_file_rule:created"
+        @high_impact_file_rule_updated "high_impact_file_rule:updated"
+        @high_impact_file_rule_deleted "high_impact_file_rule:deleted"
 
         @flash_info "flash:info"
         @flash_error "flash:error"

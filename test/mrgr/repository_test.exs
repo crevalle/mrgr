@@ -1,11 +1,11 @@
 defmodule Mrgr.RepositoryTest do
   use Mrgr.DataCase
 
-  describe "generate_default_high_impact_files/1" do
+  describe "generate_default_high_impact_file_rules/1" do
     test "creates default file change alerts according to repo language" do
       %{id: id} = r = insert!(:repository, language: "Elixir")
 
-      %{high_impact_files: hifs} = Mrgr.Repository.generate_default_high_impact_files(r)
+      %{high_impact_file_rules: hifs} = Mrgr.Repository.generate_default_high_impact_file_rules(r)
 
       assert [
                %{
@@ -38,7 +38,7 @@ defmodule Mrgr.RepositoryTest do
     test "creates nothing if repo language is unsupported" do
       r = insert!(:repository, language: "que")
 
-      %{high_impact_files: hifs} = Mrgr.Repository.generate_default_high_impact_files(r)
+      %{high_impact_file_rules: hifs} = Mrgr.Repository.generate_default_high_impact_file_rules(r)
       assert hifs == []
     end
   end

@@ -1,6 +1,6 @@
-defmodule Mrgr.HighImpactFile do
-  alias Mrgr.Schema.HighImpactFile, as: Schema
-  alias Mrgr.HighImpactFile.Query
+defmodule Mrgr.HighImpactFileRule do
+  alias Mrgr.Schema.HighImpactFileRule, as: Schema
+  alias __MODULE__.Query
 
   use Mrgr.PubSub.Event
 
@@ -32,15 +32,15 @@ defmodule Mrgr.HighImpactFile do
 
   @doc "gets all HIFs on the repository and returns those applicable to the PR"
   def for_pull_request(
-        %{repository: %{high_impact_files: %Ecto.Association.NotLoaded{}}} = pull_request
+        %{repository: %{high_impact_file_rules: %Ecto.Association.NotLoaded{}}} = pull_request
       ) do
-    repo = Mrgr.Repo.preload(pull_request.repository, :high_impact_files)
+    repo = Mrgr.Repo.preload(pull_request.repository, :high_impact_file_rules)
     pull_request = %{pull_request | repository: repo}
 
     for_pull_request(pull_request)
   end
 
-  def for_pull_request(%{repository: %{high_impact_files: hifs}} = pull_request) do
+  def for_pull_request(%{repository: %{high_impact_file_rules: hifs}} = pull_request) do
     for_pull_request(hifs, pull_request)
   end
 
@@ -51,19 +51,19 @@ defmodule Mrgr.HighImpactFile do
   end
 
   def clear_from_pr(pull_request) do
-    pull_request = Mrgr.Repo.preload(pull_request, :high_impact_file_pull_requests)
+    pull_request = Mrgr.Repo.preload(pull_request, :high_impact_file_rule_pull_requests)
 
-    pull_request.high_impact_file_pull_requests
+    pull_request.high_impact_file_rule_pull_requests
     |> Enum.map(&Mrgr.Repo.delete/1)
 
-    %{pull_request | high_impact_file_pull_requests: [], high_impact_files: []}
+    %{pull_request | high_impact_file_rule_pull_requests: [], high_impact_file_rules: []}
   end
 
   def reset_hifs(pull_request) do
     reset_hifs(pull_request.repository, pull_request)
   end
 
-  def reset_hifs(%Mrgr.Schema.Repository{high_impact_files: hifs}, pull_request) do
+  def reset_hifs(%Mrgr.Schema.Repository{high_impact_file_rules: hifs}, pull_request) do
     reset_hifs(hifs, pull_request)
   end
 
@@ -77,19 +77,19 @@ defmodule Mrgr.HighImpactFile do
       |> Enum.map(fn hif -> create_for_pull_request(hif, pull_request) end)
       |> Enum.map(fn {:ok, a} -> a end)
 
-    %{pull_request | high_impact_files: hifs, high_impact_file_pull_requests: assocs}
+    %{pull_request | high_impact_file_rules: hifs, high_impact_file_rule_pull_requests: assocs}
   end
 
   @spec create_for_pull_request(Schema.t(), Mrgr.Schema.PullRequest.t()) ::
-          {:ok, Mrgr.Schema.HighImpactFilePullRequest.t()} | {:error, Ecto.Changeset.t()}
+          {:ok, Mrgr.Schema.HighImpactFileRulePullRequest.t()} | {:error, Ecto.Changeset.t()}
   def create_for_pull_request(hif, pull_request) do
     params = %{
-      high_impact_file_id: hif.id,
+      high_impact_file_rule_id: hif.id,
       pull_request_id: pull_request.id
     }
 
-    %Mrgr.Schema.HighImpactFilePullRequest{}
-    |> Mrgr.Schema.HighImpactFilePullRequest.changeset(params)
+    %Mrgr.Schema.HighImpactFileRulePullRequest{}
+    |> Mrgr.Schema.HighImpactFileRulePullRequest.changeset(params)
     |> Mrgr.Repo.insert()
   end
 
@@ -118,7 +118,7 @@ defmodule Mrgr.HighImpactFile do
     |> Mrgr.Repo.delete()
     |> case do
       {:ok, deleted} = res ->
-        broadcast(deleted, @high_impact_file_deleted)
+        broadcast(deleted, @high_impact_file_rule_deleted)
         res
 
       {:error, _cs} = error ->
@@ -134,7 +134,7 @@ defmodule Mrgr.HighImpactFile do
       {:ok, created} = res ->
         add_to_matching_open_prs(created)
 
-        broadcast(created, @high_impact_file_created)
+        broadcast(created, @high_impact_file_rule_created)
         res
 
       {:error, _cs} = error ->
@@ -185,7 +185,7 @@ defmodule Mrgr.HighImpactFile do
   end
 
   def find_pr_assoc(hif, pull_request) do
-    Mrgr.Schema.HighImpactFilePullRequest
+    Mrgr.Schema.HighImpactFileRulePullRequest
     |> Query.for_hif_and_pr(hif, pull_request)
     |> Mrgr.Repo.one()
   end
@@ -270,7 +270,7 @@ defmodule Mrgr.HighImpactFile do
     |> case do
       {:ok, updated} = res ->
         update_matching_prs(updated)
-        broadcast(updated, @high_impact_file_updated)
+        broadcast(updated, @high_impact_file_rule_updated)
         res
 
       {:error, _cs} = error ->
@@ -318,7 +318,7 @@ defmodule Mrgr.HighImpactFile do
 
     def for_hif_and_pr(query, hif, pr) do
       from(q in query,
-        where: q.high_impact_file_id == ^hif.id,
+        where: q.high_impact_file_rule_id == ^hif.id,
         where: q.pull_request_id == ^pr.id
       )
     end

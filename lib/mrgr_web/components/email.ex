@@ -9,7 +9,8 @@ defmodule MrgrWeb.Components.Email do
       <ul>
         <li :for={pr <- @pull_requests}>
           <a href={Mrgr.Schema.PullRequest.external_pull_request_url(pr)}><%= pr.title %></a>
-          [<%= Mrgr.Schema.PullRequest.author_name(pr) %>] <.hif_list hifs={pr.high_impact_files} />
+          [<%= Mrgr.Schema.PullRequest.author_name(pr) %>]
+          <.hif_list hifs={pr.high_impact_file_rules} />
         </li>
       </ul>
     <% end %>

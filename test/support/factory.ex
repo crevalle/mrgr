@@ -124,7 +124,7 @@ defmodule Mrgr.Factory do
   end
 
   def build(:high_impact_file) do
-    %Mrgr.Schema.HighImpactFile{
+    %Mrgr.Schema.HighImpactFileRule{
       repository: build(:repository),
       name: "socks",
       notify_user: false,

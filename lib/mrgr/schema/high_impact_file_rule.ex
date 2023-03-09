@@ -1,7 +1,7 @@
-defmodule Mrgr.Schema.HighImpactFile do
+defmodule Mrgr.Schema.HighImpactFileRule do
   use Mrgr.Schema
 
-  schema "high_impact_files" do
+  schema "high_impact_file_rules" do
     field(:name, :string)
     field(:color, :string, default: "#f1e5d1")
     field(:notify_user, :boolean)
@@ -11,8 +11,8 @@ defmodule Mrgr.Schema.HighImpactFile do
     belongs_to(:repository, Mrgr.Schema.Repository)
     belongs_to(:user, Mrgr.Schema.User)
 
-    has_many(:high_impact_file_pull_requests, Mrgr.Schema.HighImpactFilePullRequest)
-    has_many(:pull_requests, through: [:high_impact_file_pull_requests, :pull_request])
+    has_many(:high_impact_file_rule_pull_requests, Mrgr.Schema.HighImpactFileRulePullRequest)
+    has_many(:pull_requests, through: [:high_impact_file_rule_pull_requests, :pull_request])
     timestamps()
   end
 

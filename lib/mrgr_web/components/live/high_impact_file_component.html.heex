@@ -19,7 +19,7 @@
   </div>
 
   <table class="min-w-full">
-    <thead :if={Enum.any?(@repo.high_impact_files)}>
+    <thead :if={Enum.any?(@repo.high_impact_file_rules)}>
       <tr class="border-t border-gray-200">
         <th class="pl-6 py-2 text-left text-sm font-light text-gray-400">File Pattern</th>
         <th class="py-2 text-left text-sm font-light text-gray-400">Badge</th>
@@ -31,7 +31,7 @@
     </thead>
 
     <tbody class="bg-white">
-      <tr :for={hif <- @repo.high_impact_files} class="border-t border-gray-300">
+      <tr :for={hif <- @repo.high_impact_file_rules} class="border-t border-gray-300">
         <td class="whitespace-nowrap pl-6 py-2 text-sm font-medium text-gray-900">
           <pre><%= hif.pattern %></pre>
         </td>

@@ -150,7 +150,7 @@ defmodule Mrgr.Email do
     end
 
     defp high_impact?(pr) do
-      Enum.any?(pr.high_impact_files)
+      Enum.any?(pr.high_impact_file_rules)
     end
   end
 end
