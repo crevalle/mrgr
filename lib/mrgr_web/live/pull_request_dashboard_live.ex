@@ -227,7 +227,10 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     pull_request =
       selected_tab
       |> Tabs.find_pull_request(pull_request_id)
-      |> Mrgr.PullRequest.snooze(translate_snooze(snooze_id))
+      |> Mrgr.PullRequest.snooze_for_user(
+        socket.assigns.current_user,
+        translate_snooze(snooze_id)
+      )
 
     tabs = Tabs.snooze(socket.assigns.tabs, selected_tab, pull_request)
     selected = get_selected_tab(tabs, socket)
@@ -254,7 +257,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     pull_request =
       selected_tab
       |> Tabs.find_pull_request(id)
-      |> Mrgr.PullRequest.unsnooze()
+      |> Mrgr.PullRequest.unsnooze_for_user(socket.assigns.current_user)
 
     tabs = Tabs.unsnooze(socket.assigns.tabs, pull_request)
     selected = get_selected_tab(tabs, socket)

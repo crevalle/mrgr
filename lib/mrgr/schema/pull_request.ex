@@ -69,6 +69,8 @@ defmodule Mrgr.Schema.PullRequest do
     has_many(:high_impact_file_pull_requests, Mrgr.Schema.HighImpactFilePullRequest)
     has_many(:high_impact_files, through: [:high_impact_file_pull_requests, :high_impact_file])
 
+    has_many(:user_snoozed_pull_requests, Mrgr.Schema.UserSnoozedPullRequest)
+
     timestamps()
   end
 
