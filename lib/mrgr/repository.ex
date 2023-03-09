@@ -84,12 +84,22 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.all()
   end
 
-  def for_user_with_rules(user) do
+  def for_user_with_hif_rules(user) do
+    # this will pull in hifs for repos at other installations,
+    # but who cares
+    grouped_hifs_by_repo =
+      Mrgr.HighImpactFile.for_user(user)
+      |> Enum.group_by(& &1.repository_id)
+
     Schema
     |> Query.at_current_installation(user)
     |> Query.order_by_insensitive(asc: :name)
-    |> Query.with_hif_rules()
     |> Mrgr.Repo.all()
+    |> Enum.map(fn repo ->
+      hifs = Map.get(grouped_hifs_by_repo, repo.id, [])
+
+      %{repo | high_impact_files: hifs}
+    end)
   end
 
   def find_for_user(user, ids) do
@@ -487,7 +497,7 @@ defmodule Mrgr.Repository do
       )
     end
 
-    def with_hif_rules(query) do
+    def with_hif_rules(query, user) do
       from(q in query,
         left_join: f in assoc(q, :high_impact_files),
         preload: [high_impact_files: f]

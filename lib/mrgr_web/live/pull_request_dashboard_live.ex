@@ -12,7 +12,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     if connected?(socket) do
       current_user = socket.assigns.current_user
 
-      repos = Mrgr.Repository.for_user_with_rules(current_user)
+      repos = Mrgr.Repository.for_user_with_hif_rules(current_user)
       frozen_repos = filter_frozen_repos(repos)
 
       visible_repo_count =

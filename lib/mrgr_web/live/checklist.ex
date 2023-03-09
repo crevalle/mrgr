@@ -41,7 +41,7 @@ defmodule MrgrWeb.Live.Checklist do
     # Enum.map(@user.roles, &(&1.id)
     repo_list =
       socket.assigns.current_user
-      |> Mrgr.Repository.for_user_with_rules()
+      |> Mrgr.Repository.for_user_with_hif_rules()
 
     socket
     |> assign(:detail, nil)

@@ -4,6 +4,25 @@ defmodule Mrgr.HighImpactFile do
 
   use Mrgr.PubSub.Event
 
+  def rt_migrate_hifs do
+    Schema
+    |> Query.with_installation()
+    |> Mrgr.Repo.all()
+    |> Enum.map(fn hif ->
+      user_id = hif.repository.installation.creator_id
+
+      hif
+      |> Ecto.Changeset.change(%{user_id: user_id})
+      |> Mrgr.Repo.update!()
+    end)
+  end
+
+  def for_user(user) do
+    Schema
+    |> Query.for_user(user.id)
+    |> Mrgr.Repo.all()
+  end
+
   def for_repository(%{id: repo_id}) do
     Schema
     |> Query.for_repository(repo_id)
@@ -274,6 +293,20 @@ defmodule Mrgr.HighImpactFile do
     def for_repository(query, repo_id) do
       from(q in query,
         where: q.repository_id == ^repo_id
+      )
+    end
+
+    def for_user(query, user_id) do
+      from(q in query,
+        where: q.user_id == ^user_id
+      )
+    end
+
+    def with_installation(query) do
+      from(q in query,
+        join: r in assoc(q, :repository),
+        join: i in assoc(r, :installation),
+        preload: [repository: {r, [installation: i]}]
       )
     end
 

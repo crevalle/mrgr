@@ -9,6 +9,7 @@ defmodule Mrgr.Schema.HighImpactFile do
     field(:source, Ecto.Enum, values: [:user, :system])
 
     belongs_to(:repository, Mrgr.Schema.Repository)
+    belongs_to(:user, Mrgr.Schema.User)
 
     has_many(:high_impact_file_pull_requests, Mrgr.Schema.HighImpactFilePullRequest)
     has_many(:pull_requests, through: [:high_impact_file_pull_requests, :pull_request])
@@ -21,7 +22,8 @@ defmodule Mrgr.Schema.HighImpactFile do
     :notify_user,
     :pattern,
     :repository_id,
-    :source
+    :source,
+    :user_id
   ]
 
   @update_params [
@@ -37,6 +39,7 @@ defmodule Mrgr.Schema.HighImpactFile do
     |> validate_required(@create_params)
     |> add_hashie_tag_to_color()
     |> foreign_key_constraint(:repository_id)
+    |> foreign_key_constraint(:user_id)
   end
 
   def update_changeset(schema, params \\ %{}) do
