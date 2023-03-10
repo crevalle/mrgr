@@ -100,6 +100,8 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
       installation = Mrgr.Installation.find_admin(id)
       open_pr_count = Mrgr.PullRequest.open_pr_count(id)
 
+      Mrgr.PubSub.subscribe_to_installation(installation)
+
       socket
       |> assign(:installation, installation)
       |> assign(:open_pr_count, open_pr_count)
@@ -108,4 +110,20 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
       ok(socket)
     end
   end
+
+  def handle_event("re-onboard", _params, socket) do
+    Mrgr.Installation.queue_initial_setup(socket.assigns.installation)
+
+    socket
+    |> Flash.put(:info, "Commencing onboarding")
+    |> noreply()
+  end
+
+  def handle_info(%{event: @installation_onboarding_progressed, payload: installation}, socket) do
+    socket
+    |> assign(:installation, installation)
+    |> noreply()
+  end
+
+  def handle_info(_event, socket), do: noreply(socket)
 end

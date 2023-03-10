@@ -2,6 +2,7 @@ defmodule MrgrWeb.Components.Admin do
   use MrgrWeb, :component
 
   import MrgrWeb.Components.UI
+  alias Phoenix.LiveView.JS
 
   def subscription(%{subscription: nil} = assigns) do
     ~H"""
@@ -67,7 +68,19 @@ defmodule MrgrWeb.Components.Admin do
   def installation_table(assigns) do
     ~H"""
     <table class="min-w-full">
-      <.table_attr obj={@installation} key={:state} . />
+      <.tr striped={true}>
+        <.td class="font-bold">Onboarding State</.td>
+        <.td>
+          <%= @installation.state %>
+          <.l
+            :if={!Mrgr.Installation.onboarded?(@installation)}
+            phx-click={JS.push("re-onboard", value: %{id: @installation.id})}
+            data={[confirm: "Sure about that?"]}
+          >
+            Re-onboard
+          </.l>
+        </.td>
+      </.tr>
       <.tr striped={true}>
         <.td class="font-bold">State Changes</.td>
         <.td>
