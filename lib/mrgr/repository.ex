@@ -499,13 +499,6 @@ defmodule Mrgr.Repository do
       )
     end
 
-    def with_hif_rules(query, user) do
-      from(q in query,
-        left_join: f in assoc(q, :high_impact_file_rules),
-        preload: [high_impact_file_rules: f]
-      )
-    end
-
     def uvr(user, repo) do
       from(q in Mrgr.Schema.UserVisibleRepository,
         where: q.user_id == ^user.id,
