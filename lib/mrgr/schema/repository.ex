@@ -28,7 +28,7 @@ defmodule Mrgr.Schema.Repository do
     has_many(:pull_requests, Mrgr.Schema.PullRequest, on_delete: :delete_all)
 
     # these are per-user, eg a repo may have two rules for a migration, one for each user
-    has_many(:high_impact_file_rules, Mrgr.Schema.HighImpactFile, on_delete: :delete_all)
+    has_many(:high_impact_file_rules, Mrgr.Schema.HighImpactFileRule, on_delete: :delete_all)
 
     timestamps()
   end
