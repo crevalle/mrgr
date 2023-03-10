@@ -5,7 +5,5 @@ defmodule Mrgr.Repo.Migrations.AddUserIdToHIF do
     alter table("high_impact_files") do
       add(:user_id, references(:users, on_delete: :delete_all))
     end
-
-    # create index(:high_impact_files, [:user_id
   end
 end
