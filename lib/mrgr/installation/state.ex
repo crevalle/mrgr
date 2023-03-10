@@ -49,6 +49,12 @@ defmodule Mrgr.Installation.State do
     update_state!(installation, @onboarding_error, %{onboarding_error: stacktrace})
   end
 
+  def reset_onboarding_error!(installation) do
+    installation
+    |> Ecto.Changeset.change(%{onboarding_error: nil})
+    |> Mrgr.Repo.update!()
+  end
+
   def update_state!(installation, state, params \\ %{}) do
     state_change = build_state_change(state)
 

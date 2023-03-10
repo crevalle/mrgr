@@ -222,14 +222,16 @@ defmodule Mrgr.Repository do
 
   @spec generate_default_high_impact_file_rules(Schema.t()) :: Schema.t()
   def generate_default_high_impact_file_rules(%Schema{} = repository) do
-    hifs =
-      repository
-      |> Mrgr.HighImpactFileRule.defaults_for_repo()
-      |> Enum.map(&Mrgr.HighImpactFileRule.create/1)
+    users = Mrgr.User.for_installation(repository.installation_id)
+
+    rules =
+      users
+      |> Enum.map(&Mrgr.HighImpactFileRule.create_user_defaults_for_repository(&1, repository))
+      |> List.flatten()
       |> Enum.filter(fn {res, _hif} -> res == :ok end)
       |> Enum.map(&Mrgr.Tuple.take_value/1)
 
-    %{repository | high_impact_file_rules: hifs}
+    %{repository | high_impact_file_rules: rules}
   end
 
   def make_visible_to_all_users(repository) do

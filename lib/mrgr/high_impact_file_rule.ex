@@ -210,14 +210,29 @@ defmodule Mrgr.HighImpactFileRule do
     |> Mrgr.Repo.one()
   end
 
-  def defaults_for_repo(%{language: "Elixir"} = repository) do
+  def create_user_defaults_for_repository(user, repository) do
+    user
+    |> user_defaults_for_repository(repository)
+    |> Enum.map(&create/1)
+  end
+
+  def user_defaults_for_repository(user, repository) do
+    repository
+    |> defaults_for_repo()
+    |> Enum.map(fn attrs ->
+      attrs
+      |> Map.put(:user_id, user.id)
+      |> Map.put(:repository_id, repository.id)
+    end)
+  end
+
+  def defaults_for_repo(%{language: "Elixir"}) do
     [
       %{
         name: "migration",
         pattern: "priv/repo/migrations/*",
         color: "#dcfce7",
         notify_user: true,
-        repository_id: repository.id,
         source: :system
       },
       %{
@@ -225,7 +240,6 @@ defmodule Mrgr.HighImpactFileRule do
         pattern: "lib/**/router.ex",
         color: "#dbeafe",
         notify_user: true,
-        repository_id: repository.id,
         source: :system
       },
       %{
@@ -233,20 +247,18 @@ defmodule Mrgr.HighImpactFileRule do
         pattern: "mix.lock",
         color: "#fef9c3",
         notify_user: true,
-        repository_id: repository.id,
         source: :system
       }
     ]
   end
 
-  def defaults_for_repo(%{language: "Ruby"} = repository) do
+  def defaults_for_repo(%{language: "Ruby"}) do
     [
       %{
         name: "migration",
         pattern: "db/migrate/*",
         color: "#dcfce7",
         notify_user: true,
-        repository_id: repository.id,
         source: :system
       },
       %{
@@ -254,7 +266,6 @@ defmodule Mrgr.HighImpactFileRule do
         pattern: "config/routes.rb",
         color: "#dbeafe",
         notify_user: true,
-        repository_id: repository.id,
         source: :system
       },
       %{
@@ -262,20 +273,18 @@ defmodule Mrgr.HighImpactFileRule do
         pattern: "Gemfile.lock",
         color: "#fef9c3",
         notify_user: true,
-        repository_id: repository.id,
         source: :system
       }
     ]
   end
 
-  def defaults_for_repo(%{language: "Javascript"} = repository) do
+  def defaults_for_repo(%{language: "Javascript"}) do
     [
       %{
         name: "dependencies",
         pattern: "package-lock.json",
         color: "#fef9c3",
         notify_user: true,
-        repository_id: repository.id,
         source: :system
       }
     ]

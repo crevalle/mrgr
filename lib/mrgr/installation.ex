@@ -119,7 +119,9 @@ defmodule Mrgr.Installation do
   end
 
   def onboard(i) do
-    clear_installation_data(i)
+    i
+    |> clear_installation_data()
+    |> State.reset_onboarding_error!()
 
     i = find_for_onboarding(i.id)
 
@@ -332,6 +334,8 @@ defmodule Mrgr.Installation do
     Mrgr.Repository.delete_all_for_installation(installation)
     Mrgr.Team.delete_all_for_installation(installation)
     Mrgr.Member.delete_all_for_installation(installation)
+
+    installation
   end
 
   def recreate_repositories(installation) do
