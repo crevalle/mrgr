@@ -34,9 +34,24 @@ defmodule Mrgr.Member do
   end
 
   def delete_all_for_installation(installation) do
-    installation.id
-    |> for_installation()
+    memberships =
+      Mrgr.Schema.Membership
+      |> Query.where(installation_id: installation.id)
+      |> Mrgr.Repo.all()
+
+    member_ids = Enum.map(memberships, & &1.member_id)
+
+    Enum.map(memberships, &Mrgr.Repo.delete/1)
+
+    clear_orphaned_members(member_ids)
+  end
+
+  defp clear_orphaned_members(member_ids) do
+    Schema
+    |> Query.by_ids(member_ids)
+    |> Query.with_memberships()
     |> Mrgr.Repo.all()
+    |> Enum.filter(fn member -> Enum.empty?(member.memberships) end)
     |> Enum.map(&Mrgr.Repo.delete/1)
   end
 
@@ -62,6 +77,13 @@ defmodule Mrgr.Member do
     def by_login(query, login) do
       from(q in query,
         where: q.login == ^login
+      )
+    end
+
+    def with_memberships(query) do
+      from(q in query,
+        left_join: m in assoc(q, :memberships),
+        preload: [memberships: m]
       )
     end
   end
