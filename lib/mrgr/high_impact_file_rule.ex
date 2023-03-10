@@ -23,13 +23,6 @@ defmodule Mrgr.HighImpactFileRule do
     |> Mrgr.Repo.all()
   end
 
-  def for_repository(%{id: repo_id}) do
-    Schema
-    |> Query.for_repository(repo_id)
-    |> Query.order_by_pattern()
-    |> Mrgr.Repo.all()
-  end
-
   @doc "gets all HIFs on the repository and returns those applicable to the PR"
   def for_pull_request(
         %{repository: %{high_impact_file_rules: %Ecto.Association.NotLoaded{}}} = pull_request
@@ -318,12 +311,6 @@ defmodule Mrgr.HighImpactFileRule do
 
   defmodule Query do
     use Mrgr.Query
-
-    def for_repository(query, repo_id) do
-      from(q in query,
-        where: q.repository_id == ^repo_id
-      )
-    end
 
     def for_user(query, user_id) do
       from(q in query,
