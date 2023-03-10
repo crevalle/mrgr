@@ -1,7 +1,7 @@
 <div class="flex flex-col space-y-4">
   <div class="flex justify-between">
     <div class="flex flex-col">
-      <.heading title="Open Pull Requests">
+      <.heading title={"#{account_name(@current_user)} Open Pull Requests"}>
         <:description>
           <.showing_repos_text showing={@visible_repo_count} total={Enum.count(@repos)} />
         </:description>
