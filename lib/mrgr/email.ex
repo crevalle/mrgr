@@ -32,11 +32,11 @@ defmodule Mrgr.Email do
     |> render_with_layout(MrgrWeb.Email.Renderer.hif_alert(assigns))
   end
 
-  def send_pr_summary(pull_requests, last_week_count, recipient) do
-    summary = __MODULE__.PRSummary.new(pull_requests)
+  def send_changelog(pull_requests, last_week_count, recipient) do
+    changelog = __MODULE__.Changelog.new(pull_requests)
 
     assigns = %{
-      pull_requests: summary,
+      pull_requests: changelog,
       closed_last_week_count: last_week_count,
       recipient: recipient
     }
@@ -44,8 +44,8 @@ defmodule Mrgr.Email do
     new()
     |> from({"Mrgr", "noreply@mrgr.io"})
     |> to(recipient)
-    |> subject("Weekly Merged Pull Request Summary - #{summary.total}")
-    |> render("weekly_pr_summary", assigns)
+    |> subject("Weekly Merged Pull Request Summary - #{changelog.total}")
+    |> render("weekly_changelog", assigns)
   end
 
   def render(email, template, assigns) do
@@ -64,7 +64,7 @@ defmodule Mrgr.Email do
     heex |> Phoenix.HTML.Safe.to_iodata() |> IO.chardata_to_string()
   end
 
-  defmodule PRSummary do
+  defmodule Changelog do
     def new(pull_requests) do
       bucket =
         Enum.reduce(pull_requests, build_bucket(), fn pr, acc ->

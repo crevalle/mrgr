@@ -6,9 +6,9 @@ defmodule Mrgr.User do
 
   require Logger
 
-  def wanting_pr_summary do
+  def wanting_changelog do
     Schema
-    |> Query.wanting_pr_summary()
+    |> Query.wanting_changelog()
     |> Mrgr.Repo.all()
   end
 
@@ -232,12 +232,12 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.all()
   end
 
-  def send_pr_summary(user) do
+  def send_changelog(user) do
     closed_last_week_count = Mrgr.PullRequest.closed_last_week_count(user.current_installation_id)
 
     user
     |> Mrgr.PullRequest.closed_this_week()
-    |> Mrgr.Email.send_pr_summary(closed_last_week_count, user)
+    |> Mrgr.Email.send_changelog(closed_last_week_count, user)
     |> Mrgr.Mailer.deliver()
   end
 
@@ -295,9 +295,9 @@ defmodule Mrgr.User do
       )
     end
 
-    def wanting_pr_summary(query) do
+    def wanting_changelog(query) do
       from(q in query,
-        where: q.send_weekly_summary_email == true,
+        where: q.send_weekly_changelog_email == true,
         where: not is_nil(q.current_installation_id)
       )
     end

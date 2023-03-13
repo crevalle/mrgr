@@ -39,9 +39,9 @@ defmodule MrgrWeb.ProfileLive do
     end
   end
 
-  def handle_event("update-weekly-summary-preference", %{"user" => params}, socket) do
+  def handle_event("update-weekly-changelog-preference", %{"user" => params}, socket) do
     socket.assigns.current_user
-    |> Mrgr.Schema.User.weekly_summary_changeset(params)
+    |> Mrgr.Schema.User.weekly_changelog_changeset(params)
     |> Mrgr.Repo.update()
     |> case do
       {:ok, user} ->

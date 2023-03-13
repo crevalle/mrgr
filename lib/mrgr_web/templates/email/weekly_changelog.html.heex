@@ -19,19 +19,19 @@
   <hr />
 
   <div :if={Enum.any?(@pull_requests.last_friday.pull_requests)}>
-    <.daily_pr_summary day={@pull_requests.last_friday} />
+    <.daily_changelog day={@pull_requests.last_friday} />
   </div>
 
   <div :if={Enum.any?(@pull_requests.saturday.pull_requests)}>
-    <.daily_pr_summary day={@pull_requests.saturday} />
+    <.daily_changelog day={@pull_requests.saturday} />
   </div>
 
   <div :if={Enum.any?(@pull_requests.sunday.pull_requests)}>
-    <.daily_pr_summary day={@pull_requests.sunday} />
+    <.daily_changelog day={@pull_requests.sunday} />
   </div>
 
   <div :for={day <- @pull_requests.this_week}>
-    <.daily_pr_summary day={day} />
+    <.daily_changelog day={day} />
   </div>
 
   <p>Have a nice day! ✌️</p>

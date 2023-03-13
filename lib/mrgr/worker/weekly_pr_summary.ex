@@ -8,7 +8,7 @@ defmodule Mrgr.Worker.WeeklyPRSummary do
   def perform(%Oban.Job{args: %{"user_id" => id}}) do
     user = Mrgr.User.find_with_current_installation(id)
 
-    Mrgr.User.send_pr_summary(user)
+    Mrgr.User.send_changelog(user)
 
     :ok
   end
@@ -17,7 +17,7 @@ defmodule Mrgr.Worker.WeeklyPRSummary do
   def perform(%Oban.Job{args: %{"job" => "weekly"}}) do
     schedule_next_job()
 
-    users = Mrgr.User.wanting_pr_summary()
+    users = Mrgr.User.wanting_changelog()
 
     Enum.each(users, &enqueue_job_for_user/1)
 

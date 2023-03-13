@@ -20,7 +20,7 @@ defmodule Mrgr.Schema.User do
     field(:notification_email, :string)
     field(:phone, :string)
     field(:refresh_token, :string)
-    field(:send_weekly_summary_email, :boolean)
+    field(:send_weekly_changelog_email, :boolean)
     field(:token, :string)
     field(:token_expires_at, :utc_datetime)
     field(:token_updated_at, :utc_datetime)
@@ -153,9 +153,9 @@ defmodule Mrgr.Schema.User do
     |> validate_required(:notification_email)
   end
 
-  def weekly_summary_changeset(schema, params) do
+  def weekly_changelog_changeset(schema, params) do
     schema
-    |> cast(params, [:send_weekly_summary_email])
+    |> cast(params, [:send_weekly_changelog_email])
   end
 
   def image(%{avatar_url: url}) when is_bitstring(url), do: url

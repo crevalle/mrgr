@@ -44,7 +44,7 @@
                   <.l phx-click="edit">Edit</.l>
                 </p>
                 <p :if={is_nil(@current_user.notification_email)} class="text-red-800 text-sm">
-                  * Required for HIF alerts and weekly summary emails.
+                  * Required for HIF alerts and weekly changelog emails.
                 </p>
               </div>
             <% end %>
@@ -52,11 +52,11 @@
               High Impact File Alerts and notification emails will go to this address
             </p>
           </div>
-          <div class="font-semibold">Send Weekly PR Summary Email</div>
+          <div class="font-semibold">Send Weekly Changelog Email</div>
           <div class="col-span-2 flex flex-col">
-            <.form :let={f} for={%{}} as={:user} phx-change="update-weekly-summary-preference">
-              <%= checkbox(f, :send_weekly_summary_email,
-                value: @current_user.send_weekly_summary_email,
+            <.form :let={f} for={%{}} as={:user} phx-change="update-weekly-changelog-preference">
+              <%= checkbox(f, :send_weekly_changelog_email,
+                value: @current_user.send_weekly_changelog_email,
                 class: "checkbox"
               ) %>
             </.form>

@@ -17,7 +17,7 @@ defmodule MrgrWeb.Components.Email do
     """
   end
 
-  def daily_pr_summary(assigns) do
+  def daily_changelog(assigns) do
     ~H"""
     <h3><%= Calendar.strftime(@day.date, "%A %-m/%-d") %></h3>
     <.pr_list pull_requests={@day.pull_requests} />
