@@ -6,13 +6,14 @@ defmodule MrgrWeb.AccountLive do
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
-      user = Mrgr.User.find_full(socket.assigns.current_user.id)
+      installations = Mrgr.Installation.find_for_account_page(socket.assigns.current_user.id)
 
-      subscribe(user)
+      subscribe(socket.assigns.current_user)
 
       socket
       |> put_title("Your Account")
-      |> assign(:current_user, user)
+      |> assign(:installations, installations)
+      |> assign(:selected_installation, nil)
       |> ok()
     else
       ok(socket)
@@ -20,12 +21,56 @@ defmodule MrgrWeb.AccountLive do
   end
 
   def handle_event("switch-installation", %{"id" => id}, socket) do
-    i = Mrgr.List.find(socket.assigns.current_user.installations, id)
+    i = Mrgr.List.find(socket.assigns.installations, id)
     user = Mrgr.User.set_current_installation(socket.assigns.current_user, i)
 
     socket
     |> assign(:current_user, user)
     |> noreply()
+  end
+
+  def handle_event("show-detail", %{"id" => id}, socket) do
+    installation = Mrgr.List.find(socket.assigns.installations, id)
+
+    socket
+    |> assign(:selected_installation, installation)
+    |> noreply()
+  end
+
+  def handle_event("close-detail", _params, socket) do
+    socket
+    |> assign(:selected_installation, nil)
+    |> noreply()
+  end
+
+  def handle_event("invite-users", %{"users" => %{"emails" => emails}}, socket) do
+    emails
+    |> format_raw_email_input()
+    |> Mrgr.User.invite_by_email(socket.assigns.selected_installation)
+
+    socket
+    |> Flash.put(:info, "Invitations sent!")
+    |> assign(:selected_installation, nil)
+    |> noreply()
+  end
+
+  defp format_raw_email_input(string) do
+    string
+    |> String.replace("\r\n", ",")
+    |> String.replace("\n", ",")
+    |> String.replace(" ", ",")
+    |> String.split(",")
+    |> Enum.reject(&is_nil/1)
+    |> Enum.filter(&looks_like_an_email/1)
+  end
+
+  def looks_like_an_email(string) do
+    with true <- String.contains?(string, "@"),
+         true <- String.contains?(string, ".") do
+      true
+    else
+      false -> false
+    end
   end
 
   def format_subscription_state(%{subscription_state: "trial"}), do: "Trial"

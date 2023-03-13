@@ -17,10 +17,12 @@
               </th>
               <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
               </th>
+              <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              </th>
             </tr>
           </thead>
           <tbody>
-            <%= for installation <- @current_user.installations do %>
+            <%= for installation <- @installations do %>
               <.tr>
                 <.td>
                   <%= account_name(installation) %>
@@ -44,12 +46,17 @@
                 </.td>
                 <.td>
                   <%= if @current_user.current_installation_id == installation.id do %>
-                    currently active! ✌️
+                    currently viewing ✌️
                   <% else %>
                     <.l phx-click={JS.push("switch-installation", value: %{id: installation.id})}>
                       Switch to this Organization
                     </.l>
                   <% end %>
+                </.td>
+                <.td>
+                  <.l phx-click={JS.push("show-detail", value: %{id: installation.id})}>
+                    View/Invite Team Members
+                  </.l>
                 </.td>
               </.tr>
             <% end %>
@@ -61,10 +68,37 @@
               </.td>
               <.td></.td>
               <.td></.td>
+              <.td></.td>
             </.tr>
           </tbody>
         </table>
       </div>
+    </div>
+    <div :if={@selected_installation} class="detail-pane">
+      <.detail_column>
+        <:title>
+          Users for <%= account_name(@selected_installation) %>
+        </:title>
+        <ul>
+          <%= for user <- @selected_installation.users do %>
+            <li><.avatar member={user} /></li>
+          <% end %>
+        </ul>
+
+        <hr />
+
+        <h5>Invite Users</h5>
+        <p class="text-gray-500 text-sm">
+          Add your team to Mrgr! Enter their email addresses here and we'll send them an invite.  Invited users must be members of the <%= account_name(
+            @selected_installation
+          ) %> organization on Github.
+        </p>
+
+        <.form :let={f} for={%{}} as={:users} phx-submit="invite-users">
+          <.textarea form={f} field={:emails} opts={[placeholder: "One email per line"]} />
+          <.button class="mt-2">Invite!</.button>
+        </.form>
+      </.detail_column>
     </div>
   </div>
 </div>

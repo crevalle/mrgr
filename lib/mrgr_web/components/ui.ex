@@ -47,6 +47,29 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  attr :close, :string, default: "close-detail"
+
+  slot :title, required: true
+  slot :inner_block, required: true
+
+  def detail_column(assigns) do
+    ~H"""
+    <div class="bg-white rounded-md">
+      <div class="flex flex-col space-y-4">
+        <div class="flex justify-between items-center">
+          <.h3>
+            <%= render_slot(@title) %>
+          </.h3>
+          <.link phx-click={@close}>
+            <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
+          </.link>
+        </div>
+        <%= render_slot(@inner_block) %>
+      </div>
+    </div>
+    """
+  end
+
   def nav_bar(assigns) do
     ~H"""
     <div class="ml-4 flex items-center space-x-6">
@@ -683,7 +706,7 @@ defmodule MrgrWeb.Components.UI do
     ~H"""
     <div class="flex items-center">
       <%= img_tag(@member.avatar_url, class: "rounded-xl h-5 w-5 mr-1") %>
-      <%= @member.login %>
+      <%= login(@member) %>
     </div>
     """
   end

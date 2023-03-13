@@ -1,7 +1,20 @@
 defmodule Mrgr.Email do
   use Phoenix.VerifiedRoutes, endpoint: MrgrWeb.Endpoint, router: MrgrWeb.Router
 
+  import MrgrWeb.Formatter, only: [account_name: 1]
   import Swoosh.Email
+
+  def invite_user_to_installation(recipient, installation) do
+    assigns = %{
+      installation: installation
+    }
+
+    new()
+    |> from({"Mrgr", "noreply@mrgr.io"})
+    |> to(recipient)
+    |> subject("You've been invited to join #{account_name(installation)} on Mrgr")
+    |> render_with_layout(MrgrWeb.Email.Renderer.invite_user_to_installation(assigns))
+  end
 
   def hif_alert(alerts, recipient, pull_request_id, repository) do
     url = url(MrgrWeb.Endpoint, ~p"/pull-requests/hifs/#{pull_request_id}/files-changed")

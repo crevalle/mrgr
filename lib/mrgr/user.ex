@@ -97,6 +97,15 @@ defmodule Mrgr.User do
     end
   end
 
+  def invite_by_email(emails, installation) when is_list(emails) do
+    Enum.map(emails, &invite_by_email(&1, installation))
+  end
+
+  def invite_by_email(email, installation) do
+    mail = Mrgr.Email.invite_user_to_installation(email, installation)
+    Mrgr.Mailer.deliver(mail)
+  end
+
   def find_member(%Schema{node_id: node_id}) do
     Mrgr.Member.find_by_node_id(node_id)
   end

@@ -15,6 +15,14 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.one()
   end
 
+  def find_for_account_page(user_id) do
+    Schema
+    |> Query.for_user(user_id)
+    |> Query.with_account()
+    |> Query.with_users()
+    |> Mrgr.Repo.all()
+  end
+
   def all do
     Schema
     |> Query.all()
@@ -499,6 +507,7 @@ defmodule Mrgr.Installation do
   def for_user(user) do
     Schema
     |> Query.for_user(user.id)
+    |> Query.with_account()
     |> Mrgr.Repo.all()
   end
 
@@ -582,9 +591,7 @@ defmodule Mrgr.Installation do
     def for_user(query, user_id) do
       from(q in query,
         join: u in assoc(q, :users),
-        join: a in assoc(q, :account),
-        where: u.id == ^user_id,
-        preload: [account: a]
+        where: u.id == ^user_id
       )
     end
   end

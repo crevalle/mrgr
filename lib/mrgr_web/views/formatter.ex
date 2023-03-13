@@ -10,6 +10,9 @@ defmodule MrgrWeb.Formatter do
   def account_name(%{account: %{login: login}}), do: login
   def account_name(_), do: ""
 
+  def login(%{login: login}), do: login
+  def login(%{nickname: nickname}), do: nickname
+
   def shorten_sha(sha) do
     String.slice(sha, 0..6)
   end

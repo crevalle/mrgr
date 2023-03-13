@@ -102,6 +102,10 @@ h5 {
   cursor: pointer;
 }
 
+.detail-pane {
+  @apply sticky w-full top-6 overflow-visible p-3 bg-white shadow rounded-lg;
+}
+
 #detail-pane {
   @apply sticky top-6 overflow-visible p-3 bg-white shadow rounded-lg;
 
