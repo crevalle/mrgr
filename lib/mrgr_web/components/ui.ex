@@ -937,6 +937,10 @@ defmodule MrgrWeb.Components.UI do
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{name}/#{name}-plain.svg"
   end
 
+  defp language_icon_url("shell") do
+    "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/bash/bash-original.svg"
+  end
+
   defp language_icon_url(name) do
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{name}/#{name}-original.svg"
   end
