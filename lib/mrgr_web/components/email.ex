@@ -8,8 +8,9 @@ defmodule MrgrWeb.Components.Email do
     <% else %>
       <ul>
         <li :for={pr <- @pull_requests}>
+          [<%= pr.repository.name %>]
           <a href={Mrgr.Schema.PullRequest.external_pull_request_url(pr)}><%= pr.title %></a>
-          [<%= Mrgr.Schema.PullRequest.author_name(pr) %>]
+          (<%= Mrgr.Schema.PullRequest.author_name(pr) %>)
           <.hif_list hifs={pr.high_impact_file_rules} />
         </li>
       </ul>
@@ -76,6 +77,19 @@ defmodule MrgrWeb.Components.Email do
 
     ~H"""
     <strong><%= @yep %></strong>
+    """
+  end
+
+  def update_email_preferences_link(assigns) do
+    ~H"""
+    <div style="padding-top: 2rem;">
+      <p style=" font-weight: 400; font-size: 0.75rem; line-height: 1rem;">
+        <a href="https://app.mrgr.io/profile" style="rgb(15 118 110 / var(--tw-text-opacity));">
+          Click here
+        </a>
+        to update your email preferences.
+      </p>
+    </div>
     """
   end
 end
