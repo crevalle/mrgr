@@ -1,5 +1,5 @@
 <div>
-  <h1>Weekly Merged PR Summary for <%= @recipient.current_installation.account.login %></h1>
+  <h1>Weekly Changelog for <%= @recipient.current_installation.account.login %></h1>
   <p>Hello <%= @recipient.name %>! 👋</p>
 
   <p>
@@ -34,7 +34,10 @@
     <.daily_changelog day={day} />
   </div>
 
-  <p>Have a nice day! ✌️</p>
+  <p>
+    Your full changelog is available
+    <.l href={~p"/changelog"}>here</.l>.  Have a nice day! ✌️
+  </p>
 
   <p>- The Mrgr Team</p>
 </div>

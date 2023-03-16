@@ -44,7 +44,7 @@ defmodule Mrgr.Email do
     new()
     |> from({"Mrgr", "noreply@mrgr.io"})
     |> to(recipient)
-    |> subject("Weekly Merged Pull Request Summary - #{changelog.total}")
+    |> subject("Weekly Changelog - #{changelog.total} PRs merged")
     |> render("weekly_changelog", assigns)
   end
 

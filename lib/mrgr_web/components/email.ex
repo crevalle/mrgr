@@ -1,6 +1,12 @@
 defmodule MrgrWeb.Components.Email do
   use MrgrWeb, :component
 
+  def l(assigns) do
+    ~H"""
+    <a href={@href} style="color: #2C746E;"><%= render_slot(@inner_block) %></a>
+    """
+  end
+
   def pr_list(assigns) do
     ~H"""
     <%= if @pull_requests == [] do %>
