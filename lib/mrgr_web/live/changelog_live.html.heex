@@ -1,0 +1,27 @@
+<div class="flex flex-col space-y-8 w-9/12">
+  <.heading title="Changelog">
+    <:description>
+      All the merged PRs for <%= account_name(@current_user) %>
+    </:description>
+  </.heading>
+  <div class="flex flex-col">
+    <div class="flex items-center justify-between p-2">
+      <span class="text-xs font-medium uppercase text-gray-500">
+        Week
+      </span>
+      <span class="text-xs font-medium uppercase text-gray-500">
+        total
+      </span>
+    </div>
+    <div id="changelog-list-body" class="flex flex-col space-y-6 divide-y" phx-update="stream">
+      <.weekly_changelog
+        :for={{dom_id, {date, prs}} <- @streams.pull_requests}
+        id={dom_id}
+        date={date}
+        prs={prs}
+      />
+    </div>
+
+    <div id="infinite-scroll-marker" phx-hook="InfiniteScroll" data-page={@page}></div>
+  </div>
+</div>

@@ -28,7 +28,7 @@ defmodule MrgrWeb.Components.UI do
 
   def l(assigns) do
     default_colors = "text-teal-700 hover:text-teal-500"
-    default_class = "#{Map.get(assigns, :colors, default_colors)} text-sm"
+    default_class = "#{Map.get(assigns, :colors, default_colors)}"
     class = Map.get(assigns, :class, default_class)
     href = Map.get(assigns, :href, "#")
 
@@ -81,15 +81,12 @@ defmodule MrgrWeb.Components.UI do
         ) %>
       </.nav_item>
 
-      <.nav_item
-        route={Routes.high_impact_file_path(MrgrWeb.Endpoint, :index)}
-        icon="megaphone"
-        label="High Impact Files"
-        .
-      />
+      <.nav_item route={~p"/high-impact-files"} icon="megaphone" label="High Impact Files" . />
+
+      <.nav_item route={~p"/changelog"} icon="book-open" label="Changelog" . />
 
       <.l
-        href={Routes.repository_list_path(MrgrWeb.Endpoint, :index)}
+        href={~p"/repositories"}
         class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center space-x-2 px-2 py-2 text-sm font-medium rounded-md"
       >
         <%= img_tag("/images/repository-32.png", class: "opacity-40 h-6 w-6") %>

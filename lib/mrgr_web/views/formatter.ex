@@ -38,6 +38,10 @@ defmodule MrgrWeb.Formatter do
     Calendar.strftime(timestamp, format)
   end
 
+  def format_week(date) do
+    Calendar.strftime(date, "%b %-d, %Y")
+  end
+
   def ago(nil), do: nil
 
   def ago(timestamp) do

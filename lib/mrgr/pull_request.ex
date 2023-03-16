@@ -820,6 +820,16 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
+  def closed_between(user, starting_date, ending_date) do
+    Schema
+    |> Query.for_installation(user.current_installation_id)
+    |> Query.merged()
+    |> Query.merged_since(starting_date)
+    |> Query.merged_before(ending_date)
+    |> Query.with_hifs_for_user(user)
+    |> Mrgr.Repo.all()
+  end
+
   def open_for_installation(installation_id) do
     Schema
     |> Query.for_installation(installation_id)
