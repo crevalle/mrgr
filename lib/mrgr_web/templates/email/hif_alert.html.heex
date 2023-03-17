@@ -14,9 +14,11 @@
     <% end %>
   </ul>
 
-  <p><a href={@url} target="_blank">Click Here</a> to check it out.</p>
+  <p>
+    <.l href={~p"/pull-requests/hifs/#{@pull_request_id}/files-changed"}>Check it out</.l>
+  </p>
 
-  <p>Have a nice day! ✌️</p>
+  <p>Have a nice day ✌️</p>
 
   <p>- The Mrgr Team</p>
 </div>

@@ -1,11 +1,18 @@
 defmodule MrgrWeb.Components.Email do
   use MrgrWeb, :component
+  use Phoenix.VerifiedRoutes, endpoint: MrgrWeb.Endpoint, router: MrgrWeb.Router
 
   def l(assigns) do
+    url = Phoenix.VerifiedRoutes.unverified_url(MrgrWeb.Endpoint, assigns.href)
+    style = "color: #2C746E;"
+
+    assigns =
+      assigns
+      |> assign(:url, url)
+      |> assign(:style, style)
+
     ~H"""
-    <a href={Phoenix.VerifiedRoutes.unverified_url(MrgrWeb.Endpoint, @href)} style="color: #2C746E;">
-      <%= render_slot(@inner_block) %>
-    </a>
+    <a href={@url} style={@style}><%= render_slot(@inner_block) %></a>
     """
   end
 
@@ -91,11 +98,8 @@ defmodule MrgrWeb.Components.Email do
   def update_email_preferences_link(assigns) do
     ~H"""
     <div style="padding-top: 2rem;">
-      <p style=" font-weight: 400; font-size: 0.75rem; line-height: 1rem;">
-        <a href="https://app.mrgr.io/profile" style="rgb(15 118 110 / var(--tw-text-opacity));">
-          Click here
-        </a>
-        to update your email preferences.
+      <p style="font-weight: 400; font-size: 0.75rem; line-height: 1rem;">
+        <.l href={~p"/profile"}>Update your email preferences</.l>
       </p>
     </div>
     """

@@ -1,8 +1,8 @@
 defmodule Mrgr.Email do
-  use Phoenix.VerifiedRoutes, endpoint: MrgrWeb.Endpoint, router: MrgrWeb.Router
-
   import MrgrWeb.Formatter, only: [account_name: 1]
   import Swoosh.Email
+
+  @from {"Mrgr", "noreply@mrgr.io"}
 
   def invite_user_to_installation(recipient, installation) do
     assigns = %{
@@ -10,23 +10,21 @@ defmodule Mrgr.Email do
     }
 
     new()
-    |> from({"Mrgr", "noreply@mrgr.io"})
+    |> from(@from)
     |> to(recipient)
     |> subject("You've been invited to join #{account_name(installation)} on Mrgr")
     |> render_with_layout(MrgrWeb.Email.Renderer.invite_user_to_installation(assigns))
   end
 
   def hif_alert(alerts, recipient, pull_request_id, repository) do
-    url = url(MrgrWeb.Endpoint, ~p"/pull-requests/hifs/#{pull_request_id}/files-changed")
-
     assigns = %{
       hif_alerts: alerts,
       repository_name: repository.name,
-      url: url
+      pull_request_id: pull_request_id
     }
 
     new()
-    |> from({"Mrgr", "noreply@mrgr.io"})
+    |> from(@from)
     |> to(recipient)
     |> subject("File Change Alert in #{assigns.repository_name}")
     |> render_with_layout(MrgrWeb.Email.Renderer.hif_alert(assigns))
@@ -42,7 +40,7 @@ defmodule Mrgr.Email do
     }
 
     new()
-    |> from({"Mrgr", "noreply@mrgr.io"})
+    |> from(@from)
     |> to(recipient)
     |> subject("Weekly Changelog - #{changelog.total} PRs merged")
     |> render("weekly_changelog", assigns)
