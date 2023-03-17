@@ -3,7 +3,9 @@ defmodule MrgrWeb.Components.Email do
 
   def l(assigns) do
     ~H"""
-    <a href={@href} style="color: #2C746E;"><%= render_slot(@inner_block) %></a>
+    <a href={Phoenix.VerifiedRoutes.unverified_url(MrgrWeb.Endpoint, @href)} style="color: #2C746E;">
+      <%= render_slot(@inner_block) %>
+    </a>
     """
   end
 
