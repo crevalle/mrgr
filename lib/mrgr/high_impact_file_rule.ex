@@ -105,10 +105,10 @@ defmodule Mrgr.HighImpactFileRule do
     Enum.map(rules, fn rule ->
       %{
         filenames: matching_filenames(rule, pull_request),
-        name: rule.name
+        rule: rule
       }
     end)
-    |> Mrgr.Email.hif_alert(user, pull_request.id, pull_request.repository)
+    |> Mrgr.Email.hif_alert(user, pull_request, pull_request.repository)
     |> Mrgr.Mailer.deliver()
   end
 

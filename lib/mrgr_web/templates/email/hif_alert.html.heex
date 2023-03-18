@@ -3,20 +3,19 @@
 
   <p>
     A File Change Alert in the <strong><%= @repository_name %></strong>
-    repository was triggered.  Here are the affected files:
+    repository was triggered in
+    <.l href={~p"/pull-requests/hifs/#{@pull_request.id}/files-changed"}>
+      <%= @pull_request.title %>
+    </.l>, opened by @<%= @pull_request.author.login %>.  Here are the affected files:
   </p>
 
   <ul>
-    <%= for hif_alert <- @hif_alerts, filename <- hif_alert.filenames do %>
+    <%= for alert <- @alerts, filename <- alert.filenames do %>
       <li>
-        <strong>[<%= hif_alert.name %>]</strong> <%= filename %>
+        <.hif_badge hif={alert.rule} /> <%= filename %>
       </li>
     <% end %>
   </ul>
-
-  <p>
-    <.l href={~p"/pull-requests/hifs/#{@pull_request_id}/files-changed"}>Check it out</.l>
-  </p>
 
   <p>Have a nice day ✌️</p>
 

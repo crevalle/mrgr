@@ -16,11 +16,11 @@ defmodule Mrgr.Email do
     |> render_with_layout(MrgrWeb.Email.Renderer.invite_user_to_installation(assigns))
   end
 
-  def hif_alert(alerts, recipient, pull_request_id, repository) do
+  def hif_alert(alerts, recipient, pull_request, repository) do
     assigns = %{
-      hif_alerts: alerts,
+      alerts: alerts,
       repository_name: repository.name,
-      pull_request_id: pull_request_id
+      pull_request: pull_request
     }
 
     new()

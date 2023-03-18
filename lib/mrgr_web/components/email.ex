@@ -66,9 +66,7 @@ defmodule MrgrWeb.Components.Email do
     assigns = assign(assigns, :styles, styles)
 
     ~H"""
-    <span style={@styles}>
-      <%= @hif.name %>
-    </span>
+    <span style={@styles}><%= @hif.name %></span>
     """
   end
 
