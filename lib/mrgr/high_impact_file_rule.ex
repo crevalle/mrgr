@@ -92,6 +92,8 @@ defmodule Mrgr.HighImpactFileRule do
     |> Enum.any?()
   end
 
+  def send_alert([], _pull_request), do: nil
+
   def send_alert(rules, pull_request) when is_list(rules) do
     # each user gets one email per pull request of all applicable rules
     rules
