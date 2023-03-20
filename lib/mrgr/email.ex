@@ -68,7 +68,6 @@ defmodule Mrgr.Email do
         Enum.reduce(pull_requests, build_bucket(), fn pr, acc ->
           acc
           |> increment_total()
-          |> maybe_put_high_impact(pr)
           |> put_pr_in_date_bucket(pr)
         end)
 
@@ -80,7 +79,6 @@ defmodule Mrgr.Email do
     def build_bucket do
       basic = %{
         total: 0,
-        high_impact: [],
         now: DateTime.now!("America/Los_Angeles") |> DateTime.to_date()
       }
 
@@ -129,17 +127,6 @@ defmodule Mrgr.Email do
       end)
     end
 
-    def maybe_put_high_impact(bucket, pr) do
-      case high_impact?(pr) do
-        true ->
-          hi_prs = [pr | bucket.high_impact]
-          %{bucket | high_impact: hi_prs}
-
-        false ->
-          bucket
-      end
-    end
-
     def put_pr_in_date_bucket(bucket, pr) do
       key =
         pr.merged_at
@@ -158,10 +145,6 @@ defmodule Mrgr.Email do
     defp key_from_offset(bucket, offset) do
       # offset should be negative
       Date.add(bucket.now, offset)
-    end
-
-    defp high_impact?(pr) do
-      Enum.any?(pr.high_impact_file_rules)
     end
   end
 end

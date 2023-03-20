@@ -9,15 +9,6 @@
     last week.  Here's the full breakdown:
   </p>
 
-  <div>
-    <h3>High Impact PRs</h3>
-    <p>These pull requests contained a change to a High Impact file.</p>
-
-    <.pr_list pull_requests={@pull_requests.high_impact} />
-  </div>
-
-  <hr />
-
   <div :if={Enum.any?(@pull_requests.last_friday.pull_requests)}>
     <.daily_changelog day={@pull_requests.last_friday} />
   </div>
