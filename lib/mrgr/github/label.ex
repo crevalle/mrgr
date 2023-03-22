@@ -1,5 +1,6 @@
 defmodule Mrgr.Github.Label do
   use Mrgr.Schema
+  alias __MODULE__.GraphQL
 
   embedded_schema do
     field(:color, :string)
@@ -32,24 +33,30 @@ defmodule Mrgr.Github.Label do
     |> cast(params, @attrs)
   end
 
-  def from_graphql(labels) when is_list(labels) do
-    Enum.map(labels, &from_graphql/1)
-  end
-
-  def from_graphql(nil), do: []
-
-  def from_graphql(label) do
-    %{
-      "color" => label["color"],
-      "default" => label["isDefault"],
-      "description" => label["description"],
-      "name" => label["name"],
-      "node_id" => label["id"],
-      "url" => label["url"]
-    }
+  def from_graphql(nodes) when is_list(nodes) do
+    nodes
+    |> Enum.map(&GraphQL.to_params/1)
+    |> Enum.map(&new/1)
   end
 
   defmodule GraphQL do
+    def to_params(nodes) when is_list(nodes) do
+      Enum.map(nodes, &to_params/1)
+    end
+
+    def to_params(nil), do: []
+
+    def to_params(node) do
+      %{
+        "color" => node["color"],
+        "default" => node["isDefault"],
+        "description" => node["description"],
+        "name" => node["name"],
+        "node_id" => node["id"],
+        "url" => node["url"]
+      }
+    end
+
     def basic do
       """
         color

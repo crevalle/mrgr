@@ -69,8 +69,10 @@ defmodule Mrgr.Repository do
 
   def update_labels_from_graphql(repo, %{"labels" => %{"nodes" => nodes}}) do
     nodes
-    |> Enum.map(&Mrgr.Github.Label.from_graphql/1)
+    |> Enum.map(&Mrgr.Github.Label.GraphQL.to_params/1)
     |> Enum.map(&Mrgr.Label.find_or_create_for_repo(&1, repo))
+
+    repo
   end
 
   def update_labels_from_graphql(repo, _some_data), do: repo

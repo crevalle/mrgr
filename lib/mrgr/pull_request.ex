@@ -57,7 +57,6 @@ defmodule Mrgr.PullRequest do
     # add the labels
     data["labels"]["nodes"]
     |> Mrgr.Github.Label.from_graphql()
-    |> Enum.map(&Mrgr.Github.Label.new/1)
     |> Enum.map(fn label -> do_add_label(pull_request, label, data["installation_id"]) end)
 
     # create the comments
@@ -488,10 +487,7 @@ defmodule Mrgr.PullRequest do
 
     translated = Mrgr.Github.PullRequest.GraphQL.to_params(node)
 
-    labels =
-      node["labels"]["nodes"]
-      |> Mrgr.Github.Label.from_graphql()
-      |> Enum.map(&Mrgr.Github.Label.new/1)
+    labels = Mrgr.Github.Label.from_graphql(node["labels"]["nodes"])
 
     pull_request
     |> update_labels_from_sync(labels)
