@@ -1,7 +1,10 @@
 defmodule Mrgr.Schema.PRTab do
   use Mrgr.Schema
 
+  @draft_statuses ["open", "draft", "both"]
+
   schema "pr_tabs" do
+    field(:draft_status, :string, default: "open")
     field(:title, :string)
     field(:permalink, :string)
 
@@ -44,6 +47,12 @@ defmodule Mrgr.Schema.PRTab do
     |> cast(params, [:title])
     |> set_default_title()
     |> set_permalink()
+  end
+
+  def draft_status_changeset(schema, params) do
+    schema
+    |> cast(params, [:draft_status])
+    |> validate_inclusion(:draft_status, @draft_statuses)
   end
 
   def set_default_title(changeset) do

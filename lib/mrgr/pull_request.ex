@@ -48,15 +48,7 @@ defmodule Mrgr.PullRequest do
     end
   end
 
-  def create_for_onboarding(data, installation_id) do
-    files_changed = Mrgr.Github.PullRequest.filepaths(data)
-    commits = Mrgr.Github.PullRequest.commit_data(data)
-
-    data =
-      data
-      |> Map.put("files_changed", files_changed)
-      |> Map.put("commits", commits)
-
+  def create_for_onboarding(data) do
     pull_request =
       %Schema{}
       |> Schema.create_changeset(data)
@@ -66,7 +58,7 @@ defmodule Mrgr.PullRequest do
     data["labels"]["nodes"]
     |> Mrgr.Github.Label.from_graphql()
     |> Enum.map(&Mrgr.Github.Label.new/1)
-    |> Enum.map(fn label -> do_add_label(pull_request, label, installation_id) end)
+    |> Enum.map(fn label -> do_add_label(pull_request, label, data["installation_id"]) end)
 
     # create the comments
     Enum.map(data["comments"]["nodes"], fn node ->
@@ -494,21 +486,12 @@ defmodule Mrgr.PullRequest do
   def sync_github_data(pull_request) do
     %{"node" => node} = Mrgr.Github.API.fetch_light_pr_data(pull_request)
 
-    files_changed = Mrgr.Github.PullRequest.filepaths(node)
-    commits = Mrgr.Github.PullRequest.commit_data(node)
+    translated = Mrgr.Github.PullRequest.GraphQL.to_params(node)
 
     labels =
       node["labels"]["nodes"]
       |> Mrgr.Github.Label.from_graphql()
       |> Enum.map(&Mrgr.Github.Label.new/1)
-
-    translated = %{
-      files_changed: files_changed,
-      commits: commits,
-      merge_state_status: node["mergeStateStatus"],
-      mergeable: node["mergeable"],
-      title: node["title"]
-    }
 
     pull_request
     |> update_labels_from_sync(labels)
@@ -714,11 +697,11 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
   end
 
-  def nav_tab_prs(tab) do
+  def custom_tab_prs(tab) do
     Schema
     |> Query.dashboard_preloads(tab.user)
     |> Query.unsnoozed(tab.user)
-    |> Query.for_nav_tab(tab)
+    |> Query.for_custom_tab(tab)
     |> Mrgr.Repo.all()
   end
 
@@ -972,11 +955,26 @@ defmodule Mrgr.PullRequest do
       )
     end
 
-    def for_nav_tab(query, tab) do
+    def for_custom_tab(query, tab) do
       query
+      |> filter_draft_status(tab.draft_status)
       |> filter_authors(tab.authors)
       |> filter_labels(tab.labels)
       |> filter_repositories(tab.repositories)
+    end
+
+    def filter_draft_status(query, "both"), do: query
+
+    def filter_draft_status(query, "draft") do
+      from(q in query,
+        where: q.draft == true
+      )
+    end
+
+    def filter_draft_status(query, "open") do
+      from(q in query,
+        where: q.draft == false
+      )
     end
 
     def filter_authors(query, []), do: query

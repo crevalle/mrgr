@@ -29,6 +29,16 @@ defmodule Mrgr.PRTab do
     Mrgr.Repo.delete(tab)
   end
 
+  def draft_statuses do
+    [Open: "open", Draft: "draft", Both: "both"]
+  end
+
+  def update_draft_status(tab, status) do
+    tab
+    |> Schema.draft_status_changeset(%{draft_status: status})
+    |> Mrgr.Repo.update!()
+  end
+
   def toggle_author(tab, member) do
     tab
     |> author_present?(member)

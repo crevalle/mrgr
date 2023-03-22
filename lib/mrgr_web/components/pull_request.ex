@@ -388,6 +388,18 @@ defmodule MrgrWeb.Components.PullRequest do
           </div>
         </div>
       </div>
+      <!-- draft -->
+      <div class="flex items-center">
+        <.icon name="pencil-square" class="text-gray-400 mr-1 h-5 w-5" />
+
+        <.form :let={f} for={%{}} as={:tab} phx-change="update-draft-selection">
+          <%= select(f, :draft_status, @draft_statuses,
+            selected: @selected_tab.draft_status,
+            class:
+              "py-1.5 px-0 w-16 text-sm bg-transparent border-0 focus:outline-none focus:ring-0 focus:border-teal-500"
+          ) %>
+        </.form>
+      </div>
     </div>
     """
   end

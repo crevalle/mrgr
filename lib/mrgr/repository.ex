@@ -364,58 +364,23 @@ defmodule Mrgr.Repository do
 
   def parse_graphql_attrs(%{"repository" => %{"pullRequests" => %{"edges" => edges}}})
       when is_list(edges) do
-    Enum.map(edges, fn %{"node" => node} -> parse_node(node) end)
+    Enum.map(edges, fn %{"node" => node} ->
+      Mrgr.Github.PullRequest.GraphQL.heavy_pull_to_params(node)
+    end)
   end
 
   # repo no longer exists?
   def parse_graphql_attrs(_), do: []
 
-  defp parse_node(node) do
-    requested_reviewers =
-      node["reviewRequests"]["nodes"]
-      |> Enum.map(fn node -> node["requestedReviewer"] end)
-      |> Enum.map(&Mrgr.Github.User.graphql_to_attrs/1)
-
-    author_id = find_member_id(node["author"]["id"])
-
-    parsed = %{
-      "author_id" => author_id,
-      "assignees" => Mrgr.Github.User.graphql_to_attrs(node["assignees"]["nodes"]),
-      "created_at" => node["createdAt"],
-      "head" => %{
-        "node_id" => node["headRef"]["id"],
-        "ref" => node["headRef"]["name"],
-        "sha" => node["headRef"]["target"]["oid"]
-      },
-      "id" => node["databaseId"],
-      "merged_at" => node["mergedAt"],
-      "node_id" => node["id"],
-      "requested_reviewers" => requested_reviewers,
-      "status" => String.downcase(node["state"]),
-      "url" => node["permalink"],
-      "user" => %{
-        "login" => node["author"]["login"],
-        "avatar_url" => node["author"]["avatarUrl"]
-      }
-    }
-
-    Map.merge(node, parsed)
-  end
-
-  def find_member_id(nil), do: nil
-
-  def find_member_id(node_id) do
-    case Mrgr.Member.find_by_node_id(node_id) do
-      %{id: id} -> id
-      nil -> nil
-    end
-  end
-
   # will blow up if you try to do a duplicate
   def create_pull_requests_from_data(repo, data) do
     data
-    |> Enum.map(&Map.put(&1, "repository_id", repo.id))
-    |> Enum.map(&Mrgr.PullRequest.create_for_onboarding(&1, repo.installation_id))
+    |> Enum.map(fn params ->
+      params
+      |> Map.put("repository_id", repo.id)
+      |> Map.put("installation_id", repo.installation_id)
+    end)
+    |> Enum.map(&Mrgr.PullRequest.create_for_onboarding/1)
   end
 
   # expects that you've preloaded it

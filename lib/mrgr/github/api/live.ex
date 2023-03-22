@@ -33,6 +33,7 @@ defmodule Mrgr.Github.API.Live do
                 }
               }
             }
+            isDraft
             id
             number
             mergeStateStatus
@@ -177,6 +178,7 @@ defmodule Mrgr.Github.API.Live do
                 }
                 createdAt
                 databaseId
+                isDraft
                 files(first: #{@page_size}) {
                   nodes #{Mrgr.Github.PullRequest.GraphQL.files()}
                 }

@@ -34,6 +34,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       |> assign(:repos, repos)
       |> assign(:labels, labels)
       |> assign(:members, members)
+      |> assign(:draft_statuses, Mrgr.PRTab.draft_statuses())
       |> assign(:snooze_options, snooze_options)
       |> assign(:frozen_repos, frozen_repos)
       |> assign(:visible_repo_count, visible_repo_count)
@@ -195,6 +196,19 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end)
 
     socket
+    |> noreply()
+  end
+
+  def handle_event("update-draft-selection", %{"tab" => %{"draft_status" => status}}, socket) do
+    selected_tab = socket.assigns.selected_tab
+
+    updated_tab = Mrgr.PRTab.update_draft_status(selected_tab, status)
+
+    {tabs, selected} = Tabs.reload_prs(socket.assigns.tabs, updated_tab)
+
+    socket
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected)
     |> noreply()
   end
 
@@ -780,7 +794,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
 
     def fetch_pull_requests(%Mrgr.Schema.PRTab{} = tab) do
-      Mrgr.PullRequest.nav_tab_prs(tab)
+      Mrgr.PullRequest.custom_tab_prs(tab)
     end
 
     def fetch_pull_requests(_unknown_tab) do
