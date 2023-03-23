@@ -8,15 +8,6 @@ defmodule Mrgr.PullRequest do
   alias Mrgr.PullRequest.Query
   alias Mrgr.Schema.PullRequest, as: Schema
 
-  def rt_populate_solicited_reviewers(page \\ %{}) do
-    Schema
-    |> Mrgr.Repo.paginate(page)
-    |> Map.get(:entries)
-    |> Enum.map(fn pr ->
-      set_solicited_reviewers(pr, pr.requested_reviewers)
-    end)
-  end
-
   def load_authors do
     Schema
     |> Mrgr.Repo.all()
@@ -283,14 +274,6 @@ defmodule Mrgr.PullRequest do
   end
 
   defp add_solicited_reviewer(pull_request, nil), do: pull_request
-
-  defp add_solicited_reviewer(pull_request, %Mrgr.Github.User{} = user) do
-    # TODO: only used for the data migration from old requested reviewers.
-    # can delete when that's done.
-    member = Mrgr.Member.find_from_github_user(user)
-
-    add_solicited_reviewer(pull_request, member)
-  end
 
   defp add_solicited_reviewer(pull_request, %{"login" => login}) do
     member = Mrgr.Member.find_by_login(login)
