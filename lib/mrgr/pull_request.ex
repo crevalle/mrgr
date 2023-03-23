@@ -282,6 +282,8 @@ defmodule Mrgr.PullRequest do
     %{pull_request | solicited_reviewers: [], pull_request_reviewers: []}
   end
 
+  defp add_solicited_reviewer(pull_request, nil), do: pull_request
+
   defp add_solicited_reviewer(pull_request, %Mrgr.Github.User{} = user) do
     # TODO: only used for the data migration from old requested reviewers.
     # can delete when that's done.

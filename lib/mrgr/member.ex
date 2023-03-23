@@ -27,6 +27,9 @@ defmodule Mrgr.Member do
     |> Mrgr.Repo.one()
   end
 
+  # some github user structs or params have no login, i guess
+  def find_by_login(nil), do: nil
+
   def find_by_login(login) do
     Schema
     |> Query.by_login(login)
