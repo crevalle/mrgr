@@ -270,7 +270,6 @@ defmodule Mrgr.PullRequest do
       end)
 
     pull_request
-    |> broadcast(@pull_request_reviewers_updated)
   end
 
   def clear_solicited_reviewers(pull_request) do
