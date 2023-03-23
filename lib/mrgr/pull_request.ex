@@ -308,7 +308,7 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Schema.PullRequestReviewer.changeset(params)
     |> Mrgr.Repo.insert!()
 
-    %{pull_request | solicited_reviewers: [member | pull_request.solicited_reviewers]}
+    Mrgr.Repo.preload(pull_request, :solicited_reviewers, force: true)
   end
 
   def remove_solicited_reviewer(pull_request, member) do
@@ -318,9 +318,7 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
     |> Mrgr.Repo.delete()
 
-    updated_reviewers = Mrgr.List.remove(pull_request.solicited_reviewers, member)
-
-    %{pull_request | solicited_reviewers: updated_reviewers}
+    Mrgr.Repo.preload(pull_request, :solicited_reviewers, force: true)
   end
 
   def tagged?(pull_request, user) do
