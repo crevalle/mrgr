@@ -8,9 +8,10 @@ defmodule Mrgr.PullRequest do
   alias Mrgr.PullRequest.Query
   alias Mrgr.Schema.PullRequest, as: Schema
 
-  def rt_populate_solicited_reviewers do
+  def rt_populate_solicited_reviewers(page \\ %{}) do
     Schema
-    |> Mrgr.Repo.all()
+    |> Mrgr.Repo.paginate(page)
+    |> Map.get(:entries)
     |> Enum.map(fn pr ->
       set_solicited_reviewers(pr, pr.requested_reviewers)
     end)
@@ -261,7 +262,7 @@ defmodule Mrgr.PullRequest do
     end
   end
 
-  defp set_solicited_reviewers(pull_request, members) when is_list(members) do
+  def set_solicited_reviewers(pull_request, members) when is_list(members) do
     pull_request = clear_solicited_reviewers(pull_request)
 
     pull_request =
