@@ -46,6 +46,9 @@ defmodule Mrgr.Schema.Member do
     # TODO: _active_ memberships, where a user leaves the company but still has records of approvals
     has_many(:memberships, Mrgr.Schema.Membership)
     has_many(:installations, through: [:memberships, :installation])
+
+    has_many(:pull_request_reviewers, Mrgr.Schema.PullRequestReviewer)
+    has_many(:pull_request_reviews, through: [:pull_request_reviewers, :pull_request])
   end
 
   @allowed ~w[

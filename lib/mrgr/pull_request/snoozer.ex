@@ -60,16 +60,23 @@ defmodule Mrgr.PullRequest.Snoozer do
     %{pull_request | user_snoozed_pull_requests: [uspr]}
   end
 
-  @spec unsnooze_for_user(Mrgr.Schema.PullRequest.t(), Mrgr.Schema.User.t()) ::
+  @spec unsnooze_for_user(Mrgr.Schema.PullRequest.t(), Mrgr.Schema.User.t() | nil) ::
           Mrgr.Schema.PullRequest.t()
+  def unsnooze_for_user(pull_request, nil), do: pull_request
+
   def unsnooze_for_user(pull_request, user) do
-    snoozed = find_uspr(pull_request, user)
+    case find_uspr(pull_request, user) do
+      nil ->
+        pull_request
 
-    Mrgr.Repo.delete(snoozed)
+      snoozed ->
+        Mrgr.Repo.delete(snoozed)
 
-    Mrgr.PullRequest.broadcast(pull_request, @pull_request_unsnoozed)
+        # nb: this will broadcast to other people
+        Mrgr.PullRequest.broadcast(pull_request, @pull_request_unsnoozed)
 
-    %{pull_request | user_snoozed_pull_requests: []}
+        %{pull_request | user_snoozed_pull_requests: []}
+    end
   end
 
   @spec unsnooze(Mrgr.Schema.PullRequest.t()) :: Mrgr.Schema.PullRequest.t()

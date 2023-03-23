@@ -8,6 +8,14 @@ defmodule Mrgr.PullRequest do
   alias Mrgr.PullRequest.Query
   alias Mrgr.Schema.PullRequest, as: Schema
 
+  def rt_populate_solicited_reviewers do
+    Schema
+    |> Mrgr.Repo.all()
+    |> Enum.map(fn pr ->
+      set_solicited_reviewers(pr, pr.requested_reviewers)
+    end)
+  end
+
   def load_authors do
     Schema
     |> Mrgr.Repo.all()
@@ -37,6 +45,7 @@ defmodule Mrgr.PullRequest do
         pull_request
         |> preload_installation()
         |> sync_repo_if_first_pr()
+        |> set_solicited_reviewers(params["requested_reviewers"])
         |> sync_github_data()
         |> reassociate_high_impact_file_rules()
         |> notify_hif_alert_consumers()
@@ -53,6 +62,7 @@ defmodule Mrgr.PullRequest do
       %Schema{}
       |> Schema.create_changeset(data)
       |> Mrgr.Repo.insert!()
+      |> set_solicited_reviewers(data["requested_reviewers"])
 
     # add the labels
     data["labels"]["nodes"]
@@ -70,7 +80,7 @@ defmodule Mrgr.PullRequest do
   @spec reopen(map()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def reopen(payload) do
-    with {:ok, pull_request} <- find_from_payload(payload),
+    with {:ok, pull_request} <- Mrgr.PullRequest.Webhook.find_pull_request(payload),
          cs <- Schema.create_changeset(pull_request, payload_to_params(payload)),
          {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
       updated_pull_request
@@ -90,7 +100,7 @@ defmodule Mrgr.PullRequest do
   @spec edit(map()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def edit(payload) do
-    with {:ok, pull_request} <- find_from_payload(payload),
+    with {:ok, pull_request} <- Mrgr.PullRequest.Webhook.find_pull_request(payload),
          cs <- Schema.edit_changeset(pull_request, payload),
          {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
       updated_pull_request
@@ -106,7 +116,7 @@ defmodule Mrgr.PullRequest do
   @spec synchronize(map()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def synchronize(payload) do
-    with {:ok, pull_request} <- find_from_payload(payload) do
+    with {:ok, pull_request} <- Mrgr.PullRequest.Webhook.find_pull_request(payload) do
       pull_request
       |> preload_installation()
       |> sync_github_data()
@@ -121,7 +131,7 @@ defmodule Mrgr.PullRequest do
   @spec close(map()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def close(%{"pull_request" => params} = payload) do
-    with {:ok, pull_request} <- find_from_payload(payload),
+    with {:ok, pull_request} <- Mrgr.PullRequest.Webhook.find_pull_request(payload),
          cs <- Schema.close_changeset(pull_request, params),
          {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
       updated_pull_request
@@ -193,51 +203,42 @@ defmodule Mrgr.PullRequest do
     end
   end
 
-  @spec toggle_reviewer(Schema.t(), Mrgr.Github.User.t() | Mrgr.Schema.Member.t()) ::
+  @spec toggle_reviewer(Schema.t(), Mrgr.Schema.Member.t()) ::
           {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
   def toggle_reviewer(pull_request, %Mrgr.Schema.Member{} = member) do
-    toggle_reviewer(pull_request, Mrgr.Github.User.from_member(member))
-  end
-
-  def toggle_reviewer(pull_request, gh_user) do
     # for a smoother UX, we update locally and broadcast the update before
     # we push to GH, which we optimistically assume will work.  This lets me
     # avoid having to do a whole spinner thing on the UI.
     #
     # our add_reviewer and remove_reviewer webhooks are no-ops if the user has
     # already been added/removed.
-    case Mrgr.Schema.PullRequest.reviewer_requested?(pull_request, gh_user) do
+    case Mrgr.Schema.PullRequest.reviewer_requested?(pull_request, member) do
       true ->
-        remove_reviewer(pull_request, gh_user)
-        Mrgr.Github.API.remove_review_request(pull_request, gh_user.login)
+        pull_request = remove_reviewer(pull_request, member)
+        Mrgr.Github.API.remove_review_request(pull_request, member.login)
+
+        pull_request
 
       false ->
-        add_reviewer(pull_request, gh_user)
-        Mrgr.Github.API.add_review_request(pull_request, gh_user.login)
+        pull_request = add_reviewer(pull_request, member)
+        Mrgr.Github.API.add_review_request(pull_request, member.login)
+
+        pull_request
     end
   end
 
-  @spec add_reviewer(Schema.t(), Mrgr.Github.User.t()) ::
+  @spec add_reviewer(Schema.t(), Mrgr.Schema.Member.t()) ::
           {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
-  def add_reviewer(pull_request, gh_user) do
-    case Mrgr.Schema.PullRequest.reviewer_requested?(pull_request, gh_user) do
+  def add_reviewer(pull_request, member) do
+    case Mrgr.Schema.PullRequest.reviewer_requested?(pull_request, member) do
       false ->
-        case set_reviewers(pull_request, [gh_user | pull_request.requested_reviewers]) do
-          {:ok, pull_request} ->
-            # we want to unsnooze only if the user has been tagged,
-            # but we don't have the concept of per-user snoozing so
-            # we can't answer the question "have i been tagged?" because we don't
-            # know who "i" is.  the app is currently built around a #single_user
-            # using it.
-            #
-            # rather than build out per-user snoozing,
-            # just blanket unsnooze whenever anyone is added to tags, which should
-            # be infrequent enough not to mess with the benefit of being snoozed.
-            {:ok, unsnooze(pull_request)}
-
-          error ->
-            error
-        end
+        pull_request
+        |> add_solicited_reviewer(member)
+        |> broadcast(@pull_request_reviewers_updated)
+        # there probably won't be a user associated with this member
+        # the idea is if you're tagged, unsnooze for you
+        |> unsnooze_for_user(Mrgr.User.find_from_member(member))
+        |> ok()
 
       true ->
         # no-op
@@ -245,34 +246,79 @@ defmodule Mrgr.PullRequest do
     end
   end
 
-  @spec remove_reviewer(Schema.t(), Mrgr.Github.User.t()) ::
+  @spec remove_reviewer(Schema.t(), Mrgr.Schema.Member.t()) ::
           {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
-  def remove_reviewer(pull_request, gh_user) do
-    case Mrgr.Schema.PullRequest.reviewer_requested?(pull_request, gh_user) do
+  def remove_reviewer(pull_request, member) do
+    case Mrgr.Schema.PullRequest.reviewer_requested?(pull_request, member) do
       true ->
-        updated_list =
-          Enum.reject(pull_request.requested_reviewers, fn r -> r.login == gh_user.login end)
-
-        set_reviewers(pull_request, updated_list)
+        pull_request
+        |> remove_solicited_reviewer(member)
+        |> broadcast(@pull_request_reviewers_updated)
+        |> ok()
 
       false ->
         {:ok, pull_request}
     end
   end
 
-  defp set_reviewers(pull_request, reviewers) do
-    pull_request
-    |> Schema.change_reviewers(reviewers)
-    |> Mrgr.Repo.update()
-    |> case do
-      {:ok, pull_request} ->
-        pull_request
-        |> broadcast(@pull_request_reviewers_updated)
-        |> ok()
+  defp set_solicited_reviewers(pull_request, members) when is_list(members) do
+    pull_request = clear_solicited_reviewers(pull_request)
 
-      error ->
-        error
-    end
+    pull_request =
+      Enum.reduce(members, pull_request, fn {member, pr} ->
+        add_solicited_reviewer(pr, member)
+      end)
+
+    pull_request
+    |> broadcast(@pull_request_reviewers_updated)
+  end
+
+  def clear_solicited_reviewers(pull_request) do
+    Mrgr.Schema.PullRequestReviewer
+    |> Query.review_requests_for_pull_request(pull_request)
+    |> Mrgr.Repo.all()
+    |> Enum.map(&Mrgr.Repo.delete/1)
+
+    %{pull_request | solicited_reviewers: [], pull_request_reviewers: []}
+  end
+
+  defp add_solicited_reviewer(pull_request, %Mrgr.Github.User{} = user) do
+    # TODO: only used for the data migration from old requested reviewers.
+    # can delete when that's done.
+    member = Mrgr.Member.find_from_github_user(user)
+
+    add_solicited_reviewer(pull_request, member)
+  end
+
+  defp add_solicited_reviewer(pull_request, %{"login" => login}) do
+    member = Mrgr.Member.find_by_login(login)
+
+    add_solicited_reviewer(pull_request, member)
+  end
+
+  defp add_solicited_reviewer(pull_request, %Mrgr.Schema.Member{} = member) do
+    params = %{
+      member_id: member.id,
+      pull_request_id: pull_request.id
+    }
+
+    %Mrgr.Schema.PullRequestReviewer{}
+    |> Mrgr.Schema.PullRequestReviewer.changeset(params)
+    |> Mrgr.Repo.insert!()
+
+    %{pull_request | solicited_reviewers: [member | pull_request.solicited_reviewers]}
+  end
+
+  def remove_solicited_reviewer(pull_request, member) do
+    Mrgr.Schema.PullRequestReviewer
+    |> Query.review_requests_for_pull_request(pull_request)
+    |> Query.review_requests_for_member(member)
+    |> Mrgr.Repo.one()
+    |> Mrgr.Repo.delete()
+
+    updated_reviewers = Mrgr.List.remove(pull_request.solicited_reviewers, member)
+
+    %{pull_request | solicited_reviewers: updated_reviewers}
   end
 
   def tagged?(pull_request, user) do
@@ -326,7 +372,7 @@ defmodule Mrgr.PullRequest do
   @spec add_pull_request_review_comment(String.t(), Mrgr.Github.Webhook.t()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def add_pull_request_review_comment(object, params) do
-    with {:ok, pull_request} <- find_from_payload(params),
+    with {:ok, pull_request} <- Mrgr.PullRequest.Webhook.find_pull_request(params),
          {:ok, comment} <-
            create_comment(object, pull_request, params["comment"]["created_at"], params) do
       # !!! we broadcast the pull_request, not the comment,
@@ -346,7 +392,7 @@ defmodule Mrgr.PullRequest do
   end
 
   def add_issue_comment(object, params) do
-    with {:ok, pull_request} <- find_from_payload(params["issue"]),
+    with {:ok, pull_request} <- Mrgr.PullRequest.Webhook.find_pull_request(params["issue"]),
          {:ok, comment} <-
            create_comment(object, pull_request, params["comment"]["created_at"], params) do
       pull_request = %{pull_request | comments: [comment | pull_request.comments]}
@@ -448,19 +494,6 @@ defmodule Mrgr.PullRequest do
   defdelegate snoozed_until(pull_request), to: Mrgr.PullRequest.Snoozer
   defdelegate unsnooze(pull_request), to: Mrgr.PullRequest.Snoozer
   defdelegate unsnooze_for_user(pull_request, user), to: Mrgr.PullRequest.Snoozer
-
-  @spec find_from_payload(Mrgr.Github.Webhook.t() | map()) ::
-          {:ok, Schema.t()} | {:error, :not_found}
-  defp find_from_payload(%{"node_id" => node_id}) do
-    case find_by_node_id(node_id) do
-      nil -> {:error, :not_found}
-      pull_request -> {:ok, pull_request}
-    end
-  end
-
-  defp find_from_payload(%{"pull_request" => params}) do
-    find_from_payload(params)
-  end
 
   def sync_repo_if_first_pr(pull_request) do
     definitely_synced = Mrgr.Repository.sync_if_first_pr(pull_request.repository)
@@ -655,11 +688,12 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
-  def find_by_node_id(id) do
+  def find_for_webhook(node_id) do
     Schema
-    |> Query.by_node_id(id)
+    |> Query.by_node_id(node_id)
     |> Query.with_installation()
     |> Query.with_comments()
+    |> Query.with_solicited_reviewers()
     |> Mrgr.Repo.one()
   end
 
@@ -738,6 +772,7 @@ defmodule Mrgr.PullRequest do
     |> Query.with_pr_reviews()
     |> Query.with_labels()
     |> Query.with_author()
+    |> Query.with_solicited_reviewers()
     |> Query.unsnoozed(user)
     |> Mrgr.Repo.all()
   end
@@ -1152,6 +1187,7 @@ defmodule Mrgr.PullRequest do
       |> with_pr_reviews()
       |> with_labels()
       |> with_author()
+      |> with_solicited_reviewers()
     end
 
     def fix_ci(query) do
@@ -1241,6 +1277,27 @@ defmodule Mrgr.PullRequest do
         where: r.installation_id == ^installation_id,
         where: q.status == "open",
         select: count(q.id)
+      )
+    end
+
+    def with_solicited_reviewers(query) do
+      from(q in query,
+        left_join: sr in assoc(q, :solicited_reviewers),
+        preload: [solicited_reviewers: sr]
+      )
+    end
+
+    def review_requests_for_pull_request(query, pull_request) do
+      from(q in query,
+        join: pr in assoc(q, :pull_request),
+        where: pr.id == ^pull_request.id
+      )
+    end
+
+    def review_requests_for_member(query, member) do
+      from(q in query,
+        join: m in assoc(q, :member),
+        where: m.id == ^member.id
       )
     end
   end

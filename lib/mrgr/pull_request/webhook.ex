@@ -29,8 +29,9 @@ defmodule Mrgr.PullRequest.Webhook do
   def add_reviewer(payload) do
     with {:ok, pull_request} <- find_pull_request(payload),
          # TODO this can be a team
-         %Mrgr.Github.User{} = gh_user <- Mrgr.Github.User.new(payload["requested_reviewer"]) do
-      Mrgr.PullRequest.add_reviewer(pull_request, gh_user)
+         %Mrgr.Github.User{} = gh_user <- Mrgr.Github.User.new(payload["requested_reviewer"]),
+         %Mrgr.Schema.Member{} = member <- Mrgr.Member.find_from_github_user(gh_user) do
+      Mrgr.PullRequest.add_reviewer(pull_request, member)
     end
   end
 
@@ -72,8 +73,9 @@ defmodule Mrgr.PullRequest.Webhook do
   @spec remove_reviewer(webhook()) :: success() | change_error() | not_found()
   def remove_reviewer(payload) do
     with {:ok, pull_request} <- find_pull_request(payload),
-         %Mrgr.Github.User{} = gh_user <- Mrgr.Github.User.new(payload["requested_reviewer"]) do
-      Mrgr.PullRequest.remove_reviewer(pull_request, gh_user)
+         %Mrgr.Github.User{} = gh_user <- Mrgr.Github.User.new(payload["requested_reviewer"]),
+         %Mrgr.Schema.Member{} = member <- Mrgr.Member.find_from_github_user(gh_user) do
+      Mrgr.PullRequest.remove_reviewer(pull_request, member)
     end
   end
 
@@ -115,14 +117,14 @@ defmodule Mrgr.PullRequest.Webhook do
   end
 
   @spec find_pull_request(webhook() | map()) :: {:ok, Schema.t()} | not_found()
-  defp find_pull_request(%{"node_id" => node_id}) do
-    case Mrgr.PullRequest.find_by_node_id(node_id) do
+  def find_pull_request(%{"node_id" => node_id}) do
+    case Mrgr.PullRequest.find_for_webhook(node_id) do
       nil -> {:error, :not_found}
       pull_request -> {:ok, pull_request}
     end
   end
 
-  defp find_pull_request(%{"pull_request" => params}) do
+  def find_pull_request(%{"pull_request" => params}) do
     find_pull_request(params)
   end
 end

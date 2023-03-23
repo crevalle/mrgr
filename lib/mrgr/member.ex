@@ -33,6 +33,8 @@ defmodule Mrgr.Member do
     |> Mrgr.Repo.one()
   end
 
+  def find_from_github_user(%{login: login}), do: find_by_login(login)
+
   def delete_all_for_installation(installation) do
     memberships =
       Mrgr.Schema.Membership

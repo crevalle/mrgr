@@ -70,7 +70,7 @@
           <.aside><.pr_approval_text pull_request={@pull_request} /></.aside>
         </span>
         <div class="flex space-x-1 items-center">
-          <.reviewers reviewers={@pull_request.requested_reviewers} current_user={@current_user} />
+          <.reviewers reviewers={@pull_request.solicited_reviewers} current_user={@current_user} />
           <.toggle_reviewer_menu pull_request={@pull_request} members={@members} />
         </div>
       </div>

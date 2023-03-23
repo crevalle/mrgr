@@ -1,4 +1,8 @@
 defmodule Mrgr.Github.User do
+  @moduledoc """
+  The same thing as %Mrgr.Schema.Member{}.  Only it's in-memory.
+  """
+
   use Mrgr.Github.Schema
 
   embedded_schema do

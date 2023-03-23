@@ -116,6 +116,12 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.one()
   end
 
+  def find_from_member(%Mrgr.Schema.Member{} = member) do
+    Schema
+    |> Query.from_member(member)
+    |> Mrgr.Repo.one()
+  end
+
   def welcome_back(user, params) do
     user
     |> Schema.welcome_back_changeset(params)
@@ -312,6 +318,13 @@ defmodule Mrgr.User do
       from(q in query,
         left_join: m in assoc(q, :member),
         preload: [member: m]
+      )
+    end
+
+    def from_member(query, member) do
+      from(q in query,
+        join: m in assoc(q, :member),
+        where: m.id == ^member.id
       )
     end
   end

@@ -64,7 +64,13 @@ defmodule Mrgr.Schema.PullRequest do
     has_many(:labels, through: [:pr_labels, :label])
 
     has_many(:comments, Mrgr.Schema.Comment, on_delete: :delete_all)
+
+    # pr_reviews are the actual reviews and their reviewers
     has_many(:pr_reviews, Mrgr.Schema.PRReview, on_delete: :delete_all)
+
+    # these vv are the people who were asked to review
+    has_many(:pull_request_reviewers, Mrgr.Schema.PullRequestReviewer)
+    has_many(:solicited_reviewers, through: [:pull_request_reviewers, :member])
 
     has_many(:high_impact_file_rule_pull_requests, Mrgr.Schema.HighImpactFileRulePullRequest)
 
@@ -217,10 +223,10 @@ defmodule Mrgr.Schema.PullRequest do
     pull_request.repository.settings.required_approving_review_count
   end
 
-  def reviewer_requested?(pr, member) do
-    pr.requested_reviewers
-    |> Enum.map(& &1.login)
-    |> Enum.member?(member.login)
+  def reviewer_requested?(%{solicited_reviewers: srs}, member) do
+    srs
+    |> Enum.map(& &1.id)
+    |> Enum.member?(member.id)
   end
 
   def author_name(%{author: %{login: login}}), do: login
