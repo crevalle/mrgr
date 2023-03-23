@@ -6,6 +6,7 @@ defmodule Mrgr.PRTab do
     Schema
     |> Query.for_user(user)
     |> Query.with_authors()
+    |> Query.with_reviewers()
     |> Query.with_labels()
     |> Query.with_repositories()
     |> Query.cron()
@@ -73,6 +74,42 @@ defmodule Mrgr.PRTab do
     authors
     |> Enum.map(& &1.id)
     |> Enum.member?(member.id)
+  end
+
+  def reviewer_present?(%{reviewers: reviewers}, member) do
+    reviewers
+    |> Enum.map(& &1.id)
+    |> Enum.member?(member.id)
+  end
+
+  def toggle_reviewer(tab, member) do
+    tab
+    |> reviewer_present?(member)
+    |> case do
+      true ->
+        remove_reviewer(tab, member)
+
+      false ->
+        add_reviewer(tab, member)
+    end
+  end
+
+  def add_reviewer(tab, member) do
+    params = %{pr_tab_id: tab.id, reviewer_id: member.id}
+
+    %Mrgr.Schema.ReviewerPRTab{}
+    |> Ecto.Changeset.change(params)
+    |> Mrgr.Repo.insert!()
+
+    Mrgr.Repo.preload(tab, :reviewers, force: true)
+  end
+
+  def remove_reviewer(tab, member) do
+    Mrgr.Schema.ReviewerPRTab
+    |> Mrgr.Repo.get_by(pr_tab_id: tab.id, reviewer_id: member.id)
+    |> Mrgr.Repo.delete()
+
+    Mrgr.Repo.preload(tab, :reviewers, force: true)
   end
 
   def toggle_label(tab, label) do
@@ -162,6 +199,13 @@ defmodule Mrgr.PRTab do
       from(q in query,
         left_join: a in assoc(q, :authors),
         preload: [authors: a]
+      )
+    end
+
+    def with_reviewers(query) do
+      from(q in query,
+        left_join: r in assoc(q, :reviewers),
+        preload: [reviewers: r]
       )
     end
 

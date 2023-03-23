@@ -155,6 +155,20 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     |> noreply()
   end
 
+  def handle_event("toggle-reviewer", %{"id" => id}, socket) do
+    reviewer = Mrgr.List.find(socket.assigns.members, id)
+    selected_tab = socket.assigns.selected_tab
+
+    updated_tab = Mrgr.PRTab.toggle_reviewer(selected_tab, reviewer)
+
+    {tabs, selected} = Tabs.reload_prs(socket.assigns.tabs, updated_tab)
+
+    socket
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected)
+    |> noreply()
+  end
+
   def handle_event("toggle-label", %{"id" => id}, socket) do
     label = Mrgr.List.find(socket.assigns.labels, id)
     selected_tab = socket.assigns.selected_tab

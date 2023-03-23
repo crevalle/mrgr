@@ -973,6 +973,7 @@ defmodule Mrgr.PullRequest do
       query
       |> filter_draft_status(tab.draft_status)
       |> filter_authors(tab.authors)
+      |> filter_reviewers(tab.reviewers)
       |> filter_labels(tab.labels)
       |> filter_repositories(tab.repositories)
     end
@@ -998,6 +999,17 @@ defmodule Mrgr.PullRequest do
 
       from(q in query,
         where: q.author_id in ^author_ids
+      )
+    end
+
+    def filter_reviewers(query, []), do: query
+
+    def filter_reviewers(query, reviewers) do
+      reviewer_ids = Enum.map(reviewers, & &1.id)
+
+      from(q in query,
+        left_join: sr in assoc(q, :solicited_reviewers),
+        where: sr.id in ^reviewer_ids
       )
     end
 

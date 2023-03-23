@@ -19,6 +19,9 @@ defmodule Mrgr.Schema.PRTab do
     has_many(:author_pr_tabs, Mrgr.Schema.AuthorPRTab)
     has_many(:authors, through: [:author_pr_tabs, :author])
 
+    has_many(:reviewer_pr_tabs, Mrgr.Schema.ReviewerPRTab)
+    has_many(:reviewers, through: [:reviewer_pr_tabs, :reviewer])
+
     has_many(:label_pr_tabs, Mrgr.Schema.LabelPRTab)
     has_many(:labels, through: [:label_pr_tabs, :label])
 

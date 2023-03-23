@@ -522,35 +522,9 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def pr_filter(assigns) do
-    ~H"""
-    <div class="flex items-center p-1 m-1 rounded-t-lg">
-      <.pr_filter_title item={@item} />
-    </div>
-    """
-  end
-
   def to_days(assigns) do
     ~H"""
     <%= Float.round(@hours / 24, 1) %> days
-    """
-  end
-
-  def pr_filter_title(%{item: %Mrgr.Schema.Repository{}} = assigns) do
-    ~H"""
-    <%= @item.name %>
-    """
-  end
-
-  def pr_filter_title(%{item: %Mrgr.Schema.Member{}} = assigns) do
-    ~H"""
-    <.avatar member={@item} />
-    """
-  end
-
-  def pr_filter_title(%{item: %Mrgr.Schema.Label{}} = assigns) do
-    ~H"""
-    <.badge item={@item} />
     """
   end
 
