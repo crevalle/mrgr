@@ -265,7 +265,7 @@ defmodule Mrgr.PullRequest do
     pull_request = clear_solicited_reviewers(pull_request)
 
     pull_request =
-      Enum.reduce(members, pull_request, fn {member, pr} ->
+      Enum.reduce(members, pull_request, fn member, pr ->
         add_solicited_reviewer(pr, member)
       end)
 
