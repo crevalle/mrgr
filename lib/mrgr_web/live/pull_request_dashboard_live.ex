@@ -213,10 +213,11 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     |> noreply()
   end
 
-  def handle_event("update-draft-selection", %{"tab" => %{"draft_status" => status}}, socket) do
+  def handle_event("toggle-draft-status", %{"id" => id}, socket) do
     selected_tab = socket.assigns.selected_tab
+    status = Mrgr.List.find(socket.assigns.draft_statuses, id)
 
-    updated_tab = Mrgr.PRTab.update_draft_status(selected_tab, status)
+    updated_tab = Mrgr.PRTab.update_draft_status(selected_tab, status.value)
 
     {tabs, selected} = Tabs.reload_prs(socket.assigns.tabs, updated_tab)
 

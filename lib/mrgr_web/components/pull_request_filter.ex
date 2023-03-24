@@ -30,12 +30,14 @@ defmodule MrgrWeb.Components.PullRequestFilter do
     ~H"""
     <div class="flex flex-col space-y-2">
       <div class="flex items-center">
-        <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
-        <p class="text-gray-500">Authors</p>
-
         <div class="relative">
           <.dropdown_toggle_link target="pr-tab-author-dropdown">
-            <.dropdown_clicky />
+            <div class="flex items-center">
+              <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
+              <p class="text-gray-500">Authors</p>
+
+              <.dropdown_clicky />
+            </div>
           </.dropdown_toggle_link>
 
           <.dropdown_menu name="pr-tab-author-dropdown">
@@ -71,12 +73,14 @@ defmodule MrgrWeb.Components.PullRequestFilter do
     ~H"""
     <div class="flex flex-col space-y-2">
       <div class="flex items-center">
-        <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
-        <p class="text-gray-500">Reviewers</p>
-
         <div class="relative">
           <.dropdown_toggle_link target="pr-tab-reviewer-dropdown">
-            <.dropdown_clicky />
+            <div class="flex items-center">
+              <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
+              <p class="text-gray-500">Reviewers</p>
+
+              <.dropdown_clicky />
+            </div>
           </.dropdown_toggle_link>
 
           <.dropdown_menu name="pr-tab-reviewer-dropdown">
@@ -112,12 +116,14 @@ defmodule MrgrWeb.Components.PullRequestFilter do
     ~H"""
     <div class="flex flex-col space-y-2">
       <div class="flex items-center">
-        <.repository_icon />
-        <p class="text-gray-500">Repositories</p>
-
         <div class="relative">
           <.dropdown_toggle_link target="pr-tab-repository-dropdown">
-            <.dropdown_clicky />
+            <div class="flex items-center">
+              <.repository_icon />
+              <p class="text-gray-500">Repositories</p>
+
+              <.dropdown_clicky />
+            </div>
           </.dropdown_toggle_link>
 
           <.dropdown_menu name="pr-tab-repository-dropdown">
@@ -150,12 +156,14 @@ defmodule MrgrWeb.Components.PullRequestFilter do
     ~H"""
     <div class="flex flex-col space-y-2">
       <div class="flex items-center">
-        <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />
-        <p class="text-gray-500">Labels</p>
-
         <div class="relative">
           <.dropdown_toggle_link target="pr-tab-label-dropdown">
-            <.dropdown_clicky />
+            <div class="flex items-center">
+              <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />
+              <p class="text-gray-500">Labels</p>
+
+              <.dropdown_clicky />
+            </div>
           </.dropdown_toggle_link>
 
           <.dropdown_menu name="pr-tab-label-dropdown">
@@ -186,19 +194,40 @@ defmodule MrgrWeb.Components.PullRequestFilter do
 
   def draft(assigns) do
     ~H"""
-    <div>
+    <div class="flex flex-col space-y-2">
       <div class="flex items-center">
-        <.icon name="pencil-square" class="text-gray-400 mr-1 h-5 w-5" />
-        <p class="text-gray-500">Draft Status</p>
+        <div class="relative">
+          <.dropdown_toggle_link target="pr-tab-draft-dropdown">
+            <div class="flex items-center">
+              <.icon name="pencil-square" class="text-gray-400 mr-1 h-5 w-5" />
+              <p class="text-gray-500">Draft Status</p>
 
-        <.form :let={f} for={%{}} as={:tab} phx-change="update-draft-selection" class="ml-2">
-          <%= select(f, :draft_status, @draft_statuses,
-            selected: @selected_tab.draft_status,
-            class:
-              "p-0 w-16 text-sm bg-transparent border-0 focus:outline-none focus:ring-0 focus:border-teal-500"
-          ) %>
-        </.form>
+              <.dropdown_clicky />
+            </div>
+          </.dropdown_toggle_link>
+
+          <.dropdown_menu name="pr-tab-draft-dropdown">
+            <:description>
+              Filter By Draft Status
+            </:description>
+
+            <.dropdown_toggle_list name="draft-status" items={@draft_statuses}>
+              <:row :let={status}>
+                <div class="flex items-center">
+                  <div class="w-8">
+                    <%= if Mrgr.PRTab.draft_status_selected?(@selected_tab, status.value) do %>
+                      <.icon name="check" class="text-teal-700 h-5 w-5" />
+                    <% end %>
+                  </div>
+                  <span><%= status.value %></span>
+                </div>
+              </:row>
+            </.dropdown_toggle_list>
+          </.dropdown_menu>
+        </div>
       </div>
+
+      <.active_filter_items items={[@selected_tab.draft_status]} />
     </div>
     """
   end
@@ -229,6 +258,12 @@ defmodule MrgrWeb.Components.PullRequestFilter do
   def active_filter_title(%{item: %Mrgr.Schema.Label{}} = assigns) do
     ~H"""
     <.badge item={@item} />
+    """
+  end
+
+  def active_filter_title(assigns) do
+    ~H"""
+    <span><%= String.capitalize(@item) %></span>
     """
   end
 

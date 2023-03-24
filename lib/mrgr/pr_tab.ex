@@ -81,7 +81,20 @@ defmodule Mrgr.PRTab do
   end
 
   def draft_statuses do
-    [Open: "open", Draft: "draft", Both: "both"]
+    [
+      %{
+        id: 1,
+        value: "open"
+      },
+      %{
+        id: 2,
+        value: "draft"
+      },
+      %{
+        id: 3,
+        value: "both"
+      }
+    ]
   end
 
   def update_draft_status(tab, status) do
@@ -119,6 +132,9 @@ defmodule Mrgr.PRTab do
 
     Mrgr.Repo.preload(tab, :authors, force: true)
   end
+
+  def draft_status_selected?(%{draft_status: status}, status), do: true
+  def draft_status_selected?(_tab, _different_status), do: false
 
   def author_present?(%{authors: authors}, member) do
     authors
