@@ -40,6 +40,8 @@ defmodule Mrgr.Schema.PullRequest do
     embeds_many(:commits, Mrgr.Github.Commit, on_replace: :delete)
     # what are assignees? how are they differetn from requested reviewers?
     embeds_many(:assignees, Mrgr.Github.User, on_replace: :delete)
+
+    # TODO: these can be removed when I'm comfortable the new data is good.
     embeds_many(:requested_reviewers, Mrgr.Github.User, on_replace: :delete)
 
     # duplicate author info.
@@ -117,7 +119,6 @@ defmodule Mrgr.Schema.PullRequest do
     |> cast_embed(:user)
     |> cast_embed(:commits)
     |> cast_embed(:assignees)
-    |> cast_embed(:requested_reviewers)
     |> cast_embed(:head)
     |> put_external_id()
     |> put_change(:raw, params)
@@ -151,12 +152,6 @@ defmodule Mrgr.Schema.PullRequest do
     schema
     |> change()
     |> put_embed(:assignees, assignees)
-  end
-
-  def change_reviewers(schema, reviewers) do
-    schema
-    |> change()
-    |> put_embed(:requested_reviewers, reviewers)
   end
 
   def edit_changeset(schema, params) do

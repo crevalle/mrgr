@@ -304,11 +304,6 @@ defmodule Mrgr.PullRequest do
     Mrgr.Repo.preload(pull_request, :solicited_reviewers, force: true)
   end
 
-  def tagged?(pull_request, user) do
-    (pull_request.assignees ++ pull_request.requested_reviewers)
-    |> Enum.any?(&Mrgr.Schema.User.is_github_user?(user, &1))
-  end
-
   @spec sync_comments(Schema.t()) :: Schema.t()
   def sync_comments(pull_request) do
     pull_request
