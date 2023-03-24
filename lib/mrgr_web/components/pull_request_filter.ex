@@ -12,29 +12,30 @@ defmodule MrgrWeb.Components.PullRequestFilter do
           delete tab
         </.l>
       </.aside>
-      <.h3>Filters</.h3>
-      <.repositories selected_tab={@selected_tab} repos={@repos} />
-      <.labels selected_tab={@selected_tab} labels={@labels} />
-      <.authors selected_tab={@selected_tab} items={@members} />
-      <.draft selected_tab={@selected_tab} draft_statuses={@draft_statuses} />
-      <.reviewers selected_tab={@selected_tab} items={@members} />
+
+      <.h3>Custom Filters</.h3>
+
+      <div class="flex items-start space-x-8">
+        <.repositories selected_tab={@selected_tab} repos={@repos} />
+        <.labels selected_tab={@selected_tab} labels={@labels} />
+        <.authors selected_tab={@selected_tab} items={@members} />
+        <.draft selected_tab={@selected_tab} draft_statuses={@draft_statuses} />
+        <.reviewers selected_tab={@selected_tab} items={@members} />
+      </div>
     </div>
     """
   end
 
   def authors(assigns) do
     ~H"""
-    <div class="flex items-center">
-      <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
-
-      <div class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
-        <div :for={author <- @selected_tab.authors} class="mr-2" role="presentation">
-          <.pr_filter item={author} />
-        </div>
+    <div class="flex flex-col space-y-2">
+      <div class="flex items-center">
+        <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
+        <p class="text-gray-500">Authors</p>
 
         <div class="relative">
           <.dropdown_toggle_link target="pr-tab-author-dropdown">
-            <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
+            <.dropdown_clicky />
           </.dropdown_toggle_link>
 
           <.dropdown_menu name="pr-tab-author-dropdown">
@@ -60,23 +61,22 @@ defmodule MrgrWeb.Components.PullRequestFilter do
           </.dropdown_menu>
         </div>
       </div>
+
+      <.active_filter_items items={@selected_tab.authors} />
     </div>
     """
   end
 
   def reviewers(assigns) do
     ~H"""
-    <div class="flex items-center">
-      <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
-
-      <div class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
-        <div :for={reviewers <- @selected_tab.reviewers} class="mr-2" role="presentation">
-          <.pr_filter item={reviewers} />
-        </div>
+    <div class="flex flex-col space-y-2">
+      <div class="flex items-center">
+        <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
+        <p class="text-gray-500">Reviewers</p>
 
         <div class="relative">
           <.dropdown_toggle_link target="pr-tab-reviewer-dropdown">
-            <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
+            <.dropdown_clicky />
           </.dropdown_toggle_link>
 
           <.dropdown_menu name="pr-tab-reviewer-dropdown">
@@ -102,131 +102,139 @@ defmodule MrgrWeb.Components.PullRequestFilter do
           </.dropdown_menu>
         </div>
       </div>
+
+      <.active_filter_items items={@selected_tab.reviewers} />
     </div>
     """
   end
 
   def repositories(assigns) do
     ~H"""
-    <div class="flex items-center">
-      <.repository_icon />
+    <div class="flex flex-col space-y-2">
+      <div class="flex items-center">
+        <.repository_icon />
+        <p class="text-gray-500">Repositories</p>
 
-      <div class="relative">
-        <div class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
-          <div :for={repo <- @selected_tab.repositories} class="mr-2" role="presentation">
-            <.pr_filter item={repo} />
-          </div>
+        <div class="relative">
+          <.dropdown_toggle_link target="pr-tab-repository-dropdown">
+            <.dropdown_clicky />
+          </.dropdown_toggle_link>
 
-          <div class="relative">
-            <.dropdown_toggle_link target="pr-tab-repository-dropdown">
-              <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
-            </.dropdown_toggle_link>
+          <.dropdown_menu name="pr-tab-repository-dropdown">
+            <:description>
+              Filter By Repository
+            </:description>
 
-            <.dropdown_menu name="pr-tab-repository-dropdown">
-              <:description>
-                Filter By Repository
-              </:description>
-
-              <.dropdown_toggle_list name="repository" items={@repos}>
-                <:row :let={repo}>
-                  <div class="flex items-center">
-                    <div class="w-8">
-                      <%= if Mrgr.PRTab.repository_present?(@selected_tab, repo) do %>
-                        <.icon name="check" class="text-teal-700 h-5 w-5" />
-                      <% end %>
-                    </div>
-                    <%= repo.name %>
+            <.dropdown_toggle_list name="repository" items={@repos}>
+              <:row :let={repo}>
+                <div class="flex items-center">
+                  <div class="w-8">
+                    <%= if Mrgr.PRTab.repository_present?(@selected_tab, repo) do %>
+                      <.icon name="check" class="text-teal-700 h-5 w-5" />
+                    <% end %>
                   </div>
-                </:row>
-              </.dropdown_toggle_list>
-            </.dropdown_menu>
-          </div>
+                  <%= repo.name %>
+                </div>
+              </:row>
+            </.dropdown_toggle_list>
+          </.dropdown_menu>
         </div>
       </div>
+
+      <.active_filter_items items={@selected_tab.repositories} />
     </div>
     """
   end
 
   def labels(assigns) do
     ~H"""
-    <div class="flex items-center">
-      <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />
+    <div class="flex flex-col space-y-2">
+      <div class="flex items-center">
+        <.icon name="tag" class="text-gray-400 mr-1 h-5 w-5" />
+        <p class="text-gray-500">Labels</p>
 
-      <div class="relative">
-        <div class="flex flex-wrap -mb-px text-sm font-medium text-center items-center" role="tablist">
-          <div :for={label <- @selected_tab.labels} class="mr-2" role="presentation">
-            <.pr_filter item={label} />
-          </div>
+        <div class="relative">
+          <.dropdown_toggle_link target="pr-tab-label-dropdown">
+            <.dropdown_clicky />
+          </.dropdown_toggle_link>
 
-          <div class="relative">
-            <.dropdown_toggle_link target="pr-tab-label-dropdown">
-              <.icon name="ellipsis-horizontal" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
-            </.dropdown_toggle_link>
+          <.dropdown_menu name="pr-tab-label-dropdown">
+            <:description>
+              Filter By Label
+            </:description>
 
-            <.dropdown_menu name="pr-tab-label-dropdown">
-              <:description>
-                Filter By Label
-              </:description>
-
-              <.dropdown_toggle_list name="label" items={@labels}>
-                <:row :let={label}>
-                  <div class="flex items-center">
-                    <div class="w-8">
-                      <%= if Mrgr.PRTab.label_present?(@selected_tab, label) do %>
-                        <.icon name="check" class="text-teal-700 h-5 w-5" />
-                      <% end %>
-                    </div>
-                    <.badge item={label} />
+            <.dropdown_toggle_list name="label" items={@labels}>
+              <:row :let={label}>
+                <div class="flex items-center">
+                  <div class="w-8">
+                    <%= if Mrgr.PRTab.label_present?(@selected_tab, label) do %>
+                      <.icon name="check" class="text-teal-700 h-5 w-5" />
+                    <% end %>
                   </div>
-                </:row>
-              </.dropdown_toggle_list>
-            </.dropdown_menu>
-          </div>
+                  <.badge item={label} />
+                </div>
+              </:row>
+            </.dropdown_toggle_list>
+          </.dropdown_menu>
         </div>
       </div>
+
+      <.active_filter_items items={@selected_tab.labels} />
     </div>
     """
   end
 
   def draft(assigns) do
     ~H"""
-    <div class="flex items-center">
-      <.icon name="pencil-square" class="text-gray-400 mr-1 h-5 w-5" />
+    <div>
+      <div class="flex items-center">
+        <.icon name="pencil-square" class="text-gray-400 mr-1 h-5 w-5" />
+        <p class="text-gray-500">Draft Status</p>
 
-      <.form :let={f} for={%{}} as={:tab} phx-change="update-draft-selection">
-        <%= select(f, :draft_status, @draft_statuses,
-          selected: @selected_tab.draft_status,
-          class:
-            "py-1.5 px-0 w-16 text-sm bg-transparent border-0 focus:outline-none focus:ring-0 focus:border-teal-500"
-        ) %>
-      </.form>
+        <.form :let={f} for={%{}} as={:tab} phx-change="update-draft-selection" class="ml-2">
+          <%= select(f, :draft_status, @draft_statuses,
+            selected: @selected_tab.draft_status,
+            class:
+              "p-0 w-16 text-sm bg-transparent border-0 focus:outline-none focus:ring-0 focus:border-teal-500"
+          ) %>
+        </.form>
+      </div>
     </div>
     """
   end
 
-  def pr_filter(assigns) do
+  def active_filter_items(assigns) do
     ~H"""
-    <div class="flex items-center p-1 m-1 rounded-t-lg">
-      <.pr_filter_title item={@item} />
+    <div class="flex flex-col space-y-1 text-sm">
+      <.active_filter_title :for={item <- @items} item={item} />
     </div>
     """
   end
 
-  def pr_filter_title(%{item: %Mrgr.Schema.Repository{}} = assigns) do
+  def active_filter_title(%{item: %Mrgr.Schema.Repository{}} = assigns) do
     ~H"""
-    <%= @item.name %>
+    <div class="flex space-x-1 items-center">
+      <.language_icon language={@item.language} />
+      <span><%= @item.name %></span>
+    </div>
     """
   end
 
-  def pr_filter_title(%{item: %Mrgr.Schema.Member{}} = assigns) do
+  def active_filter_title(%{item: %Mrgr.Schema.Member{}} = assigns) do
     ~H"""
     <.avatar member={@item} />
     """
   end
 
-  def pr_filter_title(%{item: %Mrgr.Schema.Label{}} = assigns) do
+  def active_filter_title(%{item: %Mrgr.Schema.Label{}} = assigns) do
     ~H"""
     <.badge item={@item} />
+    """
+  end
+
+  def dropdown_clicky(assigns) do
+    ~H"""
+    <.icon name="chevron-down" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
     """
   end
 end
