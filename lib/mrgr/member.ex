@@ -29,7 +29,7 @@ defmodule Mrgr.Member do
         member
 
       existing_user ->
-        associate_with_user(member, user)
+        associate_with_user(member, existing_user)
     end
   end
 
