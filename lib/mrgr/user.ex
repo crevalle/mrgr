@@ -70,7 +70,6 @@ defmodule Mrgr.User do
           user
           |> preload_current_installation()
           |> welcome_back(params)
-          |> reassociate_user_with_member()
           |> set_tokens(params)
 
         {:ok, user, :returning}
@@ -203,20 +202,6 @@ defmodule Mrgr.User do
     end)
 
     user
-  end
-
-  def reassociate_user_with_member(user) do
-    case find_member(user) do
-      %Mrgr.Schema.Member{user_id: nil} = member ->
-        associate_user_with_member(user, member)
-
-      nil ->
-        # TODO: create_member!()
-        user
-
-      _associated_member ->
-        user
-    end
   end
 
   def associate_user_with_member(user, member) do
