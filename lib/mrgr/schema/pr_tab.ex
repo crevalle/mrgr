@@ -15,6 +15,7 @@ defmodule Mrgr.Schema.PRTab do
     field(:pull_requests, {:array, :map}, default: [], virtual: true)
 
     belongs_to(:user, Mrgr.Schema.User)
+    belongs_to(:installation, Mrgr.Schema.Installation)
 
     has_many(:author_pr_tabs, Mrgr.Schema.AuthorPRTab)
     has_many(:authors, through: [:author_pr_tabs, :author])
@@ -32,8 +33,9 @@ defmodule Mrgr.Schema.PRTab do
   end
 
   @allowed ~w[
-    title
+    installation_id
     permalink
+    title
     user_id
   ]a
 

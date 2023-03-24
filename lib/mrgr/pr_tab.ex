@@ -2,7 +2,20 @@ defmodule Mrgr.PRTab do
   alias Mrgr.Schema.PRTab, as: Schema
   alias __MODULE__.Query
 
+  def rt_migrate_installation_ids do
+    Schema
+    |> Query.with_user()
+    |> Mrgr.Repo.all()
+    |> Enum.map(fn tab ->
+      tab
+      |> Ecto.Changeset.change(%{installation_id: tab.user.current_installation_id})
+      |> Mrgr.Repo.update()
+    end)
+  end
+
   def for_user(user) do
+    # !!! pulls for the user's current installation
+    # since that's almost always what we want
     Schema
     |> Query.for_user(user)
     |> Query.with_authors()
@@ -190,6 +203,14 @@ defmodule Mrgr.PRTab do
     def for_user(query, user) do
       from(q in query,
         where: q.user_id == ^user.id,
+        where: q.installation_id == ^user.current_installation_id,
+        join: u in assoc(q, :user),
+        preload: [user: u]
+      )
+    end
+
+    def with_user(query) do
+      from(q in query,
         join: u in assoc(q, :user),
         preload: [user: u]
       )
