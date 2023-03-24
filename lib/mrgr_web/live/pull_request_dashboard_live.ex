@@ -465,7 +465,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
 
     def add(tabs, user) do
-      new_tab = Mrgr.PRTab.create(user)
+      new_tab = Mrgr.PRTab.create_for_user(user)
       updated_tabs = tabs ++ [new_tab]
 
       {updated_tabs, new_tab}

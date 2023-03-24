@@ -136,7 +136,8 @@ defmodule Mrgr.Installation do
     with {:ok, i} <- onboard_members(i),
          {:ok, i} <- onboard_teams(i),
          {:ok, i} <- onboard_repos(i),
-         {:ok, i} <- onboard_prs(i) do
+         {:ok, i} <- onboard_prs(i),
+         {:ok, i} <- final_onboarding(i) do
       i
       |> State.onboarding_complete!()
       |> broadcast(@installation_onboarding_progressed)
@@ -206,6 +207,12 @@ defmodule Mrgr.Installation do
         Appsignal.set_error(e, __STACKTRACE__)
         {:error, :onboarding_prs_failed}
     end
+  end
+
+  def final_onboarding(installation) do
+    Mrgr.PRTab.create_defaults_for_new_installation(installation)
+
+    {:ok, installation}
   end
 
   defdelegate subscribed?(i), to: SubscriptionState

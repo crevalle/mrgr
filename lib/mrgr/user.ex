@@ -20,6 +20,8 @@ defmodule Mrgr.User do
   end
 
   @spec find(Ecto.Schema.t() | integer()) :: Schema.t() | nil
+  def find(%Mrgr.Github.User{login: nil}), do: nil
+
   def find(%Mrgr.Github.User{} = user) do
     Mrgr.Repo.get_by(Schema, nickname: user.login)
   end
@@ -68,7 +70,7 @@ defmodule Mrgr.User do
           user
           |> preload_current_installation()
           |> welcome_back(params)
-          |> associate_user_with_member()
+          |> reassociate_user_with_member()
           |> set_tokens(params)
 
         {:ok, user, :returning}
@@ -154,8 +156,8 @@ defmodule Mrgr.User do
     Mrgr.Repo.preload(user, current_installation: :account)
   end
 
-  @spec set_current_installation(Schema.t()) :: Schema.t()
-  def set_current_installation(user) do
+  @spec reset_current_installation(Schema.t()) :: Schema.t()
+  def reset_current_installation(user) do
     case Mrgr.Installation.for_user(user) do
       [] ->
         user
@@ -203,7 +205,7 @@ defmodule Mrgr.User do
     user
   end
 
-  def associate_user_with_member(user) do
+  def reassociate_user_with_member(user) do
     case find_member(user) do
       %Mrgr.Schema.Member{user_id: nil} = member ->
         associate_user_with_member(user, member)
@@ -222,7 +224,7 @@ defmodule Mrgr.User do
     |> Mrgr.Schema.Member.changeset(%{user_id: user.id})
     |> Mrgr.Repo.update!()
 
-    set_current_installation(user)
+    reset_current_installation(user)
   end
 
   def repos(user) do

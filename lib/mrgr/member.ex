@@ -2,6 +2,12 @@ defmodule Mrgr.Member do
   alias Mrgr.Schema.Member, as: Schema
   alias __MODULE__.Query
 
+  def find_by_user_id(user_id) do
+    Schema
+    |> Query.by_user_id(user_id)
+    |> Mrgr.Repo.one()
+  end
+
   def paged_for_installation(installation_id, page \\ %{}) do
     Schema
     |> Query.for_installation(installation_id)
@@ -82,6 +88,12 @@ defmodule Mrgr.Member do
     def by_login(query, login) do
       from(q in query,
         where: q.login == ^login
+      )
+    end
+
+    def by_user_id(query, user_id) do
+      from(q in query,
+        where: q.user_id == ^user_id
       )
     end
 

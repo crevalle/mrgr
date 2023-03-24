@@ -13,6 +13,33 @@ defmodule Mrgr.PRTab do
     end)
   end
 
+  def create_defaults_for_new_installation(%Mrgr.Schema.Installation{} = installation) do
+    case Mrgr.Member.find_by_user_id(installation.creator_id) do
+      %Mrgr.Schema.Member{} = member ->
+        params = %{
+          user_id: installation.creator_id,
+          installation_id: installation.id
+        }
+
+        my_prs =
+          params
+          |> Map.put(:title, "My PRs")
+          |> create()
+          |> add_author(member)
+
+        assigned_to_me =
+          params
+          |> Map.put(:title, "Assigned to Me")
+          |> create()
+          |> add_reviewer(member)
+
+        [my_prs, assigned_to_me]
+
+      nil ->
+        []
+    end
+  end
+
   def for_user(user) do
     # !!! pulls for the user's current installation
     # since that's almost always what we want
@@ -26,11 +53,17 @@ defmodule Mrgr.PRTab do
     |> Mrgr.Repo.all()
   end
 
-  def create(user) do
+  def create_for_user(user) do
+    params = %{user_id: user.id, installation_id: user.current_installation_id}
+
+    create(params)
+  end
+
+  def create(params) do
     %Schema{}
-    |> Schema.changeset(%{user_id: user.id})
+    |> Schema.changeset(params)
     |> Mrgr.Repo.insert!()
-    |> Mrgr.Repo.preload([:authors, :labels, :repositories, :user])
+    |> Mrgr.Repo.preload([:authors, :reviewers, :labels, :repositories, :user])
   end
 
   def update(tab, params) do
