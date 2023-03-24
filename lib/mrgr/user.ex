@@ -88,6 +88,7 @@ defmodule Mrgr.User do
                   user
                   |> associate_user_with_member(member)
                   |> make_all_repos_visible()
+                  |> generate_default_custom_dashboard_tabs()
 
                 {:ok, user, :invited}
             end
@@ -204,8 +205,26 @@ defmodule Mrgr.User do
     user
   end
 
+  def generate_default_custom_dashboard_tabs(user) do
+    # creates tabs for every installation the user is a member of.
+    # ❗️ a user invited to one org will automatically join all the
+    # other orgs we have accounts for, increasing their billing.  this should
+    # be fixed so that an invited user only joins a specific accout.  For now
+    # I don't think it's a big problem so I'll fix it later and refund someone $25.
+
+    user
+    |> Mrgr.Installation.for_user()
+    |> Enum.map(fn i ->
+      Mrgr.PRTab.create_default_tabs(user.id, i.id, user.member)
+    end)
+
+    user
+  end
+
   def associate_user_with_member(user, member) do
-    _member = Mrgr.Member.associate_with_user(member, user)
+    member = Mrgr.Member.associate_with_user(member, user)
+
+    user = %{user | member: member}
 
     reset_current_installation(user)
   end

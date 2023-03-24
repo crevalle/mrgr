@@ -16,28 +16,32 @@ defmodule Mrgr.PRTab do
   def create_defaults_for_new_installation(%Mrgr.Schema.Installation{} = installation) do
     case Mrgr.Member.find_by_user_id(installation.creator_id) do
       %Mrgr.Schema.Member{} = member ->
-        params = %{
-          user_id: installation.creator_id,
-          installation_id: installation.id
-        }
-
-        my_prs =
-          params
-          |> Map.put(:title, "My PRs")
-          |> create()
-          |> add_author(member)
-
-        assigned_to_me =
-          params
-          |> Map.put(:title, "Assigned to Me")
-          |> create()
-          |> add_reviewer(member)
-
-        [my_prs, assigned_to_me]
+        create_default_tabs(installation.creator_id, installation.id, member)
 
       nil ->
         []
     end
+  end
+
+  def create_default_tabs(user_id, installation_id, member) do
+    params = %{
+      user_id: user_id,
+      installation_id: installation_id
+    }
+
+    my_prs =
+      params
+      |> Map.put(:title, "My PRs")
+      |> create()
+      |> add_author(member)
+
+    assigned_to_me =
+      params
+      |> Map.put(:title, "Assigned to Me")
+      |> create()
+      |> add_reviewer(member)
+
+    [my_prs, assigned_to_me]
   end
 
   def for_user(user) do
