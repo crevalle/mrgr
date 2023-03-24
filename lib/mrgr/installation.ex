@@ -451,7 +451,7 @@ defmodule Mrgr.Installation do
   end
 
   defp add_members(installation, github_users) when is_list(github_users) do
-    members = Enum.map(github_users, &find_or_create_member/1)
+    members = Enum.map(github_users, &Mrgr.Member.find_or_create_member/1)
     Enum.map(members, &create_membership(installation, &1))
 
     members
@@ -463,35 +463,6 @@ defmodule Mrgr.Installation do
     params
     |> Mrgr.Schema.Membership.changeset()
     |> Mrgr.Repo.insert()
-  end
-
-  def find_or_create_member(github_user) do
-    Mrgr.Member.find_by_login(github_user.login)
-    |> case do
-      %Mrgr.Schema.Member{} = member ->
-        member
-
-      nil ->
-        {:ok, member} = create_member_from_github(github_user)
-        member
-    end
-  end
-
-  def create_member_from_github(github_user) do
-    existing_user = Mrgr.User.find(github_user)
-
-    github_user
-    |> Map.from_struct()
-    |> Map.put(:external_id, github_user.id)
-    |> maybe_associate_with_existing_user(existing_user)
-    |> Mrgr.Schema.Member.changeset()
-    |> Mrgr.Repo.insert()
-  end
-
-  def maybe_associate_with_existing_user(attrs, nil), do: attrs
-
-  def maybe_associate_with_existing_user(attrs, %{id: id}) do
-    Map.put(attrs, :user_id, id)
   end
 
   def add_teams(installation, github_teams) when is_list(github_teams) do

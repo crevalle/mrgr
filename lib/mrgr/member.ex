@@ -2,6 +2,43 @@ defmodule Mrgr.Member do
   alias Mrgr.Schema.Member, as: Schema
   alias __MODULE__.Query
 
+  def find_or_create_member(github_user) do
+    find_by_login(github_user.login)
+    |> case do
+      %Schema{} = member ->
+        member
+
+      nil ->
+        github_user
+        |> create_member_from_github()
+        |> maybe_associate_with_existing_user(github_user)
+    end
+  end
+
+  def create_member_from_github(github_user) do
+    github_user
+    |> Map.from_struct()
+    |> Map.put(:external_id, github_user.id)
+    |> Mrgr.Schema.Member.changeset()
+    |> Mrgr.Repo.insert!()
+  end
+
+  def maybe_associate_with_existing_user(member, github_user) do
+    case Mrgr.User.find(github_user) do
+      nil ->
+        member
+
+      existing_user ->
+        associate_with_user(member, user)
+    end
+  end
+
+  def associate_with_user(member, user) do
+    member
+    |> Mrgr.Schema.Member.changeset(%{user_id: user.id})
+    |> Mrgr.Repo.update!()
+  end
+
   def find_by_user_id(user_id) do
     Schema
     |> Query.by_user_id(user_id)

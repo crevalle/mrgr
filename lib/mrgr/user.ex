@@ -205,9 +205,7 @@ defmodule Mrgr.User do
   end
 
   def associate_user_with_member(user, member) do
-    member
-    |> Mrgr.Schema.Member.changeset(%{user_id: user.id})
-    |> Mrgr.Repo.update!()
+    _member = Mrgr.Member.associate_with_user(member, user)
 
     reset_current_installation(user)
   end
