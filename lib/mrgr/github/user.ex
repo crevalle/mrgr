@@ -81,7 +81,7 @@ defmodule Mrgr.Github.User do
     Enum.map(list, &graphql_to_attrs/1)
   end
 
-  def graphql_to_attrs(map) do
+  def graphql_to_attrs(map) when is_map(map) do
     %{
       "avatar_url" => map["avatarUrl"],
       "node_id" => map["id"],
@@ -90,6 +90,8 @@ defmodule Mrgr.Github.User do
       "name" => map["name"]
     }
   end
+
+  def graphql_to_attrs(_), do: []
 
   defmodule GraphQL do
     def git_actor do

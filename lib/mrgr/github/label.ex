@@ -39,6 +39,8 @@ defmodule Mrgr.Github.Label do
     |> Enum.map(&new/1)
   end
 
+  def from_graphql(_), do: []
+
   defmodule GraphQL do
     def to_params(nodes) when is_list(nodes) do
       Enum.map(nodes, &to_params/1)
