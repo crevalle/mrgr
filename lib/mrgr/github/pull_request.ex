@@ -53,7 +53,7 @@ defmodule Mrgr.Github.PullRequest do
         "id" => node["databaseId"],
         "merged_at" => node["mergedAt"],
         "node_id" => node["id"],
-        "requested_reviewers" => parse_requested_reviewers(node["reviewRequests"]["nodes"]),
+        "requested_reviewers" => parse_requested_reviewers(node),
         "status" => String.downcase(node["state"]),
         "url" => node["permalink"],
         "user" => %{
@@ -65,15 +65,17 @@ defmodule Mrgr.Github.PullRequest do
       Map.merge(node, parsed)
     end
 
-    def commit_data(nil), do: []
-
-    def commit_data(node) do
-      Enum.map(node["commits"]["nodes"], & &1["commit"])
+    def commit_data(%{"commits" => %{"nodes" => nodes}}) when is_list(nodes) do
+      Enum.map(nodes, & &1["commit"])
     end
 
-    def filepaths(node) do
-      Enum.map(node["files"]["nodes"], & &1["path"])
+    def commit_data(_), do: []
+
+    def filepaths(%{"files" => %{"nodes" => nodes}}) when is_list(nodes) do
+      Enum.map(nodes, & &1["path"])
     end
+
+    def filepaths(_), do: []
 
     def find_member_id(nil), do: nil
 
@@ -84,10 +86,13 @@ defmodule Mrgr.Github.PullRequest do
       end
     end
 
-    def parse_requested_reviewers(nodes) do
+    def parse_requested_reviewers(%{"reviewRequests" => %{"nodes" => nodes}})
+        when is_list(nodes) do
       nodes
       |> Enum.map(&Map.get(&1, "requestedReviewer"))
       |> Enum.map(&Mrgr.Github.User.graphql_to_attrs/1)
     end
+
+    def parse_requested_reviewers(_), do: []
   end
 end
