@@ -88,7 +88,7 @@ defmodule MrgrWeb.Formatter do
   @spec number_with_delimiter(Integer.t()) :: String.t()
   def number_with_delimiter(number) when is_integer(number) do
     number
-    |> Integer.to_char_list()
+    |> Integer.to_charlist()
     |> Enum.reverse()
     |> Enum.chunk_every(3)
     |> Enum.join(",")
