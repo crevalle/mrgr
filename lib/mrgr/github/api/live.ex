@@ -1,5 +1,5 @@
 defmodule Mrgr.Github.API.Live do
-  @page_size 100
+  @page_size 99
 
   use Mrgr.PubSub.Event
 
