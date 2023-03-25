@@ -22,18 +22,8 @@
           <.line_diff additions={@pull_request.additions} deletions={@pull_request.deletions} />
         </div>
 
-        <div class="flex space-x items-center">
-          <.repository_icon />
-          <p class="text-sm italic font-light text-gray-400">
-            <%= @pull_request.repository.name %>
-          </p>
-        </div>
-        <div class="mt-2 flex flex-wrap items-center space-x text-sm text-gray-500 sm:mt-0">
-          <.icon name="tag" class="text-gray-400 h-5 w-5" />
-          <div class="flex space-x-2">
-            <.badge :for={label <- @pull_request.labels} item={label} />
-          </div>
-        </div>
+        <.repository repository={@pull_request.repository} />
+        <.labels labels={@pull_request.labels} />
         <div :if={Mrgr.PullRequest.snoozed?(@pull_request)}>
           <p class="italic text-gray-500">
             😴 Snoozed until <%= ts(Mrgr.PullRequest.snoozed_until(@pull_request), @timezone) %>

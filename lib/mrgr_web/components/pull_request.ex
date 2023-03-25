@@ -392,6 +392,28 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
+  def labels(assigns) do
+    ~H"""
+    <div class="mt-2 flex flex-wrap items-center space-x text-sm text-gray-500 sm:mt-0">
+      <.icon name="tag" class="text-gray-400 h-5 w-5" />
+      <div class="flex space-x-2">
+        <.badge :for={label <- @labels} item={label} />
+      </div>
+    </div>
+    """
+  end
+
+  def repository(assigns) do
+    ~H"""
+    <div class="flex space-x items-center">
+      <.repository_icon />
+      <p class="text-sm italic font-light text-gray-400">
+        <%= @repository.name %>
+      </p>
+    </div>
+    """
+  end
+
   def line_diff(assigns) do
     ~H"""
     <p class="text-sm">
