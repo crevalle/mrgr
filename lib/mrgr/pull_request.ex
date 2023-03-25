@@ -13,7 +13,18 @@ defmodule Mrgr.PullRequest do
     |> Query.open()
     |> Query.with_repository()
     |> Mrgr.Repo.paginate(page)
-    |> Enum.map(&sync_github_data/1)
+    |> Enum.map(fn pr ->
+      try do
+        sync_github_data(pr)
+      rescue
+        e ->
+          IO.inspect(pr.id, label: "BUSTED")
+          IO.inspect(e)
+          IO.inspect(Exception.format_stacktrace(__STACKTRACE__))
+
+          pr
+      end
+    end)
     |> Enum.count()
   end
 
