@@ -65,6 +65,8 @@ defmodule Mrgr.Github.PullRequest do
       Map.merge(node, parsed)
     end
 
+    def commit_data(nil), do: []
+
     def commit_data(node) do
       Enum.map(node["commits"]["nodes"], & &1["commit"])
     end
