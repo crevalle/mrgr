@@ -4,6 +4,26 @@ defmodule Mrgr.Email do
 
   @from {"Mrgr", "noreply@mrgr.io"}
 
+  def hey_desmond_another_user(params, count, user) do
+    assigns = %{params: params, count: count, user: user}
+
+    new()
+    |> from(@from)
+    |> to("desmond@crevalle.io")
+    |> subject("Whoopee!  a new Mrgr signup")
+    |> render_with_layout(MrgrWeb.Email.Renderer.hey_desmond_another_user(assigns))
+  end
+
+  def hey_desmond_a_busted_user(params, error) do
+    assigns = %{params: params, error: error}
+
+    new()
+    |> from(@from)
+    |> to("desmond@crevalle.io")
+    |> subject("Uh oh!  Someone couldn't sign up")
+    |> render_with_layout(MrgrWeb.Email.Renderer.hey_desmond_a_busted_user(assigns))
+  end
+
   def invite_user_to_installation(recipient, installation) do
     assigns = %{
       installation: installation
