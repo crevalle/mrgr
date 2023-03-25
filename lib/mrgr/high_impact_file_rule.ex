@@ -4,19 +4,6 @@ defmodule Mrgr.HighImpactFileRule do
 
   use Mrgr.PubSub.Event
 
-  def rt_migrate_hifs do
-    Schema
-    |> Query.with_installation()
-    |> Mrgr.Repo.all()
-    |> Enum.map(fn hif ->
-      user_id = hif.repository.installation.creator_id
-
-      hif
-      |> Ecto.Changeset.change(%{user_id: user_id})
-      |> Mrgr.Repo.update!()
-    end)
-  end
-
   def for_user(user) do
     Schema
     |> Query.for_user(user.id)

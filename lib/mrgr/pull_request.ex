@@ -8,26 +8,6 @@ defmodule Mrgr.PullRequest do
   alias Mrgr.PullRequest.Query
   alias Mrgr.Schema.PullRequest, as: Schema
 
-  def rt_load_additions_and_deletions(page \\ %{}) do
-    Schema
-    |> Query.open()
-    |> Query.with_repository()
-    |> Mrgr.Repo.paginate(page)
-    |> Enum.map(fn pr ->
-      try do
-        sync_github_data(pr)
-      rescue
-        e ->
-          IO.inspect(pr.id, label: "BUSTED")
-          IO.inspect(e)
-          IO.inspect(Exception.format_stacktrace(__STACKTRACE__))
-
-          pr
-      end
-    end)
-    |> Enum.count()
-  end
-
   def load_authors do
     Schema
     |> Mrgr.Repo.all()
