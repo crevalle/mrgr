@@ -85,6 +85,16 @@ defmodule MrgrWeb.Formatter do
     DateTime.diff(DateTime.utc_now(), timestamp)
   end
 
+  @spec number_with_delimiter(Integer.t()) :: String.t()
+  def number_with_delimiter(number) when is_integer(number) do
+    number
+    |> Integer.to_char_list()
+    |> Enum.reverse()
+    |> Enum.chunk_every(3)
+    |> Enum.join(",")
+    |> String.reverse()
+  end
+
   def uhoh_color(%DateTime{} = dt) do
     DateTime.utc_now()
     |> DateTime.diff(dt)

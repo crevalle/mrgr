@@ -20,9 +20,11 @@ defmodule Mrgr.Schema.PullRequest do
   ]
 
   schema "pull_requests" do
+    field(:additions, :integer)
     # counter cache, can update out from under us
     field(:approving_review_count, :integer)
     field(:ci_status, :string, default: "success")
+    field(:deletions, :integer)
     field(:draft, :boolean)
     field(:external_id, :integer)
     field(:files_changed, {:array, :string})
@@ -86,8 +88,10 @@ defmodule Mrgr.Schema.PullRequest do
   end
 
   @create_fields ~w[
+    additions
     author_id
     ci_status
+    deletions
     draft
     files_changed
     mergeable
@@ -104,6 +108,8 @@ defmodule Mrgr.Schema.PullRequest do
   ]a
 
   @most_params ~w(
+    additions
+    deletions
     draft
     files_changed
     merge_state_status

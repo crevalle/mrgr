@@ -26,6 +26,7 @@ defmodule Mrgr.Github.API.Live do
       query {
         node(id:"#{pull_request.node_id}") {
           ... on PullRequest {
+            additions
             commits(first: 50) {
               nodes {
                 commit {
@@ -33,6 +34,7 @@ defmodule Mrgr.Github.API.Live do
                 }
               }
             }
+            deletions
             isDraft
             id
             number
@@ -154,6 +156,7 @@ defmodule Mrgr.Github.API.Live do
           pullRequests(#{params}) {
             edges {
               node {
+                additions
                 assignees(first: 20) {
                   nodes {
                     #{Mrgr.Github.User.GraphQL.user()}
@@ -177,6 +180,7 @@ defmodule Mrgr.Github.API.Live do
                   }
                 }
                 createdAt
+                deletions
                 databaseId
                 isDraft
                 files(first: #{@page_size}) {

@@ -380,4 +380,24 @@ defmodule MrgrWeb.Components.PullRequest do
     </div>
     """
   end
+
+  def title(assigns) do
+    ~H"""
+    <.l href={@href} target="_blank">
+      <div class="flex items-center space-x-1 text-teal-700 hover:text-teal-500">
+        <.h3><%= @title %></.h3>
+        <.icon name="arrow-top-right-on-square" class="flex-shrink-0 h-5 w-5" />
+      </div>
+    </.l>
+    """
+  end
+
+  def line_diff(assigns) do
+    ~H"""
+    <p class="text-sm">
+      <span class="text-green-600">+<%= number_with_delimiter(@additions) %></span>
+      <span class="text-red-400">-<%= number_with_delimiter(@deletions) %></span>
+    </p>
+    """
+  end
 end

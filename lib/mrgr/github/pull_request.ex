@@ -23,7 +23,9 @@ defmodule Mrgr.Github.PullRequest do
 
     def to_params(node) do
       %{
+        additions: node["additions"],
         commits: commit_data(node),
+        deletions: node["deletions"],
         draft: node["isDraft"],
         files_changed: filepaths(node),
         merge_state_status: node["mergeStateStatus"],
