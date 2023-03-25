@@ -2,17 +2,6 @@ defmodule Mrgr.PRTab do
   alias Mrgr.Schema.PRTab, as: Schema
   alias __MODULE__.Query
 
-  def rt_migrate_installation_ids do
-    Schema
-    |> Query.with_user()
-    |> Mrgr.Repo.all()
-    |> Enum.map(fn tab ->
-      tab
-      |> Ecto.Changeset.change(%{installation_id: tab.user.current_installation_id})
-      |> Mrgr.Repo.update()
-    end)
-  end
-
   def create_defaults_for_new_installation(%Mrgr.Schema.Installation{} = installation) do
     case Mrgr.Member.find_by_user_id(installation.creator_id) do
       %Mrgr.Schema.Member{} = member ->
