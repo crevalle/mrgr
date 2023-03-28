@@ -307,7 +307,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
   end
 
   def handle_info(%{event: @pull_request_closed, payload: payload}, socket) do
-    tabs = Tabs.remove_pull_request(socket.assigns.tabs, payload)
+    tabs = Tabs.excise_pr_from_all_tabs(socket.assigns.tabs, payload)
     selected_tab = get_selected_tab(tabs, socket)
 
     socket
@@ -637,7 +637,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       |> Enum.map(&replace_pr_in_tab(&1, pr))
     end
 
-    def remove_pull_request(tabs, pr) do
+    def excise_pr_from_all_tabs(tabs, pr) when is_list(tabs) do
       Enum.map(tabs, &excise_pr_from_tab(&1, pr))
     end
 
@@ -682,15 +682,15 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
 
     def snooze(tabs, selected, pull_request) do
-      # just operate on the main tabs data structure
-      updated = excise_pr_from_tab(selected, pull_request)
-
-      snoozed =
+      snoozed_tab =
         tabs
         |> find_tab_by_id(@snoozed)
         |> poke_pr_into_tab(pull_request)
 
-      replace_tabs(tabs, [updated, snoozed])
+      # PR can appear on several different tabs, remove from all
+      tabs
+      |> excise_pr_from_all_tabs(pull_request)
+      |> replace_tabs(snoozed_tab)
     end
 
     # hard to be smart about poking in the PR to system tabs
