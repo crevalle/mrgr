@@ -457,6 +457,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     @fix_ci "fix-ci"
     @snoozed "snoozed"
     @hifs "hifs"
+    @dormant "dormant"
 
     def new(user) do
       []
@@ -549,6 +550,14 @@ defmodule MrgrWeb.PullRequestDashboardLive do
           id: @hifs,
           permalink: @hifs,
           title: "💥 High Impact Changes",
+          type: "system",
+          meta: %{user: user},
+          pull_requests: []
+        },
+        %{
+          id: @dormant,
+          permalink: @dormant,
+          title: "🥀 Dormant",
           type: "system",
           meta: %{user: user},
           pull_requests: []
@@ -802,6 +811,10 @@ defmodule MrgrWeb.PullRequestDashboardLive do
 
     def fetch_pull_requests(%{id: @hifs} = tab) do
       Mrgr.PullRequest.high_impact_prs(tab.meta.user)
+    end
+
+    def fetch_pull_requests(%{id: @dormant} = tab) do
+      Mrgr.PullRequest.dormant_prs(tab.meta.user)
     end
 
     def fetch_pull_requests(%{id: @snoozed} = tab) do

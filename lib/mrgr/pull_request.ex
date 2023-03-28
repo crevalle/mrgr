@@ -5,7 +5,8 @@ defmodule Mrgr.PullRequest do
 
   import Mrgr.Tuple
 
-  alias Mrgr.PullRequest.Query
+  alias __MODULE__.Query
+  alias __MODULE__.Dormant
   alias Mrgr.Schema.PullRequest, as: Schema
 
   def load_authors do
@@ -753,6 +754,14 @@ defmodule Mrgr.PullRequest do
     |> Query.with_solicited_reviewers()
     |> Query.unsnoozed(user)
     |> Mrgr.Repo.all()
+  end
+
+  def dormant_prs(user) do
+    Schema
+    |> Query.dashboard_preloads(user)
+    |> Query.unsnoozed(user)
+    |> Mrgr.Repo.all()
+    |> Enum.filter(&Dormant.dormant?/1)
   end
 
   def snoozed_prs(user) do

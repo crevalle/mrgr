@@ -239,6 +239,27 @@ defmodule Mrgr.Schema.PullRequest do
 
     pull_request.comments
     |> Enum.filter(&Mrgr.DateTime.after?(&1.posted_at, recently))
-    |> Mrgr.Schema.Comment.ordered()
+    |> Mrgr.Schema.Comment.rev_cron()
+  end
+
+  def latest_commit_date(%{commits: []}), do: nil
+
+  def latest_commit_date(%{commits: commits}) do
+    commits
+    |> Enum.sort_by(& &1.author.date, {:desc, DateTime})
+    |> hd()
+    |> committed_at()
+  end
+
+  def latest_comment_date(%{comments: []}), do: nil
+
+  def latest_comment_date(%{comments: comments}) do
+    Mrgr.Schema.Comment.latest(comments).posted_at
+  end
+
+  def latest_pr_review_date(%{pr_reviews: []}), do: nil
+
+  def latest_pr_review_date(%{pr_reviews: pr_reviews}) do
+    Mrgr.Schema.PRReview.latest(pr_reviews).submitted_at
   end
 end

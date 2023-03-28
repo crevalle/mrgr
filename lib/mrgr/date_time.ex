@@ -41,6 +41,11 @@ defmodule Mrgr.DateTime do
     DateTime.utc_now()
   end
 
+  # for inserting into db columns without usec
+  def safe_now do
+    Mrgr.DateTime.safe_truncate(Mrgr.DateTime.now())
+  end
+
   def elapsed(starting, unit \\ :millisecond) do
     DateTime.diff(now(), starting, unit)
   end

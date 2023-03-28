@@ -45,4 +45,18 @@ defmodule Mrgr.Schema.PRReview do
     schema
     |> change(%{state: "dismissed"})
   end
+
+  def cron(pr_reviews) do
+    Enum.sort_by(pr_reviews, & &1.submitted_at, DateTime)
+  end
+
+  def rev_cron(pr_reviews) do
+    Enum.sort_by(pr_reviews, & &1.submitted_at, {:desc, DateTime})
+  end
+
+  def latest(pr_reviews) do
+    pr_reviews
+    |> rev_cron()
+    |> hd()
+  end
 end
