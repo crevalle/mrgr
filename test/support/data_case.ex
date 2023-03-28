@@ -26,6 +26,7 @@ defmodule Mrgr.DataCase do
       import Mrgr.DataCase
       import Mrgr.Factory
       import Mrgr.Assertions
+      import Mrgr.TestHelpers
     end
   end
 

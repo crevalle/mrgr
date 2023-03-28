@@ -33,7 +33,17 @@ defmodule Mrgr.Schema.Comment do
   def body(%{raw: %{"comment" => %{"body" => body}}}), do: body
   def body(%{raw: %{"body" => body}}), do: body
 
-  def ordered(comments) do
+  def cron(comments) do
     Enum.sort_by(comments, & &1.posted_at, DateTime)
+  end
+
+  def rev_cron(comments) do
+    Enum.sort_by(comments, & &1.posted_at, {:desc, DateTime})
+  end
+
+  def latest(comments) do
+    comments
+    |> rev_cron()
+    |> hd()
   end
 end

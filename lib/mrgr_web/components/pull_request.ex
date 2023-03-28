@@ -47,7 +47,7 @@ defmodule MrgrWeb.Components.PullRequest do
     ~H"""
     <div class="flex flex-col space-y-4 divide-y divide-gray-200">
       <.render_comment
-        :for={comment <- Mrgr.Schema.Comment.ordered(@pull_request.comments)}
+        :for={comment <- Mrgr.Schema.Comment.cron(@pull_request.comments)}
         comment={comment}
         tz={@timezone}
       />
@@ -295,6 +295,16 @@ defmodule MrgrWeb.Components.PullRequest do
     <div class="w-3/5">
       <.aside>
         These PRs contain changes to files marked High Impact.  Take an extra look before you merge them!
+      </.aside>
+    </div>
+    """
+  end
+
+  def tab_explanation(%{tab: %{id: "dormant"}} = assigns) do
+    ~H"""
+    <div class="w-3/5">
+      <.aside>
+        Dormant PRs have recently gone quiet.  It's been at least 24 hours (but less than 72) since the last commit, comment, or review.  To prevent them from going stale, they should be revived immediately by pinging your team.
       </.aside>
     </div>
     """

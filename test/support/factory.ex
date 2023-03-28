@@ -82,7 +82,7 @@ defmodule Mrgr.Factory do
       title: Faker.Company.bs(),
       number: System.unique_integer([:positive, :monotonic]),
       node_id: Ecto.UUID.generate(),
-      opened_at: Mrgr.DateTime.safe_truncate(Mrgr.DateTime.now()),
+      opened_at: Mrgr.DateTime.safe_now(),
       ci_status: "success",
       status: "open",
       head: build(:head),
@@ -94,6 +94,7 @@ defmodule Mrgr.Factory do
     %Mrgr.Schema.PRReview{
       pull_request: build(:pull_request),
       user: build(:github_user),
+      submitted_at: Mrgr.DateTime.safe_now(),
       state: "approved",
       commit_id: Ecto.UUID.generate(),
       node_id: Ecto.UUID.generate(),
@@ -185,16 +186,32 @@ defmodule Mrgr.Factory do
     }
   end
 
+  def build(:user_visible_repository) do
+    %Mrgr.Schema.UserVisibleRepository{
+      user: build(:user),
+      repository: build(:repository)
+    }
+  end
+
   def build(:commit) do
     %Mrgr.Github.Commit{
       node_id: Ecto.UUID.generate(),
       # whatevs!
       sha: Ecto.UUID.generate(),
-      author: build(:github_user),
-      committer: build(:github_user),
+      author: build(:git_actor),
+      committer: build(:git_actor),
       additions: 10,
       deletions: 12,
       message: Faker.Company.bs()
+    }
+  end
+
+  def build(:git_actor) do
+    %Mrgr.Github.GitActor{
+      avatar_url: Faker.Internet.url(),
+      date: Mrgr.DateTime.safe_now(),
+      email: Faker.Internet.email(),
+      name: Faker.Person.name()
     }
   end
 
