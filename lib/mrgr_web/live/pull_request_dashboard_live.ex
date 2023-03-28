@@ -629,6 +629,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
 
     def update_pull_request(tabs, pr) do
       tabs
+      |> excise_pr_from_tab(@dormant, pr)
       |> update_action_state_tabs(pr)
       # replaces the PR again in the action state tabs, but i don't
       # care about the extra work rn.  this code is simpler than extracting
