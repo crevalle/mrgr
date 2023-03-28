@@ -175,11 +175,42 @@ defmodule Mrgr.PullRequestTest do
       insert!(:pr_review, pull_request: pr_6, submitted_at: ctx.fresh)
       insert!(:pr_review, pull_request: pr_6, submitted_at: ctx.dormant)
 
-      pr_ids = Mrgr.PullRequest.dormant_prs(ctx.user) |> ids() |> IO.inspect()
+      pr_ids = Mrgr.PullRequest.dormant_prs(ctx.user) |> ids()
 
       assert Enum.count(pr_ids) == 2
       assert Enum.member?(pr_ids, pr_2.id)
       assert Enum.member?(pr_ids, pr_3.id)
+    end
+
+    test "respects a mix of activities", ctx do
+      fresh_commit = build(:commit, author: build(:git_actor, date: ctx.fresh))
+
+      pr_1 = insert!(:pull_request, repository: ctx.r1, opened_at: ctx.stale)
+      insert!(:pr_review, pull_request: pr_1, submitted_at: ctx.fresh)
+
+      pr_2 =
+        insert!(:pull_request, commits: [fresh_commit], repository: ctx.r1, opened_at: ctx.stale)
+
+      insert!(:pr_review, pull_request: pr_2, submitted_at: ctx.dormant)
+
+      pr_3 = insert!(:pull_request, repository: ctx.r1, opened_at: ctx.stale)
+      insert!(:pr_review, pull_request: pr_3, submitted_at: ctx.also_dormant)
+
+      pr_4 = insert!(:pull_request, repository: ctx.r1, opened_at: ctx.stale)
+      insert!(:pr_review, pull_request: pr_4, submitted_at: ctx.also_dormant)
+      insert!(:comment, pull_request: pr_4, posted_at: ctx.stale)
+
+      pr_5 =
+        insert!(:pull_request, commits: [fresh_commit], repository: ctx.r1, opened_at: ctx.stale)
+
+      insert!(:pr_review, pull_request: pr_5, submitted_at: ctx.also_dormant)
+      insert!(:comment, pull_request: pr_5, posted_at: ctx.stale)
+
+      pr_ids = Mrgr.PullRequest.dormant_prs(ctx.user) |> ids()
+
+      assert Enum.count(pr_ids) == 2
+      assert Enum.member?(pr_ids, pr_3.id)
+      assert Enum.member?(pr_ids, pr_4.id)
     end
   end
 
