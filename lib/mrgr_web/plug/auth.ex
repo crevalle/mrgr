@@ -137,4 +137,17 @@ defmodule MrgrWeb.Plug.Auth do
     |> Phoenix.Controller.put_flash(:info, "Please sign in to check that out!")
     |> Phoenix.Controller.redirect(to: "/sign-in")
   end
+
+  def assign_user_timezone(socket) do
+    user = socket.assigns.current_user
+    timezone = socket.assigns.timezone
+
+    user =
+      user
+      |> Mrgr.Schema.User.timezone_changeset(%{timezone: timezone})
+      |> Mrgr.Repo.update!()
+
+    socket
+    |> Phoenix.Component.assign(:current_user, user)
+  end
 end

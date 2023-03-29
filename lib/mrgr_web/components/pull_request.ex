@@ -304,7 +304,7 @@ defmodule MrgrWeb.Components.PullRequest do
     ~H"""
     <div class="w-3/5">
       <.aside>
-        Dormant PRs have recently gone quiet.  It's been at least 24 hours (but less than 72) since the last commit, comment, or review.  To prevent them from going stale, they should be revived immediately by pinging your team.
+        Dormant PRs have recently gone quiet.  It's been at least 24 hours - but less than 72 - since the last commit, comment, or review (weekends are NOT included in this calculation).  To prevent them from going stale, they should be revived immediately by pinging your team.
       </.aside>
     </div>
     """

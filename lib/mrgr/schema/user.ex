@@ -21,6 +21,7 @@ defmodule Mrgr.Schema.User do
     field(:phone, :string)
     field(:refresh_token, :string)
     field(:send_weekly_changelog_email, :boolean)
+    field(:timezone, :string)
     field(:token, :string)
     field(:token_expires_at, :utc_datetime)
     field(:token_updated_at, :utc_datetime)
@@ -156,6 +157,11 @@ defmodule Mrgr.Schema.User do
   def weekly_changelog_changeset(schema, params) do
     schema
     |> cast(params, [:send_weekly_changelog_email])
+  end
+
+  def timezone_changeset(schema, params) do
+    schema
+    |> cast(params, [:timezone])
   end
 
   def image(%{avatar_url: url}) when is_bitstring(url), do: url
