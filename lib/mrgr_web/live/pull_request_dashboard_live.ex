@@ -246,17 +246,15 @@ defmodule MrgrWeb.PullRequestDashboardLive do
   end
 
   def handle_event("snooze", %{"snooze_id" => snooze_id, "pr_id" => pull_request_id}, socket) do
-    selected_tab = socket.assigns.selected_tab
-
     pull_request =
-      selected_tab
+      socket.assigns.selected_tab
       |> Tabs.find_pull_request(pull_request_id)
       |> Mrgr.PullRequest.snooze_for_user(
         socket.assigns.current_user,
         translate_snooze(snooze_id)
       )
 
-    tabs = Tabs.snooze(socket.assigns.tabs, selected_tab, pull_request)
+    tabs = Tabs.snooze(socket.assigns.tabs, pull_request)
     selected = get_selected_tab(tabs, socket)
 
     socket =
@@ -703,7 +701,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       replace_tabs(tabs, [needs_approval_tab, refreshing])
     end
 
-    def snooze(tabs, selected, pull_request) do
+    def snooze(tabs, pull_request) do
       snoozed_tab =
         tabs
         |> find_tab_by_id(@snoozed)
