@@ -745,6 +745,7 @@ defmodule Mrgr.PullRequest do
     |> Query.for_visible_repos(user.id)
     |> Query.for_installation(user.current_installation_id)
     |> Query.open()
+    |> Query.undrafted()
     |> Query.order_by_opened()
     |> Query.high_impact(user)
     |> Query.with_comments()
@@ -984,15 +985,19 @@ defmodule Mrgr.PullRequest do
 
     def filter_draft_status(query, "both"), do: query
 
-    def filter_draft_status(query, "draft") do
+    def filter_draft_status(query, "draft"), do: drafts(query)
+
+    def filter_draft_status(query, "open"), do: undrafted(query)
+
+    def undrafted(query) do
       from(q in query,
-        where: q.draft == true
+        where: q.draft == false
       )
     end
 
-    def filter_draft_status(query, "open") do
+    def drafts(query) do
       from(q in query,
-        where: q.draft == false
+        where: q.draft == true
       )
     end
 
@@ -1179,6 +1184,7 @@ defmodule Mrgr.PullRequest do
       |> for_visible_repos(user.id)
       |> for_installation(user.current_installation_id)
       |> open()
+      |> undrafted()
       |> order_by_opened()
       ### these are left-joined, the HIF tab is inner-joined
       |> with_hifs_for_user(user)
