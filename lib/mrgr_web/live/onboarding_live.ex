@@ -8,6 +8,8 @@ defmodule MrgrWeb.OnboardingLive do
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
+      socket = MrgrWeb.Plug.Auth.assign_user_timezone(socket)
+
       current_user = socket.assigns.current_user
       subscribe(current_user)
 

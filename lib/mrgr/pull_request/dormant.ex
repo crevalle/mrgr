@@ -1,12 +1,12 @@
 defmodule Mrgr.PullRequest.Dormant do
-  def dormant?(%Mrgr.Schema.PullRequest{} = pr) do
+  def dormant?(%Mrgr.Schema.PullRequest{} = pr, timezone) do
     pr
     |> most_recent_activity_timestamp()
-    |> dormant?()
+    |> dormant?(timezone)
   end
 
-  def dormant?(timestamp) do
-    !fresh?(timestamp) && !stale?(timestamp)
+  def dormant?(timestamp, timezone) do
+    !fresh?(timestamp, timezone) && !stale?(timestamp, timezone)
   end
 
   def most_recent_activity_timestamp(pr) do
@@ -21,23 +21,27 @@ defmodule Mrgr.PullRequest.Dormant do
     |> hd()
   end
 
-  def fresh?(timestamp) do
-    Mrgr.DateTime.before?(fresh_threshold(), timestamp)
+  def fresh?(timestamp, timezone) do
+    localized_timestamp = DateTime.shift_zone!(timestamp, timezone)
+
+    Mrgr.DateTime.before?(fresh_threshold(timezone), localized_timestamp)
   end
 
-  def stale?(timestamp) do
-    Mrgr.DateTime.before?(timestamp, stale_threshold())
+  def stale?(timestamp, timezone) do
+    localized_timestamp = DateTime.shift_zone!(timestamp, timezone)
+
+    Mrgr.DateTime.before?(localized_timestamp, stale_threshold(timezone))
   end
 
-  def fresh_threshold do
-    now = Mrgr.DateTime.now()
+  def fresh_threshold(timezone) do
+    now = DateTime.now!(timezone)
     offset = fresh_offset(Date.day_of_week(now))
 
     set_offset(now, offset)
   end
 
-  def stale_threshold do
-    now = Mrgr.DateTime.now()
+  def stale_threshold(timezone) do
+    now = DateTime.now!(timezone)
     offset = stale_offset(Date.day_of_week(now))
 
     set_offset(now, offset)
@@ -64,5 +68,4 @@ defmodule Mrgr.PullRequest.Dormant do
   def stale_offset(5), do: 72
   def stale_offset(6), do: 96
   def stale_offset(7), do: 120
-
 end

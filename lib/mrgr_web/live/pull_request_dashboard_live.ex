@@ -10,6 +10,8 @@ defmodule MrgrWeb.PullRequestDashboardLive do
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
+      socket = MrgrWeb.Plug.Auth.assign_user_timezone(socket)
+
       current_user = socket.assigns.current_user
 
       repos = Mrgr.Repository.for_user_with_hif_rules(current_user)
