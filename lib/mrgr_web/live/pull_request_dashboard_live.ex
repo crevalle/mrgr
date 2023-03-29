@@ -27,6 +27,8 @@ defmodule MrgrWeb.PullRequestDashboardLive do
 
       subscribe(current_user)
 
+      set_dormancy_timer()
+
       socket
       |> assign(:detail, nil)
       |> assign(:selected_attr, nil)
@@ -282,6 +284,13 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     |> noreply()
   end
 
+  def set_dormancy_timer do
+    # ms
+    one_hour = 60 * 60 * 1000
+
+    Process.send_after(self(), :refresh_dormancy, one_hour)
+  end
+
   # event bus
   def subscribe(user) do
     user
@@ -291,6 +300,17 @@ defmodule MrgrWeb.PullRequestDashboardLive do
 
   def installation_topic(user) do
     Mrgr.PubSub.Topic.installation(user)
+  end
+
+  def handle_info(:refresh_dormancy, socket) do
+    set_dormancy_timer()
+
+    # the async handler takes care of the currently selected tab
+    tabs = Tabs.refresh_dormant_tab(socket.assigns.tabs)
+
+    socket
+    |> assign(:tabs, tabs)
+    |> noreply()
   end
 
   def handle_info(%{event: event, payload: payload}, socket)
@@ -755,6 +775,15 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       set_prs_on_tab(tab, prs)
     end
 
+    def refresh_dormant_tab(tabs) do
+      dormant =
+        tabs
+        |> find_tab_by_id(@dormant)
+        |> refresh_tab_async()
+
+      replace_tab(tabs, dormant)
+    end
+
     def refresh_non_snoozed_tabs_async(tabs) do
       refreshing =
         tabs
@@ -843,10 +872,12 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     # once a tab's data has been updated, we need to poke it back into its
     # place among the list of all tabs
     def replace_tabs(all, updated) when is_list(updated) do
-      Enum.reduce(updated, all, fn t, a -> replace_tabs(a, t) end)
+      Enum.reduce(updated, all, fn t, a -> replace_tab(a, t) end)
     end
 
-    def replace_tabs(all, updated) do
+    def replace_tabs(all, updated), do: replace_tab(all, updated)
+
+    def replace_tab(all, updated) do
       Mrgr.List.replace(all, updated)
     end
 
