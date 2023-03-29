@@ -9,20 +9,24 @@
       <div class="flex flex-col space-y-1">
         <div class="flex items-end space-x-3">
           <div class="flex items-center space-x-2">
-            <.action_state_emoji
-              :if={@show_action_state_emoji}
-              action_state={Mrgr.PullRequest.action_state(@pull_request)}
-            />
             <.title
               href={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)}
               title={@pull_request.title}
             >
             </.title>
+            <.action_state_emoji
+              :if={@show_action_state_emoji}
+              action_state={Mrgr.PullRequest.action_state(@pull_request)}
+            />
           </div>
+          <.byline author={Mrgr.Schema.PullRequest.author_name(@pull_request)} />
           <.line_diff additions={@pull_request.additions} deletions={@pull_request.deletions} />
         </div>
 
-        <.repository repository={@pull_request.repository} />
+        <.repository_and_branch
+          repository={@pull_request.repository}
+          branch={Mrgr.Schema.PullRequest.branch_name(@pull_request)}
+        />
         <.labels labels={@pull_request.labels} />
         <div :if={Mrgr.PullRequest.snoozed?(@pull_request)}>
           <p class="italic text-gray-500">

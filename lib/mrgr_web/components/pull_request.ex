@@ -413,14 +413,20 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
-  def repository(assigns) do
+  def repository_and_branch(assigns) do
     ~H"""
-    <div class="flex space-x items-center">
+    <div class="flex space-x">
       <.repository_icon />
-      <p class="text-sm italic font-light text-gray-400">
-        <%= @repository.name %>
-      </p>
+      <p class="text-sm italic font-light text-gray-400"><%= @repository.name %>/<%= @branch %></p>
     </div>
+    """
+  end
+
+  def byline(assigns) do
+    ~H"""
+    <p class="text-sm font-light text-gray-400">
+      by @<%= @author %>
+    </p>
     """
   end
 
