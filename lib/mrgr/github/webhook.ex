@@ -70,6 +70,14 @@ defmodule Mrgr.Github.Webhook do
     # Mrgr.CheckRun.create(payload)
   end
 
+  def handle("pull_request", %{"action" => "ready_for_review"} = payload) do
+    Mrgr.PullRequest.Webhook.ready_for_review(payload)
+  end
+
+  def handle("pull_request", %{"action" => "converted_to_draft"} = payload) do
+    Mrgr.PullRequest.Webhook.converted_to_draft(payload)
+  end
+
   def handle("pull_request", %{"action" => "assigned"} = payload) do
     Mrgr.PullRequest.Webhook.assign_user(payload)
   end

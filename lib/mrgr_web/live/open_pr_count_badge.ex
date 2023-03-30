@@ -49,6 +49,8 @@ defmodule MrgrWeb.Live.OpenPRCountBadge do
              @pull_request_closed,
              @pull_request_snoozed,
              @pull_request_unsnoozed,
+             @pull_request_ready_for_review,
+             @pull_request_converted_to_draft,
              @repository_visibility_updated
            ] do
     # can't just do naive increment/decrement because the PRs may be in hidden repos
