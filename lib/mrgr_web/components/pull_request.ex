@@ -393,12 +393,19 @@ defmodule MrgrWeb.Components.PullRequest do
 
   def title(assigns) do
     ~H"""
-    <.l href={@href} target="_blank">
-      <div class="flex items-center space-x-1 text-teal-700 hover:text-teal-500">
-        <.h3><%= @title %></.h3>
-        <.icon name="arrow-top-right-on-square" class="flex-shrink-0 h-5 w-5" />
-      </div>
-    </.l>
+    <div class="flex items-center space-x-2">
+      <.l href={@href} target="_blank">
+        <div class="flex items-center space-x-1 text-teal-700 hover:text-teal-500">
+          <.h3><%= @title %></.h3>
+          <.icon name="arrow-top-right-on-square" class="flex-shrink-0 h-5 w-5" />
+        </div>
+      </.l>
+      <%= if @draft do %>
+        <span class="text-gray-400">[draft]</span>
+      <% else %>
+        <.action_state_emoji :if={@show_action_state_emoji} action_state={@action_state} />
+      <% end %>
+    </div>
     """
   end
 
