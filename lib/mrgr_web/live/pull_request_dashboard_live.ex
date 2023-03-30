@@ -688,17 +688,26 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     # TODO: pull from snoozed tab
     # poke into HIF tab
     def receive_opened_pull_request(tabs, pr) do
-      needs_approval_tab =
-        tabs
-        |> find_tab_by_id(@needs_approval)
-        |> poke_pr_into_tab(pr)
+      tabs = start_pr_in_needs_approval(tabs, pr)
 
       refreshing =
         tabs
         |> custom_tabs()
         |> Enum.map(&refresh_tab_async/1)
 
-      replace_tabs(tabs, [needs_approval_tab, refreshing])
+      replace_tabs(tabs, refreshing)
+    end
+
+    # drafts don't go in our regular tabs
+    defp start_pr_in_needs_approval(tabs, %{draft: true}), do: tabs
+
+    defp start_pr_in_needs_approval(tabs, pr) do
+      needs_approval =
+        tabs
+        |> find_tab_by_id(@needs_approval)
+        |> poke_pr_into_tab(pr)
+
+      replace_tab(tabs, needs_approval)
     end
 
     def snooze(tabs, pull_request) do
