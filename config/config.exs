@@ -53,8 +53,7 @@ config :logger, :console,
 # Use Jason for JSON parsing in Phoenix
 config :phoenix, :json_library, Jason
 
-config :mrgr, :analytics,
-  render_analytics_tag: false
+config :mrgr, :analytics, render_analytics_tag: false
 
 config :mrgr, :oauth,
   client_id: System.get_env("GITHUB_OAUTH_CLIENT_ID"),
