@@ -164,37 +164,39 @@
           </div>
         </.form>
       </div>
-      <%= if Mrgr.PullRequest.snoozed?(@pull_request) do %>
-        <.l
-          class="clear-btn text-teal-700 hover:text-teal-500"
-          phx-click={JS.push("unsnooze", value: %{pr_id: @pull_request.id})}
-        >
-          Unsnooze
-        </.l>
-      <% else %>
-        <div class="relative">
-          <.dropdown_toggle_link
-            target={"snooze-menu-#{@pull_request.id}"}
-            class="clear-btn text-teal-700"
+      <%= if !@pull_request.draft do %>
+        <%= if Mrgr.PullRequest.snoozed?(@pull_request) do %>
+          <.l
+            class="clear-btn text-teal-700 hover:text-teal-500"
+            phx-click={JS.push("unsnooze", value: %{pr_id: @pull_request.id})}
           >
-            <div class="flex items-center">
-              Snooze <.icon name="chevron-down" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
-            </div>
-          </.dropdown_toggle_link>
+            Unsnooze
+          </.l>
+        <% else %>
+          <div class="relative">
+            <.dropdown_toggle_link
+              target={"snooze-menu-#{@pull_request.id}"}
+              class="clear-btn text-teal-700"
+            >
+              <div class="flex items-center">
+                Snooze <.icon name="chevron-down" class="text-gray-500 -mr-1 ml-2 h-5 w-5" />
+              </div>
+            </.dropdown_toggle_link>
 
-          <.dropdown_menu name={"snooze-menu-#{@pull_request.id}"}>
-            <:description>
-              Snooze this PR to hide it for a while.<br /> It'll still appear in the Snoozed tab.
-            </:description>
-            <div class="flex flex-col">
-              <.snooze_option
-                :for={option <- @snooze_options}
-                option={option}
-                ctx={@pull_request.id}
-              />
-            </div>
-          </.dropdown_menu>
-        </div>
+            <.dropdown_menu name={"snooze-menu-#{@pull_request.id}"}>
+              <:description>
+                Snooze this PR to hide it for a while.<br /> It'll still appear in the Snoozed tab.
+              </:description>
+              <div class="flex flex-col">
+                <.snooze_option
+                  :for={option <- @snooze_options}
+                  option={option}
+                  ctx={@pull_request.id}
+                />
+              </div>
+            </.dropdown_menu>
+          </div>
+        <% end %>
       <% end %>
     </div>
   </div>
