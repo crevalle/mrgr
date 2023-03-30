@@ -661,6 +661,8 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       Enum.map(tabs, &excise_pr_from_tab(&1, pr))
     end
 
+    def update_action_state_tabs(tabs, %{draft: true}), do: tabs
+
     def update_action_state_tabs(tabs, pull_request) do
       # pr may move from eg Fix CI to Ready to Merge
 
