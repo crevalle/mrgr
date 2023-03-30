@@ -8,17 +8,13 @@
       <!-- title -->
       <div class="flex flex-col space-y-1">
         <div class="flex items-end space-x-3">
-          <div class="flex items-center space-x-2">
-            <.title
-              href={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)}
-              title={@pull_request.title}
-            >
-            </.title>
-            <.action_state_emoji
-              :if={@show_action_state_emoji}
-              action_state={Mrgr.PullRequest.action_state(@pull_request)}
-            />
-          </div>
+          <.title
+            href={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)}
+            title={@pull_request.title}
+            draft={@pull_request.draft}
+            show_action_state_emoji={@show_action_state_emoji}
+            action_state={Mrgr.PullRequest.action_state(@pull_request)}
+          />
           <.byline author={Mrgr.Schema.PullRequest.author_name(@pull_request)} />
           <.line_diff additions={@pull_request.additions} deletions={@pull_request.deletions} />
         </div>
