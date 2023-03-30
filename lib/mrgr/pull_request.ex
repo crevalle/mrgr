@@ -696,6 +696,7 @@ defmodule Mrgr.PullRequest do
     |> Query.for_visible_repos(user.id)
     |> Query.for_installation(user.current_installation_id)
     |> Query.open()
+    |> Query.undrafted()
     |> Query.unsnoozed(user)
     |> Mrgr.Repo.aggregate(:count)
   end
@@ -719,6 +720,7 @@ defmodule Mrgr.PullRequest do
     |> Query.ready_to_merge()
     |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
+    |> Query.undrafted()
     |> Mrgr.Repo.all()
   end
 
@@ -727,6 +729,7 @@ defmodule Mrgr.PullRequest do
     |> Query.needs_approval()
     |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
+    |> Query.undrafted()
     |> Mrgr.Repo.all()
   end
 
@@ -735,6 +738,7 @@ defmodule Mrgr.PullRequest do
     |> Query.fix_ci()
     |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
+    |> Query.undrafted()
     |> Mrgr.Repo.all()
   end
 
@@ -761,6 +765,7 @@ defmodule Mrgr.PullRequest do
     Schema
     |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
+    |> Query.undrafted()
     |> Mrgr.Repo.all()
     |> Enum.filter(&Dormant.dormant?(&1, user.timezone))
   end
@@ -769,6 +774,7 @@ defmodule Mrgr.PullRequest do
     Schema
     |> Query.dashboard_preloads(user)
     |> Query.snoozed(user)
+    |> Query.undrafted()
     |> Mrgr.Repo.all()
   end
 
@@ -1184,7 +1190,6 @@ defmodule Mrgr.PullRequest do
       |> for_visible_repos(user.id)
       |> for_installation(user.current_installation_id)
       |> open()
-      |> undrafted()
       |> order_by_opened()
       ### these are left-joined, the HIF tab is inner-joined
       |> with_hifs_for_user(user)
