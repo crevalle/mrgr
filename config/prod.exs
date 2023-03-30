@@ -59,8 +59,7 @@ config :logger, level: :info
 
 config :appsignal, :config, active: true
 
-config :mrgr, :analytics,
-  render_analytics_tag: true
+config :mrgr, :analytics, render_analytics_tag: true
 
 config :mrgr, Mrgr.Mailer,
   adapter: Swoosh.Adapters.Sendgrid,
