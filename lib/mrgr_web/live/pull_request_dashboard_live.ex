@@ -257,16 +257,8 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     tabs = Tabs.snooze(socket.assigns.tabs, pull_request)
     selected = get_selected_tab(tabs, socket)
 
-    socket =
-      case previewing_pull_request?(socket.assigns.detail, pull_request) do
-        true ->
-          hide_detail(socket)
-
-        false ->
-          socket
-      end
-
     socket
+    |> hide_detail_if_previewing(pull_request)
     |> assign(:tabs, tabs)
     |> assign(:selected_tab, selected)
     |> Flash.put(:info, "PR snoozed 😴")
@@ -314,7 +306,11 @@ defmodule MrgrWeb.PullRequestDashboardLive do
   end
 
   def handle_info(%{event: event, payload: payload}, socket)
-      when event in [@pull_request_created, @pull_request_reopened] do
+      when event in [
+             @pull_request_created,
+             @pull_request_reopened,
+             @pull_request_ready_for_review
+           ] do
     hydrated = Mrgr.PullRequest.preload_for_dashboard(payload, socket.assigns.current_user)
     tabs = Tabs.receive_opened_pull_request(socket.assigns.tabs, hydrated)
     selected_tab = get_selected_tab(tabs, socket)
@@ -379,6 +375,17 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     |> noreply()
   end
 
+  def handle_info(%{event: @pull_request_converted_to_draft, payload: pull_request}, socket) do
+    tabs = Tabs.convert_pr_to_draft(socket.assigns.tabs, pull_request)
+    selected_tab = get_selected_tab(tabs, socket)
+
+    socket
+    |> Flash.put(:info, "PR converted to draft: #{pull_request.title}")
+    |> assign(:tabs, tabs)
+    |> assign(:selected_tab, selected_tab)
+    |> noreply()
+  end
+
   def handle_info({_ref, {:time, elapsed}}, socket) do
     IO.inspect(elapsed, label: "ELAPSED")
 
@@ -408,6 +415,16 @@ defmodule MrgrWeb.PullRequestDashboardLive do
 
   def handle_info(_uninteresting_event, socket) do
     noreply(socket)
+  end
+
+  def hide_detail_if_previewing(socket, pull_request) do
+    case previewing_pull_request?(socket.assigns.detail, pull_request) do
+      true ->
+        hide_detail(socket)
+
+      false ->
+        socket
+    end
   end
 
   def snooze_options do
@@ -690,8 +707,26 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     # TODO: pull from snoozed tab
     # poke into HIF tab
     def receive_opened_pull_request(tabs, pr) do
-      tabs = start_pr_in_needs_approval(tabs, pr)
+      tabs
+      |> start_pr_in_needs_approval(pr)
+      |> refresh_custom_tabs()
+    end
 
+    def convert_pr_to_draft(tabs, pull_request) do
+      tabs
+      |> excise_pr_from_system_tabs(pull_request)
+      |> refresh_custom_tabs()
+    end
+
+    def excise_pr_from_system_tabs(tabs, pull_request) do
+      tabs
+      |> system_tabs()
+      |> Enum.reduce(tabs, fn tab, acc ->
+        excise_pr_from_tab(acc, tab.id, pull_request)
+      end)
+    end
+
+    def refresh_custom_tabs(tabs) do
       refreshing =
         tabs
         |> custom_tabs()

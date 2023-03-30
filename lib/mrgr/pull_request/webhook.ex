@@ -9,6 +9,20 @@ defmodule Mrgr.PullRequest.Webhook do
   @typep change_error :: {:error, Ecto.Changeset.t()}
   @typep not_found :: {:error, :not_found}
 
+  @spec ready_for_review(webhook()) :: success() | not_found()
+  def ready_for_review(payload) do
+    with {:ok, pull_request} <- find_pull_request(payload) do
+      Mrgr.PullRequest.ready_for_review(pull_request)
+    end
+  end
+
+  @spec converted_to_draft(webhook()) :: success() | not_found()
+  def converted_to_draft(payload) do
+    with {:ok, pull_request} <- find_pull_request(payload) do
+      Mrgr.PullRequest.converted_to_draft(pull_request)
+    end
+  end
+
   @spec assign_user(webhook()) :: success() | change_error() | not_found()
   def assign_user(payload) do
     with {:ok, pull_request} <- find_pull_request(payload),

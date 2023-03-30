@@ -121,6 +121,25 @@ defmodule Mrgr.PullRequest do
     end
   end
 
+  def ready_for_review(pull_request) do
+    pull_request
+    |> Schema.most_changeset(%{draft: false})
+    |> Mrgr.Repo.update!()
+    |> preload_installation()
+    |> preload_hif_alerts()
+    |> notify_hif_alert_consumers()
+    |> broadcast(@pull_request_ready_for_review)
+    |> ok()
+  end
+
+  def converted_to_draft(pull_request) do
+    pull_request
+    |> Schema.most_changeset(%{draft: true})
+    |> Mrgr.Repo.update!()
+    |> broadcast(@pull_request_converted_to_draft)
+    |> ok()
+  end
+
   @spec close(map()) ::
           {:ok, Schema.t()} | {:error, :not_found} | {:error, Ecto.Changeset.t()}
   def close(%{"pull_request" => params} = payload) do
@@ -453,6 +472,10 @@ defmodule Mrgr.PullRequest do
     # just blow them all away and replace them
 
     Mrgr.HighImpactFileRule.reset(pull_request)
+  end
+
+  def preload_hif_alerts(pull_request) do
+    Mrgr.Repo.preload(pull_request, :high_impact_file_rules, force: true)
   end
 
   def notify_hif_alert_consumers(%{draft: true} = pr), do: pr
