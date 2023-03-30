@@ -41,7 +41,7 @@ defmodule Mrgr.PullRequest do
         |> set_solicited_reviewers(params["requested_reviewers"])
         |> sync_github_data()
         |> reassociate_high_impact_file_rules()
-        |> notify_hif_alert_consumers()
+        # |> notify_hif_alert_consumers()
         |> broadcast(@pull_request_created)
         |> ok()
 
