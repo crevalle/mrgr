@@ -53,7 +53,10 @@ defmodule MrgrWeb.Components.Changelog do
         <div class="flex flex-col items-start">
           <div class="flex items-center space-x-2">
             <.l href={Mrgr.Schema.PullRequest.external_pull_request_url(@pr)}>
-              <%= @pr.title %>
+              <div class="flex items-center space-x-1">
+                <span><%= @pr.title %></span>
+                <.icon name="chevron-right" class="h-4 w-4" />
+              </div>
             </.l>
             <span>(<%= Mrgr.Schema.PullRequest.author_name(@pr) %>)</span>
             <.line_diff additions={@pr.additions} deletions={@pr.deletions} />
