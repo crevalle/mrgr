@@ -439,7 +439,7 @@ defmodule MrgrWeb.Components.PullRequest do
 
   def line_diff(assigns) do
     ~H"""
-    <p class="text-sm">
+    <p class="text-sm flex items-center space-x-1">
       <span class="text-green-600">+<%= number_with_delimiter(@additions) %></span>
       <span class="text-red-400">-<%= number_with_delimiter(@deletions) %></span>
     </p>

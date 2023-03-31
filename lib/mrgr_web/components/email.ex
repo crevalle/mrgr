@@ -1,4 +1,7 @@
 defmodule MrgrWeb.Components.Email do
+  @green_600 "#4aa35b"
+  @red_400 "#ed7a74"
+
   use MrgrWeb, :component
   use Phoenix.VerifiedRoutes, endpoint: MrgrWeb.Endpoint, router: MrgrWeb.Router
 
@@ -26,10 +29,25 @@ defmodule MrgrWeb.Components.Email do
           [<%= pr.repository.name %>]
           <a href={Mrgr.Schema.PullRequest.external_pull_request_url(pr)}><%= pr.title %></a>
           (<%= Mrgr.Schema.PullRequest.author_name(pr) %>)
+          <.line_diff additions={pr.additions} deletions={pr.deletions} />
           <.hif_list hifs={pr.high_impact_file_rules} />
         </li>
       </ul>
     <% end %>
+    """
+  end
+
+  def line_diff(assigns) do
+    assigns =
+      assigns
+      |> assign(:green_text, "color: #{@green_600};")
+      |> assign(:red_text, "color: #{@red_400};")
+
+    ~H"""
+    <span style={"#{@green_text} padding-left: 0.25rem;"}>
+      +<%= number_with_delimiter(@additions) %>
+    </span>
+    <span style={@red_text}>-<%= number_with_delimiter(@deletions) %></span>
     """
   end
 

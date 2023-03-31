@@ -87,7 +87,7 @@ defmodule Mrgr.Email do
       bucket =
         Enum.reduce(pull_requests, build_bucket(), fn pr, acc ->
           acc
-          |> increment_total()
+          |> increment_total(pr)
           |> put_pr_in_date_bucket(pr)
         end)
 
@@ -99,6 +99,8 @@ defmodule Mrgr.Email do
     def build_bucket do
       basic = %{
         total: 0,
+        total_additions: 0,
+        total_deletions: 0,
         now: DateTime.now!("America/Los_Angeles") |> DateTime.to_date()
       }
 
@@ -158,8 +160,13 @@ defmodule Mrgr.Email do
       Map.put(bucket, key, [pr | prs])
     end
 
-    def increment_total(bucket) do
-      %{bucket | total: bucket.total + 1}
+    def increment_total(bucket, pr) do
+      %{
+        bucket
+        | total: bucket.total + 1,
+          total_additions: bucket.total_additions + pr.additions,
+          total_deletions: bucket.total_deletions + pr.deletions
+      }
     end
 
     defp key_from_offset(bucket, offset) do

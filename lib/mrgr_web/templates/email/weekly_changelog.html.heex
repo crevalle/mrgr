@@ -6,7 +6,11 @@
     <%= @pull_requests.total %> pull requests were merged this week.  That's
     <.up_or_down this_week={@pull_requests.total} last_week={@closed_last_week_count} /> from
     <strong><%= @closed_last_week_count %></strong>
-    last week.  Here's the full breakdown:
+    last week.  The total diff was
+    <.line_diff
+      additions={@pull_requests.total_additions}
+      deletions={@pull_requests.total_deletions}
+    />. Here's the full breakdown:
   </p>
 
   <div :if={Enum.any?(@pull_requests.last_friday.pull_requests)}>
