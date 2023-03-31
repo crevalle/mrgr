@@ -119,6 +119,14 @@ defmodule Mrgr.Schema.User do
     |> cast_embed(:urls, with: &url_changeset/2)
   end
 
+  def email_changeset(schema, params) do
+    schema
+    |> cast(params, [:email])
+    |> validate_required([:email])
+    |> validate_format(:email, ~r/^\S+@\S+\.\S+$/)
+    |> set_default_notification_email()
+  end
+
   def welcome_back_changeset(schema, params \\ %{}) do
     schema
     |> cast(params, @welcome_back_params)

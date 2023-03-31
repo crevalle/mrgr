@@ -17,6 +17,7 @@ defmodule MrgrWeb.OnboardingLive do
       stats = stats(installation)
 
       socket
+      |> assign(:changeset, email_changeset(current_user))
       |> assign(:installation, installation)
       |> assign(:stats, stats)
       |> put_title("Onboarding")
@@ -32,22 +33,45 @@ defmodule MrgrWeb.OnboardingLive do
       <div class="flex flex-col space-y-8 lg:w-1/2 md:w-full">
         <.heading title="All Right!👋 Let's get you started" />
 
-        <div class="space-y-4">
-          <p>Mrgr onboarding is just 3 simple steps:</p>
+        <%= if !@current_user.email do %>
+          <div class="flex flex-col space-y-2">
+            <h5>Add your Email</h5>
+            <p>Looks like Github didn't provide your email address. Please enter one to continue.</p>
+            <.form :let={f} for={@changeset} phx-submit="update-email">
+              <div class="flex items-center space-x-1">
+                <%= text_input(f, :email,
+                  placeholder: "you@starshipenterprise.com",
+                  class: "w-full text-sm font-medium rounded-md text-gray-700 mt-px pt-2"
+                ) %>
+                <.button
+                  type="submit"
+                  phx-disable-with="Saving..."
+                  class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+                >
+                  Save
+                </.button>
+              </div>
+              <.error form={f} attr={:email} />
+            </.form>
+          </div>
+        <% else %>
+          <div class="space-y-4">
+            <p>Mrgr onboarding is just 3 simple steps:</p>
 
-          <.step_list>
-            <.step name="install_github_app" number={1} installation={@installation} />
-            <.step name="sync_data" number={2} installation={@installation} />
-            <.step name="done" number={3} installation={@installation} />
-          </.step_list>
-        </div>
+            <.step_list>
+              <.step name="install_github_app" number={1} installation={@installation} />
+              <.step name="sync_data" number={2} installation={@installation} />
+              <.step name="done" number={3} installation={@installation} />
+            </.step_list>
+          </div>
 
-        <div class="flex flex-col space-y-4">
-          <.installed_message installation={@installation} />
-          <.syncing_message installation={@installation} />
-          <.render_stats stats={@stats} />
-          <.action installation={@installation} socket={@socket} />
-        </div>
+          <div class="flex flex-col space-y-4">
+            <.installed_message installation={@installation} />
+            <.syncing_message installation={@installation} />
+            <.render_stats stats={@stats} />
+            <.action installation={@installation} socket={@socket} />
+          </div>
+        <% end %>
       </div>
     </div>
     """
@@ -73,6 +97,31 @@ defmodule MrgrWeb.OnboardingLive do
     installation
     |> Mrgr.PubSub.Topic.installation()
     |> Mrgr.PubSub.subscribe()
+  end
+
+  def handle_event("update-email", %{"user" => params}, socket) do
+    user = socket.assigns.current_user
+
+    user
+    |> email_changeset(params)
+    |> Mrgr.Repo.update()
+    |> case do
+      {:ok, user} ->
+        socket
+        |> Flash.put(:info, "Thanks! Now to the good stuff.")
+        |> assign(:current_user, user)
+        |> noreply()
+
+      {:error, changeset} ->
+        socket
+        |> assign(:changeset, changeset)
+        |> noreply()
+    end
+  end
+
+  def email_changeset(user, params \\ %{}) do
+    user
+    |> Mrgr.Schema.User.email_changeset(params)
   end
 
   def handle_info(%{event: @installation_created, payload: installation}, socket) do
