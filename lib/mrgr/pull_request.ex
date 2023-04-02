@@ -859,6 +859,7 @@ defmodule Mrgr.PullRequest do
     |> Query.merged()
     |> Query.merged_since(starting_date)
     |> Query.merged_before(ending_date)
+    |> Query.with_comments()
     |> Query.with_hifs_for_user(user)
     |> Mrgr.Repo.all()
   end

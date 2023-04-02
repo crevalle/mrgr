@@ -67,13 +67,10 @@ defmodule MrgrWeb.Components.PullRequest do
     ~H"""
     <.hif_badge_list hifs={@pull_request.high_impact_file_rules} />
 
-    <div class="flex flex-col space-y-0 leading-tight">
-      <.changed_file
-        :for={f <- @pull_request.files_changed}
-        filename={f}
-        hifs={@pull_request.high_impact_file_rules}
-      />
-    </div>
+    <.changed_file_list
+      files_changed={@pull_request.files_changed}
+      hifs={@pull_request.high_impact_file_rules}
+    />
     """
   end
 
@@ -88,6 +85,14 @@ defmodule MrgrWeb.Components.PullRequest do
       <div class="mt-2 flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
         <.badge :for={hif <- @hifs} item={hif} />
       </div>
+    </div>
+    """
+  end
+
+  def changed_file_list(assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-0 leading-tight">
+      <.changed_file :for={f <- @files_changed} filename={f} hifs={@hifs} />
     </div>
     """
   end
