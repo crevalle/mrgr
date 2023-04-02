@@ -92,6 +92,8 @@ defmodule MrgrWeb do
     quote do
       use Phoenix.Component
 
+      alias Phoenix.LiveView.JS
+
       unquote(view_helpers())
     end
   end

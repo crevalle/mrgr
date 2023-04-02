@@ -190,6 +190,21 @@ h5 {
   @apply border-teal-700 text-teal-700 hover:cursor-default bg-white border-x-2 border-b-2;
 }
 
+.tab {
+  @apply text-gray-500 p-1 bg-gray-50 hover:bg-gray-100 border-t border-x rounded-t-lg hover:cursor-pointer;
+  transition: border-color 150ms ease-out;
+}
+
+.tab.selected {
+  @apply text-teal-700 hover:cursor-default bg-white border-b;
+  cursor: default;
+  pointer-events: none;
+}
+
+.transform-rotate-90 {
+ transform: rotate(90deg);
+}
+
 .checkbox {
   @apply shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md;
 }

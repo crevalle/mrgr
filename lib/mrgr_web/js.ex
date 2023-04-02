@@ -40,8 +40,33 @@ defmodule MrgrWeb.JS do
     JS.toggle(js,
       to: opts[:to],
       in: toggle_in_transition(),
-      out: toggle_out_transition()
+      out: toggle_out_transition(),
+      display: opts[:display] || "block"
     )
+  end
+
+  @spec toggle_class(js :: map(), classes :: String.t(), opts :: keyword()) :: map()
+  def toggle_class(js \\ %JS{}, classes, opts) when is_binary(classes) do
+    if not Keyword.has_key?(opts, :to) do
+      raise ArgumentError, "Missing option `:to`"
+    end
+
+    case String.split(classes) do
+      [class] ->
+        opts_remove_class = Keyword.update!(opts, :to, fn selector -> "#{selector}.#{class}" end)
+
+        opts_add_class =
+          Keyword.update!(opts, :to, fn selector -> "#{selector}:not(.#{class})" end)
+
+        js
+        |> JS.remove_class(class, opts_remove_class)
+        |> JS.add_class(class, opts_add_class)
+
+      classes ->
+        Enum.reduce(classes, js, fn class, js ->
+          toggle_class(js, class, opts)
+        end)
+    end
   end
 
   def toggle_in_transition do

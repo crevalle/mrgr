@@ -85,3 +85,8 @@ window.addEventListener(
   "phx:hide-element",
   e => document.getElementById(e.detail.id).classList.remove("show")
 )
+
+window.addEventListener(
+  "icon:rotate-90",
+  e => e.target.classList.toggle("transform-rotate-90")
+);
