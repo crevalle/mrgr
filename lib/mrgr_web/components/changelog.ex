@@ -64,7 +64,7 @@ defmodule MrgrWeb.Components.Changelog do
             </.l>
             <span>@<%= Mrgr.Schema.PullRequest.author_name(@pr) %></span>
             <.line_diff additions={@pr.additions} deletions={@pr.deletions} />
-            <span class="text-gray-500 text-sm">21h</span>
+            <.time_to_close opened_at={@pr.opened_at} merged_at={@pr.merged_at} />
           </div>
           <div class="flex flex-wrap items-center space-x-2 text-sm text-gray-500 sm:mt-0">
             <.badge :for={hif <- @pr.high_impact_file_rules} item={hif} />
@@ -180,6 +180,12 @@ defmodule MrgrWeb.Components.Changelog do
     <div id={@id} class="flex flex-col hidden">
       <.changed_file :for={f <- @files_changed} filename={f} hifs={@hifs} />
     </div>
+    """
+  end
+
+  def time_to_close(assigns) do
+    ~H"""
+    <span class="text-gray-500 text-sm"><%= format_ttc(@opened_at, @merged_at) %></span>
     """
   end
 
