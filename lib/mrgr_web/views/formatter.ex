@@ -145,4 +145,10 @@ defmodule MrgrWeb.Formatter do
     |> Enum.sort()
     |> Enum.join(", ")
   end
+
+  def md(text) do
+    text
+    |> Earmark.as_html!()
+    |> Phoenix.HTML.raw()
+  end
 end
