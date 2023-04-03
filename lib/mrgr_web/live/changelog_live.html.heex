@@ -1,9 +1,17 @@
 <div class="flex flex-col space-y-8 w-9/12">
-  <.heading title="Changelog">
-    <:description>
-      All the merged PRs for <%= account_name(@current_user) %>
-    </:description>
-  </.heading>
+  <div class="flex items-center justify-between">
+    <.heading title="Changelog">
+      <:description>
+        All the merged PRs for <%= account_name(@current_user) %>
+      </:description>
+    </.heading>
+
+    <%= live_render(@socket, MrgrWeb.Live.AnalyticsBox,
+      session: %{"installation_id" => @current_user.current_installation_id},
+      id: "analytics-box"
+    ) %>
+  </div>
+
   <div class="flex flex-col">
     <div class="flex items-center justify-between p-2">
       <span class="text-xs font-medium uppercase text-gray-500">
