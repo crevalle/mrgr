@@ -79,6 +79,10 @@ defmodule Mrgr.HighImpactFileRule do
     |> Enum.any?()
   end
 
+  @spec hif_consumer_is_author?(Schema.t(), Mrgr.Schema.PullRequest.t()) :: boolean()
+  def hif_consumer_is_author?(%{user_id: user_id}, %{user_id: user_id}), do: true
+  def hif_consumer_is_author?(_hif, _pr), do: false
+
   def send_alert([], _pull_request), do: nil
 
   def send_alert(rules, pull_request) when is_list(rules) do
