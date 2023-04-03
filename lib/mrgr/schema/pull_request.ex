@@ -50,7 +50,10 @@ defmodule Mrgr.Schema.PullRequest do
     # legacy PRs may have been opened by users who left
     # before Mrgr was installed, thus we don't have them as
     # members of the organization.  we don't care about finding
-    # PRs by them, but we need to display their name somehow
+    # PRs by them, but we need to display their name somehow.
+    # Also useful for when PRs are authored by bots, who are
+    # not members of the org.  It's a current limitation of PR filtering
+    # that we cannot filter PRs opened by bots.
     embeds_one(:user, Mrgr.Github.User, on_replace: :update)
 
     embeds_one(:head, Mrgr.Schema.Head, on_replace: :update)
