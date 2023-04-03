@@ -253,7 +253,10 @@ defmodule MrgrWeb.Components.PullRequest do
     ~H"""
     <div id={"comment-#{@comment.id}"} class="flex flex-col pt-2">
       <div class="flex flex-col">
-        <.avatar member={Mrgr.Schema.Comment.author(@comment)} />
+        <div class="flex space-x-1 items-center">
+          <.avatar member={Mrgr.Schema.Comment.author(@comment)} />
+          <.link_to_comment url={Mrgr.Schema.Comment.url(@comment)} />
+        </div>
         <.aside><%= ts(@comment.posted_at, @tz) %></.aside>
       </div>
       <div class="pt-1">
@@ -448,6 +451,16 @@ defmodule MrgrWeb.Components.PullRequest do
       <span class="text-green-600">+<%= number_with_delimiter(@additions) %></span>
       <span class="text-red-400">-<%= number_with_delimiter(@deletions) %></span>
     </p>
+    """
+  end
+
+  def link_to_comment(%{url: nil} = assigns), do: ~H[]
+
+  def link_to_comment(assigns) do
+    ~H"""
+    <.l href={@url} target="_blank" class="text-gray-400">
+      <.icon name="arrow-top-right-on-square" class="h-4 w-4" />
+    </.l>
     """
   end
 end

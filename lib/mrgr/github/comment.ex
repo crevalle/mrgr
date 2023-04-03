@@ -8,6 +8,7 @@ defmodule Mrgr.Github.Comment do
       }
       body
       publishedAt
+      url
       """
     end
   end
