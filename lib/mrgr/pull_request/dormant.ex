@@ -10,15 +10,21 @@ defmodule Mrgr.PullRequest.Dormant do
   end
 
   def most_recent_activity_timestamp(pr) do
-    [
-      pr.opened_at,
-      Mrgr.Schema.PullRequest.latest_comment_date(pr),
-      Mrgr.Schema.PullRequest.latest_commit_date(pr),
-      Mrgr.Schema.PullRequest.latest_pr_review_date(pr)
-    ]
+    pr
+    |> recent_timestamps()
+    |> Map.values()
     |> Enum.reject(&is_nil/1)
     |> Enum.sort_by(& &1, {:desc, DateTime})
     |> hd()
+  end
+
+  def recent_timestamps(pr) do
+    %{
+      opened_at: pr.opened_at,
+      commented_at: Mrgr.Schema.PullRequest.latest_comment_date(pr),
+      committed_at: Mrgr.Schema.PullRequest.latest_commit_date(pr),
+      reviewed_at: Mrgr.Schema.PullRequest.latest_pr_review_date(pr)
+    }
   end
 
   def fresh?(timestamp, timezone) do
