@@ -87,6 +87,7 @@ defmodule MrgrWeb.Components.Changelog do
   attr :body, :string, default: nil
   attr :comments, :list, required: true
   attr :files_changed, :list, required: true
+  attr :hifs, :list, required: true
 
   def details(assigns) do
     comments_tab_id = "details-#{assigns.id}-comments"
