@@ -155,7 +155,7 @@ defmodule MrgrWeb.Components.Changelog do
     ~H"""
     <div id={@id} class="flex flex-col">
       <div :for={comment <- @comments}>
-        <%= Mrgr.Schema.Comment.body(comment) %>
+        <%= md(Mrgr.Schema.Comment.body(comment)) %>
       </div>
     </div>
     """
