@@ -151,4 +151,20 @@ defmodule MrgrWeb.Formatter do
     |> Earmark.as_html!()
     |> Phoenix.HTML.raw()
   end
+
+  def format_ttc(opened_at, closed_at) do
+    diff = DateTime.diff(closed_at, opened_at, :hour)
+
+    case diff do
+      0 ->
+        "<1h"
+
+      h when h < 24 ->
+        "#{h}h"
+
+      d ->
+        days = round(d / 24)
+        "#{days}d"
+    end
+  end
 end
