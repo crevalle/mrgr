@@ -160,8 +160,11 @@ defmodule MrgrWeb.Components.Changelog do
 
   def body(assigns) do
     ~H"""
-    <div>
-      <%= md(@body) %>
+    <div class="flex flex-col space-y-2">
+      <h5>Description</h5>
+      <div>
+        <%= md(@text) %>
+      </div>
     </div>
     """
   end
