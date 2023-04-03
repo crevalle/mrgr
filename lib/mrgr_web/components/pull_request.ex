@@ -258,7 +258,7 @@ defmodule MrgrWeb.Components.PullRequest do
       </div>
       <div class="pt-1">
         <p class="text-gray-500 italic">
-          <%= Mrgr.Schema.Comment.body(@comment) %>
+          <%= md(Mrgr.Schema.Comment.body(@comment)) %>
         </p>
       </div>
     </div>
