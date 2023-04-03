@@ -111,7 +111,7 @@ defmodule MrgrWeb.Components.Changelog do
 
     ~H"""
     <div id={@div_id} class="flex flex-col space-y-2 p-2 bg-white rounded-md hidden mt-2 mb-6">
-      <div><%= @body || "No body" %></div>
+      <.body text={@body} />
 
       <div class="flex items-center">
         <.tab id={@comments_tab_id} selected="selected" toggler={@toggler}>
@@ -147,6 +147,20 @@ defmodule MrgrWeb.Components.Changelog do
       role="presentation"
     >
       <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  def body(%{text: text} = assigns) when is_nil(text) or text == "" do
+    ~H"""
+    <span class="text-gray-500 italic text-sm">No description provided.</span>
+    """
+  end
+
+  def body(assigns) do
+    ~H"""
+    <div>
+      <%= md(@body) %>
     </div>
     """
   end
