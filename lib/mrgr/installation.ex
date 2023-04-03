@@ -381,6 +381,10 @@ defmodule Mrgr.Installation do
     fetch_all_repository_data(installation, acc, response)
   end
 
+  def fetch_all_repository_data(_installation, acc, _response) do
+    acc
+  end
+
   # initial call
   def fetch_all_repository_data(installation) do
     acc = []
