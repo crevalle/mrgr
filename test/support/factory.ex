@@ -120,6 +120,10 @@ defmodule Mrgr.Factory do
     }
   end
 
+  def build(:pull_request_review_comment) do
+    build(:comment) |> Map.put(:object, :pull_request_review_comment)
+  end
+
   def build(:head) do
     %Mrgr.Schema.Head{
       external_id: 123,

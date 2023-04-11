@@ -5,8 +5,9 @@ defmodule Mrgr.PullRequest do
 
   import Mrgr.Tuple
 
-  alias __MODULE__.Query
+  alias __MODULE__.Controversy
   alias __MODULE__.Dormant
+  alias __MODULE__.Query
   alias Mrgr.Schema.PullRequest, as: Schema
 
   def load_authors do
@@ -385,6 +386,7 @@ defmodule Mrgr.PullRequest do
       pull_request
       |> preload_installation()
       |> broadcast(@pull_request_comment_created)
+      |> Controversy.handle()
       |> ok()
     end
   end

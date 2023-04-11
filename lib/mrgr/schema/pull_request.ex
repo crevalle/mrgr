@@ -24,6 +24,7 @@ defmodule Mrgr.Schema.PullRequest do
     # counter cache, can update out from under us
     field(:approving_review_count, :integer)
     field(:ci_status, :string, default: "success")
+    field(:controversial, :boolean)
     field(:deletions, :integer)
     field(:draft, :boolean)
     field(:external_id, :integer)

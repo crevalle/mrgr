@@ -61,4 +61,28 @@ defmodule Mrgr.Schema.Comment do
     |> rev_cron()
     |> hd()
   end
+
+  def review_id(%{raw: %{"pull_request_review_id" => id}}), do: id
+
+  def socks(comment) do
+    String.split(comment.raw["_links"]["html"]["href"], "discussion_") |> Enum.reverse() |> hd()
+  end
+
+  def initial_comment?(%{raw: %{"in_reply_to_id" => _external_id}}), do: false
+  def initial_comment?(_comment), do: true
+
+  def external_id(%{raw: %{"id" => id}}), do: id
+
+  def in_reply_to_id(%{raw: %{"in_reply_to_id" => id}}), do: id
+  def in_reply_to_id(_comment), do: nil
+
+  def is_a_reply_to?(reply, parent) do
+    in_reply_to_id(reply) == external_id(parent)
+  end
+
+  # raw: %{
+  # "_links" => %{
+  # "html" => %{
+  # "href" => "https://github.com/crevalle/mrgr/pull/33#discussion_r986234822"
+  # },
 end
