@@ -815,6 +815,7 @@ defmodule Mrgr.PullRequest do
     |> Query.with_pr_reviews()
     |> Query.with_labels()
     |> Query.with_author()
+    |> Query.with_solicited_reviewers()
     |> Mrgr.Repo.all()
   end
 
