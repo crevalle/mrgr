@@ -265,6 +265,7 @@ defmodule Mrgr.User do
 
   def desmond do
     Mrgr.Repo.get_by(Schema, nickname: "desmondmonster")
+    |> Mrgr.Repo.preload(current_installation: :account)
   end
 
   def tell_desmond_someone_failed_to_sign_up(params, error) do
