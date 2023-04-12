@@ -8,40 +8,11 @@ defmodule MrgrWeb.PullRequestDashboardLive do
 
   on_mount MrgrWeb.Plug.Auth
 
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     if connected?(socket) do
-      socket = MrgrWeb.Plug.Auth.assign_user_timezone(socket)
-
-      current_user = socket.assigns.current_user
-
-      repos = Mrgr.Repository.for_user_with_hif_rules(current_user)
-      frozen_repos = filter_frozen_repos(repos)
-
-      visible_repo_count =
-        Mrgr.Repo.aggregate(Mrgr.User.visible_repos_at_current_installation(current_user), :count)
-
-      labels = Mrgr.Label.list_for_user(current_user)
-      members = Mrgr.Repo.all(Mrgr.Member.for_installation(current_user.current_installation_id))
-
-      tabs = Tabs.new(current_user)
-
-      snooze_options = snooze_options()
-
-      subscribe(current_user)
-
-      set_dormancy_timer()
-
       socket
-      |> assign(:detail, nil)
-      |> assign(:selected_attr, nil)
-      |> assign(:tabs, tabs)
-      |> assign(:repos, repos)
-      |> assign(:labels, labels)
-      |> assign(:members, members)
-      |> assign(:draft_statuses, Mrgr.PRTab.draft_statuses())
-      |> assign(:snooze_options, snooze_options)
-      |> assign(:frozen_repos, frozen_repos)
-      |> assign(:visible_repo_count, visible_repo_count)
+      |> assign_timezone()
+      |> assign_all_the_things(params)
       |> put_title("Open Pull Requests")
       |> ok()
     else
@@ -50,16 +21,55 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
   end
 
-  # index action
-  def handle_params(params, _uri, socket) when params == %{} do
-    if connected?(socket) do
-      socket
-      |> assign(:selected_tab, hd(socket.assigns.tabs))
-      |> noreply()
-    else
-      socket
-      |> noreply()
-    end
+  def assign_all_the_things(
+        %{assigns: %{current_user: %{nickname: "desmondmonster"}}} = socket,
+        %{"as_user_id" => user_id}
+      ) do
+    user = Mrgr.User.find(user_id)
+    data = load_data_for_user(user)
+
+    socket
+    |> assign(data)
+    |> Flash.put(:info, "Showing data for #{user.nickname}")
+  end
+
+  def assign_all_the_things(socket, params) do
+    current_user = socket.assigns.current_user
+
+    subscribe(current_user)
+    set_dormancy_timer()
+
+    assign(socket, load_data_for_user(current_user))
+  end
+
+  def load_data_for_user(user) do
+    repos = Mrgr.Repository.for_user_with_hif_rules(user)
+    frozen_repos = filter_frozen_repos(repos)
+
+    visible_repo_count =
+      Mrgr.Repo.aggregate(Mrgr.User.visible_repos_at_current_installation(user), :count)
+
+    labels = Mrgr.Label.list_for_user(user)
+    members = Mrgr.Repo.all(Mrgr.Member.for_installation(user.current_installation_id))
+
+    tabs = Tabs.new(user)
+
+    %{
+      detail: nil,
+      selected_attr: nil,
+      tabs: tabs,
+      repos: repos,
+      labels: labels,
+      members: members,
+      draft_statuses: Mrgr.PRTab.draft_statuses(),
+      snooze_options: snooze_options(),
+      frozen_repos: frozen_repos,
+      visible_repo_count: visible_repo_count
+    }
+  end
+
+  def assign_timezone(socket) do
+    MrgrWeb.Plug.Auth.assign_user_timezone(socket)
   end
 
   def handle_params(%{"attr" => attr, "pull_request_id" => pr_id, "tab" => id}, _uri, socket) do
@@ -87,6 +97,18 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       |> assign(:selected_tab, selected)
       |> assign(:detail, nil)
       |> assign(:selected_attr, nil)
+      |> noreply()
+    else
+      socket
+      |> noreply()
+    end
+  end
+
+  # index action
+  def handle_params(params, _uri, socket) do
+    if connected?(socket) do
+      socket
+      |> assign(:selected_tab, hd(socket.assigns.tabs))
       |> noreply()
     else
       socket
