@@ -811,12 +811,12 @@ defmodule Mrgr.PullRequest do
     |> Query.open()
     |> Query.order_by_opened()
     |> Query.with_hifs()
-    |> Query.with_comments()
     |> Query.with_pr_reviews()
     |> Query.with_labels()
     |> Query.with_author()
     |> Query.with_solicited_reviewers()
     |> Mrgr.Repo.all()
+    |> Enum.map(fn pr -> Mrgr.Repo.preload(pr, :comments) end)
   end
 
   def closed_this_week(user) do
