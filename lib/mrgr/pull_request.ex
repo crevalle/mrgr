@@ -1116,8 +1116,7 @@ defmodule Mrgr.PullRequest do
 
     def with_hifs(query) do
       from(q in query,
-        left_join: h in assoc(q, :high_impact_file_rules),
-        preload: [high_impact_file_rules: h]
+        preload: :high_impact_file_rules
       )
     end
 
@@ -1203,8 +1202,7 @@ defmodule Mrgr.PullRequest do
 
     def with_labels(query) do
       from(q in query,
-        left_join: l in assoc(q, :labels),
-        preload: [labels: l]
+        preload: :labels
       )
     end
 
@@ -1317,8 +1315,7 @@ defmodule Mrgr.PullRequest do
 
     def with_solicited_reviewers(query) do
       from(q in query,
-        left_join: sr in assoc(q, :solicited_reviewers),
-        preload: [solicited_reviewers: sr]
+        preload: :solicited_reviewers
       )
     end
 
