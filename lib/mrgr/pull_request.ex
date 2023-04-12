@@ -812,11 +812,11 @@ defmodule Mrgr.PullRequest do
     |> Query.order_by_opened()
     |> Query.with_hifs()
     |> Query.with_pr_reviews()
+    |> Query.with_comments()
     |> Query.with_labels()
     |> Query.with_author()
     |> Query.with_solicited_reviewers()
     |> Mrgr.Repo.all()
-    |> Enum.map(fn pr -> Mrgr.Repo.preload(pr, :comments) end)
   end
 
   def closed_this_week(user) do
@@ -1165,15 +1165,13 @@ defmodule Mrgr.PullRequest do
 
     def with_comments(query) do
       from(q in query,
-        left_join: c in assoc(q, :comments),
-        preload: [comments: c]
+        preload: :comments
       )
     end
 
     def with_pr_reviews(query) do
       from(q in query,
-        left_join: prr in assoc(q, :pr_reviews),
-        preload: [pr_reviews: prr]
+        preload: :pr_reviews
       )
     end
 
