@@ -33,7 +33,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     |> Flash.put(:info, "Showing data for #{user.nickname}")
   end
 
-  def assign_all_the_things(socket, params) do
+  def assign_all_the_things(socket, _params) do
     current_user = socket.assigns.current_user
 
     subscribe(current_user)
@@ -105,7 +105,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
   end
 
   # index action
-  def handle_params(params, _uri, socket) do
+  def handle_params(_params, _uri, socket) do
     if connected?(socket) do
       socket
       |> assign(:selected_tab, hd(socket.assigns.tabs))
