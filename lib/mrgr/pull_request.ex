@@ -407,7 +407,7 @@ defmodule Mrgr.PullRequest do
       object: object,
       pull_request_id: pull_request.id,
       posted_at: posted_at,
-      raw: params
+      raw: Mrgr.Schema.Comment.strip_bs(params)
     }
 
     attrs

@@ -18,6 +18,17 @@ defmodule Mrgr.Schema.Comment do
     |> foreign_key_constraint(:pull_request_id)
   end
 
+  def strip_bs(%{"comment" => comment_params}), do: %{"comment" => comment_params}
+  def strip_bs(params), do: params
+
+  def socks(%{raw: %{"comment" => comment_params}} = comment) do
+    comment
+    |> Ecto.Changeset.change(%{raw: %{"comment" => comment_params}})
+    |> Mrgr.Repo.update!()
+  end
+
+  def socks(comment), do: comment
+
   def author(%{raw: %{"comment" => %{"user" => user}}}) do
     Mrgr.Github.User.new(user)
   end

@@ -111,7 +111,12 @@ defmodule Mrgr.Factory do
     %Mrgr.Schema.Comment{
       object: :issue_comment,
       posted_at: posted_at,
-      pull_request: build(:pull_request)
+      pull_request: build(:pull_request),
+      raw: %{
+        "user" => %{"login" => "desmondmonster"},
+        "body" => Faker.Lorem.Shakespeare.as_you_like_it(),
+        "url" => Faker.Internet.url()
+      }
     }
   end
 
