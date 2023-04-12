@@ -37,6 +37,7 @@ defmodule Mrgr.MixProject do
       {:circular_buffer, "~> 0.4"},
       {:contex, github: "crevalle/contex"},
       {:dialyxir, "~> 1.1", runtime: false},
+      {:ecto_psql_extras, "~> 0.6"},
       {:earmark, "~> 1.4"},
       {:ecto_sql, "~> 3.6"},
       {:esbuild, "~> 0.2", runtime: Mix.env() == :dev},
