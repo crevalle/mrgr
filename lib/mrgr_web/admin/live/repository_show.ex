@@ -1,8 +1,6 @@
 defmodule MrgrWeb.Admin.Live.RepositoryShow do
   use MrgrWeb, :live_view
 
-  import MrgrWeb.Components.Admin
-
   on_mount {MrgrWeb.Plug.Auth, :admin}
 
   def render(assigns) do
