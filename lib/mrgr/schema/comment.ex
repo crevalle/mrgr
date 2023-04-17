@@ -21,13 +21,10 @@ defmodule Mrgr.Schema.Comment do
   def strip_bs(%{"comment" => comment_params}), do: %{"comment" => comment_params}
   def strip_bs(params), do: params
 
-  def socks(%{raw: %{"comment" => comment_params}} = comment) do
-    comment
-    |> Ecto.Changeset.change(%{raw: %{"comment" => comment_params}})
-    |> Mrgr.Repo.update!()
+  # this may be wrong, a holdover from MVP
+  def discussion_url(comment) do
+    String.split(comment.raw["_links"]["html"]["href"], "discussion_") |> Enum.reverse() |> hd()
   end
-
-  def socks(comment), do: comment
 
   def author(%{raw: %{"comment" => %{"user" => user}}}) do
     Mrgr.Github.User.new(user)
@@ -63,10 +60,6 @@ defmodule Mrgr.Schema.Comment do
   end
 
   def review_id(%{raw: %{"pull_request_review_id" => id}}), do: id
-
-  def socks(comment) do
-    String.split(comment.raw["_links"]["html"]["href"], "discussion_") |> Enum.reverse() |> hd()
-  end
 
   def initial_comment?(%{raw: %{"in_reply_to_id" => _external_id}}), do: false
   def initial_comment?(_comment), do: true
