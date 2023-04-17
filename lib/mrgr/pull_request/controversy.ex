@@ -66,6 +66,7 @@ defmodule Mrgr.PullRequest.Controversy do
   end
 
   def notify_consumers(pull_request) do
-    # ...
+    # TODO
+    pull_request
   end
 end
