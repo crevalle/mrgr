@@ -14,7 +14,7 @@ defmodule Mrgr.PullRequest.Controversy do
     end
   end
 
-  def controversy_brewing?(%{comments: comments} = pull_request) do
+  def controversy_brewing?(%{comments: comments}) do
     comments
     |> build_conversation_threads()
     |> Enum.any?(&longer_than_they_should_be?/1)
