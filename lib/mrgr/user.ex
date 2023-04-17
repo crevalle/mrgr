@@ -260,6 +260,9 @@ defmodule Mrgr.User do
   def admin_at_installation?(%{id: id, current_installation: %{creator_id: id}}), do: true
   def admin_at_installation?(_user), do: false
 
+  def admin?(%{nickname: "desmondmonster"}), do: true
+  def admin?(_user), do: false
+
   def desmond do
     Mrgr.Repo.get_by(Schema, nickname: "desmondmonster")
   end

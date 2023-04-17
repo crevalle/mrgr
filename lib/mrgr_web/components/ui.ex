@@ -227,6 +227,23 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
+  def th_left(assigns) do
+    ~H"""
+    <th
+      scope="col"
+      class={[
+        "p-3 text-left text-xs font-medium uppercase text-gray-500",
+        @class
+      ]}
+    >
+      <%= render_slot(@inner_block) %>
+    </th>
+    """
+  end
+
   def tr(assigns) do
     striped = if assigns[:striped], do: "even:bg-white odd:bg-gray-50", else: nil
 

@@ -22,7 +22,10 @@ defmodule MrgrWeb.Locale do
 
   defp assign_timezone(socket) do
     timezone = get_connect_params(socket)["timezone"] || @default_timezone
-    assign(socket, :timezone, timezone)
+
+    socket
+    |> assign(:timezone, timezone)
+    |> assign(:tz, timezone)
   end
 
   defp assign_timezone_offset(socket) do

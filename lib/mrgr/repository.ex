@@ -104,6 +104,14 @@ defmodule Mrgr.Repository do
     end)
   end
 
+  def find_for_admin(id) do
+    Schema
+    |> Query.by_id(id)
+    |> Query.with_installation()
+    |> Query.with_all_hifs()
+    |> Mrgr.Repo.one()
+  end
+
   def find_for_user(user, ids) do
     Schema
     |> Query.for_user(user)
@@ -430,6 +438,20 @@ defmodule Mrgr.Repository do
     def for_installation(query, id) do
       from(q in query,
         where: q.installation_id == ^id
+      )
+    end
+
+    def with_installation(query) do
+      from(q in query,
+        join: i in assoc(q, :installation),
+        join: a in assoc(i, :account),
+        preload: [installation: {i, account: a}]
+      )
+    end
+
+    def with_all_hifs(query) do
+      from(q in query,
+        preload: [high_impact_file_rules: :user]
       )
     end
 

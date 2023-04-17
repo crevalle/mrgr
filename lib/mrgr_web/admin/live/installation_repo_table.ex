@@ -31,7 +31,11 @@ defmodule MrgrWeb.Admin.Live.InstallationRepoTable do
             <.tr striped={true}>
               <.td><%= repo.id %></.td>
               <.td><%= repo.node_id %></.td>
-              <.td><%= repo.name %></.td>
+              <.td>
+                <.l href={~p"/admin/repositories/#{repo.id}"}>
+                  <%= repo.name %>
+                </.l>
+              </.td>
               <.td><MrgrWeb.Components.Repository.lock bool={repo.private} /></.td>
               <.td><.language_icon language={repo.language} /></.td>
               <.td><%= ts(repo.updated_at, @timezone) %></.td>
