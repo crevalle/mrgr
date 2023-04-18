@@ -23,17 +23,6 @@ defmodule Mrgr.Schema.UserNotificationAddress do
     |> validate_required(:email)
   end
 
-  def rt_backfill_for_users do
-    Mrgr.Schema.User
-    |> Mrgr.User.Query.with_installations()
-    |> Mrgr.Repo.all()
-    |> Enum.map(fn user ->
-      Enum.map(user.installations, fn installation ->
-        create_for_user_and_installation(user, installation)
-      end)
-    end)
-  end
-
   def create_for_user_and_installation(user, installation) do
     params = %{
       user_id: user.id,
