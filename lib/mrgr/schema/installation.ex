@@ -22,6 +22,18 @@ defmodule Mrgr.Schema.Installation do
     field(:token, :string)
     field(:token_expires_at, :utc_datetime)
 
+    embeds_one :slackbot, Slackbot, primary_key: false, on_replace: :delete do
+      field(:access_token, :string)
+      field(:app_id, :string)
+      field(:authed_user, :map)
+      field(:bot_user_id, :string)
+      field(:enterprise, :string)
+      field(:is_enterprise_install, :boolean)
+      field(:scope, :string)
+      field(:team, :map)
+      field(:token_type, :string)
+    end
+
     embeds_many :subscription_state_changes, SubscriptionStateChange, on_replace: :delete do
       field(:state, :string)
       field(:transitioned_at, :utc_datetime)
@@ -111,6 +123,35 @@ defmodule Mrgr.Schema.Installation do
     |> put_embed(:subscription_state_changes, params.subscription_state_changes)
     |> validate_inclusion(:subscription_state, Mrgr.Installation.SubscriptionState.states())
   end
+
+  def slack_changeset(schema, params) do
+    schema
+    |> cast(params, [])
+    |> cast_embed(:slackbot, with: &slackbot_embeds_changeset/2)
+  end
+
+  @slackbot_params [
+    :access_token,
+    :app_id,
+    :authed_user,
+    :bot_user_id,
+    :enterprise,
+    :is_enterprise_install,
+    :scope,
+    :team,
+    :token_type
+  ]
+
+  def slackbot_embeds_changeset(schema, params) do
+    schema
+    |> cast(params, @slackbot_params)
+  end
+
+  def slack_team_name(%{slackbot: %{team: %{"name" => name}}}), do: name
+  def slack_team_name(_installation), do: nil
+
+  def slack_team_id(%{slackbot: %{team: %{"id" => id}}}), do: id
+  def slack_team_id(_installation), do: nil
 
   # "access_tokens_url" => "https://api.github.com/app/installations/19872469/access_tokens",
   # "account" => %{

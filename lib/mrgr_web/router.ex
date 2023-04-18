@@ -61,6 +61,12 @@ defmodule MrgrWeb.Router do
     get "/github/callback", AuthController, :callback
   end
 
+  scope "/auth", MrgrWeb do
+    pipe_through [:browser, :authenticate]
+
+    get "/slack/callback", SlackController, :callback
+  end
+
   scope "/", MrgrWeb do
     pipe_through [:browser, :authenticate]
 

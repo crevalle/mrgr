@@ -239,6 +239,12 @@ defmodule Mrgr.Installation do
 
   def activate_subscriptions_on_personal_accounts(installation), do: installation
 
+  def set_slackbot_info(installation, params) do
+    installation
+    |> Schema.slack_changeset(%{slackbot: params})
+    |> Mrgr.Repo.update!()
+  end
+
   def hot_stats(installation) do
     member_count =
       installation.id

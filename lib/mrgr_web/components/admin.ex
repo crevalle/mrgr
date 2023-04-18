@@ -4,6 +4,50 @@ defmodule MrgrWeb.Components.Admin do
   import MrgrWeb.Components.UI
   alias Phoenix.LiveView.JS
 
+  def slackbot(%{slackbot: nil} = assigns) do
+    ~H"""
+    <.section>
+      <:title>
+        Slackbot
+      </:title>
+
+      <p class="italic">No slack integration!</p>
+    </.section>
+    """
+  end
+
+  def slackbot(assigns) do
+    ~H"""
+    <.section>
+      <:title>
+        Slackbot
+      </:title>
+
+      <table class="w-full">
+        <.table_attr obj={@slackbot} key={:access_token} . />
+        <.table_attr obj={@slackbot} key={:app_id} . />
+        <.tr striped={true}>
+          <.td class="font-bold">Authed User Id</.td>
+          <.td><%= @slackbot.authed_user["id"] %></.td>
+        </.tr>
+        <.table_attr obj={@slackbot} key={:bot_user_id} . />
+        <.table_attr obj={@slackbot} key={:enterprise} . />
+        <.table_attr obj={@slackbot} key={:is_enterprise_install} . />
+        <.table_attr obj={@slackbot} key={:scope} . />
+        <.tr striped={true}>
+          <.td class="font-bold">Team ID</.td>
+          <.td><%= @slackbot.team["id"] %></.td>
+        </.tr>
+        <.tr striped={true}>
+          <.td class="font-bold">Team Name</.td>
+          <.td><%= @slackbot.team["name"] %></.td>
+        </.tr>
+        <.table_attr obj={@slackbot} key={:token_type} . />
+      </table>
+    </.section>
+    """
+  end
+
   def subscription(%{subscription: nil} = assigns) do
     ~H"""
     <.section>

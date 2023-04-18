@@ -97,6 +97,11 @@ config :mrgr, Oban,
   ],
   queues: [default: 10]
 
+config :mrgr, :slack,
+  client_id: System.get_env("SLACK_OAUTH_CLIENT_ID"),
+  client_secret: System.get_env("SLACK_OAUTH_CLIENT_SECRET"),
+  signing_secret: System.get_env("SLACK_SIGNING_SECRET")
+
 import_config "#{config_env()}.exs"
 
 import_config "appsignal.exs"

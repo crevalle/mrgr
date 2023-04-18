@@ -91,6 +91,8 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
           session: %{"id" => @installation.id}
         ) %>
       </div>
+
+      <.slackbot slackbot={@installation.slackbot} />
     </div>
     """
   end
