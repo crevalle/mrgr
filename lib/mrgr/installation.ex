@@ -105,11 +105,12 @@ defmodule Mrgr.Installation do
     topic = Mrgr.PubSub.Topic.onboarding(creator)
     Mrgr.PubSub.broadcast(installation, topic, @installation_created)
 
-    Mrgr.User.set_current_installation(creator, installation)
+    # user <> installation onboarding
+    creator
+    |> Mrgr.User.set_current_installation(installation)
+    |> Mrgr.User.create_notification_address_at_current_installation(creator)
 
-    installation = activate_subscriptions_on_personal_accounts(installation)
-
-    installation
+    activate_subscriptions_on_personal_accounts(installation)
   end
 
   def queue_initial_setup(installation) do

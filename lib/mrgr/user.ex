@@ -84,11 +84,7 @@ defmodule Mrgr.User do
                 {:ok, user, :new}
 
               member ->
-                user =
-                  user
-                  |> associate_user_with_member(member)
-                  |> make_all_repos_visible()
-                  |> generate_default_custom_dashboard_tabs()
+                user = join_invited_user(user, member)
 
                 {:ok, user, :invited}
             end
@@ -238,12 +234,27 @@ defmodule Mrgr.User do
     user
   end
 
+  def join_invited_user(user, member) do
+    user
+    |> associate_user_with_member(member)
+    |> create_notification_address_at_current_installation()
+    |> make_all_repos_visible()
+    |> generate_default_custom_dashboard_tabs()
+  end
+
   def associate_user_with_member(user, member) do
     member = Mrgr.Member.associate_with_user(member, user)
 
     user = %{user | member: member}
 
     reset_current_installation(user)
+  end
+
+  def create_notification_address_at_current_installation(user) do
+    Mrgr.Schema.UserNotificationAddress.create_for_user_and_installation(
+      user,
+      user.current_installation
+    )
   end
 
   def repos(user) do
