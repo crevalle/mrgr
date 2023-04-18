@@ -42,7 +42,12 @@ defmodule MrgrWeb.SlackController do
   defp correct_user?(id, %{id: id}), do: true
   defp correct_user?(_other_id, _current_user), do: false
 
-  def set_slackbot_info_on_current_installation(%{current_installation: installation}, data) do
+  def set_slackbot_info_on_current_installation(
+        %{current_installation: installation} = user,
+        data
+      ) do
+    Mrgr.User.set_slack_contact_at_installation(user, installation, data["authed_user"]["id"])
+
     Mrgr.Installation.set_slackbot_info(installation, data)
   end
 
@@ -95,18 +100,6 @@ defmodule MrgrWeb.SlackController do
 
     body = URI.encode_query(params)
 
-    case HTTPoison.post(url, body, headers) do
-      {:ok, %HTTPoison.Response{status_code: 200, body: body}} ->
-        case Jason.decode!(body) do
-          %{"ok" => true} = res ->
-            {:ok, res}
-
-          %{"ok" => false, "error" => reason} ->
-            {:error, reason}
-        end
-
-      {:error, %HTTPoison.Error{reason: reason}} ->
-        {:error, reason}
-    end
+    Mrgr.Slack.post(url, body, headers)
   end
 end

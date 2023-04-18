@@ -207,6 +207,21 @@ defmodule Mrgr.User do
     user
   end
 
+  def set_slack_contact_at_installation(user, installation, slack_id) do
+    pref = find_user_notification_address(user.id, installation.id)
+
+    pref
+    |> Mrgr.Schema.UserNotificationAddress.changeset(%{slack_id: slack_id})
+    |> Mrgr.Repo.update!()
+  end
+
+  def find_user_notification_address(user_id, installation_id) do
+    Mrgr.Schema.UserNotificationAddress
+    |> Query.where(user_id: user_id)
+    |> Query.where(installation_id: installation_id)
+    |> Mrgr.Repo.one()
+  end
+
   def generate_default_custom_dashboard_tabs(user) do
     # creates tabs for every installation the user is a member of.
     # ❗️ a user invited to one org will automatically join all the

@@ -39,6 +39,8 @@ defmodule Mrgr.Schema.User do
     has_many(:user_snoozed_pull_requests, Mrgr.Schema.UserSnoozedPullRequest)
     has_many(:snoozed_pull_requests, through: [:user_snoozed_pull_requests, :pull_request])
 
+    has_many(:user_notification_addresses, Mrgr.Schema.UserNotificationAddress)
+
     belongs_to(:current_installation, Mrgr.Schema.Installation)
 
     embeds_one :urls, Urls do
