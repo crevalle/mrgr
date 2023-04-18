@@ -108,7 +108,7 @@ defmodule Mrgr.Installation do
     # user <> installation onboarding
     creator
     |> Mrgr.User.set_current_installation(installation)
-    |> Mrgr.User.create_notification_address_at_current_installation(creator)
+    |> Mrgr.User.create_notification_address_at_current_installation()
 
     activate_subscriptions_on_personal_accounts(installation)
   end
