@@ -218,6 +218,13 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.one()
   end
 
+  def notification_preferences(user) do
+    Mrgr.Schema.UserNotificationPreference
+    |> Query.where(user_id: user.id)
+    |> Query.where(installation_id: user.current_installation_id)
+    |> Mrgr.Repo.all()
+  end
+
   def generate_default_custom_dashboard_tabs(user) do
     # creates tabs for every installation the user is a member of.
     # ❗️ a user invited to one org will automatically join all the

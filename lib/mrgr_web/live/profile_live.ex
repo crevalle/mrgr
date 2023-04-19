@@ -5,9 +5,12 @@ defmodule MrgrWeb.ProfileLive do
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
+      preferences = Mrgr.User.notification_preferences(socket.assigns.current_user)
+
       socket
       |> put_title("Your Profile")
       |> assign(:changeset, nil)
+      |> assign(:preferences, preferences)
       |> ok()
     else
       ok(socket)

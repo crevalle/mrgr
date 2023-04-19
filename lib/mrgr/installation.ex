@@ -246,6 +246,9 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.update!()
   end
 
+  def slack_connected?(%{slackbot: nil}), do: false
+  def slack_connected?(_installation), do: true
+
   def hot_stats(installation) do
     member_count =
       installation.id

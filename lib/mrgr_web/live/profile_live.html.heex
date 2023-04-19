@@ -1,73 +1,120 @@
 <div class="flex flex-col space-y-4">
-  <div class="flex justify-between">
-    <.heading title="Your Profile" />
-  </div>
-
   <div class="two-pane-layout">
     <div class="main-pane">
-      <div class="white-box">
-        <div class="grid grid-cols-3 gap-4 items-start">
-          <div class="font-semibold">Name</div>
-          <div class="col-span-2"><%= @current_user.name %></div>
+      <div class="flex flex-col space-y-2">
+        <.h3>Your Profile</.h3>
 
-          <div class="font-semibold">Organization</div>
-          <div class="col-span-2"><%= account_name(@current_user) %></div>
+        <div class="white-box">
+          <div class="grid grid-cols-3 gap-4 items-start">
+            <div class="font-medium">Name</div>
+            <div class="col-span-2"><%= @current_user.name %></div>
 
-          <div class="font-semibold">Handle</div>
-          <div class="col-span-2"><%= @current_user.nickname %></div>
+            <div class="font-medium">Organization</div>
+            <div class="col-span-2"><%= account_name(@current_user) %></div>
 
-          <div class="font-semibold">Notification Email</div>
-          <div class="col-span-2 flex flex-col">
-            <%= if @changeset do %>
-              <.form :let={f} for={@changeset} phx-submit="save">
-                <div class="flex flex-col">
-                  <div class="flex items-center space-x-1">
-                    <%= text_input(f, :notification_email,
-                      placeholder: "you@company_email.com",
-                      class: "w-full text-sm font-medium rounded-md text-gray-700 mt-px pt-2"
-                    ) %>
-                    <.button
-                      type="submit"
-                      phx-disable-with="Saving..."
-                      class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
-                    >
-                      Save
-                    </.button>
-                  </div>
-                  <.error form={f} attr={:notification_email} />
-                </div>
+            <div class="font-medium">Handle</div>
+            <div class="col-span-2"><%= @current_user.nickname %></div>
+
+            <div class="flex flex-col">
+              <p class="font-medium">Send Weekly Changelog Email</p>
+              <p class="text-gray-500 text-xs">
+                On Friday afternoons we'll send you a list of PRs closed that week.
+              </p>
+            </div>
+            <div class="col-span-2 flex flex-col">
+              <.form :let={f} for={%{}} as={:user} phx-change="update-weekly-changelog-preference">
+                <%= checkbox(f, :send_weekly_changelog_email,
+                  value: @current_user.send_weekly_changelog_email,
+                  class: "checkbox"
+                ) %>
               </.form>
-            <% else %>
-              <div class="flex items-center space-x-4">
-                <p>
-                  <%= @current_user.notification_email %>
-                  <.l phx-click="edit">Edit</.l>
-                </p>
-                <p :if={is_nil(@current_user.notification_email)} class="text-red-800 text-sm">
-                  * Required for HIF alerts and weekly changelog emails.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex flex-col space-y-2">
+        <.h3>Notification Preferences</.h3>
+        <div class="white-box">
+          <div class="flex flex-col space-y-4">
+            <div class="grid grid-cols-3 gap-4 items-start">
+              <div class="flex flex-col">
+                <p class="font-medium">Notification Email Address</p>
+                <p class="text-gray-500 text-xs">
+                  High Impact File Alerts and notification emails for this organization will go to this address.
                 </p>
               </div>
-            <% end %>
-            <p class="text-gray-500 text-sm">
-              High Impact File Alerts and notification emails will go to this address
-            </p>
-          </div>
-          <div class="font-semibold">Send Weekly Changelog Email</div>
-          <div class="col-span-2 flex flex-col">
-            <.form :let={f} for={%{}} as={:user} phx-change="update-weekly-changelog-preference">
-              <%= checkbox(f, :send_weekly_changelog_email,
-                value: @current_user.send_weekly_changelog_email,
-                class: "checkbox"
-              ) %>
-            </.form>
-            <p class="text-gray-500 text-sm">
-              On Friday afternoons we'll send you a list of PRs closed that week.
-            </p>
-          </div>
+              <div class="col-span-2 flex flex-col">
+                <%= if @changeset do %>
+                  <.form :let={f} for={@changeset} phx-submit="save">
+                    <div class="flex flex-col">
+                      <div class="flex items-center space-x-1">
+                        <%= text_input(f, :notification_email,
+                          placeholder: "you@company_email.com",
+                          class: "w-full text-sm font-medium rounded-md text-gray-700 mt-px pt-2"
+                        ) %>
+                        <.button
+                          type="submit"
+                          phx-disable-with="Saving..."
+                          class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+                        >
+                          Save
+                        </.button>
+                      </div>
+                      <.error form={f} attr={:notification_email} />
+                    </div>
+                  </.form>
+                <% else %>
+                  <div class="flex items-center space-x-4">
+                    <p>
+                      <%= @current_user.notification_email %>
+                      <.l phx-click="edit">Edit</.l>
+                    </p>
+                    <p :if={is_nil(@current_user.notification_email)} class="text-red-800 text-sm">
+                      * Required for HIF alerts and weekly changelog emails.
+                    </p>
+                  </div>
+                <% end %>
+              </div>
+              <div class="font-medium">Connect Slack</div>
+              <div class="col-span-2 flex flex-col">
+                <%= if Mrgr.Installation.slack_connected?(@current_user.current_installation) do %>
+                  <div class="flex items-center space-x-1">
+                    <p>Slack Connected</p>
+                    <.icon name="check-circle" type="solid" class="text-green-600 h-5 w-5" />
+                  </div>
+                <% else %>
+                  <.slack_button user_id={@current_user.id} />
+                <% end %>
+              </div>
+            </div>
 
-          <div class="font-semibold">Connect Slack</div>
-          <div class="col-span-2 flex flex-col">
-            <.slack_button user_id={@current_user.id} />
+            <table class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+              <th class="p-3 bg-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-500 rounded-t-lg">
+                Event
+              </th>
+              <.th class="bg-gray-100">Email</.th>
+              <th class="p-3 bg-gray-100 text-xs font-medium tracking-wide text-gray-500 flex items-center justify-center rounded-t-lg">
+                <span class="uppercase">Slack</span>
+                <div
+                  :if={!Mrgr.Installation.slack_connected?(@current_user.current_installation)}
+                  class="tooltip pl-2"
+                >
+                  <.icon
+                    name="question-mark-circle"
+                    class="text-gray-400 hover:text-gray-500 h-4 w-4"
+                  />
+                  <span class="tooltiptext">Install our Slackbot to receive notifications</span>
+                </div>
+              </th>
+                <.live_component
+                  :for={preference <- @preferences}
+                  module={MrgrWeb.Components.Live.NotificationPreference}
+                  id={"preference_#{preference.id}"}
+                  preference={preference}
+                  current_user={@current_user}
+                />
+            </table>
           </div>
         </div>
       </div>
