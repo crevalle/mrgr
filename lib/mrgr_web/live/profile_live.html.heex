@@ -107,13 +107,13 @@
                   <span class="tooltiptext">Install our Slackbot to receive notifications</span>
                 </div>
               </th>
-                <.live_component
-                  :for={preference <- @preferences}
-                  module={MrgrWeb.Components.Live.NotificationPreference}
-                  id={"preference_#{preference.id}"}
-                  preference={preference}
-                  current_user={@current_user}
-                />
+              <.live_component
+                :for={preference <- @preferences}
+                module={MrgrWeb.Components.Live.NotificationPreference}
+                id={"preference_#{preference.id}"}
+                preference={preference}
+                current_user={@current_user}
+              />
             </table>
           </div>
         </div>

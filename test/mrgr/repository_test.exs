@@ -12,7 +12,7 @@ defmodule Mrgr.RepositoryTest do
                  name: "migration",
                  pattern: "priv/repo/migrations/*",
                  color: "dcfce7",
-                 notify_user: true,
+                 notify_user_via_email: true,
                  repository_id: ^id,
                  source: :system
                },
@@ -20,7 +20,7 @@ defmodule Mrgr.RepositoryTest do
                  name: "router",
                  pattern: "lib/**/router.ex",
                  color: "dbeafe",
-                 notify_user: true,
+                 notify_user_via_email: true,
                  repository_id: ^id,
                  source: :system
                },
@@ -28,7 +28,7 @@ defmodule Mrgr.RepositoryTest do
                  name: "dependencies",
                  pattern: "mix.lock",
                  color: "fef9c3",
-                 notify_user: true,
+                 notify_user_via_email: true,
                  repository_id: ^id,
                  source: :system
                }

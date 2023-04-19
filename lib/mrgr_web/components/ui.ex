@@ -949,6 +949,65 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def notification_preference_icon(assigns) do
+    ~H"""
+    <div class="tooltip pl-2">
+      <%= render_slot(@inner_block) %>
+      <span class="tooltiptext">
+        <%= render_slot(@tooltip) %>
+      </span>
+    </div>
+    """
+  end
+
+  def email_icon(%{active: true} = assigns) do
+    ~H"""
+    <.notification_preference_icon>
+      <.icon name="envelope" class="h-4 w-4 text-green-500" />
+
+      <:tooltip>
+        Email enabled.
+      </:tooltip>
+    </.notification_preference_icon>
+    """
+  end
+
+  def email_icon(%{active: false} = assigns) do
+    ~H"""
+    <.notification_preference_icon>
+      <.icon name="envelope" class="h-4 w-4 text-gray-500" />
+
+      <:tooltip>
+        Email disabled.
+      </:tooltip>
+    </.notification_preference_icon>
+    """
+  end
+
+  def slack_icon(%{active: true} = assigns) do
+    ~H"""
+    <.notification_preference_icon>
+      <%= img_tag("/images/Slack-mark-RGB.png", class: "w-4 h-4") %>
+
+      <:tooltip>
+        Slack message enabled.
+      </:tooltip>
+    </.notification_preference_icon>
+    """
+  end
+
+  def slack_icon(%{active: false} = assigns) do
+    ~H"""
+    <.notification_preference_icon>
+      <%= img_tag("/images/Slack-mark-black-RGB.png", class: "w-4 h-4 opacity-40") %>
+
+      <:tooltip>
+        Slack message disabled.
+      </:tooltip>
+    </.notification_preference_icon>
+    """
+  end
+
   defp language_icon_url("html" = name) do
     "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/#{name}5/#{name}5-original.svg"
   end

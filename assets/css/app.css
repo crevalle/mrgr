@@ -162,7 +162,21 @@ h5 {
 
   /* Position the tooltip text - see examples below! */
   position: absolute;
-  z-index: 10;
+  z-index: 50;
+  bottom: 160%;
+  width: 140px;
+  left: 50%;
+  margin-left: -70px;
+}
+
+.tooltip .tooltiptext::after {
+  content: " ";
+  position: absolute;
+  top: 100%; /* At the bottom of the tooltip */
+  left: 50%;
+  border-width: 5px;
+  border-style: solid;
+  border-color: black transparent transparent transparent;
 }
 
 .btn {

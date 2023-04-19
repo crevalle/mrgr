@@ -4,7 +4,8 @@ defmodule Mrgr.Schema.HighImpactFileRule do
   schema "high_impact_file_rules" do
     field(:name, :string)
     field(:color, :string, default: "#f1e5d1")
-    field(:notify_user, :boolean)
+    field(:notify_user_via_email, :boolean)
+    field(:notify_user_via_slack, :boolean)
     field(:pattern, :string)
     field(:source, Ecto.Enum, values: [:user, :system])
 
@@ -19,7 +20,8 @@ defmodule Mrgr.Schema.HighImpactFileRule do
   @create_params [
     :color,
     :name,
-    :notify_user,
+    :notify_user_via_email,
+    :notify_user_via_slack,
     :pattern,
     :repository_id,
     :source,
@@ -30,7 +32,8 @@ defmodule Mrgr.Schema.HighImpactFileRule do
     :color,
     :pattern,
     :name,
-    :notify_user
+    :notify_user_via_email,
+    :notify_user_via_slack
   ]
 
   def changeset(schema, params \\ %{}) do

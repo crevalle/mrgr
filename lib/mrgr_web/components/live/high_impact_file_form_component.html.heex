@@ -69,16 +69,20 @@
         </div>
 
         <div class="grid grid-cols-3 gap-4 items-center border-t border-gray-200 pt-5">
-          <%= label(f, :notify_user, "Notify me of new PRs",
-            class: "block text-sm font-medium text-gray-700 mt-px pt-2"
-          ) %>
-          <div class="col-span-2 flex mt-1 items-center">
-            <.checkbox f={f} attr={:notify_user} />
-            <p class="pl-4 text-sm text-gray-500" id="notify_user-description">
-              Send an email to
-              <span class="font-semibold"><%= @current_user.notification_email %></span>
-              when a PR that changes this file/folder is opened.
+          <p class="block text-sm font-medium text-gray-700 mt-px pt-2">
+            Notify me of new PRs
+          </p>
+
+          <div class="col-span-2 grid grid-cols-2 mt-1">
+            <.checkbox f={f} attr={:notify_user_via_email} />
+            <p class="text-sm text-gray-500" id="notify_user_via_email-description">
+              Email <span class="font-semibold"><%= @current_user.notification_email %></span>
               <.l href={~p"/profile"}>Use a different email</.l>
+            </p>
+
+            <.checkbox f={f} attr={:notify_user_via_slack} />
+            <p class="text-sm text-gray-500" id="notify_user_via_slack-description">
+              Via Slack
             </p>
           </div>
         </div>

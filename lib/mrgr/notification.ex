@@ -17,14 +17,15 @@ defmodule Mrgr.Notification do
   end
 
   def create_for_user_and_installation(user, installation, event_name, opts \\ %{}) do
-    params = %{
-      event: event_name,
-      user_id: user.id,
-      installation_id: installation.id,
-      email: false,
-      slack: false
-    }
-    |> Map.merge(opts)
+    params =
+      %{
+        event: event_name,
+        user_id: user.id,
+        installation_id: installation.id,
+        email: false,
+        slack: false
+      }
+      |> Map.merge(opts)
 
     %Mrgr.Schema.UserNotificationPreference{}
     |> Mrgr.Schema.UserNotificationPreference.changeset(params)
