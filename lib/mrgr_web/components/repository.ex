@@ -2,6 +2,7 @@ defmodule MrgrWeb.Components.Repository do
   use MrgrWeb, :component
 
   import MrgrWeb.Components.UI
+  import MrgrWeb.Components.Core
 
   alias Phoenix.LiveView.JS
 
@@ -42,51 +43,53 @@ defmodule MrgrWeb.Components.Repository do
 
   def repo_forked_badge(assigns) do
     ~H"""
-    <div :if={@parent.name} class="tooltip pl-2">
+    <.tooltip :if={@parent.name} class="pl-2">
       <.icon name="share" class="text-gray-400 hover:text-gray-500 mr-1 h-5 w-5" />
-      <span class="tooltiptext">forked from <%= @parent.name_with_owner %></span>
-    </div>
+      <:text>
+        forked from <%= @parent.name_with_owner %>
+      </:text>
+    </.tooltip>
     """
   end
 
   def enforce_automatically_badge(assigns) do
     ~H"""
-    <div :if={@policy.enforce_automatically} class="tooltip pl-2">
+    <.tooltip :if={@policy.enforce_automatically} class="pl-2">
       <.icon name="check-circle" class="text-emerald-400 hover:text-emerald-500 mr-1 h-5 w-5" />
-      <span class="tooltiptext">enforce automatically</span>
-    </div>
+      <:text>enforce automatically</:text>
+    </.tooltip>
 
-    <div :if={!@policy.enforce_automatically} class="tooltip pl-2">
+    <.tooltip :if={!@policy.enforce_automatically} class="pl-2">
       <.icon name="check-circle" class="text-gray-500 hover:text-emerald-500 mr-1 h-5 w-5" />
-      <span class="tooltiptext">do not enforce automatically</span>
-    </div>
+      <:text>do not enforce automatically</:text>
+    </.tooltip>
     """
   end
 
   def default_policy_badge(assigns) do
     ~H"""
-    <div :if={@policy.default} class="tooltip pl-2">
+    <.tooltip :if={@policy.default} class="pl-2">
       <.icon name="star" class="text-emerald-400 hover:text-emerald-500 mr-1 h-5 w-5" />
-      <span class="tooltiptext">default policy</span>
-    </div>
+      <:text>default policy</:text>
+    </.tooltip>
     """
   end
 
   def lock(%{bool: true} = assigns) do
     ~H"""
-    <div class="flex items-center tooltip">
+    <.tooltip>
       <.icon name="lock-closed" class="text-emerald-400 hover:text-emerald-500 mr-1 h-5 w-5" />
-      <span class="tooltiptext">Private</span>
-    </div>
+      <:text>Private</:text>
+    </.tooltip>
     """
   end
 
   def lock(%{bool: false} = assigns) do
     ~H"""
-    <div class="flex items-center tooltip">
-      <.icon name="lock-open" class="tooltip text-gray-400 hover:text-gray-500 mr-1 h-5 w-5" />
-      <span class="tooltiptext">Public</span>
-    </div>
+    <.tooltip>
+      <.icon name="lock-open" class="text-gray-400 hover:text-gray-500 mr-1 h-5 w-5" />
+      <:text>Public</:text>
+    </.tooltip>
     """
   end
 

@@ -262,10 +262,13 @@ defmodule MrgrWeb.Components.Core do
 
   slot :text, required: true
   slot :inner_block, required: true
+  attr :class, :string, default: nil
+
+  attr :rest, :global
 
   def tooltip(assigns) do
     ~H"""
-    <div class="tooltip">
+    <div class={["tooltip", @class]} {@rest}>
       <%= render_slot(@inner_block) %>
       <span class="tooltiptext"><%= render_slot(@text) %></span>
     </div>
