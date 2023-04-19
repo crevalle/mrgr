@@ -76,45 +76,51 @@
                   </div>
                 <% end %>
               </div>
-              <div class="font-medium">Connect Slack</div>
+              <div class="font-medium pt-3">
+                <div class="flex flex-col">
+                  Connect Slack
+                  <p class="text-gray-500 text-xs">
+                    Install our Slackbot to receive notifications in your Slack account.  We don't read any Slack messages.
+                  </p>
+                </div>
+              </div>
               <div class="col-span-2 flex flex-col">
-                <%= if Mrgr.Installation.slack_connected?(@current_user.current_installation) do %>
-                  <div class="flex items-center space-x-1">
+                <%= if @slack_unconnected do %>
+                  <.slack_button user_id={@current_user.id} />
+                <% else %>
+                  <div class="flex items-center space-x-1 pt-3">
                     <p>Slack Connected</p>
                     <.icon name="check-circle" type="solid" class="text-green-600 h-5 w-5" />
                   </div>
-                <% else %>
-                  <.slack_button user_id={@current_user.id} />
                 <% end %>
               </div>
             </div>
 
-            <table class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
-              <th class="p-3 bg-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-500 rounded-t-lg">
-                Event
-              </th>
-              <.th class="bg-gray-100">Email</.th>
-              <th class="p-3 bg-gray-100 text-xs font-medium tracking-wide text-gray-500 flex items-center justify-center rounded-t-lg">
-                <span class="uppercase">Slack</span>
-                <div
-                  :if={!Mrgr.Installation.slack_connected?(@current_user.current_installation)}
-                  class="tooltip pl-2"
-                >
-                  <.icon
-                    name="question-mark-circle"
-                    class="text-gray-400 hover:text-gray-500 h-4 w-4"
-                  />
-                  <span class="tooltiptext">Install our Slackbot to receive notifications</span>
-                </div>
-              </th>
-              <.live_component
-                :for={preference <- @preferences}
-                module={MrgrWeb.Components.Live.NotificationPreference}
-                id={"preference_#{preference.id}"}
-                preference={preference}
-                current_user={@current_user}
-              />
-            </table>
+            <div class="pt-4">
+              <.table>
+                <th class="p-3 bg-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                  Event
+                </th>
+                <th class="p-3 bg-gray-100 text-xs font-medium uppercase tracking-wide text-gray-500 justify-center">
+                  Channels
+                </th>
+                <.live_component
+                  :for={preference <- @preferences}
+                  module={MrgrWeb.Components.Live.NotificationPreference}
+                  id={"preference_#{preference.id}"}
+                  preference={preference}
+                  slack_unconnected={@slack_unconnected}
+                />
+              </.table>
+            </div>
+
+            <.live_component
+              module={MrgrWeb.Components.Live.UserRepoHIFList}
+              id="user-repo-hif-list"
+              hifs_by_repo={@hifs_by_repo}
+              slack_unconnected={@slack_unconnected}
+              current_user={@current_user}
+            />
           </div>
         </div>
       </div>

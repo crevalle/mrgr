@@ -18,6 +18,14 @@ defmodule Mrgr.Schema.UserNotificationPreference do
     timestamps()
   end
 
+  def toggle_notification(preference, attr) do
+    toggle = !Map.get(preference, attr)
+
+    preference
+    |> changeset(%{attr => toggle})
+    |> Mrgr.Repo.update!()
+  end
+
   def changeset(schema, params) do
     schema
     |> cast(params, [:user_id, :installation_id, :event, :email, :slack])

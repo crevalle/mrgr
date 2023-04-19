@@ -7,10 +7,18 @@ defmodule MrgrWeb.ProfileLive do
     if connected?(socket) do
       preferences = Mrgr.User.notification_preferences(socket.assigns.current_user)
 
+      hifs_by_repo =
+        Mrgr.HighImpactFileRule.for_user_with_repo(socket.assigns.current_user) |> group_by_repo()
+
+      slack_unconnected =
+        !Mrgr.Installation.slack_connected?(socket.assigns.current_user.current_installation)
+
       socket
       |> put_title("Your Profile")
       |> assign(:changeset, nil)
       |> assign(:preferences, preferences)
+      |> assign(:slack_unconnected, slack_unconnected)
+      |> assign(:hifs_by_repo, hifs_by_repo)
       |> ok()
     else
       ok(socket)
@@ -60,8 +68,30 @@ defmodule MrgrWeb.ProfileLive do
     end
   end
 
+  def handle_info({:hif_updated, hif}, socket) do
+    hifs = Mrgr.List.replace(socket.assigns.hifs_by_repo[hif.repository], hif)
+
+    hifs_by_repo = Map.put(socket.assigns.hifs_by_repo, hif.repository, hifs)
+
+    socket
+    |> assign(:hifs_by_repo, hifs_by_repo)
+    |> noreply()
+  end
+
+  def handle_info({:preference_updated, preference}, socket) do
+    preferences = Mrgr.List.replace(socket.assigns.preferences, preference)
+
+    socket
+    |> assign(:preferences, preferences)
+    |> noreply()
+  end
+
   def build_changeset(user, params \\ %{}) do
     user
     |> Mrgr.Schema.User.notification_changeset(params)
+  end
+
+  def group_by_repo(hifs) do
+    Enum.group_by(hifs, & &1.repository)
   end
 end

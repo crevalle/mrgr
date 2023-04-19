@@ -275,6 +275,25 @@ defmodule MrgrWeb.Components.Core do
     """
   end
 
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  slot :inner_block, required: true
+
+  def table(assigns) do
+    ~H"""
+    <table
+      class={[
+        "min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </table>
+    """
+  end
+
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do

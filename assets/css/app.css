@@ -163,6 +163,14 @@ h5 {
   border-style: solid;
 }
 
+th:first-of-type {
+  @apply rounded-tl-lg;
+}
+
+th:last-of-type {
+  @apply rounded-tr-lg;
+}
+
 .btn {
   @apply flex items-center justify-center border border-transparent shadow-md rounded-md text-sm font-medium text-white py-2 px-4 focus:outline-none focus:ring-2 focus:ring-offset-2;
 }
@@ -208,6 +216,14 @@ h5 {
 }
 
 .checkbox:disabled {
+  @apply hover:cursor-not-allowed;
+}
+
+.toggle {
+  @apply hover:cursor-pointer;
+}
+
+.toggle.disabled {
   @apply hover:cursor-not-allowed;
 }
 

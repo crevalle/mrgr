@@ -218,7 +218,7 @@ defmodule MrgrWeb.Components.UI do
     <th
       scope="col"
       class={[
-        "p-3 text-center text-xs font-medium uppercase tracking-wide text-gray-500",
+        "p-3 text-center text-xs bg-gray-100 font-medium uppercase tracking-wide text-gray-500",
         @class
       ]}
     >
@@ -258,13 +258,19 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
   def td(assigns) do
-    class = "whitespace-nowrap px-3 text-gray-700 #{assigns[:class]}"
-
-    assigns = assign(assigns, :class, class)
-
     ~H"""
-    <td class={@class}>
+    <td
+      class={[
+        "whitespace-nowrap px-3 py-2 text-gray-700 ",
+        @class
+      ]}
+      {@rest}
+    >
       <%= render_slot(@inner_block) %>
     </td>
     """
@@ -960,51 +966,62 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def email_icon(%{active: true} = assigns) do
+  def notification_channels_toggle(assigns) do
     ~H"""
-    <.notification_preference_icon>
-      <.icon name="envelope" class="h-4 w-4 text-green-500" />
+    <div class="flex space-x-2 items-center justify-center">
+      <.tooltip
+        class="pl-2"
+        phx-click={JS.push("toggle-channel", value: %{id: @obj.id, attr: "email"})}
+        phx-target={@target}
+      >
+        <%= if @obj.email do %>
+          <.icon name="envelope" class="h-4 w-4 text-green-500 toggle" />
+        <% else %>
+          <.icon name="envelope" class="h-4 w-4 toggle text-gray-400" />
+        <% end %>
+        <:text>
+          <%= if @obj.email do %>
+            Email alerts enabled.
+          <% else %>
+            Email alerts disabled.
+          <% end %>
+        </:text>
+      </.tooltip>
 
-      <:tooltip>
-        Email enabled.
-      </:tooltip>
-    </.notification_preference_icon>
+      <%= if @slack_unconnected do %>
+        <.tooltip class="pl-2">
+          <%= img_tag("/images/Slack-mark-black-RGB.png", class: "w-4 h-4 opacity-40 toggle disabled") %>
+          <:text>
+            Connect Slack to receive notifications.
+          </:text>
+        </.tooltip>
+      <% else %>
+        <.tooltip
+          class="pl-2"
+          phx-click={JS.push("toggle-channel", value: %{id: @obj.id, attr: "slack"})}
+          phx-target={@target}
+        >
+          <%= if @obj.slack do %>
+            <%= img_tag("/images/Slack-mark-RGB.png", class: "w-4 h-4 toggle") %>
+          <% else %>
+            <%= img_tag("/images/Slack-mark-black-RGB.png", class: "w-4 h-4 opacity-40 toggle") %>
+          <% end %>
+          <:text>
+            <%= if @obj.slack do %>
+              Slack alerts enabled.
+            <% else %>
+              Slack alerts disabled.
+            <% end %>
+          </:text>
+        </.tooltip>
+      <% end %>
+    </div>
     """
   end
 
-  def email_icon(%{active: false} = assigns) do
+  def hif_pattern(assigns) do
     ~H"""
-    <.notification_preference_icon>
-      <.icon name="envelope" class="h-4 w-4 text-gray-500" />
-
-      <:tooltip>
-        Email disabled.
-      </:tooltip>
-    </.notification_preference_icon>
-    """
-  end
-
-  def slack_icon(%{active: true} = assigns) do
-    ~H"""
-    <.notification_preference_icon>
-      <%= img_tag("/images/Slack-mark-RGB.png", class: "w-4 h-4") %>
-
-      <:tooltip>
-        Slack message enabled.
-      </:tooltip>
-    </.notification_preference_icon>
-    """
-  end
-
-  def slack_icon(%{active: false} = assigns) do
-    ~H"""
-    <.notification_preference_icon>
-      <%= img_tag("/images/Slack-mark-black-RGB.png", class: "w-4 h-4 opacity-40") %>
-
-      <:tooltip>
-        Slack message disabled.
-      </:tooltip>
-    </.notification_preference_icon>
+    <pre class="text-sm font-medium text-gray-900"><%= @pattern %></pre>
     """
   end
 

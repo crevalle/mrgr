@@ -10,6 +10,13 @@ defmodule Mrgr.HighImpactFileRule do
     |> Mrgr.Repo.all()
   end
 
+  def for_user_with_repo(user) do
+    Schema
+    |> Query.for_user(user.id)
+    |> Query.with_repository()
+    |> Mrgr.Repo.all()
+  end
+
   @doc "gets all HIFs on the repository and returns those applicable to the PR"
   def for_pull_request(
         %{repository: %{high_impact_file_rules: %Ecto.Association.NotLoaded{}}} = pull_request
@@ -146,6 +153,14 @@ defmodule Mrgr.HighImpactFileRule do
       {:error, _cs} = error ->
         error
     end
+  end
+
+  def toggle_notification(hif, attr) do
+    toggle = !Map.get(hif, attr)
+
+    hif
+    |> Schema.update_changeset(%{attr => toggle})
+    |> Mrgr.Repo.update!()
   end
 
   @spec add_to_matching_open_prs(Schema.t()) :: Schema.t()
@@ -315,6 +330,13 @@ defmodule Mrgr.HighImpactFileRule do
     def for_user(query, user_id) do
       from(q in query,
         where: q.user_id == ^user_id
+      )
+    end
+
+    def with_repository(query) do
+      from(q in query,
+        join: r in assoc(q, :repository),
+        preload: [repository: r]
       )
     end
 

@@ -41,7 +41,7 @@ defmodule Mrgr.List do
   end
 
   @spec find_index(list(), map()) :: list()
-  def find_index(list, %{id: id}) do
+  def find_index(list, %{id: id}) when is_list(list) do
     Enum.find_index(list, fn i -> i.id == id end)
   end
 

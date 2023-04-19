@@ -10,9 +10,13 @@ defmodule MrgrWeb.HighImpactFileLive do
       repos = Mrgr.Repository.for_user_with_hif_rules(current_user)
       Mrgr.PubSub.subscribe_to_installation(current_user)
 
+      slack_unconnected =
+        !Mrgr.Installation.slack_connected?(socket.assigns.current_user.current_installation)
+
       socket
       |> assign(:form, nil)
       |> assign(:repos, repos)
+      |> assign(:slack_unconnected, slack_unconnected)
       |> put_title("High Impact Files")
       |> ok()
     else
@@ -116,6 +120,14 @@ defmodule MrgrWeb.HighImpactFileLive do
       _que ->
         noreply(socket)
     end
+  end
+
+  def handle_info({:hif_updated, hif}, socket) do
+    repos = update_hif_in_its_repo(socket.assigns.repos, hif)
+
+    socket
+    |> assign(:repos, repos)
+    |> noreply()
   end
 
   def handle_info(%{event: @high_impact_file_rule_created, payload: hif}, socket) do

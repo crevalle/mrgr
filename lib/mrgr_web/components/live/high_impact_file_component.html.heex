@@ -32,17 +32,18 @@
 
     <tbody class="bg-white">
       <tr :for={hif <- @repo.high_impact_file_rules} class="border-t border-gray-300">
-        <td class="whitespace-nowrap pl-6 py-2 text-sm font-medium text-gray-900">
-          <pre><%= hif.pattern %></pre>
+        <td class="whitespace-nowrap pl-6 py-2">
+          <.hif_pattern pattern={hif.pattern} />
         </td>
         <td class="whitespace-nowrap py-2 text-sm text-gray-500">
           <.badge item={hif} />
         </td>
         <td>
-          <div class="flex space-x-2 items-center justify-center">
-            <.email_icon active={hif} />
-            <.slack_icon active={hif.slack} />
-          </div>
+          <.notification_channels_toggle
+            obj={hif}
+            slack_unconnected={@slack_unconnected}
+            target={@myself}
+          />
         </td>
         <td class="whitespace-nowrap pr-4 py-2 text-right text-sm">
           <.l phx_click={
