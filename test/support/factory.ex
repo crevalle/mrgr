@@ -137,7 +137,7 @@ defmodule Mrgr.Factory do
     %Mrgr.Schema.HighImpactFileRule{
       repository: build(:repository),
       name: "socks",
-      notify_user_via_email: false,
+      email: false,
       pattern: "*",
       source: :user
     }

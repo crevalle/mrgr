@@ -74,14 +74,14 @@
           </p>
 
           <div class="col-span-2 grid grid-cols-2 mt-1">
-            <.checkbox f={f} attr={:notify_user_via_email} />
-            <p class="text-sm text-gray-500" id="notify_user_via_email-description">
+            <.checkbox f={f} attr={:email} />
+            <p class="text-sm text-gray-500" id="email-description">
               Email <span class="font-semibold"><%= @current_user.notification_email %></span>
               <.l href={~p"/profile"}>Use a different email</.l>
             </p>
 
-            <.checkbox f={f} attr={:notify_user_via_slack} />
-            <p class="text-sm text-gray-500" id="notify_user_via_slack-description">
+            <.checkbox f={f} attr={:slack} />
+            <p class="text-sm text-gray-500" id="slack-description">
               Via Slack
             </p>
           </div>

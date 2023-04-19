@@ -218,24 +218,24 @@ defmodule Mrgr.HighImpactFileRule do
         name: "migration",
         pattern: "priv/repo/migrations/*",
         color: "#dcfce7",
-        notify_user_via_email: true,
-        notify_user_via_slack: false,
+        email: true,
+        slack: false,
         source: :system
       },
       %{
         name: "router",
         pattern: "lib/**/router.ex",
         color: "#dbeafe",
-        notify_user_via_email: true,
-        notify_user_via_slack: false,
+        email: true,
+        slack: false,
         source: :system
       },
       %{
         name: "dependencies",
         pattern: "mix.lock",
         color: "#fef9c3",
-        notify_user_via_email: true,
-        notify_user_via_slack: false,
+        email: true,
+        slack: false,
         source: :system
       }
     ]
@@ -247,24 +247,24 @@ defmodule Mrgr.HighImpactFileRule do
         name: "migration",
         pattern: "db/migrate/*",
         color: "#dcfce7",
-        notify_user_via_email: true,
-        notify_user_via_slack: false,
+        email: true,
+        slack: false,
         source: :system
       },
       %{
         name: "router",
         pattern: "config/routes.rb",
         color: "#dbeafe",
-        notify_user_via_email: true,
-        notify_user_via_slack: false,
+        email: true,
+        slack: false,
         source: :system
       },
       %{
         name: "dependencies",
         pattern: "Gemfile.lock",
         color: "#fef9c3",
-        notify_user_via_email: true,
-        notify_user_via_slack: false,
+        email: true,
+        slack: false,
         source: :system
       }
     ]
@@ -276,8 +276,8 @@ defmodule Mrgr.HighImpactFileRule do
         name: "dependencies",
         pattern: "package-lock.json",
         color: "#fef9c3",
-        notify_user_via_email: true,
-        notify_user_via_slack: false,
+        email: true,
+        slack: false,
         source: :system
       }
     ]

@@ -486,7 +486,7 @@ defmodule Mrgr.PullRequest do
     pull_request = Mrgr.Repo.preload(pull_request, :author)
 
     pull_request.high_impact_file_rules
-    |> Enum.filter(& &1.notify_user_via_email)
+    |> Enum.filter(& &1.email)
     # don't send alerts to whomever opened the PR
     |> Enum.reject(&Mrgr.HighImpactFileRule.hif_consumer_is_author?(&1, pull_request.author))
     |> Mrgr.HighImpactFileRule.send_alert(pull_request)
