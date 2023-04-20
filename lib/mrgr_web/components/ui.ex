@@ -6,42 +6,21 @@ defmodule MrgrWeb.Components.UI do
 
   alias Phoenix.LiveView.JS
 
-  def inline_link(assigns) do
-    default_class = "text-teal-700 hover:text-teal-500"
-    class = Map.get(assigns, :class, default_class)
-    href = Map.get(assigns, :href, "#")
-
-    extra = assigns_to_attributes(assigns, [:href, :class])
-
-    assigns =
-      assigns
-      |> assign(:href, href)
-      |> assign(:class, class)
-      |> assign(:extra, extra)
-
-    ~H"""
-    <a href={@href} class={@class} {@extra}>
-      <%= render_slot(@inner_block) %>
-    </a>
-    """
-  end
+  attr :href, :string, default: "#"
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
 
   def l(assigns) do
-    default_colors = "text-teal-700 hover:text-teal-500"
-    default_class = "#{Map.get(assigns, :colors, default_colors)}"
-    class = Map.get(assigns, :class, default_class)
-    href = Map.get(assigns, :href, "#")
-
-    extra = assigns_to_attributes(assigns, [:href, :class])
-
-    assigns =
-      assigns
-      |> assign(:href, href)
-      |> assign(:class, class)
-      |> assign(:extra, extra)
-
     ~H"""
-    <a href={@href} class={@class} {@extra}>
+    <a
+      href={@href}
+      class={[
+        "text-teal-700 hover:text-teal-500",
+        @class
+      ]}
+      {@rest}
+    >
       <%= render_slot(@inner_block) %>
     </a>
     """
@@ -102,7 +81,7 @@ defmodule MrgrWeb.Components.UI do
         Your trial expires in <%= Mrgr.Installation.trial_time_left(
           @current_user.current_installation
         ) %> days.
-        <.link href={~p"/account"} class="text-teal-700 hover:text-teal-500 underline">Upgrade</.link>
+        <.link href={~p"/account"} class="underline">Upgrade</.link>
       </p>
 
       <p
@@ -596,7 +575,7 @@ defmodule MrgrWeb.Components.UI do
 
   def dropdown_toggle_link(assigns) do
     ~H"""
-    <.inline_link
+    <.l
       phx-click={toggle(to: "##{@target}")}
       id={"#{@target}-toggle"}
       aria-expanded="false"
@@ -604,7 +583,7 @@ defmodule MrgrWeb.Components.UI do
       class={@class}
     >
       <%= render_slot(@inner_block) %>
-    </.inline_link>
+    </.l>
     """
   end
 

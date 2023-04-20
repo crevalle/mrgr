@@ -379,7 +379,7 @@ defmodule MrgrWeb.Components.PullRequest do
     ~H"""
     <p class="text-xs">
       <%= @showing %>/<%= @total %> repos displayed.
-      <.l href={~p"/repositories"} class="text-xs text-teal-700 hover:text-teal-500">Configure</.l>
+      <.l href={~p"/repositories"} class="text-xs">Configure</.l>
     </p>
     """
   end

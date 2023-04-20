@@ -19,12 +19,12 @@
             <strong>None Yet!</strong>
             Why don't you
             <%= if Mrgr.User.admin_at_installation?(@current_user) do %>
-              <.inline_link phx-click={
+              <.l phx-click={
                 JS.push("add-policy")
                 |> show_detail()
               }>
                 Add One
-              </.inline_link>?
+              </.l>?
             <% else %>
               ask an admin to set one up?
             <% end %>
@@ -90,7 +90,7 @@
         <div class="flex justify-between basis-1/2">
           <.heading title={"Repositories assigned to policy #{@selected_policy.name}"} />
 
-          <.inline_link
+          <.l
             :if={Mrgr.User.admin_at_installation?(@current_user)}
             phx-click={
               JS.push("enforce-policy-to-repos", value: %{policy_id: @selected_policy.id})
@@ -99,7 +99,7 @@
             class="text-red-700 hover:text-red-900"
           >
             Enforce Policy on These Repos
-          </.inline_link>
+          </.l>
         </div>
       <% else %>
         <.heading title={"All Repositories for #{ @installation.account.login }"} />
