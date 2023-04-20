@@ -332,7 +332,7 @@ defmodule MrgrWeb.Components.PullRequest do
     ~H"""
     <.l
       id={"#{@option.id}-#{@ctx}"}
-      phx_click={JS.push("snooze", value: %{snooze_id: @option.id, pr_id: @ctx})}
+      phx-click={JS.push("snooze", value: %{snooze_id: @option.id, pr_id: @ctx})}
       class="text-teal-700 hover:text-teal-500 hover:bg-gray-50 p-2 text-sm rounded-md"
       role="menuitem"
       tabindex="-1"

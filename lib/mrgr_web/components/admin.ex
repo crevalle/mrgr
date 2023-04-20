@@ -119,7 +119,7 @@ defmodule MrgrWeb.Components.Admin do
           <.l
             :if={!Mrgr.Installation.onboarded?(@installation)}
             phx-click={JS.push("re-onboard", value: %{id: @installation.id})}
-            data={[confirm: "Sure about that?"]}
+            data-confirm="Sure about that?"
           >
             Re-onboard
           </.l>

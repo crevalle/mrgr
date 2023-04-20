@@ -21,7 +21,7 @@ defmodule MrgrWeb.Components.Live.UserHIF do
     """
   end
 
-  def handle_event("toggle-channel", %{"id" => id, "attr" => attr}, socket) do
+  def handle_event("toggle-channel", %{"attr" => attr}, socket) do
     hif =
       socket.assigns.hif
       |> Mrgr.HighImpactFileRule.toggle_notification(String.to_existing_atom(attr))

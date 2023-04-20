@@ -225,7 +225,7 @@ defmodule MrgrWeb.Components.Onboarding do
 
   def payment_or_activate_button(%{installation: %{target_type: "User"}} = assigns) do
     ~H"""
-    <.l phx_click="activate" class="btn btn-primary">
+    <.l phx-click="activate" class="btn btn-primary">
       Activate your free Mrgr account!
     </.l>
     """

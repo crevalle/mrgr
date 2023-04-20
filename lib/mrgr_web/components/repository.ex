@@ -96,7 +96,7 @@ defmodule MrgrWeb.Components.Repository do
   def enforce_policy_link(assigns) do
     ~H"""
     <.l
-      phx_click={JS.push("enforce-policy", value: %{policy_id: @policy_id, repo_id: @repo_id})}
+      phx-click={JS.push("enforce-policy", value: %{policy_id: @policy_id, repo_id: @repo_id})}
       class="text-teal-700 hover:text-teal-500 hover:bg-stone-50 font-light p-3 text-sm rounded-md"
     >
       <%= render_slot(@inner_block) %>

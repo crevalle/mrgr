@@ -603,7 +603,7 @@ defmodule MrgrWeb.Components.UI do
       <.l
         :for={item <- @items}
         id={"#{@id_prefix}-#{item.id}"}
-        phx_click={JS.push("toggle-#{@name}", value: Map.merge(%{id: item.id}, @value))}
+        phx-click={JS.push("toggle-#{@name}", value: Map.merge(%{id: item.id}, @value))}
         class="text-gray-700 p-2 text-sm w-52 rounded-md hover:bg-gray-50"
         role="menuitem"
         tabindex="-1"
@@ -745,9 +745,8 @@ defmodule MrgrWeb.Components.UI do
             <.l
               :for={r <- @repos}
               id={"repo-menu-item-#{r.id}"}
-              phx_click="toggle-merge-freeze"
-              phx_value_repo_id={r.id}
-              data_confirm="Sure about that?"
+              phx-click={JS.push("toggle-merge-freeze", value: %{repo_id: r.id})}
+              data-confirm="Sure about that?"
               class="text-teal-700 hover:text-teal-500 hover:bg-gray-50 p-2 text-sm rounded-md"
               role="menuitem"
               tabindex="-1"

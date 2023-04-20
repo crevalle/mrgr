@@ -70,11 +70,11 @@
               <td class="p-3">
                 <.l
                   :if={Mrgr.User.admin_at_installation?(@current_user)}
-                  phx_click={
+                  phx-click={
                     JS.push("edit-policy")
                     |> show_detail()
                   }
-                  phx_value_id={policy.id}
+                  phx-value-id={policy.id}
                 >
                   Edit
                 </.l>
@@ -95,7 +95,7 @@
             phx-click={
               JS.push("enforce-policy-to-repos", value: %{policy_id: @selected_policy.id})
             }
-            data_confirm="This will update the settings on all the policy's repositories.  Are you sure?"
+            data-confirm="This will update the settings on all the policy's repositories.  Are you sure?"
             class="text-red-700 hover:text-red-900"
           >
             Enforce Policy on These Repos

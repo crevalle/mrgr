@@ -8,7 +8,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
     <div class="flex flex-col mt-2 space-y-3">
       <.aside>
         Customize your view by filtering on Author, Label, or Repository.
-        <.l phx-click="delete-tab" data={[confirm: "Sure about that?"]}>
+        <.l phx-click="delete-tab" data-confirm="Sure about that?">
           delete tab
         </.l>
       </.aside>

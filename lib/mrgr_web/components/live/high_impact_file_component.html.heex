@@ -46,7 +46,7 @@
           />
         </td>
         <td class="whitespace-nowrap pr-4 py-2 text-right text-sm">
-          <.l phx_click={
+          <.l phx-click={
             JS.push("edit-hif", value: %{repo: @repo.id, hif: hif.id})
             |> show_detail()
           }>

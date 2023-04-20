@@ -3,6 +3,7 @@ defmodule MrgrWeb.Components.Form do
 
   import Phoenix.HTML.Form
   import MrgrWeb.Components.Core
+  import MrgrWeb.Components.UI
   alias Phoenix.LiveView.JS
 
   def error(assigns) do
@@ -61,11 +62,16 @@ defmodule MrgrWeb.Components.Form do
       |> assign(:color, color)
 
     ~H"""
-    <%= link to: "#", phx_click: JS.push("toggle-selected-repository", value: %{id: @repo.id}), phx_target: @target, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@color}", id: "repo-#{@repo.id}" do %>
+    <.l
+      phx-click={JS.push("toggle-selected-repository", value: %{id: @repo.id})}
+      phx-target={@target}
+      class={"flex items-center justify-center py-2 border rounded-md border-teal-500 #{@color}"}
+      id={"repo-#{@repo.id}"}
+    >
       <div>
         <%= @repo.name %>
       </div>
-    <% end %>
+    </.l>
     """
   end
 
@@ -81,11 +87,15 @@ defmodule MrgrWeb.Components.Form do
       |> assign(:color, color)
 
     ~H"""
-    <%= link to: "#", phx_click: "toggle-selected-repository", phx_value_repo_id: @repo.id, class: "flex items-center justify-center py-2 border rounded-md border-teal-500 #{@color}", id: "repo-#{@repo.id}" do %>
+    <.l
+      phx-click={JS.push("toggle-selected-repository", value: %{repo_id: @repo.id})}
+      class={"flex items-center justify-center py-2 border rounded-md border-teal-500 #{@color}"}
+      id={"repo-#{@repo.id}"}
+    >
       <div>
         <%= @repo.name %>
       </div>
-    <% end %>
+    </.l>
     """
   end
 

@@ -253,7 +253,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     |> noreply()
   end
 
-  def handle_event("toggle-merge-freeze", %{"repo-id" => id}, socket) do
+  def handle_event("toggle-merge-freeze", %{"repo_id" => id}, socket) do
     repo = Mrgr.List.find(socket.assigns.repos, id)
 
     updated = Mrgr.Repository.toggle_pull_request_freeze(repo)

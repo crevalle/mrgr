@@ -49,11 +49,11 @@
               <td class="p-3 text-center"><%= label.repo_count %></td>
               <td class="p-3 text-right">
                 <.l
-                  phx_click={
+                  phx-click={
                     JS.push("edit")
                     |> show_detail()
                   }
-                  phx_value_id={label.id}
+                  phx-value-id={label.id}
                 >
                   Edit
                 </.l>
