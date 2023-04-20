@@ -211,6 +211,10 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.update!()
   end
 
+  def find_user_notification_address(user) do
+    find_user_notification_address(user.id, user.current_installation_id)
+  end
+
   def find_user_notification_address(user_id, installation_id) do
     Mrgr.Schema.UserNotificationAddress
     |> Query.where(user_id: user_id)

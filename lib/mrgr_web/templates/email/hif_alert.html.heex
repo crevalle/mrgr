@@ -2,7 +2,7 @@
   <h1>Hello! 👋</h1>
 
   <p>
-    A File Change Alert in the <strong><%= @repository_name %></strong>
+    A file change alert in the <strong><%= @repository_name %></strong>
     repository was triggered in
     <.l href={~p"/pull-requests/hifs/#{@pull_request.id}/files-changed"}>
       <%= @pull_request.title %>
@@ -10,12 +10,16 @@
   </p>
 
   <ul>
-    <%= for alert <- @alerts, filename <- alert.filenames do %>
+    <%= for rule <- @rules, filename <- rule.filenames do %>
       <li>
-        <.hif_badge hif={alert.rule} /> <%= filename %>
+        <.hif_badge hif={rule} /> <%= filename %>
       </li>
     <% end %>
   </ul>
+
+  <.l href={Mrgr.Schema.PullRequest.external_pull_request_url(@pull_request)}>
+    View it on Github.
+  </.l>
 
   <p>Have a nice day ✌️</p>
 

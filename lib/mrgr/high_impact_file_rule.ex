@@ -90,26 +90,66 @@ defmodule Mrgr.HighImpactFileRule do
   def hif_consumer_is_author?(%{user_id: user_id}, %{user_id: user_id}), do: true
   def hif_consumer_is_author?(_hif, _pr), do: false
 
-  def send_alert([], _pull_request), do: nil
+  def send_alert(%{high_impact_file_rules: []}), do: nil
 
-  def send_alert(rules, pull_request) when is_list(rules) do
-    # each user gets one email per pull request of all applicable rules
+  def send_alert(%{high_impact_file_rules: rules} = pull_request) when is_list(rules) do
+    # each user gets one alert per pull request with all applicable rules
+    pull_request = Mrgr.Repo.preload(pull_request, :author)
+
     rules
+    # don't send alerts to whomever opened the PR
+    |> Enum.reject(&hif_consumer_is_author?(&1, pull_request.author))
     |> Enum.group_by(& &1.user_id)
     |> Enum.map(&do_send_alert(&1, pull_request))
   end
 
   defp do_send_alert({user_id, rules}, pull_request) do
-    user = Mrgr.User.find(user_id)
+    recipient = Mrgr.User.find_with_current_installation(user_id)
 
-    Enum.map(rules, fn rule ->
-      %{
-        filenames: matching_filenames(rule, pull_request),
-        rule: rule
-      }
-    end)
-    |> Mrgr.Email.hif_alert(user, pull_request, pull_request.repository)
-    |> Mrgr.Mailer.deliver()
+    rules_by_channel =
+      Enum.reduce(rules, %{email: [], slack: []}, fn rule, acc ->
+        rule = %{rule | filenames: matching_filenames(rule, pull_request)}
+
+        # strips out rules that have no channels
+        acc
+        |> put_email_channel(rule)
+        |> put_slack_channel(rule)
+      end)
+
+    email_results = send_email_alert(rules_by_channel.email, recipient, pull_request)
+    slack_results = send_slack_alert(rules_by_channel.slack, recipient, pull_request)
+
+    %{email: email_results, slack: slack_results}
+  end
+
+  def put_email_channel(acc, %{email: true} = rule) do
+    rules = acc.email
+    Map.put(acc, :email, [rule | rules])
+  end
+
+  def put_email_channel(acc, _rule), do: acc
+
+  def put_slack_channel(acc, %{slack: true} = rule) do
+    rules = acc.slack
+    Map.put(acc, :slack, [rule | rules])
+  end
+
+  def put_slack_channel(acc, _rule), do: acc
+
+  def send_email_alert([], _recipient, _pull_request), do: nil
+
+  def send_email_alert(rules, recipient, pull_request) do
+    email = Mrgr.Email.hif_alert(rules, recipient, pull_request)
+
+    Mrgr.Mailer.deliver(email)
+  end
+
+  def send_slack_alert([], _recipient, _pull_request), do: nil
+
+  def send_slack_alert(rules, recipient, pull_request) do
+    message = Mrgr.Slack.Message.compose_hif_message(rules, pull_request)
+
+    Mrgr.Slack.send_message(message, recipient)
   end
 
   def matching_filenames(rule, pull_request) do

@@ -7,6 +7,7 @@ defmodule Mrgr.Schema.HighImpactFileRule do
     field(:email, :boolean)
     field(:slack, :boolean)
     field(:pattern, :string)
+    field(:filenames, {:array, :string}, virtual: true)
     field(:source, Ecto.Enum, values: [:user, :system])
 
     belongs_to(:repository, Mrgr.Schema.Repository)

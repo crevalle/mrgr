@@ -36,17 +36,17 @@ defmodule Mrgr.Email do
     |> render_with_layout(MrgrWeb.Email.Renderer.invite_user_to_installation(assigns))
   end
 
-  def hif_alert(alerts, recipient, pull_request, repository) do
+  def hif_alert(rules, recipient, pull_request) do
     assigns = %{
-      alerts: alerts,
-      repository_name: repository.name,
+      rules: rules,
+      repository_name: pull_request.repository.name,
       pull_request: pull_request
     }
 
     new()
     |> from(@from)
     |> to(recipient)
-    |> subject("File Change Alert in #{assigns.repository_name}")
+    |> subject("High Impact File Change in #{assigns.repository_name}")
     |> render_with_layout(MrgrWeb.Email.Renderer.hif_alert(assigns))
   end
 

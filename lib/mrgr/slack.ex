@@ -3,30 +3,42 @@ defmodule Mrgr.Slack do
   Wraps the Slack API
   """
 
+  def send_message(message, user) do
+    # assumes user has opted to receive slack messages
+    address = Mrgr.User.find_user_notification_address(user)
+
+    send_message(message, user.current_installation, address)
+  end
+
   @spec(
     send_message(
-      String.t(),
+      map(),
       Mrgr.Schema.Installation.t(),
       Mrgr.Schema.UserNotificationAddress.t()
     ) :: {:ok, map()},
     {:error, String.t()}
   )
-  def send_message(message, %{slackbot: %{access_token: token}}, %{slack_id: slack_id}) do
+  def send_message(message, %{slackbot: %{access_token: token}}, %{slack_id: slack_id})
+      when is_map(message) do
     url = "https://slack.com/api/chat.postMessage"
 
     headers = %{
-      "Content-Type" => "application/x-www-form-urlencoded",
+      "Content-Type" => "application/json",
       "Authorization" => "Bearer #{token}"
     }
 
-    params = %{
-      channel: slack_id,
-      text: message
-    }
+    params = %{channel: slack_id}
 
-    body = URI.encode_query(params)
+    body =
+      params
+      |> Map.merge(message)
+      |> Jason.encode!()
 
     post(url, body, headers)
+  end
+
+  def send_message(_message, _installation, nil) do
+    {:error, "No slack connection for user"}
   end
 
   def post(url, body, headers) do
