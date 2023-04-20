@@ -70,20 +70,31 @@
 
         <div class="grid grid-cols-3 gap-4 items-center border-t border-gray-200 pt-5">
           <p class="block text-sm font-medium text-gray-700 mt-px pt-2">
-            Notify me of new PRs
+            Alert me of new PRs
           </p>
 
-          <div class="col-span-2 grid grid-cols-2 mt-1">
-            <.checkbox f={f} attr={:email} />
-            <p class="text-sm text-gray-500" id="email-description">
-              Email <span class="font-semibold"><%= @current_user.notification_email %></span>
-              <.l href={~p"/profile"}>Use a different email</.l>
-            </p>
+          <div class="col-span-2 flex flex-col space-y-3 mt-1">
+            <div class="flex items-center space-x-2">
+              <.checkbox f={f} attr={:email} />
+              <p class="text-sm text-gray-500" id="email-description">
+                Email <span class="font-semibold"><%= @current_user.notification_email %></span>
+                <.l href={~p"/profile"} class="text-xs">change</.l>
+              </p>
+            </div>
 
-            <.checkbox f={f} attr={:slack} />
-            <p class="text-sm text-gray-500" id="slack-description">
-              Via Slack
-            </p>
+            <div class="flex items-center space-x-2">
+              <%= checkbox(f, :slack,
+                class:
+                  "shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray-300 rounded-md",
+                disabled: @slack_unconnected
+              ) %>
+              <p class="text-sm text-gray-500" id="slack-description">
+                Via Slack
+                <.l :if={@slack_unconnected} href={~p"/profile"} class="text-xs">
+                  Connect Slack
+                </.l>
+              </p>
+            </div>
           </div>
         </div>
 
