@@ -20,7 +20,6 @@ defmodule MrgrWeb.Components.Live.NotificationPreference do
     preference =
       socket.assigns.preference
       |> Mrgr.Schema.UserNotificationPreference.toggle_notification(String.to_existing_atom(attr))
-      |> Mrgr.Repo.update!()
 
     send(self(), {:preference_updated, preference})
 

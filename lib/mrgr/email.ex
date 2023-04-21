@@ -1,5 +1,5 @@
 defmodule Mrgr.Email do
-  import MrgrWeb.Formatter, only: [account_name: 1]
+  import MrgrWeb.Formatter, only: [account_name: 1, author_handle: 1]
   import Swoosh.Email
 
   @from {"Mrgr", "noreply@mrgr.io"}
@@ -34,6 +34,19 @@ defmodule Mrgr.Email do
     |> to(recipient)
     |> subject("You've been invited to join #{account_name(installation)} on Mrgr")
     |> render_with_layout(MrgrWeb.Email.Renderer.invite_user_to_installation(assigns))
+  end
+
+  def controversial_pr(recipient, pull_request, thread) do
+    assigns = %{
+      pull_request: pull_request,
+      thread: thread
+    }
+
+    new()
+    |> from(@from)
+    |> to(recipient)
+    |> subject("Controversial PR: #{pull_request.title}")
+    |> render_with_layout(MrgrWeb.Email.Renderer.controversial_pr(assigns))
   end
 
   def hif_alert(rules, recipient, pull_request) do

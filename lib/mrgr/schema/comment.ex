@@ -60,13 +60,19 @@ defmodule Mrgr.Schema.Comment do
   end
 
   def review_id(%{raw: %{"pull_request_review_id" => id}}), do: id
+  def review_id(%{raw: %{"comment" => %{"pull_request_review_id" => id}}}), do: id
 
-  def initial_comment?(%{raw: %{"in_reply_to_id" => _external_id}}), do: false
-  def initial_comment?(_comment), do: true
+  def initial_comment?(comment) do
+    comment
+    |> in_reply_to_id()
+    |> is_nil()
+  end
 
   def external_id(%{raw: %{"id" => id}}), do: id
+  def external_id(%{raw: %{"comment" => %{"id" => id}}}), do: id
 
   def in_reply_to_id(%{raw: %{"in_reply_to_id" => id}}), do: id
+  def in_reply_to_id(%{raw: %{"comment" => %{"in_reply_to_id" => id}}}), do: id
   def in_reply_to_id(_comment), do: nil
 
   def is_a_reply_to?(reply, parent) do

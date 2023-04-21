@@ -246,6 +246,7 @@ defmodule Mrgr.Installation do
     |> Mrgr.Repo.update!()
   end
 
+  # def slack_connected?(_), do: false
   def slack_connected?(%{slackbot: nil}), do: false
   def slack_connected?(_installation), do: true
 

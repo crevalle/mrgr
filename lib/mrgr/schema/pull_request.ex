@@ -196,9 +196,9 @@ defmodule Mrgr.Schema.PullRequest do
     Map.put(params, "opened_at", at)
   end
 
-  def external_pull_request_url(%{url: url}) when is_bitstring(url), do: url
-  def external_pull_request_url(%{raw: %{"_links" => %{"html" => %{"href" => url}}}}), do: url
-  def external_pull_request_url(_pull_request), do: ""
+  def external_url(%{url: url}) when is_bitstring(url), do: url
+  def external_url(%{raw: %{"_links" => %{"html" => %{"href" => url}}}}), do: url
+  def external_url(_pull_request), do: ""
 
   def head(pull_request) do
     hd(pull_request.commits)

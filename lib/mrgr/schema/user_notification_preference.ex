@@ -26,6 +26,17 @@ defmodule Mrgr.Schema.UserNotificationPreference do
     |> Mrgr.Repo.update!()
   end
 
+  def rt_backfill_for_users do
+    Mrgr.Schema.User
+    |> Mrgr.User.Query.with_installations()
+    |> Mrgr.Repo.all()
+    |> Enum.map(fn user ->
+      Enum.map(user.installations, fn installation ->
+        create_for_user_and_installation(user, installation)
+      end)
+    end)
+  end
+
   def changeset(schema, params) do
     schema
     |> cast(params, [:user_id, :installation_id, :event, :email, :slack])

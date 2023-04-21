@@ -27,7 +27,7 @@ defmodule MrgrWeb.Components.Email do
       <ul>
         <li :for={pr <- @pull_requests}>
           [<%= pr.repository.name %>]
-          <a href={Mrgr.Schema.PullRequest.external_pull_request_url(pr)}><%= pr.title %></a>
+          <a href={Mrgr.Schema.PullRequest.external_url(pr)}><%= pr.title %></a>
           (<%= Mrgr.Schema.PullRequest.author_name(pr) %>)
           <.line_diff additions={pr.additions} deletions={pr.deletions} />
           <.hif_list hifs={pr.high_impact_file_rules} />

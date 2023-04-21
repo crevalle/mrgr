@@ -75,6 +75,7 @@ defmodule MrgrWeb.ProfileLive do
 
     socket
     |> assign(:hifs_by_repo, hifs_by_repo)
+    |> Flash.put(:info, "Updated!")
     |> noreply()
   end
 
@@ -83,6 +84,7 @@ defmodule MrgrWeb.ProfileLive do
 
     socket
     |> assign(:preferences, preferences)
+    |> Flash.put(:info, "Updated!")
     |> noreply()
   end
 

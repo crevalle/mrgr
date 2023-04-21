@@ -50,7 +50,7 @@ defmodule Mrgr.Slack.Message do
   end
 
   def footer(pull_request) do
-    github_url = Mrgr.Schema.PullRequest.external_pull_request_url(pull_request)
+    github_url = Mrgr.Schema.PullRequest.external_url(pull_request)
     build_link(github_url, "View it on Github")
   end
 

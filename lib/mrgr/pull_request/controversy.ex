@@ -1,4 +1,6 @@
 defmodule Mrgr.PullRequest.Controversy do
+  use Mrgr.Notification.Event
+
   @thread_threshold 4
 
   # already controversial, can't get any worse!
@@ -6,8 +8,10 @@ defmodule Mrgr.PullRequest.Controversy do
 
   def handle(pull_request) do
     case controversy_brewing?(pull_request) do
-      true ->
-        mark_controversial(pull_request)
+      {true, thread} ->
+        pull_request
+        |> Mrgr.Repo.preload(:author)
+        |> mark_controversial(thread)
 
       false ->
         pull_request
@@ -15,9 +19,15 @@ defmodule Mrgr.PullRequest.Controversy do
   end
 
   def controversy_brewing?(%{comments: comments}) do
-    comments
-    |> build_conversation_threads()
-    |> Enum.any?(&longer_than_they_should_be?/1)
+    threads = build_conversation_threads(comments)
+
+    case Enum.find(threads, &longer_than_they_should_be?/1) do
+      nil ->
+        false
+
+      thread ->
+        {true, thread}
+    end
   end
 
   def build_conversation_threads(comments) do
@@ -31,7 +41,7 @@ defmodule Mrgr.PullRequest.Controversy do
         {[thread | threads], remaining}
       end)
 
-    conversations
+    Enum.map(conversations, &Mrgr.Schema.Comment.cron/1)
   end
 
   defp build_thread([last | _rest_of_thread] = thread, responses) do
@@ -49,14 +59,20 @@ defmodule Mrgr.PullRequest.Controversy do
     build_thread([child | thread], responses)
   end
 
+  defp put_child(children, thread, responses) do
+    build_thread(children ++ thread, responses)
+  end
+
   defp longer_than_they_should_be?(thread) do
     Enum.count(thread) > @thread_threshold
   end
 
-  def mark_controversial(pull_request) do
+  def mark_controversial(pull_request, thread) do
+    pull_request = set_controversy_flag(pull_request)
+
+    notify_consumers(pull_request, thread)
+
     pull_request
-    |> set_controversy_flag()
-    |> notify_consumers()
   end
 
   def set_controversy_flag(pull_request) do
@@ -65,8 +81,23 @@ defmodule Mrgr.PullRequest.Controversy do
     |> Mrgr.Repo.update!()
   end
 
-  def notify_consumers(pull_request) do
-    # TODO
-    pull_request
+  def notify_consumers(pull_request, thread) do
+    consumers =
+      Mrgr.Notification.consumers_of_event(@pr_controversy, pull_request)
+      |> IO.inspect()
+
+    Enum.map(consumers.email, fn recipient ->
+      send_controversy_email(recipient, pull_request, thread)
+    end)
+
+    # Enum.map(consumers.slack, fn recipient ->
+    # send_controversy_email(recipient, pull_request, thread)
+    # end)
+  end
+
+  def send_controversy_email(recipient, pull_request, thread) do
+    email = Mrgr.Email.controversial_pr(recipient, pull_request, thread)
+
+    Mrgr.Mailer.deliver(email)
   end
 end

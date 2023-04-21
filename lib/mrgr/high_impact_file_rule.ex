@@ -107,34 +107,17 @@ defmodule Mrgr.HighImpactFileRule do
     recipient = Mrgr.User.find_with_current_installation(user_id)
 
     rules_by_channel =
-      Enum.reduce(rules, %{email: [], slack: []}, fn rule, acc ->
-        rule = %{rule | filenames: matching_filenames(rule, pull_request)}
-
-        # strips out rules that have no channels
-        acc
-        |> put_email_channel(rule)
-        |> put_slack_channel(rule)
+      rules
+      |> Enum.map(fn rule ->
+        %{rule | filenames: matching_filenames(rule, pull_request)}
       end)
+      |> Mrgr.Notification.bucketize_preferences()
 
     email_results = send_email_alert(rules_by_channel.email, recipient, pull_request)
     slack_results = send_slack_alert(rules_by_channel.slack, recipient, pull_request)
 
     %{email: email_results, slack: slack_results}
   end
-
-  def put_email_channel(acc, %{email: true} = rule) do
-    rules = acc.email
-    Map.put(acc, :email, [rule | rules])
-  end
-
-  def put_email_channel(acc, _rule), do: acc
-
-  def put_slack_channel(acc, %{slack: true} = rule) do
-    rules = acc.slack
-    Map.put(acc, :slack, [rule | rules])
-  end
-
-  def put_slack_channel(acc, _rule), do: acc
 
   def send_email_alert([], _recipient, _pull_request), do: nil
 
