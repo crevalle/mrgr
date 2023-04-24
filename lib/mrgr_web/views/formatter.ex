@@ -15,6 +15,12 @@ defmodule MrgrWeb.Formatter do
   def login(%{login: login}), do: login
   def login(%{nickname: nickname}), do: nickname
 
+  def author_handle(%Mrgr.Schema.Comment{} = comment) do
+    comment
+    |> Mrgr.Schema.Comment.author()
+    |> author_handle()
+  end
+
   def author_handle(%{author: %{login: login}}), do: author_handle(login)
   def author_handle(%{login: login}), do: author_handle(login)
 

@@ -82,22 +82,30 @@ defmodule Mrgr.PullRequest.Controversy do
   end
 
   def notify_consumers(pull_request, thread) do
-    consumers =
-      Mrgr.Notification.consumers_of_event(@pr_controversy, pull_request)
-      |> IO.inspect()
+    consumers = fetch_consumers(pull_request)
 
     Enum.map(consumers.email, fn recipient ->
       send_controversy_email(recipient, pull_request, thread)
     end)
 
-    # Enum.map(consumers.slack, fn recipient ->
-    # send_controversy_email(recipient, pull_request, thread)
-    # end)
+    Enum.map(consumers.slack, fn recipient ->
+      send_controversy_slack(recipient, pull_request, thread)
+    end)
+  end
+
+  def fetch_consumers(pull_request) do
+    Mrgr.Notification.consumers_of_event(@pr_controversy, pull_request)
   end
 
   def send_controversy_email(recipient, pull_request, thread) do
     email = Mrgr.Email.controversial_pr(recipient, pull_request, thread)
 
     Mrgr.Mailer.deliver(email)
+  end
+
+  def send_controversy_slack(recipient, pull_request, thread) do
+    message = Mrgr.Slack.Message.ControversialPR.render(pull_request, thread, recipient)
+
+    Mrgr.Slack.send_message(message, recipient)
   end
 end
