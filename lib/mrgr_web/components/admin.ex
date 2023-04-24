@@ -252,30 +252,6 @@ defmodule MrgrWeb.Components.Admin do
           <.td><%= @installation.repository_selection %></.td>
         </.tr>
       </.table>
-
-      <.table>
-        <.th>Events</.th>
-        <.th>Permissions</.th>
-        <.th>Repos</.th>
-        <.tr>
-          <.td>
-            <ul>
-              <li :for={event <- @installation.events}>
-                <%= event %>
-              </li>
-            </ul>
-          </.td>
-          <.td>
-            <ul>
-              <li :for={{k, v} <- @installation.permissions}>
-                <span class="text-sm text-gray-500"><%= k %></span>
-                <span class="font-semibold"><%= v %></span>
-              </li>
-            </ul>
-          </.td>
-          <.td><%= @installation.repository_selection %></.td>
-        </.tr>
-      </.table>
     </div>
     """
   end
