@@ -2,6 +2,7 @@ defmodule MrgrWeb.Components.Admin do
   use MrgrWeb, :component
 
   import MrgrWeb.Components.UI
+  import MrgrWeb.Components.Core
   alias Phoenix.LiveView.JS
 
   def slackbot(%{slackbot: nil} = assigns) do
@@ -109,63 +110,173 @@ defmodule MrgrWeb.Components.Admin do
     """
   end
 
+  def notification_preference_table(assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-2">
+      <h5>User Notification Preferences</h5>
+      <.table>
+        <.th>id</.th>
+        <.th>event</.th>
+        <.th>send email</.th>
+        <.th>send slack</.th>
+        <.th>Updated</.th>
+        <.tr>
+          <.td><%= @preference.id %></.td>
+          <.td><%= @preference.event %></.td>
+          <.td><%= tf(@preference.email) %></.td>
+          <.td><%= tf(@preference.slack) %></.td>
+          <.td><%= ts(@preference.updated_at, @timezone) %></.td>
+        </.tr>
+      </.table>
+    </div>
+    """
+  end
+
+  def notification_address_table(assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-2">
+      <h5>User Notification Addresses</h5>
+      <.table>
+        <.th>id</.th>
+        <.th>email</.th>
+        <.th>slack id</.th>
+        <.th>updated</.th>
+        <.tr>
+          <.td><%= @address.id %></.td>
+          <.td><%= @address.email %></.td>
+          <.td><%= @address.slack_id %></.td>
+          <.td><%= ts(@address.updated_at, @timezone) %></.td>
+        </.tr>
+      </.table>
+    </div>
+    """
+  end
+
   def installation_table(assigns) do
     ~H"""
-    <table class="min-w-full">
-      <.tr striped={true}>
-        <.td class="font-bold">Onboarding State</.td>
-        <.td>
-          <%= @installation.state %>
-          <.l
-            :if={!Mrgr.Installation.onboarded?(@installation)}
-            phx-click={JS.push("re-onboard", value: %{id: @installation.id})}
-            data-confirm="Sure about that?"
-          >
-            Re-onboard
-          </.l>
-        </.td>
-      </.tr>
-      <.tr striped={true}>
-        <.td class="font-bold">State Changes</.td>
-        <.td>
-          <table>
-            <.tr :for={sc <- Enum.reverse(@installation.state_changes)}>
-              <td><%= sc.state %></td>
-              <td><%= sc.transitioned_at %></td>
-            </.tr>
-          </table>
-        </.td>
-      </.tr>
-      <.table_attr obj={@installation} key={:onboarding_error} . />
-      <.table_attr obj={@installation} key={:subscription_state} . />
-      <.tr striped={true}>
-        <.td class="font-bold">Subscription State Changes</.td>
-        <.td>
-          <table>
-            <.tr :for={sc <- Enum.reverse(@installation.subscription_state_changes)}>
-              <td><%= sc.state %></td>
-              <td><%= sc.transitioned_at %></td>
-            </.tr>
-          </table>
-        </.td>
-      </.tr>
-      <.table_attr obj={@installation} key={:app_id} . />
-      <.table_attr obj={@installation} key={:app_slug} . />
-      <.table_attr obj={@installation} key={:events} . />
-      <.table_attr obj={@installation} key={:external_id} . />
-      <.table_attr obj={@installation} key={:html_url} . />
-      <.table_attr obj={@installation} key={:installation_created_at} tz={@tz} . />
-      <.table_attr obj={@installation} key={:permissions} . />
-      <.table_attr obj={@installation} key={:repositories_url} . />
-      <.table_attr obj={@installation} key={:repository_selection} . />
-      <.table_attr obj={@installation} key={:target_id} . />
-      <.table_attr obj={@installation} key={:target_type} . />
-      <.table_attr obj={@installation} key={:access_tokens_url} . />
-      <.table_attr obj={@installation} key={:token} tz={@tz} . />
-      <.table_attr obj={@installation} key={:token_expires_at} tz={@tz} . />
-      <.table_attr obj={@installation} key={:updated_at} tz={@tz} . />
-      <.table_attr obj={@installation} key={:inserted_at} tz={@tz} . />
-    </table>
+    <div class="flex flex-col space-y-4">
+      <div class="flex justify-between">
+        <div class="flex flex-col">
+          <h5>
+            <.l href={@installation.html_url}>
+              <%= account_name(@installation) %>
+            </.l>
+          </h5>
+          <p class="text-sm text-gray-500 italic">
+            <%= @installation.target_type %> <%= @installation.target_id %>
+          </p>
+        </div>
+        <div class="flex flex-col">
+          <p class="text-sm text-gray-500">Created: <%= ts(@installation.inserted_at, @tz) %></p>
+          <p class="text-sm text-gray-500">Updated: <%= ts(@installation.updated_at, @tz) %></p>
+        </div>
+      </div>
+      <.table>
+        <.th></.th>
+        <.th>Onboarding</.th>
+        <.th>Subscription</.th>
+        <.tr>
+          <.td class="font-bold">State</.td>
+          <.td>
+            <%= @installation.state %>
+            <.l
+              :if={!Mrgr.Installation.onboarded?(@installation)}
+              phx-click={JS.push("re-onboard", value: %{id: @installation.id})}
+              data-confirm="Sure about that?"
+            >
+              Re-onboard
+            </.l>
+          </.td>
+          <.td><%= @installation.subscription_state %></.td>
+        </.tr>
+
+        <.tr>
+          <.td class="font-bold">State Changes</.td>
+          <.td>
+            <table>
+              <.tr :for={sc <- Enum.reverse(@installation.state_changes)}>
+                <td><%= sc.state %></td>
+                <td><%= sc.transitioned_at %></td>
+              </.tr>
+            </table>
+          </.td>
+          <.td>
+            <table>
+              <.tr :for={sc <- Enum.reverse(@installation.subscription_state_changes)}>
+                <td><%= sc.state %></td>
+                <td><%= sc.transitioned_at %></td>
+              </.tr>
+            </table>
+          </.td>
+        </.tr>
+        <.tr>
+          <.td class="font-bold">Error</.td>
+          <.td><%= @installation.onboarding_error %></.td>
+          <.td></.td>
+        </.tr>
+      </.table>
+      <.table>
+        <.th>Access Token</.th>
+        <.th>Expires</.th>
+        <.tr>
+          <.td>
+            <.l href={@installation.access_tokens_url}>
+              <%= @installation.token %>
+            </.l>
+          </.td>
+          <.td>
+            <%= ts(@installation.token_expires_at, @tz) %>
+          </.td>
+        </.tr>
+      </.table>
+      <.table>
+        <.th>Events</.th>
+        <.th>Permissions</.th>
+        <.th>Repos</.th>
+        <.tr class="align-top">
+          <.td>
+            <ul>
+              <li :for={event <- @installation.events}>
+                <%= event %>
+              </li>
+            </ul>
+          </.td>
+          <.td>
+            <ul>
+              <li :for={{k, v} <- @installation.permissions}>
+                <span class="text-sm text-gray-500"><%= k %></span>
+                <span class="font-semibold"><%= v %></span>
+              </li>
+            </ul>
+          </.td>
+          <.td><%= @installation.repository_selection %></.td>
+        </.tr>
+      </.table>
+
+      <.table>
+        <.th>Events</.th>
+        <.th>Permissions</.th>
+        <.th>Repos</.th>
+        <.tr>
+          <.td>
+            <ul>
+              <li :for={event <- @installation.events}>
+                <%= event %>
+              </li>
+            </ul>
+          </.td>
+          <.td>
+            <ul>
+              <li :for={{k, v} <- @installation.permissions}>
+                <span class="text-sm text-gray-500"><%= k %></span>
+                <span class="font-semibold"><%= v %></span>
+              </li>
+            </ul>
+          </.td>
+          <.td><%= @installation.repository_selection %></.td>
+        </.tr>
+      </.table>
+    </div>
     """
   end
 

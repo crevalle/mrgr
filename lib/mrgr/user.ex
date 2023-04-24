@@ -36,6 +36,8 @@ defmodule Mrgr.User do
     |> Query.with_current_installation()
     |> Query.with_installations()
     |> Query.with_member()
+    |> Query.with_notification_preferences()
+    |> Query.with_notification_addresses()
     |> Mrgr.Repo.one()
   end
 
@@ -359,6 +361,20 @@ defmodule Mrgr.User do
         left_join: i in assoc(q, :installations),
         left_join: a in assoc(i, :account),
         preload: [installations: {i, account: a}]
+      )
+    end
+
+    def with_notification_preferences(query) do
+      from(q in query,
+        join: p in assoc(q, :notification_preferences),
+        preload: [notification_preferences: p]
+      )
+    end
+
+    def with_notification_addresses(query) do
+      from(q in query,
+        join: p in assoc(q, :notification_addresses),
+        preload: [notification_addresses: p]
       )
     end
 

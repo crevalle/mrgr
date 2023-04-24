@@ -1,5 +1,5 @@
 defmodule Mrgr.Email do
-  import MrgrWeb.Formatter, only: [account_name: 1, author_handle: 1]
+  import MrgrWeb.Formatter, only: [account_name: 1]
   import Swoosh.Email
 
   @from {"Mrgr", "noreply@mrgr.io"}

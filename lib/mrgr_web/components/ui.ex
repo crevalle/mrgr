@@ -197,7 +197,7 @@ defmodule MrgrWeb.Components.UI do
     <th
       scope="col"
       class={[
-        "p-3 text-center text-xs bg-gray-100 font-medium uppercase tracking-wide text-gray-500",
+        "p-3 text-left text-xs bg-gray-100 font-medium uppercase tracking-wide text-gray-500",
         @class
       ]}
     >
@@ -223,15 +223,26 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def tr(assigns) do
-    striped = if assigns[:striped], do: "even:bg-white odd:bg-gray-50", else: nil
+  attr :class, :string, default: ""
+  attr :striped, :boolean, default: false
+  attr :rest, :global
+  slot :inner_block, required: true
 
-    class = "border-t border-gray-300 py-2 #{striped}"
+  def tr(assigns) do
+    striped = if assigns.striped, do: "even:bg-white odd:bg-gray-50", else: nil
+
+    class = "#{assigns.class} #{striped}"
 
     assigns = assign(assigns, :class, class)
 
     ~H"""
-    <tr class={@class}>
+    <tr
+      class={[
+        "border-t border-gray-300 py-2",
+        @class
+      ]}
+      {@rest}
+    >
       <%= render_slot(@inner_block) %>
     </tr>
     """
@@ -1000,6 +1011,32 @@ defmodule MrgrWeb.Components.UI do
   def hif_pattern(assigns) do
     ~H"""
     <pre class="text-sm font-medium text-gray-900"><%= @pattern %></pre>
+    """
+  end
+
+  def slack_connection_status(%{connected: false} = assigns) do
+    ~H"""
+    <div class="flex items-center space-x-1 pt-3">
+      <%= img_tag("/images/Slack-mark-RGB.png", class: "w-4 h-4 toggle") %>
+      <p>Slack Unconnected</p>
+      <.icon name="x-circle" type="solid" class="text-red-600 h-5 w-5" />
+    </div>
+    """
+  end
+
+  def slack_connection_status(%{connected: true} = assigns) do
+    ~H"""
+    <.slack_connected />
+    """
+  end
+
+  def slack_connected(assigns) do
+    ~H"""
+    <div class="flex items-center space-x-1 pt-3">
+      <%= img_tag("/images/Slack-mark-RGB.png", class: "w-4 h-4 toggle") %>
+      <p>Slack Connected</p>
+      <.icon name="check-circle" type="solid" class="text-green-600 h-5 w-5" />
+    </div>
     """
   end
 
