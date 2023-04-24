@@ -93,7 +93,11 @@ defmodule Mrgr.Notification do
     end
 
     def with_user(query) do
-      from(q in query, join: u in assoc(q, :user), preload: [user: u])
+      from(q in query,
+        join: u in assoc(q, :user),
+        join: i in assoc(u, :current_installation),
+        preload: [user: {u, current_installation: i}]
+      )
     end
   end
 end

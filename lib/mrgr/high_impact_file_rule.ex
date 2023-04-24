@@ -130,7 +130,7 @@ defmodule Mrgr.HighImpactFileRule do
   def send_slack_alert([], _recipient, _pull_request), do: nil
 
   def send_slack_alert(rules, recipient, pull_request) do
-    message = Mrgr.Slack.Message.compose_hif_message(rules, pull_request)
+    message = Mrgr.Slack.Message.HIFAlert.render(pull_request, rules)
 
     Mrgr.Slack.send_message(message, recipient)
   end
