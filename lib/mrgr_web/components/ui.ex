@@ -912,11 +912,9 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
-  def slack_button(assigns) do
-    assigns =
-      assigns
-      |> assign(:uri, URI.encode_www_form("https://app.mrgr.io/auth/slack/callback"))
+  attr :user_id, :integer
 
+  def slack_button(assigns) do
     ~H"""
     <a
       href={"https://slack.com/oauth/v2/authorize?scope=chat:write,im:write&client_id=#{Application.get_env(:mrgr, :slack)[:client_id]}&state=#{@user_id}"}

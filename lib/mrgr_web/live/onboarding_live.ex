@@ -17,6 +17,7 @@ defmodule MrgrWeb.OnboardingLive do
       stats = stats(installation)
 
       socket
+      |> assign(:done, done?(installation))
       |> assign(:changeset, email_changeset(current_user))
       |> assign(:installation, installation)
       |> assign(:stats, stats)
@@ -40,7 +41,7 @@ defmodule MrgrWeb.OnboardingLive do
             <.form :let={f} for={@changeset} phx-submit="update-email">
               <div class="flex items-center space-x-1">
                 <%= text_input(f, :email,
-                  placeholder: "you@starshipenterprise.com",
+                  placeholder: "you@my_sweet_company.com",
                   class: "w-full text-sm font-medium rounded-md text-gray-700 mt-px pt-2"
                 ) %>
                 <.button
@@ -59,18 +60,13 @@ defmodule MrgrWeb.OnboardingLive do
             <p>Mrgr onboarding is just 3 simple steps:</p>
 
             <.step_list>
-              <.step name="install_github_app" number={1} installation={@installation} />
-              <.step name="sync_data" number={2} installation={@installation} />
-              <.step name="done" number={3} installation={@installation} />
+              <.install_github_app installation={@installation} />
+              <.sync_data installation={@installation} stats={@stats} />
+              <.connect_slack installation={@installation} user={@current_user} done={@done} />
             </.step_list>
           </div>
 
-          <div class="flex flex-col space-y-4">
-            <.installed_message installation={@installation} />
-            <.syncing_message installation={@installation} />
-            <.render_stats stats={@stats} />
-            <.action installation={@installation} socket={@socket} />
-          </div>
+          <.get_to_it :if={@done} installation={@installation} />
         <% end %>
       </div>
     </div>
@@ -119,6 +115,12 @@ defmodule MrgrWeb.OnboardingLive do
     end
   end
 
+  def handle_event("skip-slack-install", _params, socket) do
+    socket
+    |> assign(:done, true)
+    |> noreply()
+  end
+
   def email_changeset(user, params \\ %{}) do
     user
     |> Mrgr.Schema.User.email_changeset(params)
@@ -156,4 +158,10 @@ defmodule MrgrWeb.OnboardingLive do
   end
 
   def stats(_), do: %{}
+
+  def done?(nil), do: false
+
+  def done?(installation) do
+    Mrgr.Installation.slack_connected?(installation)
+  end
 end

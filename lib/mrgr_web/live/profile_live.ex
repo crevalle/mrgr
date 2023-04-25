@@ -5,6 +5,8 @@ defmodule MrgrWeb.ProfileLive do
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
+      socket = set_user_installing_slackbot_redirect(socket)
+
       preferences = Mrgr.User.notification_preferences(socket.assigns.current_user)
 
       hifs_by_repo =
@@ -95,5 +97,20 @@ defmodule MrgrWeb.ProfileLive do
 
   def group_by_repo(hifs) do
     Enum.group_by(hifs, & &1.repository)
+  end
+
+  # a one-way flag
+  # if a user installs slack during onboarding this doesn't change,
+  # but will change the first time they come to profile page.
+  #
+  # send them back here if it's where they started
+  defp set_user_installing_slackbot_redirect(socket) do
+    user =
+      socket.assigns.current_user
+      |> Ecto.Changeset.change(%{installing_slackbot_from_profile_page: true})
+      |> Mrgr.Repo.update!()
+
+    socket
+    |> assign(:current_user, user)
   end
 end

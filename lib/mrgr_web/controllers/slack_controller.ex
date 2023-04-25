@@ -8,7 +8,7 @@ defmodule MrgrWeb.SlackController do
 
     conn
     |> put_flash(:info, "Slack installation cancelled")
-    |> redirect(to: "/profile")
+    |> redirect(to: slackbot_installation_source_path(conn))
   end
 
   # bot install
@@ -21,12 +21,12 @@ defmodule MrgrWeb.SlackController do
 
             conn
             |> put_flash(:info, "Slack added!")
-            |> redirect(to: "/profile")
+            |> redirect(to: slackbot_installation_source_path(conn))
 
           false ->
             conn
             |> put_flash(:info, "Slack installation failed - user mismatch")
-            |> redirect(to: "/profile")
+            |> redirect(to: slackbot_installation_source_path(conn))
         end
 
       {:error, reason} ->
@@ -34,7 +34,7 @@ defmodule MrgrWeb.SlackController do
 
         conn
         |> put_flash(:info, "Slack installation failed :(")
-        |> redirect(to: "/profile")
+        |> redirect(to: slackbot_installation_source_path(conn))
     end
   end
 
@@ -63,5 +63,15 @@ defmodule MrgrWeb.SlackController do
     body = URI.encode_query(params)
 
     Mrgr.Slack.post(url, body, headers)
+  end
+
+  defp slackbot_installation_source_path(%{assigns: %{current_user: user}}) do
+    case user.installing_slackbot_from_profile_page do
+      true ->
+        ~p"/profile"
+
+      false ->
+        ~p"/onboarding"
+    end
   end
 end

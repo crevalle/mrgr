@@ -10,6 +10,7 @@ defmodule Mrgr.Schema.User do
     field(:email, :string)
     field(:first_name, :string)
     field(:image, :string)
+    field(:installing_slackbot_from_profile_page, :boolean)
     field(:last_name, :string)
     field(:last_seen_at, :utc_datetime)
     field(:location, :string)
