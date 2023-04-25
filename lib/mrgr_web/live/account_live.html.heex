@@ -9,16 +9,10 @@
         <table class="w-full">
           <thead class="bg-white">
             <tr>
-              <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                Organization
-              </th>
-              <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                Subscription Status
-              </th>
-              <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-              </th>
-              <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-              </th>
+              <.th>Organization</.th>
+              <.th>Subscription Status</.th>
+              <.th>Team Members</.th>
+              <.th>Context</.th>
             </tr>
           </thead>
           <tbody>
@@ -31,15 +25,20 @@
                   <div class="flex items-center space-x-4">
                     <.subscription_state_badge state={installation.subscription_state} />
                     <%= if show_payment_button(@current_user, installation) do %>
-                      <.l
+                      <a
                         href={payment_url(installation, @current_user)}
                         class="btn btn-primary"
                         data-confirm="You'll be redirected to Stripe to enter your payment information.  Ready?"
                       >
                         Upgrade Now!
-                      </.l>
+                      </a>
                     <% end %>
                   </div>
+                </.td>
+                <.td>
+                  <.l phx-click={JS.push("show-detail", value: %{id: installation.id})}>
+                    View/Invite
+                  </.l>
                 </.td>
                 <.td>
                   <%= if @current_user.current_installation_id == installation.id do %>
@@ -49,11 +48,6 @@
                       Switch to this Organization
                     </.l>
                   <% end %>
-                </.td>
-                <.td>
-                  <.l phx-click={JS.push("show-detail", value: %{id: installation.id})}>
-                    View/Invite Team Members
-                  </.l>
                 </.td>
               </.tr>
             <% end %>
