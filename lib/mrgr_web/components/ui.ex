@@ -913,14 +913,13 @@ defmodule MrgrWeb.Components.UI do
   end
 
   def slack_button(assigns) do
-    # href={"https://slack.com/oauth/v2/authorize?scope=chat%3Awrite%2Cim%3Awrite&amp;user_scope=&amp;redirect_uri=https%3A%2F%2Fmrgr.ngrok.dev%2Fprofile&amp;client_id=5123613851587.5147442387632&amp;state=#{@user_id}"}
     assigns =
       assigns
-      |> assign(:uri, URI.encode_www_form("https://mrgr.ngrok.dev/auth/slack/callback"))
+      |> assign(:uri, URI.encode_www_form("https://app.mrgr.io/auth/slack/callback"))
 
     ~H"""
     <a
-      href={"https://slack.com/oauth/v2/authorize?scope=chat:write,im:write&client_id=5123613851587.5147442387632&state=#{@user_id}"}
+      href={"https://slack.com/oauth/v2/authorize?scope=chat:write,im:write&client_id=#{Application.get_env(:mrgr, :slack)[:client_id]}&state=#{@user_id}"}
       style="align-items:center;color:#fff;background-color:#4A154B;border:0;border-radius:44px;display:inline-flex;font-family:Lato, sans-serif;font-size:14px;font-weight:600;height:44px;justify-content:center;text-decoration:none;width:204px"
     >
       <svg
