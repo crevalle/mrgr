@@ -31,7 +31,7 @@ defmodule MrgrWeb.WebhookController do
     #
     # IO.inspect(params, label: "WEBHOOK ***")
 
-    Mrgr.Github.Webhook.handle_webhook(Map.new(conn.req_headers), params)
+    Mrgr.Github.Webhook.handle_webhook(load_headers(conn), params)
 
     conn
     |> put_status(200)
@@ -44,5 +44,9 @@ defmodule MrgrWeb.WebhookController do
     conn
     |> put_status(200)
     |> json(%{yo: "momma"})
+  end
+
+  def load_headers(conn) do
+    Map.new(conn.req_headers)
   end
 end
