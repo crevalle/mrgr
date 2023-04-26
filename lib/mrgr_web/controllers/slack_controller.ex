@@ -47,7 +47,7 @@ defmodule MrgrWeb.SlackController do
       ) do
     Mrgr.User.set_slack_contact_at_installation(user, installation, data["authed_user"]["id"])
 
-    Mrgr.Installation.set_slackbot_info(installation, data)
+    Mrgr.Installation.add_slack_integration(installation, data, user)
   end
 
   defp exchange_code_for_access_token(code) do

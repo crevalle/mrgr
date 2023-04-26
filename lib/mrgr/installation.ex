@@ -240,6 +240,37 @@ defmodule Mrgr.Installation do
 
   def activate_subscriptions_on_personal_accounts(installation), do: installation
 
+  def add_slack_integration(installation, params, user) do
+    # right now we only have the slack ID for the installing user,
+    # so we only enable notifications for them and not any other users
+    # at the installation
+
+    installation = set_slackbot_info(installation, params)
+
+    Mrgr.Notification.enable_slack_notifications(user, installation)
+
+    installation
+  end
+
+  def remove_slack_integration(installation) do
+    set_slackbot_info(installation, nil)
+
+    # only one user (the installer) should have these turned on
+    # but it's simpler to run through them all.  they'll all need
+    # them turned off anyway.
+    #
+    # decided against leaving them enabled and just removing the slackbot
+    # because if a real user (ie, not me in testing) has removed the slackbot,
+    # they are probably not going to reinstall it
+    installation = Mrgr.Repo.preload(installation, :users)
+
+    Enum.map(installation.users, fn user ->
+      Mrgr.Notification.disable_slack_notifications(user, installation)
+    end)
+
+    installation
+  end
+
   def set_slackbot_info(installation, params) do
     installation
     |> Schema.slack_changeset(%{slackbot: params})

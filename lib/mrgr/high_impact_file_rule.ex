@@ -5,15 +5,21 @@ defmodule Mrgr.HighImpactFileRule do
   use Mrgr.PubSub.Event
 
   def for_user(user) do
-    Schema
-    |> Query.for_user(user.id)
-    |> Mrgr.Repo.all()
+    for_user_at_installation(user.id, user.current_installation_id)
   end
 
   def for_user_with_repo(user) do
     Schema
     |> Query.for_user(user.id)
+    |> Query.for_installation(user.current_installation_id)
     |> Query.with_repository()
+    |> Mrgr.Repo.all()
+  end
+
+  def for_user_at_installation(user_id, installation_id) do
+    Schema
+    |> Query.for_user(user_id)
+    |> Query.for_installation(installation_id)
     |> Mrgr.Repo.all()
   end
 
@@ -356,11 +362,24 @@ defmodule Mrgr.HighImpactFileRule do
       )
     end
 
-    def with_repository(query) do
-      from(q in query,
-        join: r in assoc(q, :repository),
-        preload: [repository: r]
+    def for_installation(query, installation_id) do
+      from([q, repository: r] in with_repository(query),
+        where: r.installation_id == ^installation_id
       )
+    end
+
+    def with_repository(query) do
+      case has_named_binding?(query, :repository) do
+        true ->
+          query
+
+        false ->
+          from(q in query,
+            join: r in assoc(q, :repository),
+            as: :repository,
+            preload: [repository: r]
+          )
+      end
     end
 
     def with_installation(query) do

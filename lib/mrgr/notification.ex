@@ -3,6 +3,9 @@ defmodule Mrgr.Notification do
 
   alias __MODULE__.Query
 
+  @type notifiable ::
+          Mrgr.Schema.UserNotificationPreference.t() | Mrgr.Schema.HighImpactFileRule.t()
+
   def rt_seed_event do
     seed_new_event(@pr_controversy, %{email: true})
   end
@@ -81,15 +84,69 @@ defmodule Mrgr.Notification do
     |> Mrgr.Repo.all()
   end
 
+  def enable_slack_notifications(user, installation) do
+    preferences =
+      Mrgr.Schema.UserNotificationPreference
+      |> Query.for_installation(installation.id)
+      |> Query.for_user(user.id)
+      |> Mrgr.Repo.all()
+      |> Enum.map(&enable_slack/1)
+
+    hifs =
+      Mrgr.HighImpactFileRule.for_user_at_installation(user.id, installation.id)
+      |> Enum.map(&enable_slack/1)
+
+    %{preferences: preferences, hifs: hifs}
+  end
+
+  def disable_slack_notifications(user, installation) do
+    preferences =
+      Mrgr.Schema.UserNotificationPreference
+      |> Query.for_installation(installation.id)
+      |> Query.for_user(user.id)
+      |> Mrgr.Repo.all()
+      |> Enum.map(&disable_slack/1)
+
+    hifs =
+      Mrgr.HighImpactFileRule.for_user_at_installation(user.id, installation.id)
+      |> Enum.map(&disable_slack/1)
+
+    %{preferences: preferences, hifs: hifs}
+  end
+
+  @spec enable_slack(notifiable()) :: notifiable()
+  def enable_slack(notifiable) do
+    notifiable
+    |> Ecto.Changeset.change(%{slack: true})
+    |> Mrgr.Repo.update!()
+  end
+
+  @spec disable_slack(notifiable()) :: notifiable()
+  def disable_slack(notifiable) do
+    notifiable
+    |> Ecto.Changeset.change(%{slack: false})
+    |> Mrgr.Repo.update!()
+  end
+
   defmodule Query do
     use Mrgr.Query
 
+    def for_user(query, id) do
+      from(q in query,
+        where: q.user_id == ^id
+      )
+    end
+
     def for_installation(query, id) do
-      from(q in query, where: q.installation_id == ^id)
+      from(q in query,
+        where: q.installation_id == ^id
+      )
     end
 
     def for_event(query, event) do
-      from(q in query, where: q.event == ^event)
+      from(q in query,
+        where: q.event == ^event
+      )
     end
 
     def with_user(query) do
