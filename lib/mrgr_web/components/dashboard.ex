@@ -6,15 +6,7 @@ defmodule MrgrWeb.Components.Dashboard do
 
   alias MrgrWeb.PullRequestDashboardLive.Tabs
 
-  def nav_tab_list(assigns) do
-    ~H"""
-    <div class="flex flex-col space-y-4">
-      <%= render_slot(@inner_block) %>
-    </div>
-    """
-  end
-
-  def render_nav_tabs(assigns) do
+  def nav_tab_menu(assigns) do
     ~H"""
     <.nav_tab_list>
       <.tab_section>
@@ -68,6 +60,14 @@ defmodule MrgrWeb.Components.Dashboard do
         </.l>
       </.tab_section>
     </.nav_tab_list>
+    """
+  end
+
+  def nav_tab_list(assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-4 w-64">
+      <%= render_slot(@inner_block) %>
+    </div>
     """
   end
 
