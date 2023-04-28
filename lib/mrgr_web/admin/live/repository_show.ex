@@ -15,15 +15,15 @@ defmodule MrgrWeb.Admin.Live.RepositoryShow do
           </div>
 
           <div class="mt-1">
-            <table class="min-w-full">
-              <.th_left>id</.th_left>
-              <.th_left>name</.th_left>
-              <.th_left>pattern</.th_left>
-              <.th_left>color</.th_left>
-              <.th_left>source</.th_left>
-              <.th_left>user</.th_left>
-              <.th_left>created</.th_left>
-              <.th_left>updated</.th_left>
+            <.table>
+              <.th>id</.th>
+              <.th>name</.th>
+              <.th>pattern</.th>
+              <.th>color</.th>
+              <.th>source</.th>
+              <.th>user</.th>
+              <.th>created</.th>
+              <.th>updated</.th>
               <tbody>
                 <.tr :for={hif <- @repo.high_impact_file_rules}>
                   <.td><%= hif.id %></.td>
@@ -38,7 +38,7 @@ defmodule MrgrWeb.Admin.Live.RepositoryShow do
                   <.td><%= ts(hif.updated_at, @tz) %></.td>
                 </.tr>
               </tbody>
-            </table>
+            </.table>
           </div>
         </div>
       </div>
