@@ -15,51 +15,53 @@
   <div class="flex space-x-4">
     <.nav_tab_menu tabs={@tabs} selected_tab={@selected_tab} />
 
-    <div class="flex flex-col space-y-4">
-      <.tab_heading
-        tab={@selected_tab}
-        labels={@labels}
-        members={@members}
-        repos={@repos}
-        draft_statuses={@draft_statuses}
-      />
+    <div class="relative">
+      <div class="flex flex-col space-y-4">
+        <.tab_heading
+          tab={@selected_tab}
+          labels={@labels}
+          members={@members}
+          repos={@repos}
+          draft_statuses={@draft_statuses}
+        />
 
-      <%= if Enum.empty?(@selected_tab.pull_requests) do %>
-        <div class="flex justify-center max-w-xl">
-          <div class="flex flex-col space-y-4">
-            <%= img_tag(Routes.static_path(MrgrWeb.Endpoint, "/images/gorbypuff.jpeg"),
-              class: "rounded-xl"
-            ) %>
-            <p class="text-center">All done!  Yay!  😊</p>
+        <%= if Enum.empty?(@selected_tab.pull_requests) do %>
+          <div class="flex justify-center max-w-xl">
+            <div class="flex flex-col space-y-4">
+              <%= img_tag(Routes.static_path(MrgrWeb.Endpoint, "/images/gorbypuff.jpeg"),
+                class: "rounded-xl"
+              ) %>
+              <p class="text-center">All done!  Yay!  😊</p>
+            </div>
           </div>
-        </div>
-      <% else %>
-        <div role="list" class="main-pane" id="pending-pull-request-list">
-          <.live_component
-            :for={pull_request <- @selected_tab.pull_requests}
-            module={MrgrWeb.Components.Live.PullRequestCard}
-            id={"pull_request_#{pull_request.id}"}
-            pull_request={pull_request}
-            selected={selected?(pull_request, @detail)}
-            tab_permalink={@selected_tab.permalink}
-            show_action_state_emoji={show_action_state_emoji?(@selected_tab)}
-            members={@members}
-            snooze_options={@snooze_options}
-            current_user={@current_user}
-            timezone={@timezone}
-          />
-        </div>
-      <% end %>
-    </div>
+        <% else %>
+          <div role="list" class="main-pane" id="pending-pull-request-list">
+            <.live_component
+              :for={pull_request <- @selected_tab.pull_requests}
+              module={MrgrWeb.Components.Live.PullRequestCard}
+              id={"pull_request_#{pull_request.id}"}
+              pull_request={pull_request}
+              selected={selected?(pull_request, @detail)}
+              tab_permalink={@selected_tab.permalink}
+              show_action_state_emoji={show_action_state_emoji?(@selected_tab)}
+              members={@members}
+              snooze_options={@snooze_options}
+              current_user={@current_user}
+              timezone={@timezone}
+            />
+          </div>
+        <% end %>
+      </div>
 
-    <div id="detail-pane">
-      <.render_detail
-        :if={@detail}
-        pull_request={@detail}
-        attr={@selected_attr}
-        timezone={@timezone}
-        close={~p"/pull-requests/#{@selected_tab.permalink}"}
-      />
+      <div class={"detail-pane #{if @detail, do: "show"} border border-teal-500 drop-shadow-xl"}>
+        <.render_detail
+          :if={@detail}
+          pull_request={@detail}
+          attr={@selected_attr}
+          timezone={@timezone}
+          close={~p"/pull-requests/#{@selected_tab.permalink}"}
+        />
+      </div>
     </div>
   </div>
 </div>

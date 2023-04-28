@@ -273,7 +273,7 @@ defmodule MrgrWeb.Components.Dashboard do
 
   def render_detail(assigns) do
     ~H"""
-    <div class="bg-white rounded-md">
+    <div class="rounded-md">
       <div class="flex flex-col space-y-4">
         <div class="flex justify-between items-center">
           <.h3>

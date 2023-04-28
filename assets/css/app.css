@@ -102,6 +102,22 @@ h5 {
   cursor: pointer;
 }
 
+.detail-pane {
+  @apply p-3 bg-white shadow-md rounded-lg;
+
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 100ms ease-in, visibility 0ms ease-in 100ms;
+}
+
+.detail-pane.show {
+  @apply fixed top-16 right-6 mt-2 z-50 overflow-visible max-w-lg overflow-y-scroll h-full;
+
+  visibility: visible;
+  opacity: 1;
+  transition: opacity 100ms ease-in, visibility 0ms ease-in 0ms;
+}
+
 #detail-pane {
   @apply sticky w-96 top-6 overflow-visible p-3 bg-white shadow rounded-lg;
 

@@ -5,8 +5,8 @@
     </:description>
   </.heading>
 
-  <div class="two-pane-layout">
-    <div class="main-pane">
+  <div class="flex space-x-4">
+    <div class="main-pane w-3/5">
       <div :if={is_nil(@current_user.notification_email)} class="alert alert-danger">
         You don't have an email address set up so we can't send you notifications!
         <.l href={~p"/profile"}>Click here</.l>
@@ -22,18 +22,16 @@
         slack_unconnected={@slack_unconnected}
       />
     </div>
-    <div class="w-2/5">
-      <div id="detail-pane">
-        <.live_component
-          :if={@form}
-          module={MrgrWeb.Components.Live.HighImpactFileFormComponent}
-          id="fca_form"
-          form={@form}
-          current_user={@current_user}
-          slack_unconnected={@slack_unconnected}
-          timezone={@timezone}
-        />
-      </div>
+    <div id="detail-pane">
+      <.live_component
+        :if={@form}
+        module={MrgrWeb.Components.Live.HighImpactFileFormComponent}
+        id="fca_form"
+        form={@form}
+        current_user={@current_user}
+        slack_unconnected={@slack_unconnected}
+        timezone={@timezone}
+      />
     </div>
   </div>
 </div>
