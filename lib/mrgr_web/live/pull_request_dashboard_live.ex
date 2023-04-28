@@ -254,20 +254,6 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     |> noreply()
   end
 
-  def handle_event("toggle-merge-freeze", %{"repo_id" => id}, socket) do
-    repo = Mrgr.List.find(socket.assigns.repos, id)
-
-    updated = Mrgr.Repository.toggle_pull_request_freeze(repo)
-
-    updated_list = Mrgr.List.replace(socket.assigns.repos, updated)
-    frozen_repos = filter_frozen_repos(updated_list)
-
-    socket
-    |> assign(:repos, updated_list)
-    |> assign(:frozen_repos, frozen_repos)
-    |> noreply()
-  end
-
   def handle_event("snooze", %{"snooze_id" => snooze_id, "pr_id" => pull_request_id}, socket) do
     pull_request =
       socket.assigns.selected_tab
