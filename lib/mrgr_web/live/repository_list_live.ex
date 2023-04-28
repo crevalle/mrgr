@@ -142,6 +142,21 @@ defmodule MrgrWeb.RepositoryListLive do
     |> noreply()
   end
 
+  def handle_info(%{event: @repository_merge_freeze_status_changed, payload: repository}, socket) do
+    all_repos = Mrgr.List.replace(socket.assigns.all_repos, repository)
+
+    what_happened =
+      case repository.merge_freeze_enabled do
+        true -> "enabled"
+        false -> "lifted"
+      end
+
+    socket
+    |> Flash.put(:info, "Merge freeze #{what_happened}!")
+    |> assign(:all_repos, all_repos)
+    |> noreply()
+  end
+
   def handle_info(%{event: @installation_repositories_synced, payload: installation}, socket) do
     socket
     |> assign(:installation, installation)

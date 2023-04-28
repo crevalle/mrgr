@@ -205,16 +205,20 @@ defmodule Mrgr.Repository do
     |> Mrgr.Repo.all()
   end
 
-  def toggle_pull_request_freeze(repo) do
-    new_value = toggle(repo.merge_freeze_enabled)
-
+  def update_merge_freeze_status(repo, status) do
     repo
-    |> Schema.merge_freeze_changeset(%{merge_freeze_enabled: new_value})
+    |> Schema.merge_freeze_changeset(%{merge_freeze_enabled: status})
     |> Mrgr.Repo.update!()
+    |> toggle_merge_freeze_on_github()
+    |> Mrgr.PubSub.broadcast_to_installation(@repository_merge_freeze_status_changed)
   end
 
-  defp toggle(true), do: false
-  defp toggle(false), do: true
+  def toggle_merge_freeze_on_github(repo) do
+    # turns out we haven't built this yet, but i think we're close?
+    # see Mrgr.CheckRun.create()
+
+    repo
+  end
 
   # when we get a new repo hook it only has minimal data
   # because no code has been pushed. check to see if we need to gather the rest

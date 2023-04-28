@@ -564,73 +564,7 @@ defmodule MrgrWeb.Components.UI do
         </li>
       </ul>
 
-      <p class="my-3">To resume merging for these repos, disable the Merge Freeze.</p>
-    </div>
-    """
-  end
-
-  def merge_freeze_menu(assigns) do
-    ~H"""
-    <div class="relative inline-block text-left">
-      <div>
-        <.outline_button
-          phx-click={
-            JS.toggle(
-              to: "#merge-freeze-menu",
-              in:
-                {"transition ease-out duration-100", "transform opacity-0 scale-95",
-                 "transform opacity-100 scale-100"},
-              out:
-                {"transition ease-in duration-75", "transform opacity-100 scale-100",
-                 "transform opacity-0 scale-95"}
-            )
-          }
-          class="text-gray-700 border-gray-300 hover:bg-gray-100"
-          id="freeze-menu-button"
-          aria-expanded="false"
-          aria-haspopup="true"
-        >
-          ❄️ Freeze Merging <.icon name="chevron-down" class="-mr-1 ml-2 h-5 w-5" />
-        </.outline_button>
-      </div>
-
-      <div
-        style="display: none;"
-        id="merge-freeze-menu"
-        phx-click-away={JS.hide(transition: toggle_out_transition())}
-        class="origin-top-right absolute on-top right-0 mt-2 w-56 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
-        role="menu"
-        aria-orientation="vertical"
-        aria-labelledby="freeze-menu-button"
-        tabindex="-1"
-      >
-        <div class="mt-2 flex flex-col text-sm divide-y divide-gray-100">
-          <p class="text-center text-gray-500 p-2">
-            Issuing a Merge Freeze will place a failing check on all PRs in the repo.
-          </p>
-
-          <div class="flex flex-col">
-            <.l
-              :for={r <- @repos}
-              id={"repo-menu-item-#{r.id}"}
-              phx-click={JS.push("toggle-merge-freeze", value: %{repo_id: r.id})}
-              data-confirm="Sure about that?"
-              class="text-teal-700 hover:text-teal-500 hover:bg-gray-50 p-2 text-sm rounded-md"
-              role="menuitem"
-              tabindex="-1"
-            >
-              <div class="flex items-center">
-                <div class="basis-8 text-blue-400 ml-2">
-                  <%= if r.merge_freeze_enabled do %>
-                    ❄️
-                  <% end %>
-                </div>
-                <%= r.name %>
-              </div>
-            </.l>
-          </div>
-        </div>
-      </div>
+      <p class="my-3">To resume merging for these repos, <.l href={~p"/repositories"}>disable the Merge Freeze</.l>.</p>
     </div>
     """
   end

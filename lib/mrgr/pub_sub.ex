@@ -119,6 +119,7 @@ defmodule Mrgr.PubSub do
 
         @repository_updated "repository:updated"
         @repository_visibility_updated "repository:visibility_updated"
+        @repository_merge_freeze_status_changed "repository:merge_freeze_status_changed"
 
         @repository_settings_policy_created "repository_settings_policy:created"
         @repository_settings_policy_updated "repository_settings_policy:updated"

@@ -149,9 +149,8 @@ h5 {
 }
 
 .tooltiptext {
-  @apply pointer-events-none absolute -top-11 left-0 w-max opacity-0 transition-opacity text-sm p-2 rounded-md bg-stone-50 border border-stone-200 z-50;
+  @apply normal-case pointer-events-none absolute -top-11 left-0 w-max opacity-0 transition-opacity text-sm p-2 rounded-md bg-stone-50 border border-stone-200 z-50;
 }
-
 
 .tooltip .tooltiptext::after {
   @apply border-transparent border-t-stone-200;

@@ -1,15 +1,13 @@
 <div class="flex flex-col space-y-4">
   <div class="flex justify-between">
     <div class="flex flex-col">
-      <.heading title={"#{account_name(@current_user)} Open Pull Requests"}></.heading>
+      <.heading title={"Open Pull Requests for #{account_name(@current_user)}"}></.heading>
     </div>
 
     <%= live_render(@socket, MrgrWeb.Live.AnalyticsBox,
       session: %{"installation_id" => @current_user.current_installation_id},
       id: "analytics-box"
     ) %>
-
-    <.merge_freeze_menu :if={Mrgr.User.admin_at_installation?(@current_user)} repos={@repos} />
   </div>
 
   <.frozen_repo_list :if={Enum.any?(@frozen_repos)} repos={@frozen_repos} />
