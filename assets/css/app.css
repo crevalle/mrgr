@@ -102,12 +102,8 @@ h5 {
   cursor: pointer;
 }
 
-.detail-pane {
-  @apply sticky w-full top-6 overflow-visible p-3 bg-white shadow rounded-lg;
-}
-
 #detail-pane {
-  @apply sticky top-6 overflow-visible p-3 bg-white shadow rounded-lg;
+  @apply sticky w-96 top-6 overflow-visible p-3 bg-white shadow rounded-lg;
 
   visibility: hidden;
   opacity: 0;
@@ -204,6 +200,14 @@ th:last-of-type {
   @apply text-teal-700 hover:cursor-default bg-white border-b;
   cursor: default;
   pointer-events: none;
+}
+
+.glance-column {
+  @apply flex flex-col h-48 overflow-hidden w-72;
+}
+
+.comment-preview {
+  @apply text-gray-500 italic text-sm max-h-10 overflow-hidden;
 }
 
 .transform-rotate-90 {
