@@ -268,66 +268,6 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
-  def tab_explanation(%{tab: %{id: "ready-to-merge"}} = assigns) do
-    ~H"""
-    <div class="w-3/5">
-      <.aside>
-        Ready to Merge pull requests have been approved (or need no approvals) and are passing CI.  Merge them!
-      </.aside>
-    </div>
-    """
-  end
-
-  def tab_explanation(%{tab: %{id: "needs-approval"}} = assigns) do
-    ~H"""
-    <div class="w-3/5">
-      <.aside>
-        Needs Approval pull requests are passing CI but require more approvals from your team in order to merge.  Ping your team or assign more reviewers to move them along.
-      </.aside>
-    </div>
-    """
-  end
-
-  def tab_explanation(%{tab: %{id: "fix-ci"}} = assigns) do
-    ~H"""
-    <div class="w-3/5">
-      <.aside>
-        These PRs are failing CI.  They may or may not also be fully approved, but any CI issues need to be resolved before they can be merged and should be resolved before any further approvals.
-      </.aside>
-    </div>
-    """
-  end
-
-  def tab_explanation(%{tab: %{id: "hifs"}} = assigns) do
-    ~H"""
-    <div class="w-3/5">
-      <.aside>
-        These PRs contain changes to files marked High Impact.  Take an extra look before you merge them!
-      </.aside>
-    </div>
-    """
-  end
-
-  def tab_explanation(%{tab: %{id: "dormant"}} = assigns) do
-    ~H"""
-    <div class="w-3/5">
-      <.aside>
-        Dormant PRs have recently gone quiet.  It's been at least 24 hours - but less than 72 - since the last commit, comment, or review (weekends are NOT included in this calculation).  To prevent them from going stale, they should be revived immediately by pinging your team.
-      </.aside>
-    </div>
-    """
-  end
-
-  def tab_explanation(%{tab: %{id: "snoozed"}} = assigns) do
-    ~H"""
-    <div class="w-3/5">
-      <.aside>
-        Snoozed PRs are hidden from your main workflow and aren't included in the badge counts.  They may be things you want to deal with later, like in a day or two, or things that are outstanding and just noise.
-      </.aside>
-    </div>
-    """
-  end
-
   def snooze_option(assigns) do
     ~H"""
     <.l
@@ -391,7 +331,7 @@ defmodule MrgrWeb.Components.PullRequest do
   def glance_column(assigns) do
     ~H"""
     <div class={[
-      "flex flex-col h-48 overflow-hidden basis-1/3",
+      "flex flex-col h-48 overflow-hidden w-64",
       @class
     ]}>
       <%= render_slot(@inner_block) %>

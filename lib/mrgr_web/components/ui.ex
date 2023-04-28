@@ -130,6 +130,14 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def h2(assigns) do
+    ~H"""
+    <h2 class="text-lg font-semibold text-gray-900">
+      <%= render_slot(@inner_block) %>
+    </h2>
+    """
+  end
+
   attr :class, :string, default: nil
 
   slot :inner_block, required: true
@@ -458,80 +466,6 @@ defmodule MrgrWeb.Components.UI do
     <p class="text-sm italic text-gray-500">
       Data last synced at <%= if @dt, do: ts(@dt, @timezone), else: "--" %>
     </p>
-    """
-  end
-
-  attr :editing, :boolean, default: false
-  attr :selected?, :boolean, default: false
-  attr :tab, :map
-
-  def pr_tab(%{tab: %{editing: true}} = assigns) do
-    ~H"""
-    <div
-      class="flex items-center tab-select-button selected"
-      id={"#{@tab.id}-tab"}
-      aria-selected="false"
-      role="presentation"
-    >
-      <.form :let={f} for={:tab} phx-submit="save-tab" phx-click-away="cancel-tab-edit">
-        <%= text_input(f, :title,
-          value: "#{@tab.title}",
-          placeholder: "name this tab",
-          autofocus: true,
-          class:
-            "text-gray-700 py-1 px-1.5 outline-none focus:outline-none focus:ring-teal-500 focus:border-teal-500 w-40 text-sm rounded-md"
-        ) %>
-      </.form>
-
-      <.pr_count_badge items={@tab.pull_requests} />
-    </div>
-    """
-  end
-
-  def pr_tab(%{tab: %Mrgr.Schema.PRTab{}, selected?: true} = assigns) do
-    ~H"""
-    <div
-      class="flex items-center tab-select-button selected"
-      id={"#{@tab.id}-tab"}
-      aria-selected="false"
-      role="presentation"
-    >
-      <h2 class="cursor-text" phx-click={JS.push("edit-tab", value: %{id: @tab.id})}>
-        <%= @tab.title || "untitled" %>
-      </h2>
-      <.pr_count_badge items={@tab.pull_requests} />
-    </div>
-    """
-  end
-
-  def pr_tab(%{selected?: true} = assigns) do
-    ~H"""
-    <div
-      class="flex items-center tab-select-button selected"
-      id={"#{@tab.id}-tab"}
-      aria-selected="false"
-      role="presentation"
-    >
-      <h2><%= @tab.title || "untitled" %></h2>
-      <.pr_count_badge items={@tab.pull_requests} />
-    </div>
-    """
-  end
-
-  def pr_tab(assigns) do
-    ~H"""
-    <.link
-      patch={~p"/pull-requests/#{@tab.permalink}"}
-      class="flex items-center tab-select-button"
-      id={"#{@tab.id}-tab"}
-      aria-selected="false"
-      role="presentation"
-    >
-      <h2>
-        <%= @tab.title || "untitled" %>
-      </h2>
-      <.pr_count_badge items={@tab.pull_requests} />
-    </.link>
     """
   end
 
