@@ -294,6 +294,83 @@ defmodule MrgrWeb.Components.Core do
     """
   end
 
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
+  def th(assigns) do
+    ~H"""
+    <th
+      scope="col"
+      class={[
+        "p-3 text-left text-xs bg-gray-100 font-medium uppercase tracking-wide text-gray-500",
+        @class
+      ]}
+    >
+      <%= render_slot(@inner_block) %>
+    </th>
+    """
+  end
+
+  attr :class, :string, default: nil
+  slot :inner_block, required: true
+
+  def th_left(assigns) do
+    ~H"""
+    <th
+      scope="col"
+      class={[
+        "p-3 text-left text-xs font-medium uppercase text-gray-500",
+        @class
+      ]}
+    >
+      <%= render_slot(@inner_block) %>
+    </th>
+    """
+  end
+
+  attr :class, :string, default: ""
+  attr :striped, :boolean, default: false
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def tr(assigns) do
+    striped = if assigns.striped, do: "even:bg-white odd:bg-gray-50", else: nil
+
+    class = "#{assigns.class} #{striped}"
+
+    assigns = assign(assigns, :class, class)
+
+    ~H"""
+    <tr
+      class={[
+        "border-t border-gray-300 py-2",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </tr>
+    """
+  end
+
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def td(assigns) do
+    ~H"""
+    <td
+      class={[
+        "whitespace-nowrap px-3 py-2 text-gray-700",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </td>
+    """
+  end
+
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do
