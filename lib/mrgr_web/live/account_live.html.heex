@@ -65,7 +65,7 @@
         </table>
       </div>
     </div>
-    <div :if={@selected_installation} class="detail-pane">
+    <div :if={@selected_installation} id="detail-pane">
       <.detail_column>
         <:title>
           Users for <%= account_name(@selected_installation) %>

@@ -593,7 +593,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
         %{
           id: @hifs,
           permalink: @hifs,
-          title: "💥 High Impact Changes",
+          title: "💥 High Impact",
           type: "needs_attention",
           meta: %{user: user},
           pull_requests: []

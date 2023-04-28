@@ -7,73 +7,6 @@ defmodule MrgrWeb.Components.PullRequest do
   alias Mrgr.Schema.PullRequest
   alias Phoenix.LiveView.JS
 
-  def render_detail(assigns) do
-    ~H"""
-    <div class="bg-white rounded-md">
-      <div class="flex flex-col space-y-4">
-        <div class="flex justify-between items-center">
-          <.h3>
-            <.detail_title pull_request={@pull_request} attr={@attr} />
-          </.h3>
-          <.link patch={@close}>
-            <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
-          </.link>
-        </div>
-        <.detail_content pull_request={@pull_request} attr={@attr} timezone={@timezone} />
-      </div>
-    </div>
-    """
-  end
-
-  def detail_title(%{attr: "comments"} = assigns) do
-    ~H"""
-    <%= @pull_request.title %> - Comments (<%= Enum.count(@pull_request.comments) %>)
-    """
-  end
-
-  def detail_title(%{attr: "commits"} = assigns) do
-    ~H"""
-    <%= @pull_request.title %> - Commits (<%= Enum.count(@pull_request.commits) %>)
-    """
-  end
-
-  def detail_title(%{attr: "files-changed"} = assigns) do
-    ~H"""
-    <%= @pull_request.title %> - Files Changed (<%= Enum.count(@pull_request.files_changed) %>)
-    """
-  end
-
-  def detail_content(%{attr: "comments"} = assigns) do
-    ~H"""
-    <div class="flex flex-col space-y-4 divide-y divide-gray-200">
-      <.render_comment
-        :for={comment <- Mrgr.Schema.Comment.cron(@pull_request.comments)}
-        comment={comment}
-        tz={@timezone}
-      />
-    </div>
-    """
-  end
-
-  def detail_content(%{attr: "commits"} = assigns) do
-    ~H"""
-    <div class="flex flex-col space-y-4 divide-y divide-gray-200">
-      <.render_commit :for={commit <- @pull_request.commits} commit={commit} tz={@timezone} />
-    </div>
-    """
-  end
-
-  def detail_content(%{attr: "files-changed"} = assigns) do
-    ~H"""
-    <.hif_badge_list hifs={@pull_request.high_impact_file_rules} />
-
-    <.changed_file_list
-      files_changed={@pull_request.files_changed}
-      hifs={@pull_request.high_impact_file_rules}
-    />
-    """
-  end
-
   def hif_badge_list(%{hifs: []} = assigns) do
     ~H[]
   end
@@ -208,22 +141,20 @@ defmodule MrgrWeb.Components.PullRequest do
     ~H"""
     <div id={"comment-preview-#{@comment.id}"}>
       <div class="float-left">
-        <div class="flex">
-          <%= img_tag(Mrgr.Schema.Comment.author(@comment).avatar_url,
-            class: "rounded-xl h-5 w-5 mr-1"
-          ) %>
-        </div>
+        <%= img_tag(Mrgr.Schema.Comment.author(@comment).avatar_url,
+          class: "rounded-xl h-5 w-5 mr-1"
+        ) %>
       </div>
-      <p class="text-gray-500 italic text-sm max-h-10 overflow-hidden">
+      <div class="comment-preview">
         <%= md(Mrgr.Schema.Comment.body(@comment)) %>
-      </p>
+      </div>
     </div>
     """
   end
 
   def preview_commit(assigns) do
     ~H"""
-    <div class="flex justify-between items-center">
+    <div class="flex justify-between items-center w-full">
       <p class="truncate"><%= PullRequest.commit_message(@commit) %></p>
       <p class="text-sm text-gray-500 whitespace-nowrap">
         <%= PullRequest.commit_author_name(@commit) %>
@@ -331,11 +262,23 @@ defmodule MrgrWeb.Components.PullRequest do
   def glance_column(assigns) do
     ~H"""
     <div class={[
-      "flex flex-col h-48 overflow-hidden w-64",
+      "glance-column",
       @class
     ]}>
       <%= render_slot(@inner_block) %>
     </div>
+    """
+  end
+
+  def glance_detail_link(assigns) do
+    ~H"""
+    <.link
+      patch={@href}
+      class="flex items-center text-teal-700 hover:text-teal-500 hover:cursor-pointer"
+    >
+      <h6><%= render_slot(@inner_block) %></h6>
+      <.icon name="chevron-right" class="h-4 w-4" />
+    </.link>
     """
   end
 

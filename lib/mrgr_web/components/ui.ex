@@ -564,7 +564,10 @@ defmodule MrgrWeb.Components.UI do
         </li>
       </ul>
 
-      <p class="my-3">To resume merging for these repos, <.l href={~p"/repositories"}>disable the Merge Freeze</.l>.</p>
+      <p class="my-3">
+        To resume merging for these repos,
+        <.l href={~p"/repositories"}>disable the Merge Freeze</.l>.
+      </p>
     </div>
     """
   end

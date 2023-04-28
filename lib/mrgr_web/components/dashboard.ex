@@ -3,6 +3,7 @@ defmodule MrgrWeb.Components.Dashboard do
 
   import MrgrWeb.Components.UI
   import MrgrWeb.Components.Core
+  import MrgrWeb.Components.PullRequest
 
   alias MrgrWeb.PullRequestDashboardLive.Tabs
 
@@ -270,9 +271,70 @@ defmodule MrgrWeb.Components.Dashboard do
     """
   end
 
-  def tab_section_header(assigns) do
+  def render_detail(assigns) do
     ~H"""
+    <div class="bg-white rounded-md">
+      <div class="flex flex-col space-y-4">
+        <div class="flex justify-between items-center">
+          <.h3>
+            <.detail_title pull_request={@pull_request} attr={@attr} />
+          </.h3>
+          <.link patch={@close}>
+            <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
+          </.link>
+        </div>
+        <.detail_content pull_request={@pull_request} attr={@attr} timezone={@timezone} />
+      </div>
+    </div>
+    """
+  end
 
+  def detail_title(%{attr: "comments"} = assigns) do
+    ~H"""
+    <%= @pull_request.title %> - Comments (<%= Enum.count(@pull_request.comments) %>)
+    """
+  end
+
+  def detail_title(%{attr: "commits"} = assigns) do
+    ~H"""
+    <%= @pull_request.title %> - Commits (<%= Enum.count(@pull_request.commits) %>)
+    """
+  end
+
+  def detail_title(%{attr: "files-changed"} = assigns) do
+    ~H"""
+    <%= @pull_request.title %> - Files Changed (<%= Enum.count(@pull_request.files_changed) %>)
+    """
+  end
+
+  def detail_content(%{attr: "comments"} = assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-4 divide-y divide-gray-200">
+      <.render_comment
+        :for={comment <- Mrgr.Schema.Comment.cron(@pull_request.comments)}
+        comment={comment}
+        tz={@timezone}
+      />
+    </div>
+    """
+  end
+
+  def detail_content(%{attr: "commits"} = assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-4 divide-y divide-gray-200">
+      <.render_commit :for={commit <- @pull_request.commits} commit={commit} tz={@timezone} />
+    </div>
+    """
+  end
+
+  def detail_content(%{attr: "files-changed"} = assigns) do
+    ~H"""
+    <.hif_badge_list hifs={@pull_request.high_impact_file_rules} />
+
+    <.changed_file_list
+      files_changed={@pull_request.files_changed}
+      hifs={@pull_request.high_impact_file_rules}
+    />
     """
   end
 
