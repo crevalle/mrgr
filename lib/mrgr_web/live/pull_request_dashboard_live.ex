@@ -513,6 +513,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     @needs_approval "needs-approval"
     @fix_ci "fix-ci"
     @snoozed "snoozed"
+    @all "all"
     @hifs "hifs"
     @dormant "dormant"
 
@@ -607,7 +608,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
           id: @hifs,
           permalink: @hifs,
           title: "💥 High Impact Changes",
-          type: "socks",
+          type: "needs_attention",
           meta: %{user: user},
           pull_requests: []
         },
@@ -615,7 +616,15 @@ defmodule MrgrWeb.PullRequestDashboardLive do
           id: @dormant,
           permalink: @dormant,
           title: "🥀 Dormant",
-          type: "socks",
+          type: "needs_attention",
+          meta: %{user: user},
+          pull_requests: []
+        },
+        %{
+          id: @all,
+          permalink: @all,
+          title: "🌎 All",
+          type: "summary",
           meta: %{user: user},
           pull_requests: []
         },
@@ -623,7 +632,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
           id: @snoozed,
           permalink: @snoozed,
           title: "😴 Snoozed",
-          type: "socks",
+          type: "summary",
           meta: %{user: user},
           pull_requests: []
         }
@@ -650,8 +659,12 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       Enum.filter(tabs, &action_state?/1)
     end
 
-    def socks_tabs(tabs) do
-      Enum.filter(tabs, &socks_state?/1)
+    def needs_attention_tabs(tabs) do
+      Enum.filter(tabs, &needs_attention?/1)
+    end
+
+    def summary_tabs(tabs) do
+      Enum.filter(tabs, &summary?/1)
     end
 
     def system_tabs(tabs) do
@@ -662,11 +675,14 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       Enum.filter(tabs, &custom?/1)
     end
 
+    def summary?(%{type: "summary"}), do: true
+    def summary?(_), do: false
+
     def action_state?(%{type: "action_state"}), do: true
     def action_state?(_), do: false
 
-    def socks_state?(%{type: "socks"}), do: true
-    def socks_state?(_), do: false
+    def needs_attention?(%{type: "needs_attention"}), do: true
+    def needs_attention?(_), do: false
 
     def custom?(%Mrgr.Schema.PRTab{}), do: true
     def custom?(_), do: false
@@ -929,6 +945,10 @@ defmodule MrgrWeb.PullRequestDashboardLive do
 
     def fetch_pull_requests(%{id: @snoozed} = tab) do
       Mrgr.PullRequest.snoozed_prs(tab.meta.user)
+    end
+
+    def fetch_pull_requests(%{id: @all} = tab) do
+      Mrgr.PullRequest.open_prs(tab.meta.user)
     end
 
     def fetch_pull_requests(%Mrgr.Schema.PRTab{} = tab) do
