@@ -782,6 +782,14 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
+  def open_prs(user) do
+    Schema
+    |> Query.dashboard_preloads(user)
+    |> Query.unsnoozed(user)
+    |> Query.undrafted()
+    |> Mrgr.Repo.all()
+  end
+
   def dormant_prs(user) do
     Schema
     |> Query.dashboard_preloads(user)

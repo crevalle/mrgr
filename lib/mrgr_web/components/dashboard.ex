@@ -19,7 +19,7 @@ defmodule MrgrWeb.Components.Dashboard do
     <.nav_tab_list>
       <.tab_section>
         <:title>
-          Action States
+          Next Action
         </:title>
 
         <.nav_tab
@@ -31,11 +31,23 @@ defmodule MrgrWeb.Components.Dashboard do
 
       <.tab_section>
         <:title>
-          Socks
+          Needs Attention
         </:title>
 
         <.nav_tab
-          :for={tab <- Tabs.socks_tabs(@tabs)}
+          :for={tab <- Tabs.needs_attention_tabs(@tabs)}
+          tab={tab}
+          selected?={selected?(tab, @selected_tab)}
+        />
+      </.tab_section>
+
+      <.tab_section>
+        <:title>
+          Summary
+        </:title>
+
+        <.nav_tab
+          :for={tab <- Tabs.summary_tabs(@tabs)}
           tab={tab}
           selected?={selected?(tab, @selected_tab)}
         />
