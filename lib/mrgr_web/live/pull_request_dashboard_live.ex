@@ -2,6 +2,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
 
+  import MrgrWeb.Components.Dashboard
   import MrgrWeb.Components.PullRequest
 
   alias __MODULE__.Tabs
@@ -476,9 +477,6 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     Enum.filter(repos, & &1.merge_freeze_enabled)
   end
 
-  def selected?(%{id: id}, %{id: id}), do: true
-  def selected?(_pull_request, _selected), do: false
-
   def show_action_state_emoji?(%{id: id})
       when id in ["ready-to-merge", "needs-approval", "fix-ci"],
       do: false
@@ -609,7 +607,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
           id: @hifs,
           permalink: @hifs,
           title: "💥 High Impact Changes",
-          type: "system",
+          type: "socks",
           meta: %{user: user},
           pull_requests: []
         },
@@ -617,7 +615,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
           id: @dormant,
           permalink: @dormant,
           title: "🥀 Dormant",
-          type: "system",
+          type: "socks",
           meta: %{user: user},
           pull_requests: []
         },
@@ -625,7 +623,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
           id: @snoozed,
           permalink: @snoozed,
           title: "😴 Snoozed",
-          type: "system",
+          type: "socks",
           meta: %{user: user},
           pull_requests: []
         }
@@ -648,6 +646,14 @@ defmodule MrgrWeb.PullRequestDashboardLive do
       Enum.find(tabs, fn i -> i.permalink == permalink end)
     end
 
+    def action_state_tabs(tabs) do
+      Enum.filter(tabs, &action_state?/1)
+    end
+
+    def socks_tabs(tabs) do
+      Enum.filter(tabs, &socks_state?/1)
+    end
+
     def system_tabs(tabs) do
       Enum.reject(tabs, &custom?/1)
     end
@@ -655,6 +661,12 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     def custom_tabs(tabs) do
       Enum.filter(tabs, &custom?/1)
     end
+
+    def action_state?(%{type: "action_state"}), do: true
+    def action_state?(_), do: false
+
+    def socks_state?(%{type: "socks"}), do: true
+    def socks_state?(_), do: false
 
     def custom?(%Mrgr.Schema.PRTab{}), do: true
     def custom?(_), do: false

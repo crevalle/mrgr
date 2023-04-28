@@ -13,14 +13,14 @@ defmodule MrgrWeb.Components.PullRequestFilter do
         </.l>
       </.aside>
 
-      <.h3>Custom Filters</.h3>
+      <p class="font-semibold">Available Filters</p>
 
       <div class="flex items-start space-x-8">
-        <.repositories selected_tab={@selected_tab} repos={@repos} />
-        <.labels selected_tab={@selected_tab} labels={@labels} />
-        <.authors selected_tab={@selected_tab} items={@members} />
-        <.draft selected_tab={@selected_tab} draft_statuses={@draft_statuses} />
-        <.reviewers selected_tab={@selected_tab} items={@members} />
+        <.repositories tab={@tab} repos={@repos} />
+        <.labels tab={@tab} labels={@labels} />
+        <.authors tab={@tab} items={@members} />
+        <.draft tab={@tab} draft_statuses={@draft_statuses} />
+        <.reviewers tab={@tab} items={@members} />
       </div>
     </div>
     """
@@ -49,7 +49,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
               <:row :let={author}>
                 <div class="flex items-center">
                   <div class="w-8">
-                    <%= if Mrgr.PRTab.author_present?(@selected_tab, author) do %>
+                    <%= if Mrgr.PRTab.author_present?(@tab, author) do %>
                       <.icon name="check" class="text-teal-700 h-5 w-5" />
                     <% end %>
                   </div>
@@ -64,7 +64,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
         </div>
       </div>
 
-      <.active_filter_items items={@selected_tab.authors} />
+      <.active_filter_items items={@tab.authors} />
     </div>
     """
   end
@@ -92,7 +92,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
               <:row :let={reviewer}>
                 <div class="flex items-center">
                   <div class="w-8">
-                    <%= if Mrgr.PRTab.reviewer_present?(@selected_tab, reviewer) do %>
+                    <%= if Mrgr.PRTab.reviewer_present?(@tab, reviewer) do %>
                       <.icon name="check" class="text-teal-700 h-5 w-5" />
                     <% end %>
                   </div>
@@ -107,7 +107,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
         </div>
       </div>
 
-      <.active_filter_items items={@selected_tab.reviewers} />
+      <.active_filter_items items={@tab.reviewers} />
     </div>
     """
   end
@@ -135,7 +135,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
               <:row :let={repo}>
                 <div class="flex items-center">
                   <div class="w-8">
-                    <%= if Mrgr.PRTab.repository_present?(@selected_tab, repo) do %>
+                    <%= if Mrgr.PRTab.repository_present?(@tab, repo) do %>
                       <.icon name="check" class="text-teal-700 h-5 w-5" />
                     <% end %>
                   </div>
@@ -147,7 +147,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
         </div>
       </div>
 
-      <.active_filter_items items={@selected_tab.repositories} />
+      <.active_filter_items items={@tab.repositories} />
     </div>
     """
   end
@@ -175,7 +175,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
               <:row :let={label}>
                 <div class="flex items-center">
                   <div class="w-8">
-                    <%= if Mrgr.PRTab.label_present?(@selected_tab, label) do %>
+                    <%= if Mrgr.PRTab.label_present?(@tab, label) do %>
                       <.icon name="check" class="text-teal-700 h-5 w-5" />
                     <% end %>
                   </div>
@@ -187,7 +187,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
         </div>
       </div>
 
-      <.active_filter_items items={@selected_tab.labels} />
+      <.active_filter_items items={@tab.labels} />
     </div>
     """
   end
@@ -215,7 +215,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
               <:row :let={status}>
                 <div class="flex items-center">
                   <div class="w-8">
-                    <%= if Mrgr.PRTab.draft_status_selected?(@selected_tab, status.value) do %>
+                    <%= if Mrgr.PRTab.draft_status_selected?(@tab, status.value) do %>
                       <.icon name="check" class="text-teal-700 h-5 w-5" />
                     <% end %>
                   </div>
@@ -227,7 +227,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
         </div>
       </div>
 
-      <.active_filter_items items={[@selected_tab.draft_status]} />
+      <.active_filter_items items={[@tab.draft_status]} />
     </div>
     """
   end

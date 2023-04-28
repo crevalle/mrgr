@@ -125,7 +125,7 @@ h5 {
 }
 
 .main-pane {
-  @apply flex flex-col space-y-8 w-9/12;
+  @apply flex flex-col space-y-8;
 }
 
 .two-pane-layout {
@@ -188,12 +188,12 @@ th:last-of-type {
 }
 
 .tab-select-button {
-  @apply text-gray-500 p-3 bg-gray-50 hover:bg-gray-100 border-t-2 border-x rounded-t-lg hover:cursor-pointer;
+  @apply text-gray-500 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 hover:cursor-pointer;
   transition: border-color 150ms ease-out;
 }
 
 .tab-select-button.selected {
-  @apply border-teal-700 text-teal-700 hover:cursor-default bg-white border-x-2 border-b-2;
+  @apply text-teal-700 hover:cursor-default bg-gray-100;
 }
 
 .tab {
