@@ -29,7 +29,7 @@ defmodule MrgrWeb.Components.Live.ToggleRepositoryMergeFreeze do
   end
 
   def handle_event("toggle-merge-freeze", %{"merge_freeze_enabled" => new_value}, socket) do
-    repo = Mrgr.Repository.update_merge_freeze_status(socket.assigns.repo, new_value)
+    Mrgr.Repository.update_merge_freeze_status(socket.assigns.repo, new_value)
 
     socket
     |> noreply()

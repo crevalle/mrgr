@@ -2,7 +2,6 @@ defmodule MrgrWeb.Components.Dashboard do
   use MrgrWeb, :component
 
   import MrgrWeb.Components.UI
-  import MrgrWeb.Components.Core
   import MrgrWeb.Components.PullRequest
 
   alias MrgrWeb.PullRequestDashboardLive.Tabs

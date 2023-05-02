@@ -3,7 +3,6 @@ defmodule MrgrWeb.PullRequestDashboardLive do
   use Mrgr.PubSub.Event
 
   import MrgrWeb.Components.Dashboard
-  import MrgrWeb.Components.PullRequest
 
   alias __MODULE__.Tabs
 
