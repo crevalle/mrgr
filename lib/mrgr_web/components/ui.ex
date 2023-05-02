@@ -420,7 +420,7 @@ defmodule MrgrWeb.Components.UI do
       style="display: none;"
       id={@name}
       phx-click-away={JS.hide(transition: toggle_out_transition())}
-      class="origin-top-right z-50 absolute rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none"
+      class="dropdown-menu"
       role="menu"
       aria-orientation="vertical"
       aria-labelledby={"#{@name}-toggle"}

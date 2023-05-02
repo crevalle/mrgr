@@ -246,6 +246,10 @@ th:last-of-type {
   @apply hover:cursor-not-allowed;
 }
 
+.dropdown-menu {
+  @apply origin-top-right top-10 right-0 z-50 absolute rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 focus:outline-none;
+}
+
 .dropdown:hover .dropdown-content {display: block;}
 
 .hide-empty:empty{
