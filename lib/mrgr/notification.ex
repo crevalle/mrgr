@@ -6,28 +6,47 @@ defmodule Mrgr.Notification do
   @type notifiable ::
           Mrgr.Schema.UserNotificationPreference.t() | Mrgr.Schema.HighImpactFileRule.t()
 
-  def rt_seed_event do
-    seed_new_event(@pr_controversy, %{email: true})
+  def create_defaults_for_new_installation(%Mrgr.Schema.Installation{} = installation) do
+    # when an installation is created the only user is its creator
+    Enum.map(@notification_events, fn event ->
+      create_for_user_and_installation(event, installation.creator_id, installation.id)
+    end)
   end
 
-  def seed_new_event(event_name, opts \\ %{}) do
-    Mrgr.Schema.User
-    |> Mrgr.User.Query.with_installations()
-    |> Mrgr.Repo.all()
-    |> Enum.map(fn user ->
+  def create_defaults_for_user(user) do
+    user = Mrgr.Repo.preload(user, :installations)
+
+    Enum.map(@notification_events, fn event ->
       Enum.map(user.installations, fn installation ->
-        create_for_user_and_installation(user, installation, event_name, opts)
+        create_for_user_and_installation(event, user.id, installation.id)
       end)
     end)
   end
 
-  def create_for_user_and_installation(user, installation, event_name, opts \\ %{}) do
+  def rt_seed_event do
+    seed_new_event(@pr_controversy)
+  end
+
+  def seed_new_event(event, opts \\ %{}) do
+    users =
+      Mrgr.Schema.User
+      |> Mrgr.User.Query.with_installations()
+      |> Mrgr.Repo.all()
+
+    Enum.map(users, fn user ->
+      Enum.map(user.installations, fn installation ->
+        create_for_user_and_installation(event, user.id, installation.id, opts)
+      end)
+    end)
+  end
+
+  def create_for_user_and_installation(event, user_id, installation_id, opts \\ %{}) do
     params =
       %{
-        event: event_name,
-        user_id: user.id,
-        installation_id: installation.id,
-        email: false,
+        event: event,
+        user_id: user_id,
+        installation_id: installation_id,
+        email: true,
         slack: false
       }
       |> Map.merge(opts)

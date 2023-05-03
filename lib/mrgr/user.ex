@@ -247,12 +247,19 @@ defmodule Mrgr.User do
     user
   end
 
+  def create_default_notifications(user) do
+    Mrgr.Notification.create_defaults_for_user(user)
+
+    user
+  end
+
   def join_invited_user(user, member) do
     user
     |> associate_user_with_member(member)
     |> create_notification_address_at_current_installation()
     |> make_all_repos_visible()
     |> generate_default_custom_dashboard_tabs()
+    |> create_default_notifications()
   end
 
   def associate_user_with_member(user, member) do
