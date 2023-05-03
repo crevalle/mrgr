@@ -4,7 +4,7 @@ defmodule MrgrWeb.AccountLive do
 
   on_mount MrgrWeb.Plug.Auth
 
-  def mount(_params, _session, socket) do
+  def mount(params, _session, socket) do
     if connected?(socket) do
       installations = Mrgr.Installation.find_for_account_page(socket.assigns.current_user.id)
 
@@ -12,6 +12,7 @@ defmodule MrgrWeb.AccountLive do
 
       socket
       |> put_title("Your Account")
+      |> maybe_congratulate_subscription(params)
       |> assign(:installations, installations)
       |> assign(:selected_installation, nil)
       |> ok()
@@ -19,6 +20,13 @@ defmodule MrgrWeb.AccountLive do
       ok(socket)
     end
   end
+
+  def maybe_congratulate_subscription(socket, %{"subscription_complete" => _}) do
+    socket
+    |> Flash.put(:info, "Subscription Activated!")
+  end
+
+  def maybe_congratulate_subscription(socket, _), do: socket
 
   def handle_event("switch-installation", %{"id" => id}, socket) do
     i = Mrgr.List.find(socket.assigns.installations, id)
