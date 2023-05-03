@@ -73,7 +73,7 @@ defmodule Mrgr.PRTab do
     [
       %{
         id: 1,
-        value: "open"
+        value: "ready_for_review"
       },
       %{
         id: 2,

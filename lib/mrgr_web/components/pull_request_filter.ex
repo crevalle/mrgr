@@ -219,7 +219,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
                       <.icon name="check" class="text-teal-700 h-5 w-5" />
                     <% end %>
                   </div>
-                  <span><%= status.value %></span>
+                  <span><%= format_draft_status(status.value) %></span>
                 </div>
               </:row>
             </.dropdown_toggle_list>
@@ -227,7 +227,7 @@ defmodule MrgrWeb.Components.PullRequestFilter do
         </div>
       </div>
 
-      <.active_filter_items items={[@tab.draft_status]} />
+      <.active_filter_items items={[%{draft_status: @tab.draft_status}]} />
     </div>
     """
   end
@@ -261,11 +261,18 @@ defmodule MrgrWeb.Components.PullRequestFilter do
     """
   end
 
-  def active_filter_title(assigns) do
+  def active_filter_title(%{item: %{draft_status: status}} = assigns) do
+    assigns =
+      assigns
+      |> assign(:title, format_draft_status(status))
+
     ~H"""
-    <span><%= String.capitalize(@item) %></span>
+    <span><%= @title %></span>
     """
   end
+
+  def format_draft_status("ready_for_review"), do: "Ready for Review"
+  def format_draft_status(other), do: String.capitalize(other)
 
   def dropdown_clicky(assigns) do
     ~H"""

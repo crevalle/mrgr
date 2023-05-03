@@ -717,7 +717,7 @@ defmodule Mrgr.PullRequest do
     |> Query.for_visible_repos(user.id)
     |> Query.for_installation(user.current_installation_id)
     |> Query.open()
-    |> Query.undrafted()
+    |> Query.ready_for_review()
     |> Query.unsnoozed(user)
     |> Mrgr.Repo.aggregate(:count)
   end
@@ -741,7 +741,7 @@ defmodule Mrgr.PullRequest do
     |> Query.ready_to_merge()
     |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
-    |> Query.undrafted()
+    |> Query.ready_for_review()
     |> Mrgr.Repo.all()
   end
 
@@ -750,7 +750,7 @@ defmodule Mrgr.PullRequest do
     |> Query.needs_approval()
     |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
-    |> Query.undrafted()
+    |> Query.ready_for_review()
     |> Mrgr.Repo.all()
   end
 
@@ -759,7 +759,7 @@ defmodule Mrgr.PullRequest do
     |> Query.fix_ci()
     |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
-    |> Query.undrafted()
+    |> Query.ready_for_review()
     |> Mrgr.Repo.all()
   end
 
@@ -770,7 +770,7 @@ defmodule Mrgr.PullRequest do
     |> Query.for_visible_repos(user.id)
     |> Query.for_installation(user.current_installation_id)
     |> Query.open()
-    |> Query.undrafted()
+    |> Query.ready_for_review()
     |> Query.order_by_opened()
     |> Query.high_impact(user)
     |> Query.with_comments()
@@ -786,7 +786,7 @@ defmodule Mrgr.PullRequest do
     Schema
     |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
-    |> Query.undrafted()
+    |> Query.ready_for_review()
     |> Mrgr.Repo.all()
   end
 
@@ -794,7 +794,7 @@ defmodule Mrgr.PullRequest do
     Schema
     |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
-    |> Query.undrafted()
+    |> Query.ready_for_review()
     |> Mrgr.Repo.all()
     |> Enum.filter(&Dormant.dormant?(&1, user.timezone))
   end
@@ -803,7 +803,7 @@ defmodule Mrgr.PullRequest do
     Schema
     |> Query.dashboard_preloads(user)
     |> Query.snoozed(user)
-    |> Query.undrafted()
+    |> Query.ready_for_review()
     |> Mrgr.Repo.all()
   end
 
@@ -1024,9 +1024,9 @@ defmodule Mrgr.PullRequest do
 
     def filter_draft_status(query, "draft"), do: drafts(query)
 
-    def filter_draft_status(query, "open"), do: undrafted(query)
+    def filter_draft_status(query, "ready_for_review"), do: ready_for_review(query)
 
-    def undrafted(query) do
+    def ready_for_review(query) do
       from(q in query,
         where: q.draft == false
       )

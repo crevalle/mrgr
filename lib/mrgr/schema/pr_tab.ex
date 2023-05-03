@@ -1,10 +1,10 @@
 defmodule Mrgr.Schema.PRTab do
   use Mrgr.Schema
 
-  @draft_statuses ["open", "draft", "both"]
+  @draft_statuses ["ready_for_review", "draft", "both"]
 
   schema "pr_tabs" do
-    field(:draft_status, :string, default: "open")
+    field(:draft_status, :string, default: "ready_for_review")
     field(:title, :string)
     field(:permalink, :string)
 
