@@ -49,24 +49,24 @@ defmodule Mrgr.Github.Webhook do
   end
 
   def handle("pull_request", %{"action" => "opened"} = payload) do
-    Mrgr.PullRequest.create_from_webhook(payload)
+    Mrgr.PullRequest.Webhook.create(payload)
   end
 
   def handle("pull_request", %{"action" => "reopened"} = payload) do
-    Mrgr.PullRequest.reopen(payload)
+    Mrgr.PullRequest.Webhook.reopen(payload)
   end
 
   def handle("pull_request", %{"action" => "edited"} = payload) do
-    Mrgr.PullRequest.edit(payload)
+    Mrgr.PullRequest.Webhook.edit(payload)
   end
 
   def handle("pull_request", %{"action" => "closed"} = payload) do
-    Mrgr.PullRequest.close(payload)
+    Mrgr.PullRequest.Webhook.close(payload)
   end
 
   # HEAD OF PR IS UPDATED - create a new check suite/run, new checklist
   def handle("pull_request", %{"action" => "synchronize"} = payload) do
-    Mrgr.PullRequest.synchronize(payload)
+    Mrgr.PullRequest.Webhook.synchronize(payload)
     # Mrgr.CheckRun.create(payload)
   end
 
@@ -120,11 +120,11 @@ defmodule Mrgr.Github.Webhook do
 
   # ignore comments being deleted, who cares if we're off by a little bit
   def handle("pull_request_review_comment" = object, %{"action" => "created"} = payload) do
-    Mrgr.PullRequest.add_pull_request_review_comment(object, payload)
+    Mrgr.PullRequest.Webhook.add_comment(payload, object)
   end
 
   def handle("issue_comment" = object, %{"action" => "created"} = payload) do
-    Mrgr.PullRequest.add_issue_comment(object, payload)
+    Mrgr.PullRequest.Webhook.add_comment(payload, object)
   end
 
   def handle("pull_request_review", %{"action" => "submitted"} = payload) do

@@ -9,6 +9,33 @@ defmodule Mrgr.PullRequest.Webhook do
   @typep change_error :: {:error, Ecto.Changeset.t()}
   @typep not_found :: {:error, :not_found}
 
+
+  def create(payload) do
+    Mrgr.PullRequest.create_from_webhook(payload)
+  end
+
+  def reopen(payload) do
+    Mrgr.PullRequest.reopen(payload)
+  end
+
+  def edit(payload) do
+    Mrgr.PullRequest.edit(payload)
+  end
+
+  def close(payload) do
+    Mrgr.PullRequest.close(payload)
+  end
+
+  def synchronize(payload) do
+    Mrgr.PullRequest.synchronize(payload)
+  end
+
+  def add_comment(payload, type) do
+    with {:ok, pull_request} <- find_pull_request(payload) do
+      Mrgr.PullRequest.add_comment(pull_request, payload, type)
+    end
+  end
+
   @spec ready_for_review(webhook()) :: success() | not_found()
   def ready_for_review(payload) do
     with {:ok, pull_request} <- find_pull_request(payload) do
@@ -139,6 +166,11 @@ defmodule Mrgr.PullRequest.Webhook do
   end
 
   def find_pull_request(%{"pull_request" => params}) do
+    find_pull_request(params)
+  end
+
+  # issue comments
+  def find_pull_request(%{"issue" => params}) do
     find_pull_request(params)
   end
 end

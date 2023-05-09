@@ -30,6 +30,7 @@ defmodule Mrgr.Schema.PullRequest do
     field(:external_id, :integer)
     field(:files_changed, {:array, :string})
     field(:head_commit, :map)
+    field(:last_activity_at, :utc_datetime)
     field(:mergeable, :string)
     field(:merge_state_status, :string)
     field(:node_id, :string)
@@ -132,6 +133,7 @@ defmodule Mrgr.Schema.PullRequest do
     |> cast_embed(:head)
     |> put_external_id()
     |> put_change(:raw, params)
+    |> put_timestamp(:last_activity_at)
     |> validate_inclusion(:ci_status, @ci_statuses)
     |> unique_constraint(:node_id)
     |> foreign_key_constraint(:repository_id)
@@ -175,6 +177,18 @@ defmodule Mrgr.Schema.PullRequest do
     |> cast_embed(:commits)
     |> validate_inclusion(:mergeable, @mergeable_states)
     |> validate_inclusion(:merge_state_status, @merge_state_statuses)
+  end
+
+  def last_activity_changeset(schema) do
+    schema
+    |> change()
+    |> put_timestamp(:last_activity_at)
+  end
+
+  def last_activity_changeset(schema, ts) do
+    schema
+    |> change()
+    |> put_timestamp(:last_activity_at, ts)
   end
 
   def unstructify(struct) when is_struct(struct), do: Map.from_struct(struct)
