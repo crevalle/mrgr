@@ -1,6 +1,6 @@
 defmodule Mrgr.Schema.UserNotificationPreference do
   use Mrgr.Schema
-  use Mrgr.Notification.Event
+  import Mrgr.Notification.Event
 
   @moduledoc """
   One preference per user-installation-event.  Can receive an email, slack message, both, or none.
@@ -40,7 +40,7 @@ defmodule Mrgr.Schema.UserNotificationPreference do
   def changeset(schema, params) do
     schema
     |> cast(params, [:user_id, :installation_id, :event, :email, :slack])
-    |> validate_inclusion(:event, @notification_events)
+    |> validate_inclusion(:event, all_notification_events())
   end
 
   def create_for_user_and_installation(user, installation) do
