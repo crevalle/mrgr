@@ -10,19 +10,6 @@ defmodule Mrgr.PullRequest do
   alias __MODULE__.Query
   alias Mrgr.Schema.PullRequest, as: Schema
 
-  def rt_set_last_activity_at do
-    Mrgr.Installation.all()
-    |> Enum.each(fn installation ->
-      Schema
-      |> Query.for_installation(installation.id)
-      |> Query.open()
-      |> Query.with_comments()
-      |> Query.with_pr_reviews()
-      |> Mrgr.Repo.all()
-      |> Enum.each(&recalculate_last_activity!/1)
-    end)
-  end
-
   def load_authors do
     Schema
     |> Mrgr.Repo.all()
