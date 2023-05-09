@@ -1,5 +1,5 @@
 defmodule MrgrWeb.Formatter do
-  use Mrgr.Notification.Event
+  import Mrgr.Notification.Event
 
   @thirty_days 2_592_000
   @fourteen_days 1_209_600
@@ -184,5 +184,10 @@ defmodule MrgrWeb.Formatter do
     end
   end
 
-  def format_preference_name(@pr_controversy), do: "Controversial Pull Requests"
+  def format_preference_name(name) do
+    case name do
+      pr_controversy() -> "Controversial Pull Requests"
+      name -> name
+    end
+  end
 end

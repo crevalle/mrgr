@@ -1,5 +1,5 @@
 defmodule Mrgr.PullRequest.Controversy do
-  use Mrgr.Notification.Event
+  import Mrgr.Notification.Event
 
   @thread_threshold 4
 
@@ -88,17 +88,19 @@ defmodule Mrgr.PullRequest.Controversy do
     pull_request = Mrgr.Repo.preload(pull_request, :author)
     consumers = fetch_consumers(pull_request)
 
-    Enum.map(consumers.email, fn recipient ->
+    email = Enum.map(consumers.email, fn recipient ->
       send_controversy_email(recipient, pull_request, thread)
     end)
 
-    Enum.map(consumers.slack, fn recipient ->
+    slack = Enum.map(consumers.slack, fn recipient ->
       send_controversy_slack(recipient, pull_request, thread)
     end)
+
+    %{email: email, slack: slack}
   end
 
   def fetch_consumers(pull_request) do
-    Mrgr.Notification.consumers_of_event(@pr_controversy, pull_request)
+    Mrgr.Notification.consumers_of_event(pr_controversy(), pull_request)
   end
 
   def send_controversy_email(recipient, pull_request, thread) do

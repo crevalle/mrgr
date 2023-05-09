@@ -1,14 +1,18 @@
 defmodule Mrgr.Notification do
-  use Mrgr.Notification.Event
 
+  import __MODULE__.Event
   alias __MODULE__.Query
 
+  @typep preference :: Mrgr.Schema.UserNotificationPreference.t()
   @type notifiable ::
-          Mrgr.Schema.UserNotificationPreference.t() | Mrgr.Schema.HighImpactFileRule.t()
+          preference() | Mrgr.Schema.HighImpactFileRule.t()
+
+  @typep preference_bucket :: %{email: [preference()], slack: [preference()]}
+  @typep user_bucket :: %{email: [Mrgr.Schema.User.t()], slack: [Mrgr.Schema.User.t()]}
 
   def create_defaults_for_new_installation(%Mrgr.Schema.Installation{} = installation) do
     # when an installation is created the only user is its creator
-    Enum.map(@notification_events, fn event ->
+    Enum.map(all_notification_events(), fn event ->
       create_for_user_and_installation(event, installation.creator_id, installation.id)
     end)
   end
@@ -16,7 +20,7 @@ defmodule Mrgr.Notification do
   def create_defaults_for_user(user) do
     user = Mrgr.Repo.preload(user, :installations)
 
-    Enum.map(@notification_events, fn event ->
+    Enum.map(all_notification_events(), fn event ->
       Enum.map(user.installations, fn installation ->
         create_for_user_and_installation(event, user.id, installation.id)
       end)
@@ -24,7 +28,7 @@ defmodule Mrgr.Notification do
   end
 
   def rt_seed_event do
-    seed_new_event(@pr_controversy)
+    seed_new_event(pr_controversy())
   end
 
   def seed_new_event(event, opts \\ %{}) do
@@ -56,6 +60,7 @@ defmodule Mrgr.Notification do
     |> Mrgr.Repo.insert()
   end
 
+  @spec consumers_of_event(String.t(), Mrgr.Schema.PullRequest.t()) :: user_bucket()
   def consumers_of_event(event, pull_request) do
     preferences =
       fetch_preferences_at_installation(pull_request.repository.installation_id, event)
@@ -65,6 +70,8 @@ defmodule Mrgr.Notification do
     |> return_users()
   end
 
+  @doc "converts a bucket of preferences to a bucket of those preferences' users"
+  @spec return_users(preference_bucket()) :: user_bucket()
   def return_users(preferences_by_channel) do
     preferences_by_channel
     |> Enum.reduce(%{}, fn {channel, prefs}, acc ->
@@ -72,6 +79,7 @@ defmodule Mrgr.Notification do
     end)
   end
 
+  @spec bucketize_preferences(list()) :: preference_bucket()
   def bucketize_preferences(preferences) do
     Enum.reduce(preferences, %{email: [], slack: []}, fn preference, acc ->
       # strips out rules that have no channels
