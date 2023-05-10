@@ -11,11 +11,14 @@ defmodule MrgrWeb.Components.Dashboard do
     <.nav_tab_list>
       <.tab_section>
         <:title>
-          Next Action
+          Custom Dashboards
+          <.l phx-click="add-tab">
+            <.icon name="plus-circle" class="ml-2 h-5 w-5" />
+          </.l>
         </:title>
 
         <.nav_tab
-          :for={tab <- Tabs.action_state_tabs(@tabs)}
+          :for={tab <- Tabs.custom_tabs(@tabs)}
           tab={tab}
           selected?={selected?(tab, @selected_tab)}
         />
@@ -35,6 +38,18 @@ defmodule MrgrWeb.Components.Dashboard do
 
       <.tab_section>
         <:title>
+          Status
+        </:title>
+
+        <.nav_tab
+          :for={tab <- Tabs.action_state_tabs(@tabs)}
+          tab={tab}
+          selected?={selected?(tab, @selected_tab)}
+        />
+      </.tab_section>
+
+      <.tab_section>
+        <:title>
           Summary
         </:title>
 
@@ -45,20 +60,6 @@ defmodule MrgrWeb.Components.Dashboard do
         />
       </.tab_section>
 
-      <.tab_section>
-        <:title>
-          Custom
-        </:title>
-
-        <.nav_tab
-          :for={tab <- Tabs.custom_tabs(@tabs)}
-          tab={tab}
-          selected?={selected?(tab, @selected_tab)}
-        />
-        <.l phx-click="add-tab">
-          <.icon name="plus-circle" type="solid" class="ml-2 h-5 w-5" />
-        </.l>
-      </.tab_section>
     </.nav_tab_list>
     """
   end
@@ -178,7 +179,7 @@ defmodule MrgrWeb.Components.Dashboard do
 
   def tab_heading(assigns) do
     ~H"""
-    <div class="white-box">
+    <div class="white-box green-border">
       <.h2><%= @tab.title %></.h2>
       <.tab_subtitle tab={@tab} />
 
@@ -259,7 +260,7 @@ defmodule MrgrWeb.Components.Dashboard do
   def tab_section(assigns) do
     ~H"""
     <div class="flex flex-col space-y">
-      <p class="font-semibold text-sm text-gray-400 uppercase">
+      <p class="font-semibold text-sm text-gray-400 uppercase flex space-x-2">
         <%= render_slot(@title) %>
       </p>
 
