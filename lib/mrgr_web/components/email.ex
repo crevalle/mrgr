@@ -19,6 +19,18 @@ defmodule MrgrWeb.Components.Email do
     """
   end
 
+  def external_link(assigns) do
+    style = "color: #2C746E;"
+
+    assigns =
+      assigns
+      |> assign(:style, style)
+
+    ~H"""
+    <a href={@href} style={@style}><%= render_slot(@inner_block) %></a>
+    """
+  end
+
   def pr_list(assigns) do
     ~H"""
     <%= if @pull_requests == [] do %>
