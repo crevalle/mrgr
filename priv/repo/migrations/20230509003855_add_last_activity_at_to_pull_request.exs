@@ -7,6 +7,5 @@ defmodule Mrgr.Repo.Migrations.AddLastActivityAtToPullRequest do
     end
 
     create index(:pull_requests, :last_activity_at)
-
   end
 end

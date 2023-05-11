@@ -2,6 +2,7 @@ defmodule MrgrWeb.Components.Onboarding do
   use MrgrWeb, :component
 
   import MrgrWeb.Components.UI
+  import MrgrWeb.Components.Core
 
   attr :name, :string
   attr :installation, :map
@@ -11,19 +12,11 @@ defmodule MrgrWeb.Components.Onboarding do
   slot :inner_block, default: nil
 
   def install_github_app(assigns) do
-    class =
-      case assigns.installation do
-        nil -> in_progress()
-        _ -> done()
-      end
-
-    assigns =
-      assigns
-      |> assign(:class, class)
+    assigns = set_status(assigns)
 
     ~H"""
-    <.step_option class={@class}>
-      <:number>1</:number>
+    <.step_option status={@status}>
+      <:number><%= @step %></:number>
       <:title>
         Install our Github App
       </:title>
@@ -32,32 +25,30 @@ defmodule MrgrWeb.Components.Onboarding do
         This is how we pull in your pull request data and stay up to date.  Requires admin privileges on your organization.
       </:description>
 
-      <.install_action installation={@installation} />
+      <.install_action installation={@state.installation} />
     </.step_option>
     """
   end
 
   def sync_data(assigns) do
-    class =
-      case assigns.installation do
-        nil ->
-          todo()
+    # class =
+    # case assigns.installation do
+    # nil ->
+    # todo()
 
-        i ->
-          case i.state do
-            "created" -> todo()
-            "onboarding_complete" -> done()
-            _the_midst_of_onboarding -> in_progress()
-          end
-      end
+    # i ->
+    # case i.state do
+    # "created" -> todo()
+    # "onboarding_complete" -> done()
+    # _the_midst_of_onboarding -> in_progress()
+    # end
+    # end
 
-    assigns =
-      assigns
-      |> assign(:class, class)
+    assigns = set_status(assigns)
 
     ~H"""
-    <.step_option class={@class}>
-      <:number>2</:number>
+    <.step_option status={@status}>
+      <:number><%= @step %></:number>
       <:title>
         Sync your data
       </:title>
@@ -66,42 +57,41 @@ defmodule MrgrWeb.Components.Onboarding do
         We'll do this for you once the app is installed :)
       </:description>
 
-      <.syncing_message installation={@installation} />
-      <.render_stats stats={@stats} />
+      <.syncing_message installation={@state.installation} />
+      <.render_stats stats={@state.stats} />
     </.step_option>
     """
   end
 
-  def connect_slack_status(%{done: true}), do: :done
-  def connect_slack_status(%{installation: nil}), do: :todo
-  def connect_slack_status(%{installation: %{state: "onboarding_complete"}}), do: :in_progress
-  def connect_slack_status(_assigns), do: :todo
-
   def connect_slack(assigns) do
-    status = connect_slack_status(assigns)
+    connected = Mrgr.Installation.slack_connected?(assigns.state.installation)
 
     assigns =
       assigns
-      |> assign(:status, status)
-      |> assign(:class, class(status))
+      |> assign(:connected?, connected)
 
     ~H"""
-    <.step_option class={@class}>
+    <.step_option status={@status}>
       <:number>3</:number>
       <:title>
         Connect Slack (optional)
       </:title>
 
       <:description>
-        Want to receive alerts in Slack?  Install our Slackbot!
+        Want to receive alerts in Slack?  Install our Slackbot!  Alerts will also go to your email.
       </:description>
 
       <%= if @status != :todo do %>
-        <%= if @done do %>
-          <.slack_connection_status connected={Mrgr.Installation.slack_connected?(@installation)} />
+        <%= if @status == :done do %>
+          <div class="flex flex-col">
+            <.slack_connection_status connected={@connected?} />
+            <p :if={!@connected?} class="text-xs text-gray-500">
+              You can connect Slack later by visiting your Profile page.
+            </p>
+          </div>
         <% else %>
-          <div class="flex flex-col space-y-4">
-            <.slack_button user_id={@user.id} />
+          <div class="flex justify-between items-center">
+            <.slack_button user_id={@state.user.id} />
             <.l phx-click="skip-slack-install" class="text-sm">Skip for now</.l>
           </div>
         <% end %>
@@ -110,21 +100,144 @@ defmodule MrgrWeb.Components.Onboarding do
     """
   end
 
+  def review_pr_notifications(assigns) do
+    assigns = set_status(assigns)
+
+    alerts = [
+      "PRs assigned to me",
+      "Controversial PRs",
+      "Weekly Changelog",
+      "PRs with migrations",
+      "PRs with dependency changes",
+      "PRs with API changes"
+    ]
+
+    assigns =
+      assigns
+      |> assign(:alerts, alerts)
+
+    ~H"""
+    <.step_option status={@status}>
+      <:number><%= @step %></:number>
+      <:title>Review PR Alerts</:title>
+
+      <div class="flex flex-col space-y-4">
+        <%= if @status != :todo do %>
+          <p>We've created the following default alerts for you:</p>
+          <.ul>
+            <.icon_li :for={alert <- @alerts}>
+              <:icon>
+                <.i name="check-circle" class="text-teal-700" />
+              </:icon>
+              <%= alert %>
+            </.icon_li>
+          </.ul>
+        <% end %>
+
+        <%= if @status == :in_progress do %>
+          <p>How would you like to receive them?</p>
+          <.button_group>
+            <.l phx-click="notify-via-email" class="btn btn-primary">Email Me</.l>
+            <div class="flex flex-col space-y-1 items-center">
+              <.slack_button user_id={@state.user.id}>Via Slack</.slack_button>
+              <p class="text-xs text-gray-500 text-center w-64">
+                Click this button to install the MrgrBot to your Slack workspace.
+              </p>
+            </div>
+          </.button_group>
+        <% end %>
+
+        <%= if @status == :done do %>
+          <%= if @state.installation.slackbot do %>
+            slack
+          <% else %>
+            <div class="flex flex-col">
+              <p>
+                👍 OK! We'll notify you at <span class="font-semibold"><%= @state.user.email %></span>.
+              </p>
+              <p class="text-gray-500 text-sm">
+                You can change your email or install our Slackbot on your Profile page.
+              </p>
+            </div>
+          <% end %>
+        <% end %>
+      </div>
+    </.step_option>
+    """
+  end
+
+  def get_to_it(assigns) do
+    assigns = set_status(assigns)
+
+    ~H"""
+    <.step_option status={@status}>
+      <:number><%= @step %></:number>
+      <:title>
+        You're done! 🏁
+      </:title>
+
+      <%= if @status == :in_progress do %>
+        <.col class="space-y-4">
+          <.onboarding_complete_message organization?={organization?(@state.installation)} />
+
+          <.button_group>
+            <.l phx-click="add-more-alerts" class="btn btn-primary">Add More File Alerts</.l>
+            <.l phx-click="go-to-dashboard" class="btn btn-secondary">View Open PRs</.l>
+          </.button_group>
+        </.col>
+      <% end %>
+    </.step_option>
+    """
+  end
+
+  def onboarding_complete_message(%{organization?: true} = assigns) do
+    ~H"""
+    <.col class="space-y-4">
+      <p>Onboarding is complete.  Your 14 day free trial has begun.</p>
+      <p>What would you like to do next?</p>
+    </.col>
+    """
+  end
+
+  def onboarding_complete_message(%{organization?: false} = assigns) do
+    ~H"""
+    <.col class="space-y-4">
+      <p>Onboarding is complete.</p>
+      <p>What would you like to do next?</p>
+    </.col>
+    """
+  end
+
   def step_list(assigns) do
     ~H"""
     <div class="flex flex-col space-y-4">
-      <%= render_slot(@inner_block) %>
+      <.install_github_app state={@state} step={1} />
+      <.sync_data state={@state} step={2} />
+      <.review_pr_notifications state={@state} step={3} />
+      <.get_to_it state={@state} step={4} />
     </div>
     """
   end
 
+  attr :status, :atom, required: true
+
+  slot :number, required: true
+  slot :title, required: true
+  slot :description
+  slot :inner_block, required: true
+
   def step_option(assigns) do
     ~H"""
-    <div class="flex items-top space-x-2 p-2 border rounded-md">
-      <span class={@class}><%= render_slot(@number) %>.</span>
-      <div class="flex flex-col">
-        <span class={@class}><%= render_slot(@title) %></span>
-        <p class="text-gray-500"><%= render_slot(@description) %></p>
+    <div class={"flex items-top space-x-2 p-2 #{border_class(@status)} rounded-md"}>
+      <span class={progress_class(@status)}><%= render_slot(@number) %>.</span>
+      <div class="flex flex-col flex-1">
+        <span class={progress_class(@status)}>
+          <%= render_slot(@title) %>
+        </span>
+
+        <p :if={!completed?(@status)} class="">
+          <%= render_slot(@description) %>
+        </p>
 
         <div class="pt-2">
           <%= render_slot(@inner_block) %>
@@ -134,26 +247,30 @@ defmodule MrgrWeb.Components.Onboarding do
     """
   end
 
-  def class(:todo), do: todo()
-  def class(:in_progress), do: in_progress()
-  def class(:done), do: done()
-
-  def done, do: "line-through text-gray-500"
-  def in_progress, do: "font-bold"
-  def todo, do: ""
-
-  def get_to_it(assigns) do
-    ~H"""
-    <div class="flex flex-col space-y-4">
-      <p>
-        <span class="font-semibold">Hot Dog</span> you are all set!
-      </p>
-      <a href={~p"/pull-requests"} class="btn btn-primary">
-        Let's get Mergin'
-      </a>
-    </div>
-    """
+  def progress_status(%{step: %{number: number}}, component) do
+    case component do
+      c when c > number -> :todo
+      c when c == number -> :in_progress
+      c when c < number -> :done
+    end
   end
+
+  def set_status(assigns) do
+    status = progress_status(assigns.state, assigns.step)
+
+    assign(assigns, :status, status)
+  end
+
+  def progress_class(:todo), do: "text-gray-500"
+  def progress_class(:in_progress), do: "font-bold"
+  def progress_class(:done), do: "line-through text-gray-500"
+
+  def border_class(:todo), do: "border"
+  def border_class(:in_progress), do: "border-2 border-teal-700 shadow-lg"
+  def border_class(:done), do: "border"
+
+  def completed?(:done), do: true
+  def completed?(_), do: false
 
   def render_stats(%{stats: stats} = assigns) when stats == %{}, do: ~H[]
 
@@ -226,8 +343,7 @@ defmodule MrgrWeb.Components.Onboarding do
     ~H"""
     <div class="flex flex-col">
       <div class="flex items-center space-x-2">
-        <p class="font-bold">Uh Oh!</p>
-        <p>We ran into an issue syncing your data.  Our Customer Support team will be in touch!</p>
+        <p>We've synced your data!</p>
       </div>
     </div>
     """
@@ -235,6 +351,14 @@ defmodule MrgrWeb.Components.Onboarding do
 
   def syncing_message(assigns), do: ~H[]
 
-  defp account_type(%{target_type: "User"}), do: "user account"
-  defp account_type(_org_or_app), do: "organization"
+  defp account_type(installation) do
+    case organization?(installation) do
+      true -> "organization"
+      false -> "user account"
+    end
+  end
+
+  defp organization?(installation) do
+    Mrgr.Schema.Installation.organization?(installation)
+  end
 end

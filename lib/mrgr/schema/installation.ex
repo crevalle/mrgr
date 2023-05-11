@@ -153,6 +153,9 @@ defmodule Mrgr.Schema.Installation do
   def slack_team_id(%{slackbot: %{team: %{"id" => id}}}), do: id
   def slack_team_id(_installation), do: nil
 
+  def organization?(%{target_type: "Organization"}), do: true
+  def organization?(_), do: false
+
   # "access_tokens_url" => "https://api.github.com/app/installations/19872469/access_tokens",
   # "account" => %{
   # "avatar_url" => "https://avatars.githubusercontent.com/u/7728671?v=4",

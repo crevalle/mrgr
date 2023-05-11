@@ -3,7 +3,9 @@
 
   <p>
     The pull request
-    <.external_link href={Mrgr.Schema.PullRequest.external_url(@pull_request)}><%= @pull_request.title %></.external_link>
+    <.external_link href={Mrgr.Schema.PullRequest.external_url(@pull_request)}>
+      <%= @pull_request.title %>
+    </.external_link>
     by <%= author_handle(@pull_request) %> in the
     <strong><%= @pull_request.repository.name %></strong>
     repository has generated some controversy.  You may want to investigate to prevent a lengthy back and forth.  Here's the recent thread:

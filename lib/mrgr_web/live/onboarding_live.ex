@@ -6,6 +6,23 @@ defmodule MrgrWeb.OnboardingLive do
 
   on_mount MrgrWeb.Plug.Auth
 
+  # @steps %{
+  # 0 => :provide_email,
+  # 1 => :create_installation,
+  # 2 => :sync_data,
+  # 3 => :install_slackbot,
+  # 4 => :review_notifications,
+  # 5 => :done
+  # }
+
+  @steps [
+    %{number: 0, name: :provide_email},
+    %{number: 1, name: :create_installation},
+    %{number: 2, name: :sync_data},
+    %{number: 3, name: :review_notifications},
+    %{number: 4, name: :done}
+  ]
+
   def mount(_params, _session, socket) do
     if connected?(socket) do
       socket = MrgrWeb.Plug.Auth.assign_user_timezone(socket)
@@ -13,19 +30,62 @@ defmodule MrgrWeb.OnboardingLive do
       current_user = socket.assigns.current_user
       subscribe(current_user)
 
-      installation = current_user.current_installation
-      stats = stats(installation)
+      state = compute_state(current_user)
 
       socket
-      |> assign(:done, done?(installation))
+      |> assign(:state, state)
       |> assign(:changeset, email_changeset(current_user))
-      |> assign(:installation, installation)
-      |> assign(:stats, stats)
       |> put_title("Onboarding")
       |> ok()
     else
       ok(socket)
     end
+  end
+
+  def basic_state(current_user) do
+    %{
+      step: nil,
+      user: current_user,
+      installation: current_user.current_installation,
+      stats: stats(current_user.current_installation)
+    }
+  end
+
+  def compute_state(%{email: nil} = current_user) do
+    current_user
+    |> basic_state()
+    |> set_step(:provide_email)
+  end
+
+  def compute_state(%{current_installation: nil} = current_user) do
+    current_user
+    |> basic_state()
+    |> set_step(:create_installation)
+  end
+
+  def compute_state(%{current_installation: %{slackbot: bot}} = current_user)
+      when not is_nil(bot) do
+    current_user
+    |> basic_state()
+    |> set_step(:done)
+  end
+
+  # this is out of order because we need to match the full state string
+  def compute_state(%{current_installation: %{state: complete}} = current_user)
+      when complete in ["onboarding_complete", "onboarding_error"] do
+    current_user
+    |> basic_state()
+    |> set_step(:review_notifications)
+  end
+
+  def compute_state(%{current_installation: %{state: "onboarding_" <> _status}} = current_user) do
+    current_user
+    |> basic_state()
+    |> set_step(:sync_data)
+  end
+
+  def set_step(state, name) do
+    Map.put(state, :step, step_by_name(@steps, name))
   end
 
   def render(assigns) do
@@ -34,7 +94,7 @@ defmodule MrgrWeb.OnboardingLive do
       <div class="flex flex-col space-y-8 lg:w-1/2 md:w-full">
         <.heading title="All Right!👋 Let's get you started" />
 
-        <%= if !@current_user.email do %>
+        <%= if @state.step.name == :provide_email do %>
           <div class="flex flex-col space-y-2">
             <h5>Add your Email</h5>
             <p>Looks like Github didn't provide your email address. Please enter one to continue.</p>
@@ -59,14 +119,8 @@ defmodule MrgrWeb.OnboardingLive do
           <div class="space-y-4">
             <p>Mrgr onboarding is just 3 simple steps:</p>
 
-            <.step_list>
-              <.install_github_app installation={@installation} />
-              <.sync_data installation={@installation} stats={@stats} />
-              <.connect_slack installation={@installation} user={@current_user} done={@done} />
-            </.step_list>
+            <.step_list state={@state} />
           </div>
-
-          <.get_to_it :if={@done} installation={@installation} />
         <% end %>
       </div>
     </div>
@@ -106,6 +160,7 @@ defmodule MrgrWeb.OnboardingLive do
         socket
         |> Flash.put(:info, "Thanks! Now to the good stuff.")
         |> assign(:current_user, user)
+        |> assign(:state, compute_state(user))
         |> noreply()
 
       {:error, changeset} ->
@@ -115,9 +170,23 @@ defmodule MrgrWeb.OnboardingLive do
     end
   end
 
-  def handle_event("skip-slack-install", _params, socket) do
+  def handle_event("notify-via-email", _params, socket) do
+    state = set_step(socket.assigns.state, :done)
+
     socket
-    |> assign(:done, true)
+    |> assign(:state, state)
+    |> noreply()
+  end
+
+  def handle_event("add-more-alerts", _params, socket) do
+    socket
+    |> redirect(to: ~p"/high-impact-files")
+    |> noreply()
+  end
+
+  def handle_event("go-to-dashboard", _params, socket) do
+    socket
+    |> redirect(to: ~p"/pull-requests")
     |> noreply()
   end
 
@@ -159,9 +228,10 @@ defmodule MrgrWeb.OnboardingLive do
 
   def stats(_), do: %{}
 
-  def done?(nil), do: false
+  def done?(%{step: %{name: :done}}), do: true
+  def done?(_state), do: false
 
-  def done?(installation) do
-    Mrgr.Installation.slack_connected?(installation)
+  def step_by_name(steps, name) do
+    Enum.find(steps, fn step -> step.name == name end)
   end
 end

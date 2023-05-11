@@ -371,6 +371,107 @@ defmodule MrgrWeb.Components.Core do
     """
   end
 
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def ul(assigns) do
+    ~H"""
+    <ul
+      class={[
+        "list-disc",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </ul>
+    """
+  end
+
+  slot :icon, required: true
+  slot :inner_block, required: true
+
+  def icon_li(assigns) do
+    ~H"""
+    <li class="flex items-center space-x-3">
+      <%= render_slot(@icon) %>
+      <span><%= render_slot(@inner_block) %></span>
+    </li>
+    """
+  end
+
+  attr :name, :string, required: true
+  attr :class, :string, default: nil
+  attr :rest, :global
+
+  def i(assigns) do
+    ~H"""
+    <.icon
+      name={@name}
+      class={[
+        "h-5 w-5 ",
+        @class
+      ]}
+      {@rest}
+    />
+    """
+  end
+
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def button_group(assigns) do
+    ~H"""
+    <div
+      class={[
+        "flex space-x-4 items-start",
+        @class
+      ]}
+      {@rest }
+    >
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def col(assigns) do
+    ~H"""
+    <div
+      class={[
+        "flex flex-col",
+        @class
+      ]}
+      {@rest }
+    >
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def row(assigns) do
+    ~H"""
+    <div
+      class={[
+        "flex",
+        @class
+      ]}
+      {@rest }
+    >
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
   ## JS Commands
 
   def show(js \\ %JS{}, selector) do

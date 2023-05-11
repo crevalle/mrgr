@@ -59,7 +59,6 @@ defmodule MrgrWeb.Components.Dashboard do
           selected?={selected?(tab, @selected_tab)}
         />
       </.tab_section>
-
     </.nav_tab_list>
     """
   end

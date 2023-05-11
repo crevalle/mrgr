@@ -186,12 +186,16 @@ th:last-of-type {
   @apply rounded-tr-lg;
 }
 
+.link {
+  @apply text-teal-700 hover:text-teal-500;
+}
+
 .btn {
-  @apply flex items-center justify-center border border-transparent shadow-md rounded-md text-sm font-medium text-white py-2 px-4 focus:outline-none focus:ring-2 focus:ring-offset-2;
+  @apply flex items-center justify-center border border-transparent shadow-md rounded-md text-sm font-medium text-white py-2 px-4 focus:outline-none focus:ring-2 focus:ring-offset-2 hover:bg-stone-50;
 }
 
 .btn-primary {
-  @apply bg-teal-700 hover:bg-teal-500;
+  @apply bg-teal-700 hover:border-teal-700 hover:text-teal-700;
 }
 
 .clear-btn {
@@ -199,7 +203,7 @@ th:last-of-type {
 }
 
 .btn-secondary {
-  @apply bg-secondary hover:opacity-90;
+  @apply border-secondary text-secondary hover:text-white hover:bg-secondary hover:opacity-90;
 }
 
 .tab-select-button {

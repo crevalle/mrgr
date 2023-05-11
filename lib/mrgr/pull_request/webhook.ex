@@ -9,7 +9,6 @@ defmodule Mrgr.PullRequest.Webhook do
   @typep change_error :: {:error, Ecto.Changeset.t()}
   @typep not_found :: {:error, :not_found}
 
-
   def create(payload) do
     Mrgr.PullRequest.create_from_webhook(payload)
   end
