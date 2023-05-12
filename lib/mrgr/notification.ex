@@ -103,17 +103,18 @@ defmodule Mrgr.Notification do
     |> Mrgr.Repo.all()
   end
 
+  @doc "converts all email notifications to slack"
   def enable_slack_notifications(user, installation) do
     preferences =
       Mrgr.Schema.UserNotificationPreference
       |> Query.for_installation(installation.id)
       |> Query.for_user(user.id)
       |> Mrgr.Repo.all()
-      |> Enum.map(&enable_slack/1)
+      |> Enum.map(&convert_to_slack/1)
 
     hifs =
       Mrgr.HighImpactFileRule.for_user_at_installation(user.id, installation.id)
-      |> Enum.map(&enable_slack/1)
+      |> Enum.map(&convert_to_slack/1)
 
     %{preferences: preferences, hifs: hifs}
   end
@@ -124,13 +125,29 @@ defmodule Mrgr.Notification do
       |> Query.for_installation(installation.id)
       |> Query.for_user(user.id)
       |> Mrgr.Repo.all()
-      |> Enum.map(&disable_slack/1)
+      |> Enum.map(&convert_from_slack/1)
 
     hifs =
       Mrgr.HighImpactFileRule.for_user_at_installation(user.id, installation.id)
-      |> Enum.map(&disable_slack/1)
+      |> Enum.map(&convert_from_slack/1)
 
     %{preferences: preferences, hifs: hifs}
+  end
+
+  def convert_to_slack(%{email: false} = notifiable), do: notifiable
+
+  def convert_to_slack(%{email: true} = notifiable) do
+    notifiable
+    |> enable_slack()
+    |> disable_email()
+  end
+
+  def convert_from_slack(%{slack: false} = notifiable), do: notifiable
+
+  def convert_from_slack(%{slack: true} = notifiable) do
+    notifiable
+    |> disable_slack()
+    |> enable_email()
   end
 
   @spec enable_slack(notifiable()) :: notifiable()
@@ -144,6 +161,20 @@ defmodule Mrgr.Notification do
   def disable_slack(notifiable) do
     notifiable
     |> Ecto.Changeset.change(%{slack: false})
+    |> Mrgr.Repo.update!()
+  end
+
+  @spec enable_email(notifiable()) :: notifiable()
+  def enable_email(notifiable) do
+    notifiable
+    |> Ecto.Changeset.change(%{email: true})
+    |> Mrgr.Repo.update!()
+  end
+
+  @spec disable_email(notifiable()) :: notifiable()
+  def disable_email(notifiable) do
+    notifiable
+    |> Ecto.Changeset.change(%{email: false})
     |> Mrgr.Repo.update!()
   end
 
