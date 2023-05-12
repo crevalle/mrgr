@@ -72,6 +72,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     MrgrWeb.Plug.Auth.assign_user_timezone(socket)
   end
 
+  # go to a specific PR on a tab
   def handle_params(%{"attr" => attr, "pull_request_id" => pr_id, "tab" => id}, _uri, socket) do
     if connected?(socket) do
       selected = get_tab(socket.assigns.tabs, id)
@@ -89,6 +90,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
   end
 
+  # go to a tab
   def handle_params(%{"tab" => id}, _uri, socket) do
     if connected?(socket) do
       selected = get_tab(socket.assigns.tabs, id)
@@ -107,12 +109,24 @@ defmodule MrgrWeb.PullRequestDashboardLive do
   # index action
   def handle_params(_params, _uri, socket) do
     if connected?(socket) do
+    default_tab = select_default_tab(socket.assigns.tabs)
+
       socket
-      |> assign(:selected_tab, hd(socket.assigns.tabs))
+      |> assign(:selected_tab, default_tab)
       |> noreply()
     else
       socket
       |> noreply()
+    end
+  end
+
+  def select_default_tab(tabs) do
+    tabs
+    |> Tabs.custom_tabs()
+    |> hd()
+    |> case do
+      nil -> hd(tabs)
+      first_custom_tab -> first_custom_tab
     end
   end
 
