@@ -122,6 +122,12 @@ defmodule MrgrWeb.Admin.Live.InstallationShow do
   end
 
   def handle_info(%{event: @installation_onboarding_progressed, payload: installation}, socket) do
+    installation = %{
+      socket.assigns.installation
+      | state: installation.state,
+        state_changes: installation.state_changes
+    }
+
     socket
     |> assign(:installation, installation)
     |> noreply()
