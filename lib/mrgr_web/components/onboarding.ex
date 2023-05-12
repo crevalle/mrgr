@@ -19,13 +19,23 @@ defmodule MrgrWeb.Components.Onboarding do
         Install our Github App
       </:title>
 
-      <.col class="space-y-4">
-        <p>We need this to receive webhooks and analyze your pull request data.</p>
+      <%= if @status == :in_progress do %>
+        <.col class="space-y-4">
+          <p>We need this to receive webhooks and analyze your pull request data.</p>
+          <p>
+            Installation requires admin privileges on your organization. We take your data security seriously.
+          </p>
+          <a href={Mrgr.Installation.installation_url()} class="btn btn-primary w-80">
+            Click to install our Github App 🚀
+          </a>
+        </.col>
+      <% else %>
         <p>
-          Installation requires admin privileges on your organization. We take your data security seriously.
+          Good News!  Mrgr has been installed to the
+          <span class="font-bold"><%= account_name(@state.installation) %></span>
+          <%= account_type(@state.installation) %>.
         </p>
-        <.install_action installation={@state.installation} />
-      </.col>
+      <% end %>
     </.step_option>
     """
   end
@@ -248,24 +258,6 @@ defmodule MrgrWeb.Components.Onboarding do
         <p class="font-semibold"><%= @stats.pull_requests %></p>
       </.col>
     </div>
-    """
-  end
-
-  def install_action(%{installation: nil} = assigns) do
-    ~H"""
-    <a href={Mrgr.Installation.installation_url()} class="btn btn-primary w-80">
-      Click to install our Github App 🚀
-    </a>
-    """
-  end
-
-  def install_action(assigns) do
-    ~H"""
-    <p>
-      Good News!  Mrgr has been installed to the
-      <span class="font-bold"><%= @installation.account.login %></span>
-      <%= account_type(@installation) %>.
-    </p>
     """
   end
 
