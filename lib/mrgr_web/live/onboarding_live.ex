@@ -123,7 +123,7 @@ defmodule MrgrWeb.OnboardingLive do
           </div>
         <% else %>
           <div class="space-y-4">
-            <p>Mrgr onboarding is just 3 simple steps:</p>
+            <p>Mrgr onboarding is just 4 simple steps:</p>
 
             <.step_list state={@state} />
           </div>

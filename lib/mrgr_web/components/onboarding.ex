@@ -4,10 +4,8 @@ defmodule MrgrWeb.Components.Onboarding do
   import MrgrWeb.Components.UI
   import MrgrWeb.Components.Core
 
-  attr :name, :string
-  attr :installation, :map
-  attr :number, :integer
-  attr :stats, :map, default: %{}
+  attr :state, :map
+  attr :step, :integer
 
   slot :inner_block, default: nil
 
@@ -21,29 +19,18 @@ defmodule MrgrWeb.Components.Onboarding do
         Install our Github App
       </:title>
 
-      <:description>
-        This is how we pull in your pull request data and stay up to date.  Requires admin privileges on your organization.
-      </:description>
-
-      <.install_action installation={@state.installation} />
+      <.col class="space-y-4">
+        <p>We need this to receive webhooks and analyze your pull request data.</p>
+        <p>
+          Installation requires admin privileges on your organization. We take your data security seriously.
+        </p>
+        <.install_action installation={@state.installation} />
+      </.col>
     </.step_option>
     """
   end
 
   def sync_data(assigns) do
-    # class =
-    # case assigns.installation do
-    # nil ->
-    # todo()
-
-    # i ->
-    # case i.state do
-    # "created" -> todo()
-    # "onboarding_complete" -> done()
-    # _the_midst_of_onboarding -> in_progress()
-    # end
-    # end
-
     assigns = set_status(assigns)
 
     ~H"""
@@ -84,7 +71,7 @@ defmodule MrgrWeb.Components.Onboarding do
       <:number><%= @step %></:number>
       <:title>Review PR Alerts</:title>
 
-      <div class="flex flex-col space-y-4">
+      <.col class="space-y-4">
         <%= if @status != :todo do %>
           <p>We've created the following default alerts for you:</p>
           <.ul>
@@ -101,12 +88,12 @@ defmodule MrgrWeb.Components.Onboarding do
           <p>How would you like to receive them?</p>
           <.button_group>
             <.l phx-click="notify-via-email" class="btn btn-primary">Email Me</.l>
-            <div class="flex flex-col space-y-1 items-center">
+            <.col class="space-y-1 items-center">
               <.slack_button user_id={@state.user.id}>Via Slack</.slack_button>
               <p class="text-xs text-gray-500 text-center w-64">
                 Click this button to install the MrgrBot to your Slack workspace.
               </p>
-            </div>
+            </.col>
           </.button_group>
         <% end %>
 
@@ -127,7 +114,7 @@ defmodule MrgrWeb.Components.Onboarding do
             </.col>
           <% end %>
         <% end %>
-      </div>
+      </.col>
     </.step_option>
     """
   end
@@ -176,12 +163,12 @@ defmodule MrgrWeb.Components.Onboarding do
 
   def step_list(assigns) do
     ~H"""
-    <div class="flex flex-col space-y-4">
+    <.col class="space-y-4">
       <.install_github_app state={@state} step={1} />
       <.sync_data state={@state} step={2} />
       <.review_pr_notifications state={@state} step={3} />
       <.get_to_it state={@state} step={4} />
-    </div>
+    </.col>
     """
   end
 
@@ -196,7 +183,7 @@ defmodule MrgrWeb.Components.Onboarding do
     ~H"""
     <div class={"flex items-top space-x-2 p-2 #{border_class(@status)} rounded-md"}>
       <span class={progress_class(@status)}><%= render_slot(@number) %>.</span>
-      <div class="flex flex-col flex-1">
+      <.col class="flex-1">
         <span class={progress_class(@status)}>
           <%= render_slot(@title) %>
         </span>
@@ -208,7 +195,7 @@ defmodule MrgrWeb.Components.Onboarding do
         <div class="pt-2">
           <%= render_slot(@inner_block) %>
         </div>
-      </div>
+      </.col>
     </div>
     """
   end
@@ -245,29 +232,29 @@ defmodule MrgrWeb.Components.Onboarding do
     <p>We've synced your data!  Here are the stats:</p>
 
     <div class="flex space-x-2">
-      <div class="flex flex-col">
+      <.col>
         <.icon name="users" class="text-gray-400 mr-1 h-5 w-5" />
         <.repository_icon />
         <.icon name="share" class="text-gray-400 mr-1 h-5 w-5" />
-      </div>
-      <div class="flex flex-col">
+      </.col>
+      <.col>
         <p>Members</p>
         <p>Repositories</p>
         <p>Pull Requests</p>
-      </div>
-      <div class="flex flex-col">
+      </.col>
+      <.col>
         <p class="font-semibold"><%= @stats.members %></p>
         <p class="font-semibold"><%= @stats.repositories %></p>
         <p class="font-semibold"><%= @stats.pull_requests %></p>
-      </div>
+      </.col>
     </div>
     """
   end
 
   def install_action(%{installation: nil} = assigns) do
     ~H"""
-    <a href={Mrgr.Installation.installation_url()} class="btn btn-primary">
-      Click here to install our Github App 🚀
+    <a href={Mrgr.Installation.installation_url()} class="btn btn-primary w-80">
+      Click to install our Github App 🚀
     </a>
     """
   end
@@ -292,28 +279,26 @@ defmodule MrgrWeb.Components.Onboarding do
     assigns = assign(assigns, :syncing, sync_text(state))
 
     ~H"""
-    <div class="flex flex-col">
-      <.col class="space-y-4">
-        <.row>
-          <p class="font-bold">Syncing in Progress.</p>
-          <p>This can take up to a minute.</p>
-        </.row>
-        <.row class="items-center space-x-4">
-          <p>Loading your <%= @syncing %></p>
-          <.spinner id="syncing-spinner" />
-        </.row>
-      </.col>
-    </div>
+    <.col class="space-y-4">
+      <.row>
+        <p class="font-bold">Syncing in Progress.</p>
+        <p>This can take up to a minute.</p>
+      </.row>
+      <.row class="items-center space-x-4">
+        <p>Loading your <%= @syncing %></p>
+        <.spinner id="syncing-spinner" />
+      </.row>
+    </.col>
     """
   end
 
   def syncing_message(%{installation: %{state: "onboarding_error"}} = assigns) do
     ~H"""
-    <div class="flex flex-col">
-      <div class="flex items-center space-x-2">
+    <.col>
+      <.row class="space-x-2">
         <p>We've synced your data!</p>
-      </div>
-    </div>
+      </.row>
+    </.col>
     """
   end
 

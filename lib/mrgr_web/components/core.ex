@@ -462,7 +462,7 @@ defmodule MrgrWeb.Components.Core do
     ~H"""
     <div
       class={[
-        "flex",
+        "flex items-center",
         @class
       ]}
       {@rest }
