@@ -24,6 +24,14 @@ defmodule Mrgr.Email do
     |> render_with_layout(MrgrWeb.Email.Renderer.hey_desmond_a_busted_user(assigns))
   end
 
+  def hey_desmond_onboarding_data_sync_failed(params) do
+    new()
+    |> from(@from)
+    |> to("desmond@crevalle.io")
+    |> subject("Uh oh!  Installation #{params.installation_id} failed to onboard")
+    |> render_with_layout(MrgrWeb.Email.Renderer.hey_desmond_onboarding_data_sync_failed(params))
+  end
+
   def invite_user_to_installation(recipient, installation) do
     assigns = %{
       installation: installation

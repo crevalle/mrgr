@@ -79,7 +79,7 @@ defmodule Mrgr.User do
       nil ->
         case create(params) do
           {:ok, user} ->
-            tell_desmond_someone_signed_up(params, user)
+            Mrgr.Desmond.someone_signed_up(params, user)
 
             case find_member(user) do
               nil ->
@@ -92,7 +92,7 @@ defmodule Mrgr.User do
             end
 
           error ->
-            tell_desmond_someone_failed_to_sign_up(params, error)
+            Mrgr.Desmond.someone_failed_to_sign_up(params, error)
 
             error
         end
@@ -312,20 +312,6 @@ defmodule Mrgr.User do
   def desmond do
     Mrgr.Repo.get_by(Schema, nickname: "desmondmonster")
     |> Mrgr.Repo.preload(current_installation: :account)
-  end
-
-  def tell_desmond_someone_failed_to_sign_up(params, error) do
-    params
-    |> Mrgr.Email.hey_desmond_a_busted_user(error)
-    |> Mrgr.Mailer.deliver()
-  end
-
-  def tell_desmond_someone_signed_up(params, user) do
-    count = Mrgr.Repo.aggregate(Schema, :count)
-
-    params
-    |> Mrgr.Email.hey_desmond_another_user(count, user)
-    |> Mrgr.Mailer.deliver()
   end
 
   defmodule Query do

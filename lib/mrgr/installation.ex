@@ -154,10 +154,7 @@ defmodule Mrgr.Installation do
       |> ok()
     rescue
       e ->
-        str = Exception.format_stacktrace(__STACKTRACE__)
-        State.onboarding_error!(installation, str)
-        Appsignal.set_error(e, __STACKTRACE__)
-        {:error, :onboarding_members_failed}
+        onboarding_failed!(installation, e, __STACKTRACE__, :onboarding_members_failed)
     end
   end
 
@@ -170,10 +167,7 @@ defmodule Mrgr.Installation do
       |> ok()
     rescue
       e ->
-        str = Exception.format_stacktrace(__STACKTRACE__)
-        State.onboarding_error!(installation, str)
-        Appsignal.set_error(e, __STACKTRACE__)
-        {:error, :onboarding_teams_failed}
+        onboarding_failed!(installation, e, __STACKTRACE__, :onboarding_teams_failed)
     end
   end
 
@@ -186,10 +180,7 @@ defmodule Mrgr.Installation do
       |> ok()
     rescue
       e ->
-        str = Exception.format_stacktrace(__STACKTRACE__)
-        State.onboarding_error!(installation, str)
-        Appsignal.set_error(e, __STACKTRACE__)
-        {:error, :onboarding_repos_failed}
+        onboarding_failed!(installation, e, __STACKTRACE__, :onboarding_repos_failed)
     end
   end
 
@@ -203,11 +194,20 @@ defmodule Mrgr.Installation do
       |> ok()
     rescue
       e ->
-        str = Exception.format_stacktrace(__STACKTRACE__)
-        State.onboarding_error!(installation, str)
-        Appsignal.set_error(e, __STACKTRACE__)
-        {:error, :onboarding_prs_failed}
+        onboarding_failed!(installation, e, __STACKTRACE__, :onboarding_prs_failed)
     end
+  end
+
+  def onboarding_failed!(installation, exception, trace, step) do
+    str = Exception.format_stacktrace(trace)
+    Appsignal.set_error(exception, trace)
+
+    installation
+    |> State.onboarding_error!(str)
+    |> broadcast(@installation_onboarding_progressed)
+    |> Mrgr.Desmond.installation_data_sync_failed(str, step)
+
+    {:error, step}
   end
 
   def final_onboarding(installation) do

@@ -211,7 +211,7 @@ defmodule MrgrWeb.Components.Admin do
         </.tr>
         <.tr>
           <.td class="font-bold">Error</.td>
-          <.td><%= @installation.onboarding_error %></.td>
+          <.td><pre><%= @installation.onboarding_error %></pre></.td>
           <.td></.td>
         </.tr>
       </.table>

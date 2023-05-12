@@ -109,7 +109,7 @@ defmodule MrgrWeb.PullRequestDashboardLive do
   # index action
   def handle_params(_params, _uri, socket) do
     if connected?(socket) do
-    default_tab = select_default_tab(socket.assigns.tabs)
+      default_tab = select_default_tab(socket.assigns.tabs)
 
       socket
       |> assign(:selected_tab, default_tab)

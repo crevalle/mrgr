@@ -53,48 +53,11 @@ defmodule MrgrWeb.Components.Onboarding do
         Sync your data
       </:title>
 
-      <:description>
-        We'll do this for you once the app is installed :)
-      </:description>
-
-      <.syncing_message installation={@state.installation} />
-      <.render_stats stats={@state.stats} />
-    </.step_option>
-    """
-  end
-
-  def connect_slack(assigns) do
-    connected = Mrgr.Installation.slack_connected?(assigns.state.installation)
-
-    assigns =
-      assigns
-      |> assign(:connected?, connected)
-
-    ~H"""
-    <.step_option status={@status}>
-      <:number>3</:number>
-      <:title>
-        Connect Slack (optional)
-      </:title>
-
-      <:description>
-        Want to receive alerts in Slack?  Install our Slackbot!  Alerts will also go to your email.
-      </:description>
-
-      <%= if @status != :todo do %>
-        <%= if @status == :done do %>
-          <div class="flex flex-col">
-            <.slack_connection_status connected={@connected?} />
-            <p :if={!@connected?} class="text-xs text-gray-500">
-              You can connect Slack later by visiting your Profile page.
-            </p>
-          </div>
-        <% else %>
-          <div class="flex justify-between items-center">
-            <.slack_button user_id={@state.user.id} />
-            <.l phx-click="skip-slack-install" class="text-sm">Skip for now</.l>
-          </div>
-        <% end %>
+      <%= if @status == :todo do %>
+        <p class="text-gray-500">We'll do this for you once the app is installed :)</p>
+      <% else %>
+        <.syncing_message installation={@state.installation} />
+        <.render_stats stats={@state.stats} />
       <% end %>
     </.step_option>
     """
@@ -149,16 +112,19 @@ defmodule MrgrWeb.Components.Onboarding do
 
         <%= if @status == :done do %>
           <%= if @state.installation.slackbot do %>
-            slack
+            <.col class="space-y-1">
+              <.slack_connected />
+              <p class="text-gray-500">You will receive all alerts via Slack.</p>
+            </.col>
           <% else %>
-            <div class="flex flex-col">
+            <.col>
               <p>
                 👍 OK! We'll notify you at <span class="font-semibold"><%= @state.user.email %></span>.
               </p>
               <p class="text-gray-500 text-sm">
                 You can change your email or install our Slackbot on your Profile page.
               </p>
-            </div>
+            </.col>
           <% end %>
         <% end %>
       </div>
@@ -323,18 +289,20 @@ defmodule MrgrWeb.Components.Onboarding do
              "onboarding_repos",
              "onboarding_prs"
            ] do
-    [_, syncing] = String.split(state, "_")
-
-    assigns = assign(assigns, :syncing, syncing)
+    assigns = assign(assigns, :syncing, sync_text(state))
 
     ~H"""
     <div class="flex flex-col">
-      <div class="flex items-center space-x-2">
-        <p class="font-bold">Syncing in Progress.</p>
-        <p>This can take up to a minute.</p>
-        <p>Syncing your <%= @syncing %></p>
-        <.spinner id="syncing-spinner" />
-      </div>
+      <.col class="space-y-4">
+        <.row>
+          <p class="font-bold">Syncing in Progress.</p>
+          <p>This can take up to a minute.</p>
+        </.row>
+        <.row class="items-center space-x-4">
+          <p>Loading your <%= @syncing %></p>
+          <.spinner id="syncing-spinner" />
+        </.row>
+      </.col>
     </div>
     """
   end
@@ -361,4 +329,9 @@ defmodule MrgrWeb.Components.Onboarding do
   defp organization?(installation) do
     Mrgr.Schema.Installation.organization?(installation)
   end
+
+  defp sync_text("onboarding_members"), do: "team members"
+  defp sync_text("onboarding_teams"), do: "team members"
+  defp sync_text("onboarding_repos"), do: "repositories"
+  defp sync_text("onboarding_prs"), do: "pull requests"
 end

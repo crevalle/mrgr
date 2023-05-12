@@ -1,0 +1,20 @@
+<div>
+  <h1>Bad news :(</h1>
+
+  <p>
+    Installation <%= @installation_id %> failed to onboard at step <%= inspect(@step) %>.
+    <a href={"https://app.mrgr.io/admin/installations/#{@installation_id}"}>Check it out.</a>
+  </p>
+
+  <p>
+    Here is the stacktrace:
+  </p>
+
+  <pre>
+    <%= @stacktrace %>
+  </pre>
+
+  <p>You can do it! ✌️</p>
+
+  <p>- The Mrgr Team</p>
+</div>

@@ -51,6 +51,12 @@ defmodule MrgrWeb.OnboardingLive do
     }
   end
 
+  # passing in the socket
+  def compute_state(%{assigns: %{current_user: user}} = socket) do
+    socket
+    |> assign(:state, compute_state(user))
+  end
+
   def compute_state(%{email: nil} = current_user) do
     current_user
     |> basic_state()
@@ -209,14 +215,22 @@ defmodule MrgrWeb.OnboardingLive do
 
     socket
     |> assign(:current_user, user)
-    |> assign(:installation, installation)
+    |> compute_state()
     |> noreply()
   end
 
   def handle_info(%{event: @installation_onboarding_progressed, payload: installation}, socket) do
+    # basic state is computed off the user's current installation
+    # reset it with the latest data from the broadcast
+    user = %{
+      socket.assigns.current_user
+      | current_installation_id: installation.id,
+        current_installation: installation
+    }
+
     socket
-    |> assign(:installation, installation)
-    |> assign(:stats, stats(installation))
+    |> assign(:current_user, user)
+    |> compute_state()
     |> noreply()
   end
 
