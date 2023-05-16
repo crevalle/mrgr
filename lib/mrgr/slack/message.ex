@@ -1,4 +1,13 @@
 defmodule Mrgr.Slack.Message do
+  defmacro __using__(_args) do
+    quote do
+      use Phoenix.VerifiedRoutes, endpoint: MrgrWeb.Endpoint, router: MrgrWeb.Router
+      import MrgrWeb.Formatter
+
+      import unquote(__MODULE__)
+    end
+  end
+
   def header(text) do
     %{
       type: "header",
