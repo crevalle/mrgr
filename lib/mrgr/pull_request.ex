@@ -70,7 +70,7 @@ defmodule Mrgr.PullRequest do
 
     pull_request
     |> Mrgr.Repo.preload([:comments, :pr_reviews])
-    |> recalculate_last_activity!()
+    |> set_current_alerts!()
   end
 
   @spec reopen(map()) ::
@@ -82,7 +82,7 @@ defmodule Mrgr.PullRequest do
       updated_pull_request
       |> preload_installation()
       |> sync_github_data()
-      |> put_last_activity!()
+      |> put_activity!()
       |> broadcast(@pull_request_reopened)
       |> ok()
     else
@@ -102,7 +102,7 @@ defmodule Mrgr.PullRequest do
          {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
       updated_pull_request
       |> preload_installation()
-      |> put_last_activity!()
+      |> put_activity!()
       |> broadcast(@pull_request_edited)
       |> ok()
     else
@@ -119,7 +119,7 @@ defmodule Mrgr.PullRequest do
       |> preload_installation()
       |> sync_github_data()
       |> reassociate_high_impact_file_rules()
-      |> put_last_activity!()
+      |> put_activity!()
       |> broadcast(@pull_request_synchronized)
       |> ok()
     else
@@ -131,7 +131,7 @@ defmodule Mrgr.PullRequest do
     pull_request
     |> Schema.most_changeset(%{draft: false})
     |> Mrgr.Repo.update!()
-    |> put_last_activity!()
+    |> put_activity!()
     |> preload_installation()
     |> preload_hif_alerts()
     |> notify_hif_alert_consumers()
@@ -143,7 +143,7 @@ defmodule Mrgr.PullRequest do
     pull_request
     |> Schema.most_changeset(%{draft: true})
     |> Mrgr.Repo.update!()
-    |> put_last_activity!()
+    |> put_activity!()
     |> broadcast(@pull_request_converted_to_draft)
     |> ok()
   end
@@ -185,7 +185,7 @@ defmodule Mrgr.PullRequest do
             # just blanket unsnooze whenever anyone is added to tags, which should
             # be infrequent enough not to mess with the benefit of being snoozed.
             pull_request
-            |> put_last_activity!()
+            |> put_activity!()
             |> unsnooze()
             |> ok()
 
@@ -205,7 +205,7 @@ defmodule Mrgr.PullRequest do
     case Mrgr.List.present?(pull_request.assignees, gh_user) do
       true ->
         pull_request
-        |> put_last_activity!()
+        |> put_activity!()
         |> set_assignees(Mrgr.List.remove(pull_request.assignees, gh_user))
 
       false ->
@@ -259,7 +259,7 @@ defmodule Mrgr.PullRequest do
       false ->
         pull_request
         |> add_solicited_reviewer(member)
-        |> put_last_activity!()
+        |> put_activity!()
         |> broadcast(@pull_request_reviewers_updated)
         # there probably won't be a user associated with this member
         # the idea is if you're tagged, unsnooze for you
@@ -279,7 +279,7 @@ defmodule Mrgr.PullRequest do
       true ->
         pull_request
         |> remove_solicited_reviewer(member)
-        |> put_last_activity!()
+        |> put_activity!()
         |> broadcast(@pull_request_reviewers_updated)
         |> ok()
 
@@ -399,7 +399,7 @@ defmodule Mrgr.PullRequest do
 
         pull_request
         |> preload_installation()
-        |> put_last_activity!()
+        |> put_activity!()
         |> broadcast(@pull_request_comment_created)
         |> Controversy.handle()
         |> ok()
@@ -434,7 +434,7 @@ defmodule Mrgr.PullRequest do
 
     # We still preload the existing pr_reviews to keep parity with the workhorse function below.
     pull_request
-    |> put_last_activity!()
+    |> put_activity!()
     |> Mrgr.Repo.preload(:pr_reviews)
     |> ok()
   end
@@ -453,7 +453,7 @@ defmodule Mrgr.PullRequest do
         pull_request
         # see if pull_request is unblocked
         |> sync_github_data()
-        |> put_last_activity!()
+        |> put_activity!()
         |> broadcast(@pull_request_reviews_updated)
         |> ok()
 
@@ -474,11 +474,19 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.preload(:pr_reviews, force: true)
     # see if pull_request is blocked
     |> sync_github_data()
-    |> put_last_activity!()
+    |> put_activity!()
     |> broadcast(@pull_request_reviews_updated)
     |> ok()
   end
 
+  # sets them, does not trigger notifications
+  def set_current_alerts!(pull_request) do
+    pull_request
+    |> recalculate_last_activity!()
+    |> Controversy.mark!()
+  end
+
+  # dormancy check
   def recalculate_last_activity!(pull_request) do
     ts = Dormant.most_recent_activity_timestamp(pull_request)
 
@@ -487,7 +495,7 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.update!()
   end
 
-  def put_last_activity!(pull_request) do
+  def put_activity!(pull_request) do
     pull_request
     |> Schema.last_activity_changeset()
     |> Mrgr.Repo.update!()
@@ -597,7 +605,7 @@ defmodule Mrgr.PullRequest do
       %Schema{} = pull_request ->
         pull_request
         |> Mrgr.Repo.preload(:labels)
-        |> put_last_activity!()
+        |> put_activity!()
         |> broadcast(@pull_request_labels_updated)
 
       :error ->
@@ -655,7 +663,7 @@ defmodule Mrgr.PullRequest do
 
     pull_request
     |> Mrgr.Repo.preload(:labels)
-    |> put_last_activity!()
+    |> put_activity!()
     |> broadcast(@pull_request_labels_updated)
   end
 
@@ -789,6 +797,20 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
+  # NOT for the dashboard.  move dashboard stuff elsewhere
+  def hif_prs_for_user(user) do
+    Schema
+    |> Query.for_visible_repos(user.id)
+    |> Query.for_installation(user.current_installation_id)
+    |> Query.open()
+    |> Query.ready_for_review()
+    |> Query.order_by_opened()
+    |> Query.high_impact(user)
+    |> Query.with_author()
+    |> Query.unsnoozed(user)
+    |> Mrgr.Repo.all()
+  end
+
   def high_impact_prs(user) do
     ### unwrap all the pending stuff because we need to specify
     # that the HIF join is inner (ie, required)
@@ -830,6 +852,23 @@ defmodule Mrgr.PullRequest do
     |> Query.dashboard_preloads(user)
     |> Query.snoozed(user)
     |> Query.ready_for_review()
+    |> Mrgr.Repo.all()
+  end
+
+  def situational_for_user(user) do
+    controversial_prs(user)
+  end
+
+  def controversial_prs(user) do
+    Schema
+    |> Query.for_visible_repos(user.id)
+    |> Query.for_installation(user.current_installation_id)
+    |> Query.controversial()
+    |> Query.open()
+    |> Query.order_by_opened()
+    |> Query.unsnoozed(user)
+    |> Query.ready_for_review()
+    |> Query.with_author()
     |> Mrgr.Repo.all()
   end
 
@@ -1034,6 +1073,12 @@ defmodule Mrgr.PullRequest do
     def open(query) do
       from(q in query,
         where: q.status == "open"
+      )
+    end
+
+    def controversial(query) do
+      from(q in query,
+        where: q.controversial == true
       )
     end
 

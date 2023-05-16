@@ -179,6 +179,8 @@ defmodule MrgrWeb.OnboardingLive do
   def handle_event("notify-via-email", _params, socket) do
     state = set_step(socket.assigns.state, :done)
 
+    Mrgr.Notification.welcome_via_email(socket.assigns.current_user)
+
     socket
     |> assign(:state, state)
     |> noreply()
