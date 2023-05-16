@@ -60,7 +60,11 @@ defmodule Mrgr.Slack.Message do
     actions([element])
   end
 
-  def build_link(url, text) do
+  def build_link("http" <> _rest = url, text) do
     "<#{url}|#{text}>"
+  end
+
+  def build_link(_not_a_url, text) do
+    text
   end
 end
