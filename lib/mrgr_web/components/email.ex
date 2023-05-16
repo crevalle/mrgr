@@ -31,21 +31,39 @@ defmodule MrgrWeb.Components.Email do
     """
   end
 
+  def pr_list(%{pull_requests: []} = assigns), do: ~H"<.none />"
+
   def pr_list(assigns) do
     ~H"""
-    <%= if @pull_requests == [] do %>
-      <span><em>none!</em></span>
-    <% else %>
-      <ul>
-        <li :for={pr <- @pull_requests}>
-          [<%= pr.repository.name %>]
-          <a href={Mrgr.Schema.PullRequest.external_url(pr)}><%= pr.title %></a>
-          (<%= Mrgr.Schema.PullRequest.author_name(pr) %>)
-          <.line_diff additions={pr.additions} deletions={pr.deletions} />
-          <.hif_list hifs={pr.high_impact_file_rules} />
-        </li>
-      </ul>
-    <% end %>
+    <ul>
+      <li :for={pr <- @pull_requests}>
+        [<%= pr.repository.name %>]
+        <a href={Mrgr.Schema.PullRequest.external_url(pr)}><%= pr.title %></a>
+        (<%= author_handle(pr) %>) <.line_diff additions={pr.additions} deletions={pr.deletions} />
+        <.hif_list hifs={pr.high_impact_file_rules} />
+      </li>
+    </ul>
+    """
+  end
+
+  def situation_list(%{pull_requests: []} = assigns), do: ~H"<.none />"
+
+  def situation_list(assigns) do
+    ~H"""
+    <ul>
+      <li :for={pr <- @pull_requests}>
+        [<%= pr.repository.name %>]
+        <a href={Mrgr.Schema.PullRequest.external_url(pr)}><%= pr.title %></a>
+        (<%= author_handle(pr) %>) <.line_diff additions={pr.additions} deletions={pr.deletions} />
+        <span><strong>controversial</strong></span>
+      </li>
+    </ul>
+    """
+  end
+
+  def none(assigns) do
+    ~H"""
+    <span><em>none!</em></span>
     """
   end
 

@@ -1,0 +1,44 @@
+<div>
+  <h1>Hello! 👋</h1>
+
+  <p>
+    Welcome to Mrgr!  You're on your way to being a more effective manager, in touch with your team.
+  </p>
+
+  <p>
+    The following are some <strong>example alerts</strong> to give you a taste of what's coming.
+  </p>
+
+  <h3>💥 High Impact Files</h3>
+  <ul>
+    <li :for={pr <- @hif_prs}>
+      <%= pr.title %> by <%= author_handle(pr) %>
+      <.hif_list hifs={pr.high_impact_file_rules} />
+    </li>
+  </ul>
+
+  <h3>🔍 Situational Alerts</h3>
+  <ul>
+    <li :for={pr <- @situational_prs}>
+      <strong>[controversial]</strong> <%= pr.title %> by <%= author_handle(pr) %>
+    </li>
+  </ul>
+
+  <p>
+    Going forward, we’ll send you a notice for <em><strong>each alert that happens</strong></em>.
+    This consolidated summary is just a welcome note 🙂.
+  </p>
+
+  <p>
+    Be sure to add new alerts or update your notification settings on your
+    <.l href={~p"/profile"}>profile page</.l>.  You can also opt to receive these notices via Slack by installing our Slackbot.  Happy merging!
+  </p>
+
+  <div>
+    <p>Good luck ✌️</p>
+  </div>
+
+  <p>- The Mrgr Team</p>
+</div>
+
+<.update_email_preferences_link />

@@ -6,13 +6,6 @@ defmodule Mrgr.Notification do
   @type notifiable ::
           Mrgr.Schema.UserNotificationPreference.t() | Mrgr.Schema.HighImpactFileRule.t()
 
-  def welcome_via_email(user) do
-  end
-
-  def welcome_via_slack(user) do
-    Mrgr.Notification.Welcome.send_via_slack(user)
-  end
-
   def create_defaults_for_new_installation(%Mrgr.Schema.Installation{} = installation) do
     # when an installation is created the only user is its creator
     Enum.map(@notification_events, fn event ->
