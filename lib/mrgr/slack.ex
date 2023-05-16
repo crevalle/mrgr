@@ -47,7 +47,7 @@ defmodule Mrgr.Slack do
     url = "https://slack.com/api/chat.postMessage"
 
     headers = %{
-      "Content-Type" => "application/json",
+      "Content-Type" => "application/json; charset=utf-8",
       "Authorization" => "Bearer #{token}"
     }
 
@@ -90,6 +90,10 @@ defmodule Mrgr.Slack do
   def handle_stale_bot({:error, "account_inactive"} = res, installation) do
     Mrgr.Installation.remove_slack_integration(installation)
 
+    res
+  end
+
+  def handle_stale_bot(res, _installation) do
     res
   end
 end
