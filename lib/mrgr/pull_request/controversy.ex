@@ -10,8 +10,19 @@ defmodule Mrgr.PullRequest.Controversy do
     case controversy_brewing?(pull_request) do
       {true, thread} ->
         pull_request
-        |> Mrgr.Repo.preload(:author)
-        |> mark_controversial(thread)
+        |> set_controversy_flag()
+        |> notify_consumers(thread)
+
+      false ->
+        pull_request
+    end
+  end
+
+  def mark!(pull_request) do
+    case controversy_brewing?(pull_request) do
+      {true, _thread} ->
+        pull_request
+        |> set_controversy_flag()
 
       false ->
         pull_request
@@ -67,14 +78,6 @@ defmodule Mrgr.PullRequest.Controversy do
     Enum.count(thread) > @thread_threshold
   end
 
-  def mark_controversial(pull_request, thread) do
-    pull_request = set_controversy_flag(pull_request)
-
-    notify_consumers(pull_request, thread)
-
-    pull_request
-  end
-
   def set_controversy_flag(pull_request) do
     pull_request
     |> Ecto.Changeset.change(%{controversial: true})
@@ -82,6 +85,7 @@ defmodule Mrgr.PullRequest.Controversy do
   end
 
   def notify_consumers(pull_request, thread) do
+    pull_request = Mrgr.Repo.preload(pull_request, :author)
     consumers = fetch_consumers(pull_request)
 
     Enum.map(consumers.email, fn recipient ->

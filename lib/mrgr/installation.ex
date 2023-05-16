@@ -250,6 +250,8 @@ defmodule Mrgr.Installation do
 
     Mrgr.Notification.enable_slack_notifications(user, installation)
 
+    Mrgr.Notification.Welcome.send_via_slack(user)
+
     installation
   end
 
