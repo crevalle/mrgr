@@ -44,6 +44,24 @@ defmodule Mrgr.Email do
     |> render_with_layout(MrgrWeb.Email.Renderer.invite_user_to_installation(assigns))
   end
 
+  def welcome(recipient, %{hif_prs: [], situational_prs: []}) do
+    pull_requests = generate_welcome_data()
+
+    new()
+    |> from(@from)
+    |> to(recipient)
+    |> subject("Welcome to Mrgr 👋")
+    |> render_with_layout(MrgrWeb.Email.Renderer.welcome_sans_alerts(pull_requests))
+  end
+
+  def welcome(recipient, pull_requests) do
+    new()
+    |> from(@from)
+    |> to(recipient)
+    |> subject("Welcome to Mrgr 👋")
+    |> render_with_layout(MrgrWeb.Email.Renderer.welcome(pull_requests))
+  end
+
   def controversial_pr(recipient, pull_request, thread) do
     assigns = %{
       pull_request: pull_request,
@@ -101,6 +119,40 @@ defmodule Mrgr.Email do
 
   defp render_component(heex) do
     heex |> Phoenix.HTML.Safe.to_iodata() |> IO.chardata_to_string()
+  end
+
+  def generate_welcome_data do
+    hif_prs = [
+      %Mrgr.Schema.PullRequest{
+        title: "Example Pull Request 1",
+        author: %{login: "Captain_Kirk"},
+        high_impact_file_rules: [
+          %Mrgr.Schema.HighImpactFileRule{
+            name: "migration",
+            color: "#dcfce7"
+          }
+        ]
+      },
+      %Mrgr.Schema.PullRequest{
+        title: "Example Pull Request 2",
+        author: %{login: "Mr_Spock"},
+        high_impact_file_rules: [
+          %Mrgr.Schema.HighImpactFileRule{
+            name: "dependencies",
+            color: "#fef9c3"
+          }
+        ]
+      }
+    ]
+
+    situational_prs = [
+      %Mrgr.Schema.PullRequest{
+        title: "Example Pull Request 3",
+        author: %{login: "Dr_McCoy"}
+      }
+    ]
+
+    %{hif_prs: hif_prs, situational_prs: situational_prs}
   end
 
   defmodule Changelog do

@@ -1,0 +1,33 @@
+<div>
+  <h1>Hello! 👋</h1>
+
+  <p>
+    Welcome to Mrgr!  You're on your way to being a more effective manager, in touch with your team.
+  </p>
+
+  <p>Here's a quick summary of your currently open alerts.  You may want to check these out!</p>
+
+  <h3>💥 High Impact Files</h3>
+  <.pr_list pull_requests={@hif_prs} />
+
+  <h3>🔍 Situational Alerts</h3>
+  <.situation_list pull_requests={@situational_prs} />
+
+  <p>
+    Going forward, we’ll send you a notice for <em><strong>each alert that happens</strong></em>.
+    This consolidated summary is just a welcome note 🙂.
+  </p>
+
+  <p>
+    Be sure to add new alerts or update your notification settings on your
+    <.l href={~p"/profile"}>profile page</.l>.  You can also opt to receive these notices via Slack by installing our Slackbot.  Happy merging!
+  </p>
+
+  <div>
+    <p>Good luck ✌️</p>
+  </div>
+
+  <p>- The Mrgr Team</p>
+</div>
+
+<.update_email_preferences_link />

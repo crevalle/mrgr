@@ -52,7 +52,7 @@ defmodule Mrgr.Slack.Message.Welcome do
   end
 
   def render_situations(prs) do
-    "🔎 *Situational Alerts*\n#{situation_list(prs)}"
+    "🔍 *Situational Alerts*\n#{situation_list(prs)}"
   end
 
   def situation_list([]) do
