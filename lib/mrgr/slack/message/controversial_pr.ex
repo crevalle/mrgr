@@ -1,6 +1,5 @@
 defmodule Mrgr.Slack.Message.ControversialPR do
-  import Mrgr.Slack.Message
-  import MrgrWeb.Formatter
+  use Mrgr.Slack.Message
 
   def render(pull_request, thread, recipient) do
     blocks =

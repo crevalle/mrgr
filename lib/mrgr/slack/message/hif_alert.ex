@@ -1,8 +1,5 @@
 defmodule Mrgr.Slack.Message.HIFAlert do
-  import Mrgr.Slack.Message
-
-  use Phoenix.VerifiedRoutes, endpoint: MrgrWeb.Endpoint, router: MrgrWeb.Router
-  import MrgrWeb.Formatter
+  use Mrgr.Slack.Message
 
   def render(pull_request, rules) do
     repo_name = pull_request.repository.name
