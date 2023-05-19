@@ -25,6 +25,7 @@ defmodule MrgrWeb.Formatter do
   def author_handle(%{login: login}), do: author_handle(login)
 
   def author_handle(handle) when is_bitstring(handle), do: "@#{handle}"
+  def author_handle(handle), do: "unknown"
 
   def shorten_sha(sha) do
     String.slice(sha, 0..6)
