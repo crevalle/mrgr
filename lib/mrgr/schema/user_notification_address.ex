@@ -7,6 +7,13 @@ defmodule Mrgr.Schema.UserNotificationAddress do
   Also, users at different Slack workspaces will have different user ids.
   """
 
+  # !!! We are not actually using this for email addresses.  Just the notification_email
+  # on the user.  That is not what we promise - which is per-installation configs -
+  # but fixing it and righting our notification model would be a huge PITA.
+  #
+  # let's assume that no one will notice that all their notices across installations
+  # go to one place.  YAGNI.
+
   schema "user_notification_addresses" do
     field(:email, :string)
     field(:slack_id, :string)

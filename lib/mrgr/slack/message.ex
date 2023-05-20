@@ -4,6 +4,8 @@ defmodule Mrgr.Slack.Message do
       use Phoenix.VerifiedRoutes, endpoint: MrgrWeb.Endpoint, router: MrgrWeb.Router
       import MrgrWeb.Formatter
 
+      import Mrgr.Slack.Helpers
+
       import unquote(__MODULE__)
     end
   end

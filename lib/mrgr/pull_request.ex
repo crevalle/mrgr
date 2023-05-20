@@ -838,6 +838,15 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.all()
   end
 
+  def freshly_dormant(installation_id, timezone) do
+    Schema
+    |> Query.for_installation(installation_id)
+    |> Query.ready_for_review()
+    |> Query.dormant(timezone)
+    |> Query.with_author()
+    |> Mrgr.Repo.all()
+  end
+
   def dormant_prs(user) do
     Schema
     |> Query.dashboard_preloads(user)
@@ -1405,6 +1414,15 @@ defmodule Mrgr.PullRequest do
       from(q in query,
         join: m in assoc(q, :member),
         where: m.id == ^member.id
+      )
+    end
+
+    def dormant(query, timezone) do
+      window = Mrgr.PullRequest.Dormant.window(timezone)
+
+      from(q in query,
+        where: q.last_activity_at > ^window.beginning,
+        where: q.last_activity_at < ^window.ending
       )
     end
   end

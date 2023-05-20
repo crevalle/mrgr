@@ -48,6 +48,12 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.one()
   end
 
+  def with_installations do
+    Schema
+    |> Query.with_installations()
+    |> Mrgr.Repo.all()
+  end
+
   def unset_current_installation_for_users(installation) do
     Schema
     |> Query.where(current_installation_id: installation.id)

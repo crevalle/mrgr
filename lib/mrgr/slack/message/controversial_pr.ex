@@ -19,9 +19,7 @@ defmodule Mrgr.Slack.Message.ControversialPR do
   end
 
   def description(pull_request) do
-    url = Mrgr.Schema.PullRequest.external_url(pull_request)
-
-    "A comment thread in #{build_link(url, pull_request.title)} by #{author_handle(pull_request)} has generated some controversy and may be worth investigating.  Here's the discussion:"
+    "A comment thread in #{build_link(github_url(pull_request), pull_request.title)} by #{author_handle(pull_request)} has generated some controversy and may be worth investigating.  Here's the discussion:"
   end
 
   def button_to_thread([first | _rest]) do

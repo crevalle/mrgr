@@ -1,22 +1,12 @@
 defmodule Mrgr.Notification.Event do
-  @moduledoc """
-  These are defined as macros so I can use them in case-statement pattern matching.
-  """
-
-  defmacro pr_controversy do
-    quote do: "pr_controversy"
-  end
-
-  defmacro pr_dormant do
-    quote do: "pr_dormant"
-  end
-
-
-  defmacro all_notification_events do
+  defmacro __using__(_opts) do
     quote do
-      [
-        pr_controversy(),
-        pr_dormant()
+      @pr_controversy "pr_controversy"
+      @dormant_pr "dormant_pr"
+
+      @notification_events [
+        @pr_controversy,
+        @dormant_pr
       ]
     end
   end
