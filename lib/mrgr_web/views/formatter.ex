@@ -1,5 +1,5 @@
 defmodule MrgrWeb.Formatter do
-  import Mrgr.Notification.Event
+  use Mrgr.Notification.Event
 
   @thirty_days 2_592_000
   @fourteen_days 1_209_600
