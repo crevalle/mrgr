@@ -1,6 +1,6 @@
 defmodule Mrgr.Notification do
 
-  import __MODULE__.Event
+  use Mrgr.Notification.Event
   alias __MODULE__.Query
 
   @typep preference :: Mrgr.Schema.UserNotificationPreference.t()
@@ -12,7 +12,7 @@ defmodule Mrgr.Notification do
 
   def create_defaults_for_new_installation(%Mrgr.Schema.Installation{} = installation) do
     # when an installation is created the only user is its creator
-    Enum.map(all_notification_events(), fn event ->
+    Enum.map(@notification_events, fn event ->
       create_for_user_and_installation(event, installation.creator_id, installation.id)
     end)
   end
@@ -20,7 +20,7 @@ defmodule Mrgr.Notification do
   def create_defaults_for_user(user) do
     user = Mrgr.Repo.preload(user, :installations)
 
-    Enum.map(all_notification_events(), fn event ->
+    Enum.map(@notification_events, fn event ->
       Enum.map(user.installations, fn installation ->
         create_for_user_and_installation(event, user.id, installation.id)
       end)
