@@ -142,7 +142,4 @@ defmodule Mrgr.Slack.Message.Welcome do
     build_link(url, "profile")
   end
 
-  defp github_url(pr) do
-    Mrgr.Schema.PullRequest.external_url(pr)
-  end
 end

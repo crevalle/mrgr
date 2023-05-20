@@ -49,9 +49,7 @@ defmodule Mrgr.PullRequest.Dormant do
   # end
 
   def dormant?(%Mrgr.Schema.PullRequest{} = pr, timezone) do
-    pr
-    |> most_recent_activity_timestamp()
-    |> dormant?(timezone)
+    dormant?(pr.last_activity_at, timezone)
   end
 
   def dormant?(timestamp, timezone) do
@@ -106,6 +104,20 @@ defmodule Mrgr.PullRequest.Dormant do
     now
     |> DateTime.add(-offset, :hour)
     |> Mrgr.DateTime.safe_truncate()
+  end
+
+  def window(timezone) do
+    # takes local time, returns UTC for db query
+
+    ending =
+      timezone
+      |> fresh_threshold()
+      |> DateTime.shift_zone!("Etc/UTC")
+
+    # assumes job runs every hour.  everything that dormanted in the last hour
+    beginning = DateTime.add(ending, -1, :hour)
+
+    %{beginning: beginning, ending: ending}
   end
 
   def fresh_offset(1), do: 72

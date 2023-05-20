@@ -184,10 +184,6 @@ defmodule MrgrWeb.Formatter do
     end
   end
 
-  def format_preference_name(name) do
-    case name do
-      pr_controversy() -> "Controversial Pull Requests"
-      name -> name
-    end
-  end
+  def format_preference_name(@pr_controversy), do: "Controversial Pull Requests"
+  def format_preference_name(@dormant_pr), do: "Dormant Pull Requests"
 end

@@ -28,7 +28,7 @@ defmodule Mrgr.Notification do
   end
 
   def rt_seed_event do
-    seed_new_event(pr_controversy())
+    seed_new_event(@dormant_pr)
   end
 
   def seed_new_event(event, opts \\ %{}) do
@@ -60,10 +60,13 @@ defmodule Mrgr.Notification do
     |> Mrgr.Repo.insert()
   end
 
-  @spec consumers_of_event(String.t(), Mrgr.Schema.PullRequest.t()) :: user_bucket()
-  def consumers_of_event(event, pull_request) do
+  def consumers_of_event(event, %Mrgr.Schema.PullRequest{} = pull_request) do
+    consumers_of_event(event, pull_request.repository.installation_id)
+  end
+
+  def consumers_of_event(event, installation_id) do
     preferences =
-      fetch_preferences_at_installation(pull_request.repository.installation_id, event)
+      fetch_preferences_at_installation(installation_id, event)
 
     preferences
     |> bucketize_preferences()

@@ -25,8 +25,7 @@ defmodule Mrgr.Slack.Message.HIFAlert do
   end
 
   def footer(pull_request) do
-    github_url = Mrgr.Schema.PullRequest.external_url(pull_request)
-    build_link(github_url, "View it on Github")
+    build_link(github_url(pull_request), "View it on Github")
   end
 
   defp hif_list(rules) do
