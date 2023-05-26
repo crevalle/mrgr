@@ -1,5 +1,4 @@
 defmodule Mrgr.Notification do
-
   use Mrgr.Notification.Event
   alias __MODULE__.Query
 
@@ -65,8 +64,7 @@ defmodule Mrgr.Notification do
   end
 
   def consumers_of_event(event, installation_id) do
-    preferences =
-      fetch_preferences_at_installation(installation_id, event)
+    preferences = fetch_preferences_at_installation(installation_id, event)
 
     preferences
     |> bucketize_preferences()

@@ -1,51 +1,50 @@
 defmodule Mrgr.PullRequest.Dormant do
-
   # def notify(pull_request, user) do
-    # pull_request = mark_dormancy_notified(pull_request)
+  # pull_request = mark_dormancy_notified(pull_request)
 
-    # notify_consumers(pull_request)
+  # notify_consumers(pull_request)
   # end
 
   # def notify_consumers(pull_request) do
-    # consumers = fetch_consumers(pull_request)
+  # consumers = fetch_consumers(pull_request)
 
-    # email = Enum.map(consumers.email, fn recipient ->
-      # send_dormant_email(recipient, pull_request)
-    # end)
+  # email = Enum.map(consumers.email, fn recipient ->
+  # send_dormant_email(recipient, pull_request)
+  # end)
 
-    # slack = Enum.map(consumers.slack, fn recipient ->
-      # send_dormant_slack(recipient, pull_request)
-    # end)
+  # slack = Enum.map(consumers.slack, fn recipient ->
+  # send_dormant_slack(recipient, pull_request)
+  # end)
 
-    # %{email: email, slack: slack}
+  # %{email: email, slack: slack}
   # end
 
   # def mark_dormancy_notified(pull_request) do
-    # pull_request
-    # |> Ecto.Changeset.change(%{dormancy_notified: true})
-    # |> Mrgr.Repo.update!()
+  # pull_request
+  # |> Ecto.Changeset.change(%{dormancy_notified: true})
+  # |> Mrgr.Repo.update!()
   # end
 
   # def mark_dormancy_reset(pull_request) do
-    # pull_request
-    # |> Ecto.Changeset.change(%{dormancy_notified: false})
-    # |> Mrgr.Repo.update!()
+  # pull_request
+  # |> Ecto.Changeset.change(%{dormancy_notified: false})
+  # |> Mrgr.Repo.update!()
   # end
 
   # def send_dormant_email(recipient, pull_request) do
-    # email = Mrgr.Email.dormant_pr(recipient, pull_request)
+  # email = Mrgr.Email.dormant_pr(recipient, pull_request)
 
-    # Mrgr.Mailer.deliver(email)
+  # Mrgr.Mailer.deliver(email)
   # end
 
   # def send_dormant_slack(recipient, pull_request) do
-    # message = Mrgr.Slack.Message.DormantPR.render(pull_request, recipient)
+  # message = Mrgr.Slack.Message.DormantPR.render(pull_request, recipient)
 
-    # Mrgr.Slack.send_message(message, recipient)
+  # Mrgr.Slack.send_message(message, recipient)
   # end
 
   # def fetch_consumers(pull_request) do
-    # Mrgr.Notification.consumers_of_event(Mrgr.Notification.Event.pr_dormant(), pull_request)
+  # Mrgr.Notification.consumers_of_event(Mrgr.Notification.Event.pr_dormant(), pull_request)
   # end
 
   def dormant?(%Mrgr.Schema.PullRequest{} = pr, timezone) do

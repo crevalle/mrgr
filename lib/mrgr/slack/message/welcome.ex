@@ -141,5 +141,4 @@ defmodule Mrgr.Slack.Message.Welcome do
 
     build_link(url, "profile")
   end
-
 end

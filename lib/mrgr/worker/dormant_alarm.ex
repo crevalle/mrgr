@@ -11,4 +11,3 @@ defmodule Mrgr.Worker.DormantAlarm do
     :ok
   end
 end
-

@@ -12,9 +12,9 @@ defmodule Mrgr.Notification.Dormant do
   end
 
   # def send_email(recipient, prs) do
-    # email = Mrgr.Email.dormant_prs(recipient, prs)
+  # email = Mrgr.Email.dormant_prs(recipient, prs)
 
-    # Mrgr.Mailer.deliver(email)
+  # Mrgr.Mailer.deliver(email)
   # end
 
   def send_slack(recipient, prs) do
@@ -22,5 +22,4 @@ defmodule Mrgr.Notification.Dormant do
 
     Mrgr.Slack.send_message(message, recipient)
   end
-
 end
