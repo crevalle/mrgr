@@ -120,6 +120,7 @@ defmodule Mrgr.PullRequest.Dormant do
     %{beginning: beginning, ending: ending}
   end
 
+  # handles weekends, based on current day of week
   def fresh_offset(1), do: 72
   def fresh_offset(2), do: 24
   def fresh_offset(3), do: 24
