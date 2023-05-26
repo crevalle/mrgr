@@ -88,13 +88,15 @@ defmodule Mrgr.PullRequest.Controversy do
     pull_request = Mrgr.Repo.preload(pull_request, :author)
     consumers = fetch_consumers(pull_request)
 
-    email = Enum.map(consumers.email, fn recipient ->
-      send_controversy_email(recipient, pull_request, thread)
-    end)
+    email =
+      Enum.map(consumers.email, fn recipient ->
+        send_controversy_email(recipient, pull_request, thread)
+      end)
 
-    slack = Enum.map(consumers.slack, fn recipient ->
-      send_controversy_slack(recipient, pull_request, thread)
-    end)
+    slack =
+      Enum.map(consumers.slack, fn recipient ->
+        send_controversy_slack(recipient, pull_request, thread)
+      end)
 
     %{email: email, slack: slack}
   end

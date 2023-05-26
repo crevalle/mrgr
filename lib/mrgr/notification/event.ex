@@ -10,5 +10,4 @@ defmodule Mrgr.Notification.Event do
       ]
     end
   end
-
 end

@@ -2,8 +2,6 @@ defmodule Mrgr.Slack.Message.Dormant do
   use Mrgr.Slack.Message
 
   def render(prs) do
-
-
     %{
       text: "PRs have gone dormant",
       blocks: [
@@ -37,11 +35,9 @@ defmodule Mrgr.Slack.Message.Dormant do
     • [#{pr.repository.name}] - #{build_link(github_url(pr), pr.title)} by #{author_handle(pr)}
       Ready to Merge | Opened last Thursday
     """
-
   end
 
   def footer do
     "i have ants in my pants"
-
   end
 end
