@@ -852,8 +852,8 @@ defmodule Mrgr.PullRequest do
     |> Query.dashboard_preloads(user)
     |> Query.unsnoozed(user)
     |> Query.ready_for_review()
+    |> Query.dormant(user.timezone)
     |> Mrgr.Repo.all()
-    |> Enum.filter(&Dormant.dormant?(&1, user.timezone))
   end
 
   def snoozed_prs(user) do
