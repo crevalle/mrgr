@@ -3,6 +3,14 @@ defmodule Mrgr.Slack do
   Wraps the Slack API
   """
 
+  def send_and_log(message, recipient, type) do
+    res = send_message(message, recipient)
+
+    Mrgr.Notification.create(recipient.id, res, "slack", type)
+
+    res
+  end
+
   def send_message(message, user) do
     # assumes user has opted to receive slack messages
     address = Mrgr.User.find_user_notification_address(user)

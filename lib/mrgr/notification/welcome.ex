@@ -9,7 +9,7 @@ defmodule Mrgr.Notification.Welcome do
 
     message = Mrgr.Slack.Message.Welcome.render(prs)
 
-    Mrgr.Slack.send_message(message, user)
+    Mrgr.Slack.send_and_log(message, user, @name)
   end
 
   def send_via_email(user) do

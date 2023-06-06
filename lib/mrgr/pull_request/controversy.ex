@@ -114,6 +114,6 @@ defmodule Mrgr.PullRequest.Controversy do
   def send_controversy_slack(recipient, pull_request, thread) do
     message = Mrgr.Slack.Message.ControversialPR.render(pull_request, thread, recipient)
 
-    Mrgr.Slack.send_message(message, recipient)
+    Mrgr.Slack.send_and_log(message, recipient, @pr_controversy)
   end
 end
