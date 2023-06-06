@@ -152,29 +152,34 @@ defmodule Mrgr.Schema.PullRequest do
     |> cast_embed(:merged_by)
     |> put_merged_status()
     |> put_timestamp(:merged_at)
+    |> put_timestamp(:last_activity_at)
   end
 
   def close_changeset(schema, %{"merged" => false} = params) do
     schema
     |> cast(params, [])
     |> put_closed_status()
+    |> put_timestamp(:last_activity_at)
   end
 
   def change_assignees(schema, assignees) do
     schema
     |> change()
     |> put_embed(:assignees, assignees)
+    |> put_timestamp(:last_activity_at)
   end
 
   def edit_changeset(schema, params) do
     schema
     |> cast(params, [:title])
+    |> put_timestamp(:last_activity_at)
   end
 
   def most_changeset(schema, params) do
     schema
     |> cast(params, @most_params)
     |> cast_embed(:commits)
+    |> put_timestamp(:last_activity_at)
     |> validate_inclusion(:mergeable, @mergeable_states)
     |> validate_inclusion(:merge_state_status, @merge_state_statuses)
   end
