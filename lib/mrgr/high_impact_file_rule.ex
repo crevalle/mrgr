@@ -1,4 +1,6 @@
 defmodule Mrgr.HighImpactFileRule do
+  @name "hif"
+
   alias Mrgr.Schema.HighImpactFileRule, as: Schema
   alias __MODULE__.Query
 
@@ -130,7 +132,7 @@ defmodule Mrgr.HighImpactFileRule do
   def send_email_alert(rules, recipient, pull_request) do
     email = Mrgr.Email.hif_alert(rules, recipient, pull_request)
 
-    Mrgr.Mailer.deliver_and_log(email, "hif")
+    Mrgr.Mailer.deliver_and_log(email, @name)
   end
 
   def send_slack_alert([], _recipient, _pull_request), do: nil
@@ -138,7 +140,7 @@ defmodule Mrgr.HighImpactFileRule do
   def send_slack_alert(rules, recipient, pull_request) do
     message = Mrgr.Slack.Message.HIFAlert.render(pull_request, rules)
 
-    Mrgr.Slack.send_message(message, recipient)
+    Mrgr.Slack.send_and_log(message, recipient, @name)
   end
 
   def matching_filenames(rule, pull_request) do
