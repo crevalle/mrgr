@@ -1,4 +1,6 @@
 defmodule Mrgr.Notification.Welcome do
+  @name "welcome"
+
   def send_via_slack(user) do
     prs = %{
       hif_prs: Mrgr.PullRequest.hif_prs_for_user(user),
@@ -18,6 +20,6 @@ defmodule Mrgr.Notification.Welcome do
 
     email = Mrgr.Email.welcome(user, prs)
 
-    Mrgr.Mailer.deliver(email)
+    Mrgr.Mailer.deliver_and_log(email, @name)
   end
 end

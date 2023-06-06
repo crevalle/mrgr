@@ -104,6 +104,13 @@ defmodule MrgrWeb.Admin.Live.UserShow do
         </div>
       </div>
 
+      <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
+        <%= live_render(@socket, MrgrWeb.Admin.Live.NotificationListTable,
+          id: "notification-list-table",
+          session: %{"id" => @current_user.id}
+        ) %>
+      </div>
+
       <.h3>All Installations</.h3>
       <%= for install <- @user.installations do %>
         <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">

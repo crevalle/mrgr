@@ -271,7 +271,7 @@ defmodule Mrgr.User do
     user
     |> Mrgr.PullRequest.closed_this_week()
     |> Mrgr.Email.send_changelog(closed_last_week_count, user)
-    |> Mrgr.Mailer.deliver()
+    |> Mrgr.Mailer.deliver_and_log("changelog")
   end
 
   def visible_repos_at_current_installation(user) do
