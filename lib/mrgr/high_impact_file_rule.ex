@@ -130,7 +130,7 @@ defmodule Mrgr.HighImpactFileRule do
   def send_email_alert(rules, recipient, pull_request) do
     email = Mrgr.Email.hif_alert(rules, recipient, pull_request)
 
-    Mrgr.Mailer.deliver(email)
+    Mrgr.Mailer.deliver_and_log(email, "hif")
   end
 
   def send_slack_alert([], _recipient, _pull_request), do: nil

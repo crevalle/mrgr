@@ -1,4 +1,7 @@
 defmodule Mrgr.Desmond do
+  ### !!! emails to me do not get logged.  i just hardcode myself
+  # as the recipient so don't have a user to pull an id off of
+
   def someone_signed_up(params, user) do
     count = Mrgr.Repo.aggregate(Mrgr.Schema.Userl, :count)
 

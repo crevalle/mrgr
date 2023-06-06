@@ -108,7 +108,7 @@ defmodule Mrgr.PullRequest.Controversy do
   def send_controversy_email(recipient, pull_request, thread) do
     email = Mrgr.Email.controversial_pr(recipient, pull_request, thread)
 
-    Mrgr.Mailer.deliver(email)
+    Mrgr.Mailer.deliver_and_log(email, @pr_controversy)
   end
 
   def send_controversy_slack(recipient, pull_request, thread) do

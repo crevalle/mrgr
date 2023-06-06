@@ -41,6 +41,8 @@ defmodule Mrgr.Schema.User do
     has_many(:notification_addresses, Mrgr.Schema.UserNotificationAddress)
     has_many(:notification_preferences, Mrgr.Schema.UserNotificationPreference)
 
+    has_many(:notifications, Mrgr.Schema.Notification, foreign_key: :recipient_id)
+
     belongs_to(:current_installation, Mrgr.Schema.Installation)
 
     embeds_one :urls, Urls do

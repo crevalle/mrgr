@@ -2,17 +2,42 @@ defmodule Mrgr.Notification do
   use Mrgr.Notification.Event
   alias __MODULE__.Query
 
-  @typep preference :: Mrgr.Schema.UserNotificationPreference.t()
+  alias Mrgr.Schema.Notification, as: Schema
+  alias Mrgr.Schema.UserNotificationPreference, as: Preference
+
+  @typep preference :: Preference.t()
   @type notifiable ::
           preference() | Mrgr.Schema.HighImpactFileRule.t()
 
   @typep preference_bucket :: %{email: [preference()], slack: [preference()]}
   @typep user_bucket :: %{email: [Mrgr.Schema.User.t()], slack: [Mrgr.Schema.User.t()]}
 
-  def create_defaults_for_new_installation(%Mrgr.Schema.Installation{} = installation) do
+  @spec create(integer(), tuple(), String.t(), String.t()) :: Schema.t()
+  def create(recipient_id, res, channel, type) do
+    attrs = %{
+      recipient_id: recipient_id,
+      channel: channel,
+      type: type
+    }
+
+    attrs = put_error(res, attrs)
+
+    %Schema{}
+    |> Schema.changeset(attrs)
+    |> Mrgr.Repo.insert!()
+  end
+
+  # for slack only - emails will always assume to go through ok
+  def put_error({:error, reason}, attrs) do
+    Map.put(attrs, :error, inspect(reason))
+  end
+
+  def put_error(_success, attrs), do: attrs
+
+  def create_default_preferences_for_new_installation(%Mrgr.Schema.Installation{} = installation) do
     # when an installation is created the only user is its creator
     Enum.map(@notification_events, fn event ->
-      create_for_user_and_installation(event, installation.creator_id, installation.id)
+      create_preference_for_user_and_installation(event, installation.creator_id, installation.id)
     end)
   end
 
@@ -21,7 +46,7 @@ defmodule Mrgr.Notification do
 
     Enum.map(@notification_events, fn event ->
       Enum.map(user.installations, fn installation ->
-        create_for_user_and_installation(event, user.id, installation.id)
+        create_preference_for_user_and_installation(event, user.id, installation.id)
       end)
     end)
   end
@@ -38,12 +63,12 @@ defmodule Mrgr.Notification do
 
     Enum.map(users, fn user ->
       Enum.map(user.installations, fn installation ->
-        create_for_user_and_installation(event, user.id, installation.id, opts)
+        create_preference_for_user_and_installation(event, user.id, installation.id, opts)
       end)
     end)
   end
 
-  def create_for_user_and_installation(event, user_id, installation_id, opts \\ %{}) do
+  def create_preference_for_user_and_installation(event, user_id, installation_id, opts \\ %{}) do
     params =
       %{
         event: event,
@@ -54,8 +79,8 @@ defmodule Mrgr.Notification do
       }
       |> Map.merge(opts)
 
-    %Mrgr.Schema.UserNotificationPreference{}
-    |> Mrgr.Schema.UserNotificationPreference.changeset(params)
+    %Preference{}
+    |> Preference.changeset(params)
     |> Mrgr.Repo.insert()
   end
 
@@ -105,7 +130,7 @@ defmodule Mrgr.Notification do
   def put_slack_channel(acc, _rule), do: acc
 
   def fetch_preferences_at_installation(installation_id, event) do
-    Mrgr.Schema.UserNotificationPreference
+    Preference
     |> Query.for_installation(installation_id)
     |> Query.for_event(event)
     |> Query.with_user()
@@ -115,7 +140,7 @@ defmodule Mrgr.Notification do
   @doc "converts all email notifications to slack"
   def enable_slack_notifications(user, installation) do
     preferences =
-      Mrgr.Schema.UserNotificationPreference
+      Preference
       |> Query.for_installation(installation.id)
       |> Query.for_user(user.id)
       |> Mrgr.Repo.all()
@@ -130,7 +155,7 @@ defmodule Mrgr.Notification do
 
   def disable_slack_notifications(user, installation) do
     preferences =
-      Mrgr.Schema.UserNotificationPreference
+      Preference
       |> Query.for_installation(installation.id)
       |> Query.for_user(user.id)
       |> Mrgr.Repo.all()
@@ -187,8 +212,23 @@ defmodule Mrgr.Notification do
     |> Mrgr.Repo.update!()
   end
 
+  ### QUERIES
+
+  def paged_for_user(id, params \\ %{}) do
+    Schema
+    |> Query.for_recipient(id)
+    |> Query.rev_cron()
+    |> Mrgr.Repo.paginate(params)
+  end
+
   defmodule Query do
     use Mrgr.Query
+
+    def for_recipient(query, id) do
+      from(q in query,
+        where: q.recipient_id == ^id
+      )
+    end
 
     def for_user(query, id) do
       from(q in query,

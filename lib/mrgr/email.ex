@@ -1,6 +1,5 @@
 defmodule Mrgr.Email do
-  import MrgrWeb.Formatter, only: [account_name: 1]
-  import Swoosh.Email
+  import Swoosh.Email, except: [to: 2]
 
   @from {"Mrgr", "noreply@mrgr.io"}
 
@@ -234,5 +233,17 @@ defmodule Mrgr.Email do
       # offset should be negative
       Date.add(bucket.now, offset)
     end
+  end
+
+  def to(email, address) when is_bitstring(address) do
+    Swoosh.Email.to(email, address)
+  end
+
+  def to(email, %Mrgr.Schema.User{} = recipient) do
+    # used to create notification log
+
+    email
+    |> Swoosh.Email.to(recipient)
+    |> put_private(:user_id, recipient.id)
   end
 end
