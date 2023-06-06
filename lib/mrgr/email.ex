@@ -32,18 +32,6 @@ defmodule Mrgr.Email do
     |> render_with_layout(MrgrWeb.Email.Renderer.hey_desmond_onboarding_data_sync_failed(params))
   end
 
-  def invite_user_to_installation(recipient, installation) do
-    assigns = %{
-      installation: installation
-    }
-
-    new()
-    |> from(@from)
-    |> to(recipient)
-    |> subject("You've been invited to join #{account_name(installation)} on Mrgr")
-    |> render_with_layout(MrgrWeb.Email.Renderer.invite_user_to_installation(assigns))
-  end
-
   def welcome(recipient, %{hif_prs: [], situational_prs: []}) do
     pull_requests = generate_welcome_data()
 

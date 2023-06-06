@@ -38,7 +38,7 @@ defmodule MrgrWeb.AuthController do
           {:ok, user, action} ->
             conn
             |> sign_in(user)
-            |> signed_in_destination(user, action)
+            |> signed_in_destination(action)
 
           {:error, _changeset} ->
             Logger.warn("OAuth error: [DATA] #{inspect(data)} \r [TOKEN] #{inspect(token)}")
@@ -67,24 +67,15 @@ defmodule MrgrWeb.AuthController do
     end
   end
 
-  def signed_in_destination(conn, _user, :new) do
+  def signed_in_destination(conn, :new) do
     conn
     |> put_flash(:info, "Welcome to Mrgr! 👋")
     |> redirect(to: ~p"/onboarding")
   end
 
-  def signed_in_destination(conn, _user, :returning) do
+  def signed_in_destination(conn, :returning) do
     conn
     |> put_flash(:info, "Welcome Back! 👋")
-    |> redirect(to: ~p"/pull-requests")
-  end
-
-  def signed_in_destination(conn, user, :invited) do
-    conn
-    |> put_flash(
-      :info,
-      "Welcome to Mrgr!  We've automatically added you to the #{MrgrWeb.Formatter.account_name(user)} account! 👋"
-    )
     |> redirect(to: ~p"/pull-requests")
   end
 end

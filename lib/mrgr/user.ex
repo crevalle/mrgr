@@ -87,15 +87,7 @@ defmodule Mrgr.User do
           {:ok, user} ->
             Mrgr.Desmond.someone_signed_up(params, user)
 
-            case find_member(user) do
-              nil ->
-                {:ok, user, :new}
-
-              member ->
-                user = join_invited_user(user, member)
-
-                {:ok, user, :invited}
-            end
+            {:ok, user, :new}
 
           error ->
             Mrgr.Desmond.someone_failed_to_sign_up(params, error)
@@ -103,15 +95,6 @@ defmodule Mrgr.User do
             error
         end
     end
-  end
-
-  def invite_by_email(emails, installation) when is_list(emails) do
-    Enum.map(emails, &invite_by_email(&1, installation))
-  end
-
-  def invite_by_email(email, installation) do
-    mail = Mrgr.Email.invite_user_to_installation(email, installation)
-    Mrgr.Mailer.deliver(mail)
   end
 
   def find_member(%Schema{node_id: node_id}) do
@@ -239,11 +222,6 @@ defmodule Mrgr.User do
 
   def generate_default_custom_dashboard_tabs(user) do
     # creates tabs for every installation the user is a member of.
-    # ❗️ a user invited to one org will automatically join all the
-    # other orgs we have accounts for, increasing their billing.  this should
-    # be fixed so that an invited user only joins a specific accout.  For now
-    # I don't think it's a big problem so I'll fix it later and refund someone $25.
-
     user
     |> Mrgr.Installation.for_user()
     |> Enum.map(fn i ->
@@ -257,15 +235,6 @@ defmodule Mrgr.User do
     Mrgr.Notification.create_defaults_for_user(user)
 
     user
-  end
-
-  def join_invited_user(user, member) do
-    user
-    |> associate_user_with_member(member)
-    |> create_notification_address_at_current_installation()
-    |> make_all_repos_visible()
-    |> generate_default_custom_dashboard_tabs()
-    |> create_default_notifications()
   end
 
   def associate_user_with_member(user, member) do
