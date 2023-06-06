@@ -143,39 +143,6 @@ defmodule Mrgr.Factory do
     }
   end
 
-  def build(:check) do
-    %Mrgr.Schema.Check{
-      text: Faker.Company.bs(),
-      checklist: build(:checklist)
-    }
-  end
-
-  def build(:checklist) do
-    %Mrgr.Schema.Checklist{
-      title: Faker.Company.bs(),
-      pull_request: build(:pull_request),
-      checklist_template: build(:checklist_template)
-    }
-  end
-
-  def build(:checklist_template) do
-    %Mrgr.Schema.ChecklistTemplate{
-      title: Faker.Company.bs(),
-      installation: build(:installation),
-      creator: build(:user)
-    }
-  end
-
-  def build(:checklist_template_repository) do
-    template = build(:checklist_template)
-    repository = build(:repository, installation: template.installation)
-
-    %Mrgr.Schema.ChecklistTemplateRepository{
-      checklist_template: template,
-      repository: repository
-    }
-  end
-
   def build(:repository_settings_policy) do
     %Mrgr.Schema.RepositorySettingsPolicy{
       installation: build(:installation),

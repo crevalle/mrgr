@@ -64,7 +64,7 @@ defmodule Mrgr.Github.Webhook do
     Mrgr.PullRequest.Webhook.close(payload)
   end
 
-  # HEAD OF PR IS UPDATED - create a new check suite/run, new checklist
+  # HEAD OF PR IS UPDATED - create a new check suite/run
   def handle("pull_request", %{"action" => "synchronize"} = payload) do
     Mrgr.PullRequest.Webhook.synchronize(payload)
     # Mrgr.CheckRun.create(payload)

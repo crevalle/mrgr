@@ -1232,18 +1232,6 @@ defmodule Mrgr.PullRequest do
       )
     end
 
-    def with_checklist(query) do
-      from(q in query,
-        left_join: checklist in assoc(q, :checklist),
-        left_join: checks in assoc(checklist, :checks),
-        left_join: approval in assoc(checks, :check_approval),
-        left_join: user in assoc(approval, :user),
-        preload: [
-          checklist: {checklist, [checks: {checks, [check_approval: {approval, [user: user]}]}]}
-        ]
-      )
-    end
-
     def with_comments(query) do
       from(q in query,
         preload: :comments

@@ -48,7 +48,6 @@ defmodule MrgrWeb.Components.Form do
 
   # like hte one below, but sends the click event to myself
   # ie, goes into a form component that handles its own events.
-  # one below is from checklists, which isn't really fleshed out anyway
   # TODO: flesh it out
   def repo_toggle_item(assigns) do
     color =
