@@ -11,8 +11,7 @@
             <tr>
               <.th>Organization</.th>
               <.th>Subscription Status</.th>
-              <.th>Team Members</.th>
-              <.th>Context</.th>
+              <.th></.th>
             </tr>
           </thead>
           <tbody>
@@ -34,11 +33,6 @@
                       </a>
                     <% end %>
                   </div>
-                </.td>
-                <.td>
-                  <.l phx-click={JS.push("show-detail", value: %{id: installation.id})}>
-                    View/Invite
-                  </.l>
                 </.td>
                 <.td>
                   <%= if @current_user.current_installation_id == installation.id do %>
@@ -65,31 +59,14 @@
         </table>
       </div>
     </div>
-    <div :if={@selected_installation} id="detail-pane">
-      <.detail_column>
-        <:title>
-          Users for <%= account_name(@selected_installation) %>
-        </:title>
-        <ul>
-          <%= for user <- @selected_installation.users do %>
-            <li><.avatar member={user} /></li>
-          <% end %>
-        </ul>
+  </div>
 
-        <hr />
-
-        <h5>Invite Users</h5>
-        <p class="text-gray-500 text-sm">
-          Add your team to Mrgr! Enter their email addresses here and we'll send them an invite.  Invited users must be members of the <%= account_name(
-            @selected_installation
-          ) %> organization on Github.
-        </p>
-
-        <.form :let={f} for={%{}} as={:users} phx-submit="invite-users">
-          <.textarea form={f} field={:emails} opts={[placeholder: "One email per line"]} />
-          <.button class="mt-2">Invite!</.button>
-        </.form>
-      </.detail_column>
-    </div>
+  <div>
+    <h5>Upgrade to Enterprise</h5>
+    <p class="text-gray-500 text-sm">
+      Add colleagues to Mrgr so everyone can stay connected.
+      <.l href="mailto:hello@mrgr.io?subject=Enterprise">Contact Sales</.l>
+      to get started.
+    </p>
   </div>
 </div>
