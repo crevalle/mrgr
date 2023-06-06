@@ -84,8 +84,6 @@ defmodule MrgrWeb.Router do
     live "/high-impact-files", HighImpactFileLive, :index
     live "/changelog", ChangelogLive, :index
 
-    live "/checklists", Live.Checklist, :index, as: :checklist
-
     live "/repositories", RepositoryListLive, :index
     live "/labels", LabelListLive, :index
   end
