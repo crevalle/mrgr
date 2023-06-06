@@ -68,6 +68,8 @@
             Comments
           </.glance_detail_link>
 
+          <.controversy_badge :if={@pull_request.controversial} />
+
           <div class="flex flex-col space-y-4">
             <.preview_comment
               :for={comment <- Mrgr.Schema.Comment.cron(@pull_request.comments)}

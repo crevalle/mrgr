@@ -22,6 +22,14 @@ defmodule MrgrWeb.Components.PullRequest do
     """
   end
 
+  def controversy_badge(assigns) do
+    ~H"""
+    <div class="mb-1">
+      <.badge item={%{name: "Controversial", color: "#edbd45"}} />
+    </div>
+    """
+  end
+
   def changed_file_list(assigns) do
     ~H"""
     <div class="flex flex-col space-y-0 leading-tight">
