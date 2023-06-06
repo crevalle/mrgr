@@ -82,7 +82,6 @@ defmodule Mrgr.PullRequest do
       updated_pull_request
       |> preload_installation()
       |> sync_github_data()
-      |> put_activity!()
       |> broadcast(@pull_request_reopened)
       |> ok()
     else
@@ -102,7 +101,6 @@ defmodule Mrgr.PullRequest do
          {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
       updated_pull_request
       |> preload_installation()
-      |> put_activity!()
       |> broadcast(@pull_request_edited)
       |> ok()
     else
@@ -119,7 +117,6 @@ defmodule Mrgr.PullRequest do
       |> preload_installation()
       |> sync_github_data()
       |> reassociate_high_impact_file_rules()
-      |> put_activity!()
       |> broadcast(@pull_request_synchronized)
       |> ok()
     else
@@ -131,7 +128,6 @@ defmodule Mrgr.PullRequest do
     pull_request
     |> Schema.most_changeset(%{draft: false})
     |> Mrgr.Repo.update!()
-    |> put_activity!()
     |> preload_installation()
     |> preload_hif_alerts()
     |> notify_hif_alert_consumers()
@@ -143,7 +139,6 @@ defmodule Mrgr.PullRequest do
     pull_request
     |> Schema.most_changeset(%{draft: true})
     |> Mrgr.Repo.update!()
-    |> put_activity!()
     |> broadcast(@pull_request_converted_to_draft)
     |> ok()
   end
@@ -185,7 +180,6 @@ defmodule Mrgr.PullRequest do
             # just blanket unsnooze whenever anyone is added to tags, which should
             # be infrequent enough not to mess with the benefit of being snoozed.
             pull_request
-            |> put_activity!()
             |> unsnooze()
             |> ok()
 
@@ -205,7 +199,6 @@ defmodule Mrgr.PullRequest do
     case Mrgr.List.present?(pull_request.assignees, gh_user) do
       true ->
         pull_request
-        |> put_activity!()
         |> set_assignees(Mrgr.List.remove(pull_request.assignees, gh_user))
 
       false ->
@@ -259,7 +252,6 @@ defmodule Mrgr.PullRequest do
       false ->
         pull_request
         |> add_solicited_reviewer(member)
-        |> put_activity!()
         |> broadcast(@pull_request_reviewers_updated)
         # there probably won't be a user associated with this member
         # the idea is if you're tagged, unsnooze for you
@@ -279,7 +271,6 @@ defmodule Mrgr.PullRequest do
       true ->
         pull_request
         |> remove_solicited_reviewer(member)
-        |> put_activity!()
         |> broadcast(@pull_request_reviewers_updated)
         |> ok()
 
@@ -326,7 +317,9 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Schema.PullRequestReviewer.changeset(params)
     |> Mrgr.Repo.insert!()
 
-    Mrgr.Repo.preload(pull_request, :solicited_reviewers, force: true)
+    pull_request
+    |> put_activity!()
+    |> Mrgr.Repo.preload(:solicited_reviewers, force: true)
   end
 
   def remove_solicited_reviewer(pull_request, member) do
@@ -336,7 +329,9 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.one()
     |> Mrgr.Repo.delete()
 
-    Mrgr.Repo.preload(pull_request, :solicited_reviewers, force: true)
+    pull_request
+    |> put_activity!()
+    |> Mrgr.Repo.preload(:solicited_reviewers, force: true)
   end
 
   @spec sync_comments(Schema.t()) :: Schema.t()
@@ -399,7 +394,6 @@ defmodule Mrgr.PullRequest do
 
         pull_request
         |> preload_installation()
-        |> put_activity!()
         |> broadcast(@pull_request_comment_created)
         |> Controversy.handle()
         |> ok()
@@ -417,9 +411,13 @@ defmodule Mrgr.PullRequest do
       raw: Mrgr.Schema.Comment.strip_bs(params)
     }
 
-    attrs
-    |> Mrgr.Schema.Comment.create_changeset()
-    |> Mrgr.Repo.insert()
+    cs = Mrgr.Schema.Comment.create_changeset(attrs)
+
+    with {:ok, comment} <- Mrgr.Repo.insert(cs) do
+      put_activity!(pull_request)
+
+      {:ok, comment}
+    end
   end
 
   @spec add_pr_review(Schema.t(), map()) :: {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
@@ -452,8 +450,8 @@ defmodule Mrgr.PullRequest do
 
         pull_request
         # see if pull_request is unblocked
+        # puts activity too
         |> sync_github_data()
-        |> put_activity!()
         |> broadcast(@pull_request_reviews_updated)
         |> ok()
 
@@ -473,8 +471,8 @@ defmodule Mrgr.PullRequest do
     pull_request
     |> Mrgr.Repo.preload(:pr_reviews, force: true)
     # see if pull_request is blocked
+    # puts activity too
     |> sync_github_data()
-    |> put_activity!()
     |> broadcast(@pull_request_reviews_updated)
     |> ok()
   end
