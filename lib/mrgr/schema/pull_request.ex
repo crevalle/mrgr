@@ -232,10 +232,6 @@ defmodule Mrgr.Schema.PullRequest do
     commit.author.name
   end
 
-  def committed_at(%Mrgr.Github.Commit{} = commit) do
-    commit.author.date
-  end
-
   def commit_sha(%Mrgr.Github.Commit{} = commit) do
     commit.sha
   end
@@ -262,24 +258,50 @@ defmodule Mrgr.Schema.PullRequest do
     |> Mrgr.Schema.Comment.rev_cron()
   end
 
+  def latest_commit(%{commits: []}), do: nil
+
+  def latest_commit(%{commits: commits}) do
+    commits
+    |> Enum.sort_by(& &1.author.date, {:desc, DateTime})
+    |> hd()
+  end
+
   def latest_commit_date(%{commits: []}), do: nil
 
   def latest_commit_date(%{commits: commits}) do
     commits
     |> Enum.sort_by(& &1.author.date, {:desc, DateTime})
     |> hd()
-    |> committed_at()
+    |> Mrgr.DateTime.happened_at()
   end
 
   def latest_comment_date(%{comments: []}), do: nil
 
   def latest_comment_date(%{comments: comments}) do
-    Mrgr.Schema.Comment.latest(comments).posted_at
+    comments
+    |> Mrgr.Schema.Comment.latest()
+    |> Mrgr.DateTime.happened_at()
+  end
+
+  def latest_comment(%{comments: []}), do: nil
+
+  def latest_comment(%{comments: comments}) do
+    comments
+    |> Mrgr.Schema.Comment.latest()
   end
 
   def latest_pr_review_date(%{pr_reviews: []}), do: nil
 
   def latest_pr_review_date(%{pr_reviews: pr_reviews}) do
-    Mrgr.Schema.PRReview.latest(pr_reviews).submitted_at
+    pr_reviews
+    |> Mrgr.Schema.PRReview.latest()
+    |> Mrgr.DateTime.happened_at()
+  end
+
+  def latest_pr_review(%{pr_reviews: []}), do: nil
+
+  def latest_pr_review(%{pr_reviews: pr_reviews}) do
+    pr_reviews
+    |> Mrgr.Schema.PRReview.latest()
   end
 end

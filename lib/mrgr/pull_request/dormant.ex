@@ -1,4 +1,7 @@
 defmodule Mrgr.PullRequest.Dormant do
+  # ten years, in days
+  @long_time_ago -3650
+
   def dormant?(%Mrgr.Schema.PullRequest{} = pr, timezone) do
     dormant?(pr.last_activity_at, timezone)
   end
@@ -22,6 +25,33 @@ defmodule Mrgr.PullRequest.Dormant do
       commented_at: Mrgr.Schema.PullRequest.latest_comment_date(pr),
       committed_at: Mrgr.Schema.PullRequest.latest_commit_date(pr),
       reviewed_at: Mrgr.Schema.PullRequest.latest_pr_review_date(pr)
+    }
+  end
+
+  @spec last_activity(Mrgr.Schema.PullRequest.t()) :: {atom(), struct()}
+  def last_activity(pr) do
+    pr
+    |> latest_activity()
+    |> to_sorted_list()
+    |> hd()
+  end
+
+  def to_sorted_list(activity) do
+    activity
+    |> Keyword.new()
+    |> Enum.sort_by(&activity_haps/1, {:desc, DateTime})
+  end
+
+  # guard clause in case there are no comments, commits, etc.
+  defp activity_haps({_type, nil}), do: DateTime.add(Mrgr.DateTime.now(), @long_time_ago, :day)
+  defp activity_haps({_type, haps}), do: Mrgr.DateTime.happened_at(haps)
+
+  def latest_activity(pr) do
+    %{
+      opened_at: pr.opened_at,
+      comment: Mrgr.Schema.PullRequest.latest_comment(pr),
+      commit: Mrgr.Schema.PullRequest.latest_commit(pr),
+      review: Mrgr.Schema.PullRequest.latest_pr_review(pr)
     }
   end
 

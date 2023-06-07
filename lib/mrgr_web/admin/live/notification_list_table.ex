@@ -26,7 +26,7 @@ defmodule MrgrWeb.Admin.Live.NotificationListTable do
           <%= for notification <- @page.entries do %>
             <.tr striped={true}>
               <.td><%= notification.id %></.td>
-              <.td><%= notification.channel %></.td>
+              <.td><.channel_icon channel={notification.channel} /></.td>
               <.td><%= notification.type %></.td>
               <.td><%= ts(notification.inserted_at, @timezone) %></.td>
               <.td><%= notification.error %></.td>

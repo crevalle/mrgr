@@ -30,10 +30,10 @@ defmodule Mrgr.Notification.Dormant do
     # Mrgr.Mailer.deliver_and_log(email, @dormant_pr)
   end
 
-  def send_slack_message(_recipient, _pull_request) do
-    # message = Mrgr.Slack.Message.DormantPR.render(pull_request, recipient)
+  def send_slack_message(recipient, pull_request) do
+    message = Mrgr.Slack.Message.Dormant.render(pull_request)
 
-    # Mrgr.Slack.send_and_log(message, recipient, @dormant_pr)
+    Mrgr.Slack.send_and_log(message, recipient, @dormant_pr)
   end
 
   def fetch_consumers(pull_request) do

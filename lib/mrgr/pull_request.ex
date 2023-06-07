@@ -842,6 +842,8 @@ defmodule Mrgr.PullRequest do
     |> Query.ready_for_review()
     |> Query.dormant(timezone)
     |> Query.with_author()
+    |> Query.with_comments()
+    |> Query.with_pr_reviews()
     |> Mrgr.Repo.all()
 
     # TODO: just became dormant in the last hour, otherwise people will get notified constantly

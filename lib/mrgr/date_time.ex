@@ -124,4 +124,16 @@ defmodule Mrgr.DateTime do
   def happened_at(%Mrgr.Github.Commit{} = commit) do
     commit.author.date
   end
+
+  def happened_at(%Mrgr.Schema.PullRequest{} = pull_request) do
+    pull_request.opened_at
+  end
+
+  def happened_at(%Mrgr.Schema.PRReview{} = review) do
+    review.submitted_at
+  end
+
+  def happened_at(%DateTime{} = timestamp) do
+    timestamp
+  end
 end
