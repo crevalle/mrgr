@@ -843,6 +843,10 @@ defmodule Mrgr.PullRequest do
     |> Query.dormant(timezone)
     |> Query.with_author()
     |> Mrgr.Repo.all()
+
+    # TODO: just became dormant in the last hour, otherwise people will get notified constantly
+    # until then, return nothing
+    []
   end
 
   def dormant_prs(user) do

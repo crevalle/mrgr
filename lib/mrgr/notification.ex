@@ -12,6 +12,9 @@ defmodule Mrgr.Notification do
   @typep preference_bucket :: %{email: [preference()], slack: [preference()]}
   @typep user_bucket :: %{email: [Mrgr.Schema.User.t()], slack: [Mrgr.Schema.User.t()]}
 
+  # lists of emails and slack messages
+  @type result :: %{email: list(), slack: list()}
+
   @spec create(integer(), tuple(), String.t(), String.t()) :: Schema.t()
   def create(recipient_id, res, channel, type) do
     attrs = %{
@@ -84,6 +87,9 @@ defmodule Mrgr.Notification do
     |> Mrgr.Repo.insert()
   end
 
+  @doc """
+  returns the users at a PR's installation who've set at least one channel for this event
+  """
   def consumers_of_event(event, %Mrgr.Schema.PullRequest{} = pull_request) do
     consumers_of_event(event, pull_request.repository.installation_id)
   end
@@ -93,12 +99,12 @@ defmodule Mrgr.Notification do
 
     preferences
     |> bucketize_preferences()
-    |> return_users()
+    |> preference_bucket_to_user_bucket()
   end
 
   @doc "converts a bucket of preferences to a bucket of those preferences' users"
-  @spec return_users(preference_bucket()) :: user_bucket()
-  def return_users(preferences_by_channel) do
+  @spec preference_bucket_to_user_bucket(preference_bucket()) :: user_bucket()
+  def preference_bucket_to_user_bucket(preferences_by_channel) do
     preferences_by_channel
     |> Enum.reduce(%{}, fn {channel, prefs}, acc ->
       Map.put(acc, channel, Enum.map(prefs, & &1.user))
