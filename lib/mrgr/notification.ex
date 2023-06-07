@@ -37,19 +37,19 @@ defmodule Mrgr.Notification do
 
   def put_error(_success, attrs), do: attrs
 
-  def create_default_preferences_for_new_installation(%Mrgr.Schema.Installation{} = installation) do
+  def create_default_preferences_for_installation(%Mrgr.Schema.Installation{} = installation) do
     # when an installation is created the only user is its creator
     Enum.map(@notification_events, fn event ->
-      create_preference_for_user_and_installation(event, installation.creator_id, installation.id)
+      create_preference(event, installation.creator_id, installation.id)
     end)
   end
 
-  def create_defaults_for_user(user) do
+  def create_default_preferences_for_user(user) do
     user = Mrgr.Repo.preload(user, :installations)
 
     Enum.map(@notification_events, fn event ->
       Enum.map(user.installations, fn installation ->
-        create_preference_for_user_and_installation(event, user.id, installation.id)
+        create_preference(event, user.id, installation.id)
       end)
     end)
   end
@@ -66,12 +66,12 @@ defmodule Mrgr.Notification do
 
     Enum.map(users, fn user ->
       Enum.map(user.installations, fn installation ->
-        create_preference_for_user_and_installation(event, user.id, installation.id, opts)
+        create_preference(event, user.id, installation.id, opts)
       end)
     end)
   end
 
-  def create_preference_for_user_and_installation(event, user_id, installation_id, opts \\ %{}) do
+  def create_preference(event, user_id, installation_id, opts \\ %{}) do
     params =
       %{
         event: event,

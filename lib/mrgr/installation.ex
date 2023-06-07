@@ -212,7 +212,7 @@ defmodule Mrgr.Installation do
 
   def final_onboarding(installation) do
     Mrgr.PRTab.create_defaults_for_new_installation(installation)
-    Mrgr.Notification.create_default_preferences_for_new_installation(installation)
+    Mrgr.Notification.create_default_preferences_for_installation(installation)
 
     {:ok, installation}
   end
