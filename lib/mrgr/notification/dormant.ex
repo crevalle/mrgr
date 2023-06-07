@@ -1,25 +1,42 @@
 defmodule Mrgr.Notification.Dormant do
   use Mrgr.Notification.Event
 
-  def notify_user_of_dormant_prs(_installation_id, []), do: nil
+  @spec notify_consumers(Mrgr.Schema.PullRequest.t()) :: Mrgr.Notification.result()
+  def notify_consumers(pull_request) do
+    consumers = fetch_consumers(pull_request)
 
-  def notify_user_of_dormant_prs(installation_id, prs) do
-    consumers = Mrgr.Notification.consumers_of_event(@dormant_pr, installation_id)
+    Enum.reduce(consumers, %{}, fn {channel, recipients}, acc ->
+      results = notify_channel(channel, recipients, pull_request)
 
-    # Enum.map(consumers.email, fn recipient -> send_email(recipient, prs) end)
-
-    Enum.map(consumers.slack, fn recipient -> send_slack(recipient, prs) end)
+      Map.put(acc, channel, results)
+    end)
   end
 
-  # def send_email(recipient, prs) do
-  # email = Mrgr.Email.dormant_prs(recipient, prs)
+  def notify_channel(:email, recipients, pull_request) do
+    Enum.map(recipients, fn recipient ->
+      send_email(recipient, pull_request)
+    end)
+  end
 
-  # Mrgr.Mailer.deliver(email)
-  # end
+  def notify_channel(:slack, recipients, pull_request) do
+    Enum.map(recipients, fn recipient ->
+      send_slack_message(recipient, pull_request)
+    end)
+  end
 
-  def send_slack(recipient, prs) do
-    message = Mrgr.Slack.Message.Dormant.render(prs)
+  def send_email(_recipient, _pull_request) do
+    # email = Mrgr.Email.dormant_pr(recipient, pull_request)
 
-    Mrgr.Slack.send_message(message, recipient)
+    # Mrgr.Mailer.deliver_and_log(email, @dormant_pr)
+  end
+
+  def send_slack_message(_recipient, _pull_request) do
+    # message = Mrgr.Slack.Message.DormantPR.render(pull_request, recipient)
+
+    # Mrgr.Slack.send_and_log(message, recipient, @dormant_pr)
+  end
+
+  def fetch_consumers(pull_request) do
+    Mrgr.Notification.consumers_of_event(@dormant_pr, pull_request)
   end
 end

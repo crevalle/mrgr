@@ -232,7 +232,7 @@ defmodule Mrgr.User do
   end
 
   def create_default_notifications(user) do
-    Mrgr.Notification.create_defaults_for_user(user)
+    Mrgr.Notification.create_default_preferences_for_user(user)
 
     user
   end
