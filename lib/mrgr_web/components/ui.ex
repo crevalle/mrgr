@@ -275,7 +275,7 @@ defmodule MrgrWeb.Components.UI do
 
     ~H"""
     <span class={@color}>
-      <time datetime={@datetime}><%= ago(@datetime) %></time> ago
+      <time datetime={@datetime}><%= ago(@datetime) %></time>
     </span>
     """
   end
@@ -766,9 +766,9 @@ defmodule MrgrWeb.Components.UI do
         phx-target={@target}
       >
         <%= if @obj.email do %>
-          <.icon name="envelope" class="h-4 w-4 text-green-500 toggle" />
+          <.email_enabled_icon />
         <% else %>
-          <.icon name="envelope" class="h-4 w-4 toggle text-gray-400" />
+          <.email_disabled_icon />
         <% end %>
         <:text>
           <%= if @obj.email do %>
@@ -793,9 +793,9 @@ defmodule MrgrWeb.Components.UI do
           phx-target={@target}
         >
           <%= if @obj.slack do %>
-            <%= img_tag("/images/Slack-mark-RGB.png", class: "w-4 h-4 toggle") %>
+            <.slack_enabled_icon />
           <% else %>
-            <%= img_tag("/images/Slack-mark-black-RGB.png", class: "w-4 h-4 opacity-40 toggle") %>
+            <.slack_disabled_icon />
           <% end %>
           <:text>
             <%= if @obj.slack do %>
@@ -810,6 +810,33 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def slack_enabled_icon(assigns) do
+    ~H"""
+    <%= img_tag("/images/Slack-mark-RGB.png", class: "w-4 h-4 toggle") %>
+    """
+  end
+
+  def slack_disabled_icon(assigns) do
+    ~H"""
+    <%= img_tag("/images/Slack-mark-black-RGB.png", class: "w-4 h-4 opacity-40 toggle") %>
+    """
+  end
+
+  def email_enabled_icon(assigns) do
+    ~H"""
+    <.icon name="envelope" class="h-4 w-4 text-green-500 toggle" />
+    """
+  end
+
+  def email_disabled_icon(assigns) do
+    ~H"""
+    <.icon name="envelope" class="h-4 w-4 toggle text-gray-400" />
+    """
+  end
+
+  def channel_icon(%{channel: "email"} = assigns), do: email_enabled_icon(assigns)
+  def channel_icon(%{channel: "slack"} = assigns), do: slack_enabled_icon(assigns)
+
   def hif_pattern(assigns) do
     ~H"""
     <pre class="text-sm font-medium text-gray-900"><%= @pattern %></pre>
@@ -819,7 +846,7 @@ defmodule MrgrWeb.Components.UI do
   def slack_connection_status(%{connected: false} = assigns) do
     ~H"""
     <div class="flex items-center space-x-1 pt-3">
-      <%= img_tag("/images/Slack-mark-RGB.png", class: "w-4 h-4 toggle") %>
+      <%= img_tag("/images/Slack-mark-RGB.png", class: "w-4 h-4") %>
       <p>Slack Unconnected</p>
       <.icon name="x-circle" type="solid" class="text-red-600 h-5 w-5" />
     </div>

@@ -15,10 +15,20 @@ defmodule MrgrWeb.Formatter do
   def login(%{login: login}), do: login
   def login(%{nickname: nickname}), do: nickname
 
+  def author_handle(%Mrgr.Github.Commit{} = commit) do
+    # not their handle, their name, since that's what's on a commit
+    # this function is provided for a consistent interface.
+    Mrgr.Schema.PullRequest.commit_author_name(commit)
+  end
+
   def author_handle(%Mrgr.Schema.Comment{} = comment) do
     comment
     |> Mrgr.Schema.Comment.author()
     |> author_handle()
+  end
+
+  def author_handle(%Mrgr.Schema.PRReview{user: author}) do
+    author_handle(author)
   end
 
   def author_handle(%{author: %{login: login}}), do: author_handle(login)
@@ -63,38 +73,41 @@ defmodule MrgrWeb.Formatter do
   def ago(timestamp) do
     seconds = timestamp_diff_seconds(timestamp)
 
-    case seconds do
-      s when s < 60 ->
-        "<1m"
+    span =
+      case seconds do
+        s when s < 60 ->
+          "<1m"
 
-      s when s < 3600 ->
-        "#{floor(s / 60)}m"
+        s when s < 3600 ->
+          "#{floor(s / 60)}m"
 
-      s when s < @one_day ->
-        "#{floor(s / 3600)}h"
+        s when s < @one_day ->
+          "#{floor(s / 3600)}h"
 
-      # 2 weeks
-      s when s < @fourteen_days ->
-        "#{floor(s / @one_day)}d"
+        # 2 weeks
+        s when s < @fourteen_days ->
+          "#{floor(s / @one_day)}d"
 
-      # 8 weeks
-      s when s < 4_838_400 ->
-        "#{floor(s / @seven_days)}w"
+        # 8 weeks
+        s when s < 4_838_400 ->
+          "#{floor(s / @seven_days)}w"
 
-      # hack because 8 weeks does not exactly equal 2 months
-      s when s < 5_184_000 ->
-        %{month: m} = DateTime.utc_now()
-        timestamp.month
-        "#{m - timestamp.month}mo"
+        # hack because 8 weeks does not exactly equal 2 months
+        s when s < 5_184_000 ->
+          %{month: m} = DateTime.utc_now()
+          timestamp.month
+          "#{m - timestamp.month}mo"
 
-      # less than 2 years, roughly
-      s when s < 62_208_000 ->
-        "#{floor(s / @thirty_days)}mo"
+        # less than 2 years, roughly
+        s when s < 62_208_000 ->
+          "#{floor(s / @thirty_days)}mo"
 
-      # 2 years or more
-      s ->
-        "#{round(s / (@thirty_days * 12))}y"
-    end
+        # 2 years or more
+        s ->
+          "#{round(s / (@thirty_days * 12))}y"
+      end
+
+    "#{span} ago"
   end
 
   def timestamp_diff_seconds(timestamp) do
@@ -186,4 +199,14 @@ defmodule MrgrWeb.Formatter do
 
   def format_preference_name(@pr_controversy), do: "Controversial Pull Requests"
   def format_preference_name(@dormant_pr), do: "Dormant Pull Requests"
+
+  def format_action_state(%Mrgr.Schema.PullRequest{} = pr) do
+    pr
+    |> Mrgr.PullRequest.action_state()
+    |> format_action_state()
+  end
+
+  def format_action_state(:ready_to_merge), do: "🚀 Ready to Merge"
+  def format_action_state(:needs_approval), do: "⚠️ Needs Approval"
+  def format_action_state(:fix_ci), do: "🛠 Fix CI"
 end

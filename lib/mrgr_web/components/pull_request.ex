@@ -165,7 +165,7 @@ defmodule MrgrWeb.Components.PullRequest do
     <div class="flex justify-between items-center w-full">
       <p class="truncate"><%= PullRequest.commit_message(@commit) %></p>
       <p class="text-sm text-gray-500 whitespace-nowrap">
-        <%= PullRequest.commit_author_name(@commit) %>
+        <%= author_handle(@commit) %>
       </p>
     </div>
     """
@@ -180,9 +180,9 @@ defmodule MrgrWeb.Components.PullRequest do
           <p class="text-sm text-gray-500 truncate">
             <%= shorten_sha(PullRequest.commit_sha(@commit)) %>
           </p>
-          <p class="pl-2 text-sm text-gray-500"><%= ts(PullRequest.committed_at(@commit)) %></p>
+          <p class="pl-2 text-sm text-gray-500"><%= ts(Mrgr.DateTime.happened_at(@commit)) %></p>
         </div>
-        <p class="text-sm text-gray-500"><%= PullRequest.commit_author_name(@commit) %></p>
+        <p class="text-sm text-gray-500"><%= author_handle(@commit) %></p>
       </div>
     </div>
     """
