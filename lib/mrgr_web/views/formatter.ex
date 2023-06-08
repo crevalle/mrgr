@@ -209,4 +209,8 @@ defmodule MrgrWeb.Formatter do
   def format_action_state(:ready_to_merge), do: "🚀 Ready to Merge"
   def format_action_state(:needs_approval), do: "⚠️ Needs Approval"
   def format_action_state(:fix_ci), do: "🛠 Fix CI"
+
+  def pr_review_state(%{state: "approved"}), do: "An approving review"
+  def pr_review_state(%{state: "changes_requested"}), do: "A review requesting changes"
+  def pr_review_state(%{state: _}), do: "A neutral review"
 end

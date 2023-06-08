@@ -1,0 +1,28 @@
+<div>
+  <h1>Hello! 👋</h1>
+
+  <p>
+    The following pull requests have gone dormant - it's been 24 working hours since they've had activity.  You may want to see what the hold up is 🤔.
+  </p>
+
+  <%= for pr <- @pull_requests do %>
+    <div style="padding-top: 0.75rem;">
+      [<%= pr.repository.name %>] -
+      <.external_link href={Mrgr.Schema.PullRequest.external_url(pr)}>
+        <%= pr.title %>
+      </.external_link>
+      by <%= author_handle(pr) %> opened <%= ago(pr.opened_at) %> <br />
+      <%= format_action_state(pr) %><br /> Last activity:
+      <.last_activity activity={Mrgr.PullRequest.Dormant.last_activity(pr)} />
+    </div>
+    <hr />
+  <% end %>
+
+  <div>
+    <p>Good luck ✌️</p>
+  </div>
+
+  <p>- The Mrgr Team</p>
+</div>
+
+<.update_email_preferences_link />

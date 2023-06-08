@@ -62,6 +62,18 @@ defmodule Mrgr.Email do
     |> render_with_layout(MrgrWeb.Email.Renderer.controversial_pr(assigns))
   end
 
+  def dormant_pr(recipient, pull_requests) do
+    assigns = %{
+      pull_requests: pull_requests
+    }
+
+    new()
+    |> from(@from)
+    |> to(recipient)
+    |> subject("PRs have gone dormant 😴")
+    |> render_with_layout(MrgrWeb.Email.Renderer.dormant_pr(assigns))
+  end
+
   def hif_alert(rules, recipient, pull_request) do
     assigns = %{
       rules: rules,

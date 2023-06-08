@@ -150,4 +150,44 @@ defmodule MrgrWeb.Components.Email do
     </div>
     """
   end
+
+  def last_activity(%{activity: {:opened_at, _ts}} = assigns), do: ~H"PR was opened."
+
+  def last_activity(%{activity: {:commit, commit}} = assigns) do
+    assigns = assign(assigns, :commit, commit)
+
+    ~H"""
+    Commit <%= @commit.abbreviated_sha %> by <%= author_handle(@commit) %> was pushed <%= ago(
+      Mrgr.DateTime.happened_at(@commit)
+    ) %>:
+    <p>
+      <em>
+        <%= Mrgr.Schema.PullRequest.commit_message(@commit) %>
+      </em>
+    </p>
+    """
+  end
+
+  def last_activity(%{activity: {:comment, comment}} = assigns) do
+    assigns = assign(assigns, :comment, comment)
+
+    ~H"""
+    Comment by <%= author_handle(@comment) %> left <%= ago(Mrgr.DateTime.happened_at(@comment)) %>:
+    <p>
+      <em>
+        <%= Mrgr.Schema.Comment.body(@comment) %>
+      </em>
+    </p>
+    """
+  end
+
+  def last_activity(%{activity: {:review, review}} = assigns) do
+    assigns = assign(assigns, :review, review)
+
+    ~H"""
+    <%= pr_review_state(@review) %> by <%= author_handle(@review) %> left <%= ago(
+      Mrgr.DateTime.happened_at(@review)
+    ) %>
+    """
+  end
 end
