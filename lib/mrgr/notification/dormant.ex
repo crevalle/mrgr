@@ -1,7 +1,15 @@
 defmodule Mrgr.Notification.Dormant do
   use Mrgr.Notification.Event
 
-  @spec notify_consumers(Mrgr.Schema.PullRequest.t()) :: Mrgr.Notification.result()
+  # get all a user's PRs that are dormant at a specific installation
+  # find their notificatin preference at that installation
+  # for all enabled channels, send one message with all dormant PRs
+
+  def socks(user, installation_id, pull_requests) do
+  end
+
+  @spec notify_consumers([Mrgr.Schema.PullRequest.t()] | Mrgr.Schema.PullRequest.t()) ::
+          Mrgr.Notification.result()
   def notify_consumers(pull_request) do
     consumers = fetch_consumers(pull_request)
 
@@ -24,10 +32,11 @@ defmodule Mrgr.Notification.Dormant do
     end)
   end
 
-  def send_email(_recipient, _pull_request) do
-    # email = Mrgr.Email.dormant_pr(recipient, pull_request)
+  # TODO: prs are lists of prs
+  def send_email(recipient, pull_request) do
+    email = Mrgr.Email.dormant_pr(recipient, pull_request)
 
-    # Mrgr.Mailer.deliver_and_log(email, @dormant_pr)
+    Mrgr.Mailer.deliver_and_log(email, @dormant_pr)
   end
 
   def send_slack_message(recipient, pull_request) do

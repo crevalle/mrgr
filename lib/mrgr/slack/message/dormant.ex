@@ -20,9 +20,7 @@ defmodule Mrgr.Slack.Message.Dormant do
     """
   end
 
-  def render_pull_requests([pr]) do
-    prs = [pr, pr]
-
+  def render_pull_requests(prs) do
     prs
     |> Enum.map(&render_pr/1)
     |> Enum.join("\n")
@@ -63,8 +61,4 @@ defmodule Mrgr.Slack.Message.Dormant do
   def format_last_activity({:review, review}) do
     "#{pr_review_state(review)} by #{author_handle(review)} left #{ago(Mrgr.DateTime.happened_at(review))}"
   end
-
-  def pr_review_state(%{state: "approved"}), do: "An approving review"
-  def pr_review_state(%{state: "changes_requested"}), do: "A review requesting changes"
-  def pr_review_state(%{state: _}), do: "A neutral review"
 end
