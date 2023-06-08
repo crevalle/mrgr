@@ -16,8 +16,7 @@ defmodule Mrgr.Worker.Dormancy do
     |> Enum.map(fn user ->
       prs = Mrgr.PullRequest.freshly_dormant(user.current_installation_id, user.timezone)
 
-      # the notify function notifies all consumers of event
-      Enum.map(prs, &Mrgr.Notification.Dormant.notify_consumers/1)
+      Mrgr.Notification.Dormant.notify_consumers(prs, user.current_installation_id)
     end)
 
     :ok

@@ -90,6 +90,22 @@ defmodule Mrgr.PullRequest.Dormant do
   def window(timezone) do
     # takes local time, returns UTC for db query
 
+    beginning =
+      timezone
+      |> fresh_threshold()
+      |> DateTime.shift_zone!("Etc/UTC")
+
+    ending =
+      timezone
+      |> stale_threshold()
+      |> DateTime.shift_zone!("Etc/UTC")
+
+    %{beginning: beginning, ending: ending}
+  end
+
+  def fresh_window(timezone) do
+    # takes local time, returns UTC for db query
+
     ending =
       timezone
       |> fresh_threshold()

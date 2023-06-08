@@ -840,15 +840,11 @@ defmodule Mrgr.PullRequest do
     Schema
     |> Query.for_installation(installation_id)
     |> Query.ready_for_review()
-    |> Query.dormant(timezone)
+    |> Query.freshly_dormant(timezone)
     |> Query.with_author()
     |> Query.with_comments()
     |> Query.with_pr_reviews()
     |> Mrgr.Repo.all()
-
-    # TODO: just became dormant in the last hour, otherwise people will get notified constantly
-    # until then, return nothing
-    []
   end
 
   def dormant_prs(user) do
@@ -1411,6 +1407,15 @@ defmodule Mrgr.PullRequest do
 
     def dormant(query, timezone) do
       window = Mrgr.PullRequest.Dormant.window(timezone)
+
+      from(q in query,
+        where: q.last_activity_at > ^window.beginning,
+        where: q.last_activity_at < ^window.ending
+      )
+    end
+
+    def freshly_dormant(query, timezone) do
+      window = Mrgr.PullRequest.Dormant.fresh_window(timezone)
 
       from(q in query,
         where: q.last_activity_at > ^window.beginning,
