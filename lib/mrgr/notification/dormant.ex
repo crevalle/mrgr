@@ -1,51 +1,53 @@
 defmodule Mrgr.Notification.Dormant do
   use Mrgr.Notification.Event
 
-  # get all a user's PRs that are dormant at a specific installation
-  # find their notificatin preference at that installation
-  # for all enabled channels, send one message with all dormant PRs
+  @moduledoc """
+  These notifications assume there will be at least one PR in them, that is, that many PRs will go dormant
+  'at one time' - within the hour that the dormancy alarm runs - and the user will get a single
+  notification for all of the PRs.  This is in contrast to other alerts that are typically 1-1 with
+  PRs.
 
-  def socks(user, installation_id, pull_requests) do
-  end
+  We can obviously pass in a list of one pr that's gone dormant, if we want.  Just calling out here
+  that the main use case will likely involve >1 PRs and users won't want a ton of alerts.
+  """
 
-  @spec notify_consumers([Mrgr.Schema.PullRequest.t()] | Mrgr.Schema.PullRequest.t()) ::
-          Mrgr.Notification.result()
-  def notify_consumers(pull_request) do
-    consumers = fetch_consumers(pull_request)
+  @spec notify_consumers([Mrgr.Schema.PullRequest.t()], integer()) :: Mrgr.Notification.result()
+  def notify_consumers(pull_requests, installation_id) do
+    # make sure this installation id is for these pull requests!
+    consumers = fetch_consumers(installation_id)
 
     Enum.reduce(consumers, %{}, fn {channel, recipients}, acc ->
-      results = notify_channel(channel, recipients, pull_request)
+      results = notify_channel(channel, recipients, pull_requests)
 
       Map.put(acc, channel, results)
     end)
   end
 
-  def notify_channel(:email, recipients, pull_request) do
+  def notify_channel(:email, recipients, pull_requests) do
     Enum.map(recipients, fn recipient ->
-      send_email(recipient, pull_request)
+      send_email(recipient, pull_requests)
     end)
   end
 
-  def notify_channel(:slack, recipients, pull_request) do
+  def notify_channel(:slack, recipients, pull_requests) do
     Enum.map(recipients, fn recipient ->
-      send_slack_message(recipient, pull_request)
+      send_slack_message(recipient, pull_requests)
     end)
   end
 
-  # TODO: prs are lists of prs
-  def send_email(recipient, pull_request) do
-    email = Mrgr.Email.dormant_pr(recipient, pull_request)
+  def send_email(recipient, pull_requests) do
+    email = Mrgr.Email.dormant_pr(recipient, pull_requests)
 
     Mrgr.Mailer.deliver_and_log(email, @dormant_pr)
   end
 
-  def send_slack_message(recipient, pull_request) do
-    message = Mrgr.Slack.Message.Dormant.render(pull_request)
+  def send_slack_message(recipient, pull_requests) do
+    message = Mrgr.Slack.Message.Dormant.render(pull_requests)
 
     Mrgr.Slack.send_and_log(message, recipient, @dormant_pr)
   end
 
-  def fetch_consumers(pull_request) do
-    Mrgr.Notification.consumers_of_event(@dormant_pr, pull_request)
+  def fetch_consumers(installation_id) do
+    Mrgr.Notification.consumers_of_event(@dormant_pr, installation_id)
   end
 end
