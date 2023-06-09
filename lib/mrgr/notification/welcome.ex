@@ -4,6 +4,7 @@ defmodule Mrgr.Notification.Welcome do
   def send_via_slack(user) do
     prs = %{
       hif_prs: Mrgr.PullRequest.hif_prs_for_user(user),
+      dormant_prs: Mrgr.PullRequest.open_prs(user),
       situational_prs: Mrgr.PullRequest.situational_for_user(user)
     }
 
