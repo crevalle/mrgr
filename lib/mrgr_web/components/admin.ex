@@ -110,22 +110,22 @@ defmodule MrgrWeb.Components.Admin do
     """
   end
 
-  def notification_preference_table(assigns) do
+  def notification_preferences_table(assigns) do
     ~H"""
     <div class="flex flex-col space-y-2">
-      <h5>User Notification Preferences</h5>
+      <h5>Notification Preferences</h5>
       <.table>
         <.th>id</.th>
         <.th>event</.th>
         <.th>send email</.th>
         <.th>send slack</.th>
         <.th>Updated</.th>
-        <.tr>
-          <.td><%= @preference.id %></.td>
-          <.td><%= @preference.event %></.td>
-          <.td><%= tf(@preference.email) %></.td>
-          <.td><%= tf(@preference.slack) %></.td>
-          <.td><%= ts(@preference.updated_at, @timezone) %></.td>
+        <.tr :for={preference <- @preferences}>
+          <.td><%= preference.id %></.td>
+          <.td><%= preference.event %></.td>
+          <.td><%= tf(preference.email) %></.td>
+          <.td><%= tf(preference.slack) %></.td>
+          <.td><%= ts(preference.updated_at, @timezone) %></.td>
         </.tr>
       </.table>
     </div>
@@ -135,7 +135,7 @@ defmodule MrgrWeb.Components.Admin do
   def notification_address_table(assigns) do
     ~H"""
     <div class="flex flex-col space-y-2">
-      <h5>User Notification Addresses</h5>
+      <h5>Notification Addresses</h5>
       <.table>
         <.th>id</.th>
         <.th>email</.th>

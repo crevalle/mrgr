@@ -93,8 +93,8 @@ defmodule MrgrWeb.Admin.Live.UserShow do
               }
             />
 
-            <.notification_preference_table
-              preference={find_preference(@user, @user.current_installation)}
+            <.notification_preferences_table
+              preferences={find_preferences(@user, @user.current_installation)}
               timezone={@timezone}
               }
             />
@@ -125,8 +125,8 @@ defmodule MrgrWeb.Admin.Live.UserShow do
               }
             />
 
-            <.notification_preference_table
-              preference={find_preference(@user, install)}
+            <.notification_preferences_table
+              preferences={find_preferences(@user, install)}
               timezone={@timezone}
               }
             />
@@ -162,7 +162,7 @@ defmodule MrgrWeb.Admin.Live.UserShow do
     Enum.find(user.notification_addresses, &(&1.installation_id == installation.id))
   end
 
-  def find_preference(user, installation) do
-    Enum.find(user.notification_preferences, &(&1.installation_id == installation.id))
+  def find_preferences(user, installation) do
+    Enum.filter(user.notification_preferences, &(&1.installation_id == installation.id))
   end
 end
