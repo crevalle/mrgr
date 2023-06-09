@@ -90,6 +90,7 @@ config :mrgr, Oban,
       Oban.Plugins.Cron,
       crontab: [
         {"0 0 * * *", Mrgr.Worker.RepositoriesSync, args: %{"type" => "all"}},
+        {"0 * * * *", Mrgr.Worker.DormancyAlert},
         {"*/5 * * * *", Mrgr.Worker.SnoozeAlarm},
         {"0 23 * * FRI", Mrgr.Worker.ChangelogEmail, args: %{"job" => "weekly"}}
       ]

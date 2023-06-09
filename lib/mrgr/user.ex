@@ -19,6 +19,13 @@ defmodule Mrgr.User do
     |> Mrgr.Repo.all()
   end
 
+  def all_regardless_of_installation do
+    Schema
+    |> Query.with_or_without_current_installation()
+    |> Query.cron()
+    |> Mrgr.Repo.all()
+  end
+
   @spec find(Ecto.Schema.t() | integer()) :: Schema.t() | nil
   def find(%Mrgr.Github.User{login: nil}), do: nil
 
@@ -316,7 +323,10 @@ defmodule Mrgr.User do
       )
     end
 
-    def with_current_installation(query) do
+    # mostly for legacy stuff, users should always have a current installation,
+    # except for the brief moment from when they sign up and before they install
+    # our GH app.  this should be used ONLY for admin stuff.
+    def with_or_without_current_installation(query) do
       from(q in query,
         left_join: c in assoc(q, :current_installation),
         left_join: a in assoc(c, :account),
@@ -324,10 +334,18 @@ defmodule Mrgr.User do
       )
     end
 
+    def with_current_installation(query) do
+      from(q in query,
+        join: c in assoc(q, :current_installation),
+        join: a in assoc(c, :account),
+        preload: [current_installation: {c, account: a}]
+      )
+    end
+
     def with_installations(query) do
       from(q in query,
-        left_join: i in assoc(q, :installations),
-        left_join: a in assoc(i, :account),
+        join: i in assoc(q, :installations),
+        join: a in assoc(i, :account),
         preload: [installations: {i, account: a}]
       )
     end
