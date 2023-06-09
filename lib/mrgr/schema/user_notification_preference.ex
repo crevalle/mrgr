@@ -27,9 +27,7 @@ defmodule Mrgr.Schema.UserNotificationPreference do
   end
 
   def rt_backfill_for_users do
-    Mrgr.Schema.User
-    |> Mrgr.User.Query.with_installations()
-    |> Mrgr.Repo.all()
+    Mrgr.User.with_installations()
     |> Enum.map(fn user ->
       Enum.map(user.installations, fn installation ->
         create_for_user_and_installation(user, installation)

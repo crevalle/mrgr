@@ -59,10 +59,7 @@ defmodule Mrgr.Notification do
   end
 
   def seed_new_event(event, opts \\ %{}) do
-    users =
-      Mrgr.Schema.User
-      |> Mrgr.User.Query.with_installations()
-      |> Mrgr.Repo.all()
+    users = Mrgr.User.with_installations()
 
     Enum.map(users, fn user ->
       Enum.map(user.installations, fn installation ->

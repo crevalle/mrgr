@@ -21,7 +21,7 @@ defmodule MrgrWeb.Admin.Live.User do
 
   def mount(_params, _session, socket) do
     if connected?(socket) do
-      users = Mrgr.User.all()
+      users = Mrgr.User.all_regardless_of_installation()
 
       socket
       |> assign(:users, users)

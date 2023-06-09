@@ -12,6 +12,10 @@ defmodule Mrgr.Notification.Dormant do
   """
 
   @spec notify_consumers([Mrgr.Schema.PullRequest.t()], integer()) :: Mrgr.Notification.result()
+  def notify_consumers([], _installation_id) do
+    %{email: [], slack: []}
+  end
+
   def notify_consumers(pull_requests, installation_id) do
     # make sure this installation id is for these pull requests!
     consumers = fetch_consumers(installation_id)
