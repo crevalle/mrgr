@@ -264,6 +264,10 @@ th:last-of-type {
   display: none;
 }
 
+.separated-grid-row {
+  @apply border-t border-gray-300 p-2;
+}
+
 .spinner {
   @apply flex items-center space-x-1;
 }

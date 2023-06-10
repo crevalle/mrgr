@@ -1,7 +1,6 @@
 defmodule Mrgr.Schema.UserNotificationPreference do
   use Mrgr.Schema
   use Mrgr.Notification.Event
-  use Mrgr.Notification.Schema
 
   @moduledoc """
   One preference per user-installation-event.  Can receive an email, slack message, both, or none.

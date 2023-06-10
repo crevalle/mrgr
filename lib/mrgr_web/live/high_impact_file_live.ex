@@ -122,6 +122,15 @@ defmodule MrgrWeb.HighImpactFileLive do
     end
   end
 
+  def handle_info({:channel_updated, %Mrgr.Schema.HighImpactFileRule{} = hif}, socket) do
+    repos = update_hif_in_its_repo(socket.assigns.repos, hif)
+
+    socket
+    |> assign(:repos, repos)
+    |> Flash.put(:info, "Updated!")
+    |> noreply()
+  end
+
   def handle_info({:hif_updated, hif}, socket) do
     repos = update_hif_in_its_repo(socket.assigns.repos, hif)
 
