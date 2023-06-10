@@ -1,8 +1,6 @@
 defmodule Mrgr.Schema.PRTab do
   use Mrgr.Schema
 
-  use Mrgr.Notification.Schema
-
   @draft_statuses ["ready_for_review", "draft", "both"]
 
   schema "pr_tabs" do

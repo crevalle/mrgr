@@ -39,10 +39,11 @@
           <.badge item={hif} />
         </td>
         <td>
-          <.notification_channels_toggle
+          <.live_component
+            module={MrgrWeb.Components.Live.NotificationChannelToggle}
+            id={"hif-#{hif.id}"}
             obj={hif}
             slack_unconnected={@slack_unconnected}
-            target={@myself}
           />
         </td>
         <td class="whitespace-nowrap pr-4 py-2 text-right text-sm">

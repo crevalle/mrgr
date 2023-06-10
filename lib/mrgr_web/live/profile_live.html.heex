@@ -94,48 +94,105 @@
             </div>
 
             <div class="pt-4">
-              <.table>
-                <th class="p-3 bg-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                  PR Event
-                </th>
-                <th class="p-3 bg-gray-100 text-xs font-medium uppercase tracking-wide text-gray-500 justify-center">
-                  Channels
-                </th>
-                <.live_component
-                  :for={preference <- @preferences}
-                  module={MrgrWeb.Components.Live.NotificationPreference}
-                  id={"preference_#{preference.id}"}
-                  preference={preference}
-                  slack_unconnected={@slack_unconnected}
-                />
-              </.table>
+              <div class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+                <div class="grid grid-cols-3">
+                  <div class="col-span-2 p-3 bg-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                    PR Event
+                  </div>
+                  <div class="bg-gray-100 p-3 text-xs font-medium uppercase tracking-wide text-gray-500 text-center">
+                    Channels
+                  </div>
+
+                  <%= for preference <- @preferences do %>
+                    <div class="col-span-2 separated-grid-row">
+                      <%= format_preference_name(preference.event) %>
+                    </div>
+                    <div class="separated-grid-row">
+                      <.live_component
+                        module={MrgrWeb.Components.Live.NotificationChannelToggle}
+                        id={"preference-#{preference.id}"}
+                        obj={preference}
+                        slack_unconnected={@slack_unconnected}
+                      />
+                    </div>
+                  <% end %>
+                </div>
+              </div>
             </div>
 
             <div class="pt-4">
-              <.table>
-                <th class="p-3 bg-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                  Custom Alert
-                </th>
-                <th class="p-3 bg-gray-100 text-xs font-medium uppercase tracking-wide text-gray-500 justify-center">
-                  Channels
-                </th>
-                <.live_component
-                  :for={tab <- @pr_tabs}
-                  module={MrgrWeb.Components.Live.PRTabChannelList}
-                  id={"tab-#{tab.id}"}
-                  tab={tab}
-                  slack_unconnected={@slack_unconnected}
-                />
-              </.table>
+              <div class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+                <div class="grid grid-cols-3">
+                  <div class="col-span-2 p-3 bg-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Custom Alert
+                  </div>
+                  <div class="bg-gray-100 p-3 text-xs font-medium uppercase tracking-wide text-gray-500 text-center">
+                    Channels
+                  </div>
+
+                  <%= for tab <- @pr_tabs do %>
+                    <div class="col-span-2 separated-grid-row">
+                      <%= tab.title %>
+                    </div>
+                    <div class="separated-grid-row">
+                      <.live_component
+                        module={MrgrWeb.Components.Live.NotificationChannelToggle}
+                        id={"tab-#{tab.id}"}
+                        obj={tab}
+                        slack_unconnected={@slack_unconnected}
+                      />
+                    </div>
+                  <% end %>
+                </div>
+              </div>
             </div>
 
-            <.live_component
-              module={MrgrWeb.Components.Live.UserRepoHIFList}
-              id="user-repo-hif-list"
-              hifs_by_repo={@hifs_by_repo}
-              slack_unconnected={@slack_unconnected}
-              current_user={@current_user}
-            />
+            <div class="pt-4">
+              <div class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+                <div class="grid grid-cols-3">
+                  <div class="bg-gray-100 p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                    High Impact File Alert
+                  </div>
+                  <div class="bg-gray-100 p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Badge
+                  </div>
+                  <div class="bg-gray-100 p-3 text-xs font-medium uppercase tracking-wide text-gray-500 text-center">
+                    Channels
+                  </div>
+
+                  <%= for {repo, hifs} <- @hifs_by_repo do %>
+                    <div
+                      class="col-span-3 border-t border-gray-300 bg-stone-50 font-semibold"
+                      id={"repo-#{repo.id}"}
+                    >
+                      <div class="rounded-lg p-2 flex items-center">
+                        <span class="pr-2"><%= repo.name %></span>
+                        <.language_icon language={repo.language} />
+                      </div>
+                    </div>
+
+                    <%= for hif <- hifs do %>
+                      <div class="separated-grid-row">
+                        <.hif_pattern pattern={hif.pattern} />
+                      </div>
+
+                      <div class="separated-grid-row">
+                        <.badge item={hif} />
+                      </div>
+
+                      <div class="separated-grid-row">
+                        <.live_component
+                          module={MrgrWeb.Components.Live.NotificationChannelToggle}
+                          id={"hif-#{hif.id}"}
+                          obj={hif}
+                          slack_unconnected={@slack_unconnected}
+                        />
+                      </div>
+                    <% end %>
+                  <% end %>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

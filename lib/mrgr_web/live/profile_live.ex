@@ -73,7 +73,7 @@ defmodule MrgrWeb.ProfileLive do
     end
   end
 
-  def handle_info({:hif_updated, hif}, socket) do
+  def handle_info({:channel_updated, %Mrgr.Schema.HighImpactFileRule{} = hif}, socket) do
     hifs = Mrgr.List.replace(socket.assigns.hifs_by_repo[hif.repository], hif)
 
     hifs_by_repo = Map.put(socket.assigns.hifs_by_repo, hif.repository, hifs)
@@ -84,7 +84,10 @@ defmodule MrgrWeb.ProfileLive do
     |> noreply()
   end
 
-  def handle_info({:preference_updated, preference}, socket) do
+  def handle_info(
+        {:channel_updated, %Mrgr.Schema.UserNotificationPreference{} = preference},
+        socket
+      ) do
     preferences = Mrgr.List.replace(socket.assigns.preferences, preference)
 
     socket
@@ -93,7 +96,7 @@ defmodule MrgrWeb.ProfileLive do
     |> noreply()
   end
 
-  def handle_info({:tab_updated, tab}, socket) do
+  def handle_info({:channel_updated, %Mrgr.Schema.PRTab{} = tab}, socket) do
     tabs = Mrgr.List.replace(socket.assigns.pr_tabs, tab)
 
     socket
