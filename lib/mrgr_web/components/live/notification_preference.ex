@@ -19,7 +19,7 @@ defmodule MrgrWeb.Components.Live.NotificationPreference do
   def handle_event("toggle-channel", %{"attr" => attr}, socket) do
     preference =
       socket.assigns.preference
-      |> Mrgr.Schema.UserNotificationPreference.toggle_notification(String.to_existing_atom(attr))
+      |> Mrgr.Schema.UserNotificationPreference.toggle_channel(String.to_existing_atom(attr))
 
     send(self(), {:preference_updated, preference})
 

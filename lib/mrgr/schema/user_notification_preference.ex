@@ -1,6 +1,7 @@
 defmodule Mrgr.Schema.UserNotificationPreference do
   use Mrgr.Schema
   use Mrgr.Notification.Event
+  use Mrgr.Notification.Schema
 
   @moduledoc """
   One preference per user-installation-event.  Can receive an email, slack message, both, or none.
@@ -16,14 +17,6 @@ defmodule Mrgr.Schema.UserNotificationPreference do
     belongs_to(:installation, Mrgr.Schema.Installation)
 
     timestamps()
-  end
-
-  def toggle_notification(preference, attr) do
-    toggle = !Map.get(preference, attr)
-
-    preference
-    |> changeset(%{attr => toggle})
-    |> Mrgr.Repo.update!()
   end
 
   def rt_backfill_for_users do
