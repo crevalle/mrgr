@@ -1,6 +1,8 @@
 defmodule Mrgr.Schema.HighImpactFileRule do
   use Mrgr.Schema
 
+  use Mrgr.Notification.Schema
+
   schema "high_impact_file_rules" do
     field(:name, :string)
     field(:color, :string, default: "#f1e5d1")

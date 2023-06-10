@@ -1,6 +1,8 @@
 defmodule Mrgr.Schema.PRTab do
   use Mrgr.Schema
 
+  use Mrgr.Notification.Schema
+
   @draft_statuses ["ready_for_review", "draft", "both"]
 
   schema "pr_tabs" do
@@ -13,6 +15,9 @@ defmodule Mrgr.Schema.PRTab do
     field(:editing, :boolean, default: false, virtual: true)
 
     field(:pull_requests, {:array, :map}, default: [], virtual: true)
+
+    field(:email, :boolean)
+    field(:slack, :boolean)
 
     belongs_to(:user, Mrgr.Schema.User)
     belongs_to(:installation, Mrgr.Schema.Installation)
@@ -37,6 +42,8 @@ defmodule Mrgr.Schema.PRTab do
     permalink
     title
     user_id
+    email
+    slack
   ]a
 
   def changeset(schema, params \\ %{}) do
@@ -49,7 +56,7 @@ defmodule Mrgr.Schema.PRTab do
 
   def edit_changeset(schema, params \\ %{}) do
     schema
-    |> cast(params, [:title])
+    |> cast(params, [:title, :email, :slack])
     |> set_default_title()
     |> set_permalink()
   end

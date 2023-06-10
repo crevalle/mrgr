@@ -15,12 +15,15 @@ defmodule MrgrWeb.ProfileLive do
       slack_unconnected =
         !Mrgr.Installation.slack_connected?(socket.assigns.current_user.current_installation)
 
+      pr_tabs = Mrgr.PRTab.for_user(socket.assigns.current_user)
+
       socket
       |> put_title("Your Profile")
       |> assign(:changeset, nil)
       |> assign(:preferences, preferences)
       |> assign(:slack_unconnected, slack_unconnected)
       |> assign(:hifs_by_repo, hifs_by_repo)
+      |> assign(:pr_tabs, pr_tabs)
       |> ok()
     else
       ok(socket)
@@ -86,6 +89,15 @@ defmodule MrgrWeb.ProfileLive do
 
     socket
     |> assign(:preferences, preferences)
+    |> Flash.put(:info, "Updated!")
+    |> noreply()
+  end
+
+  def handle_info({:tab_updated, tab}, socket) do
+    tabs = Mrgr.List.replace(socket.assigns.pr_tabs, tab)
+
+    socket
+    |> assign(:pr_tabs, tabs)
     |> Flash.put(:info, "Updated!")
     |> noreply()
   end

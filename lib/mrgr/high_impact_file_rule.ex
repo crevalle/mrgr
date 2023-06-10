@@ -186,14 +186,6 @@ defmodule Mrgr.HighImpactFileRule do
     end
   end
 
-  def toggle_notification(hif, attr) do
-    toggle = !Map.get(hif, attr)
-
-    hif
-    |> Schema.update_changeset(%{attr => toggle})
-    |> Mrgr.Repo.update!()
-  end
-
   @spec add_to_matching_open_prs(Schema.t()) :: Schema.t()
   def add_to_matching_open_prs(hif) do
     prs = find_matching_open_prs(hif)
