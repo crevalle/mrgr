@@ -1,0 +1,22 @@
+<div>
+  <h1>Hello! 👋</h1>
+
+  <p>
+    <%= author_handle(@pull_request) %> opened
+    <.external_link href={Mrgr.Schema.PullRequest.external_url(@pull_request)}>
+      <%= @pull_request.title %>
+    </.external_link>
+    in the <strong><%= @pull_request.repository.name %></strong>
+    repo, matching your custom filter <strong><%= @tab.title %></strong>.
+  </p>
+
+  <p>Click the link above to see details on Github.</p>
+
+  <div>
+    <p>Good luck ✌️</p>
+  </div>
+
+  <p>- The Mrgr Team</p>
+</div>
+
+<.update_email_preferences_link />

@@ -43,6 +43,9 @@ defmodule Mrgr.Schema.User do
 
     has_many(:notifications, Mrgr.Schema.Notification, foreign_key: :recipient_id)
 
+    # across installations
+    has_many(:pr_tabs, Mrgr.Schema.PRTab)
+
     belongs_to(:current_installation, Mrgr.Schema.Installation)
 
     embeds_one :urls, Urls do

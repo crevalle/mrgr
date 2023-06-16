@@ -1,6 +1,8 @@
 defmodule Mrgr.Schema.UserNotificationAddress do
   use Mrgr.Schema
 
+  @derive {Swoosh.Email.Recipient, address: :email}
+
   @moduledoc """
   A user may want to get notifications at different email addresses based on the installation.
 

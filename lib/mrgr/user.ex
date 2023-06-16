@@ -45,6 +45,7 @@ defmodule Mrgr.User do
     |> Query.with_member()
     |> Query.with_notification_preferences()
     |> Query.with_notification_addresses()
+    |> Query.with_pr_tabs()
     |> Mrgr.Repo.one()
   end
 
@@ -388,6 +389,13 @@ defmodule Mrgr.User do
       from(q in query,
         join: m in assoc(q, :member),
         where: m.id == ^member.id
+      )
+    end
+
+    def with_pr_tabs(query) do
+      from(q in query,
+        left_join: t in assoc(q, :pr_tabs),
+        preload: [pr_tabs: t]
       )
     end
   end

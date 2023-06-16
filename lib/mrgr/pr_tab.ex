@@ -2,6 +2,9 @@ defmodule Mrgr.PRTab do
   alias Mrgr.Schema.PRTab, as: Schema
   alias __MODULE__.Query
 
+  @drafty_statuses ["draft", "both"]
+  @ready_statuses ["draft", "both"]
+
   def create_defaults_for_new_installation(%Mrgr.Schema.Installation{} = installation) do
     case Mrgr.Member.find_by_user_id(installation.creator_id) do
       %Mrgr.Schema.Member{} = member ->
@@ -38,13 +41,66 @@ defmodule Mrgr.PRTab do
     # since that's almost always what we want
     Schema
     |> Query.for_user(user)
-    |> Query.with_authors()
-    |> Query.with_reviewers()
-    |> Query.with_labels()
-    |> Query.with_repositories()
+    |> Query.with_settings()
     |> Query.cron()
     |> Mrgr.Repo.all()
   end
+
+  def matching_pull_request(pull_request) do
+    Schema
+    |> Query.for_installation(pull_request.repository.installation_id)
+    |> Query.with_user()
+    |> Query.with_settings()
+    |> Mrgr.Repo.all()
+    |> Enum.filter(fn tab -> matches_pr?(tab, pull_request) end)
+  end
+
+  def matches_pr?(tab, pr) do
+    # only one needs to work
+    with false <- matches_author?(tab, pr),
+         false <- matches_reviewers?(tab, pr),
+         false <- matches_labels?(tab, pr),
+         false <- matches_repositories?(tab, pr),
+         false <- matches_draft_status?(tab, pr) do
+      false
+    end
+  end
+
+  def matches_author?(tab, pr) do
+    tab.authors
+    |> Enum.map(& &1.node_id)
+    |> Enum.member?(pr.author.node_id)
+  end
+
+  def matches_reviewers?(tab, pr) do
+    tab_reviewer_ids = Enum.map(tab.reviewers, & &1.node_id)
+    pr_reviewer_ids = Enum.map(pr.solicited_reviewers, & &1.node_id)
+
+    Mrgr.List.intersection?(tab_reviewer_ids, pr_reviewer_ids)
+  end
+
+  def matches_labels?(tab, pr) do
+    tab_label_ids = Enum.map(tab.labels, & &1.id)
+    pr_label_ids = Enum.map(pr.labels, & &1.id)
+
+    Mrgr.List.intersection?(tab_label_ids, pr_label_ids)
+  end
+
+  def matches_repositories?(tab, pr) do
+    tab_repository_ids = Enum.map(tab.repositories, & &1.id)
+
+    Mrgr.List.member?(tab_repository_ids, pr.repository_id)
+  end
+
+  def matches_draft_status?(%{draft_status: status}, %{draft: true})
+      when status in @drafty_statuses,
+      do: true
+
+  def matches_draft_status?(%{draft_status: status}, %{draft: false})
+      when status in @ready_statuses,
+      do: true
+
+  def matches_draft_status?(_tab, _pr), do: false
 
   def create_for_user(user) do
     params = %{user_id: user.id, installation_id: user.current_installation_id}
@@ -242,6 +298,14 @@ defmodule Mrgr.PRTab do
   defmodule Query do
     use Mrgr.Query
 
+    def with_settings(query) do
+      query
+      |> with_authors()
+      |> with_reviewers()
+      |> with_labels()
+      |> with_repositories()
+    end
+
     def for_user(query, user) do
       from(q in query,
         where: q.user_id == ^user.id,
@@ -251,10 +315,17 @@ defmodule Mrgr.PRTab do
       )
     end
 
+    def for_installation(query, installation_id) do
+      from(q in query,
+        where: q.installation_id == ^installation_id
+      )
+    end
+
     def with_user(query) do
       from(q in query,
         join: u in assoc(q, :user),
-        preload: [user: u]
+        join: i in assoc(u, :current_installation),
+        preload: [user: {u, current_installation: i}]
       )
     end
 
