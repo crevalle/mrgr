@@ -43,6 +43,7 @@ defmodule Mrgr.PullRequest do
         |> sync_github_data()
         |> reassociate_high_impact_file_rules()
         |> notify_hif_alert_consumers()
+        |> notify_pr_tab_consumers()
         |> broadcast(@pull_request_created)
         |> ok()
 
@@ -514,6 +515,12 @@ defmodule Mrgr.PullRequest do
 
   def notify_hif_alert_consumers(pull_request) do
     Mrgr.HighImpactFileRule.send_alert(pull_request)
+
+    pull_request
+  end
+
+  def notify_pr_tab_consumers(pull_request) do
+    Mrgr.Notification.PRTab.notify_consumers(pull_request)
 
     pull_request
   end

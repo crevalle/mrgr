@@ -23,6 +23,11 @@ defmodule Mrgr.List do
     end
   end
 
+  # n^n alert!
+  def intersection?(l1, l2) when is_list(l1) and is_list(l2) do
+    Enum.any?(l1, fn item -> Enum.member?(l2, item) end)
+  end
+
   @spec remove(list(), map() | String.t() | integer()) :: list()
   def remove(list, %{id: id}) do
     remove(list, id)

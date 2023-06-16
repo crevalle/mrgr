@@ -10,4 +10,8 @@ defmodule Mrgr.Notification.Event do
       ]
     end
   end
+
+  def custom_type(%Mrgr.Schema.PRTab{title: title}) do
+    "custom - #{title}"
+  end
 end

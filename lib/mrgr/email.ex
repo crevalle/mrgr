@@ -74,6 +74,19 @@ defmodule Mrgr.Email do
     |> render_with_layout(MrgrWeb.Email.Renderer.dormant_pr(assigns))
   end
 
+  def pr_tab(recipient, pull_request, tab) do
+    assigns = %{
+      pull_request: pull_request,
+      tab: tab
+    }
+
+    new()
+    |> from(@from)
+    |> to(recipient)
+    |> subject("PR opened matching '#{tab.title}'")
+    |> render_with_layout(MrgrWeb.Email.Renderer.pr_tab(assigns))
+  end
+
   def hif_alert(rules, recipient, pull_request) do
     assigns = %{
       rules: rules,
@@ -247,15 +260,17 @@ defmodule Mrgr.Email do
     end
   end
 
+  # to desmond
   def to(email, address) when is_bitstring(address) do
     Swoosh.Email.to(email, address)
   end
 
+  # all emails go to user's one email address, regardless of which installation
+  # they're for.
   def to(email, %Mrgr.Schema.User{} = recipient) do
-    # used to create notification log
-
     email
     |> Swoosh.Email.to(recipient)
+    # used to create notification log
     |> put_private(:user_id, recipient.id)
   end
 end

@@ -110,10 +110,34 @@ defmodule MrgrWeb.Components.Admin do
     """
   end
 
+  def custom_pr_tab_table(assigns) do
+    ~H"""
+    <div class="flex flex-col space-y-2">
+      <h5>Custom PR Tabs</h5>
+      <.table>
+        <.th>id</.th>
+        <.th>title</.th>
+        <.th>send email</.th>
+        <.th>send slack</.th>
+        <.th>Updated</.th>
+        <.th>Created</.th>
+        <.tr :for={tab <- @tabs}>
+          <.td><%= tab.id %></.td>
+          <.td><%= tab.title %></.td>
+          <.td><%= tf(tab.email) %></.td>
+          <.td><%= tf(tab.slack) %></.td>
+          <.td><%= ts(tab.updated_at, @timezone) %></.td>
+          <.td><%= ts(tab.inserted_at, @timezone) %></.td>
+        </.tr>
+      </.table>
+    </div>
+    """
+  end
+
   def notification_preferences_table(assigns) do
     ~H"""
     <div class="flex flex-col space-y-2">
-      <h5>Notification Preferences</h5>
+      <h5>Notification Events</h5>
       <.table>
         <.th>id</.th>
         <.th>event</.th>
@@ -135,7 +159,7 @@ defmodule MrgrWeb.Components.Admin do
   def notification_address_table(assigns) do
     ~H"""
     <div class="flex flex-col space-y-2">
-      <h5>Notification Addresses</h5>
+      <h5>Notification Address</h5>
       <.table>
         <.th>id</.th>
         <.th>email</.th>

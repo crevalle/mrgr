@@ -77,7 +77,7 @@ defmodule MrgrWeb.Admin.Live.UserShow do
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
         <div class="px-4 py-5 flex flex-col space-y-4">
           <div class="my-1 text-center">
-            <.h3>Current Installation</.h3>
+            <.h3>Current Installation - <%= account_name(@user) %></.h3>
           </div>
 
           <%= if @user.current_installation do %>
@@ -88,13 +88,21 @@ defmodule MrgrWeb.Admin.Live.UserShow do
             } />
 
             <.notification_address_table
-              address={find_address(@user, @user.current_installation)}
+              address={for_installation(@user.notification_addresses, @user.current_installation)}
               timezone={@timezone}
               }
             />
 
             <.notification_preferences_table
-              preferences={find_preferences(@user, @user.current_installation)}
+              preferences={
+                matching_installation(@user.notification_preferences, @user.current_installation)
+              }
+              timezone={@timezone}
+              }
+            />
+
+            <.custom_pr_tab_table
+              tabs={matching_installation(@user.pr_tabs, @user.current_installation)}
               timezone={@timezone}
               }
             />
@@ -120,13 +128,19 @@ defmodule MrgrWeb.Admin.Live.UserShow do
             <.slack_connection_status connected={Mrgr.Installation.slack_connected?(install)} />
 
             <.notification_address_table
-              address={find_address(@user, install)}
+              address={for_installation(@user.notification_addresses, install)}
               timezone={@timezone}
               }
             />
 
             <.notification_preferences_table
-              preferences={find_preferences(@user, install)}
+              preferences={matching_installation(@user.notification_preferences, install)}
+              timezone={@timezone}
+              }
+            />
+
+            <.custom_pr_tab_table
+              tabs={matching_installation(@user.pr_tabs, install)}
               timezone={@timezone}
               }
             />
@@ -158,11 +172,11 @@ defmodule MrgrWeb.Admin.Live.UserShow do
     |> ok
   end
 
-  def find_address(user, installation) do
-    Enum.find(user.notification_addresses, &(&1.installation_id == installation.id))
+  def for_installation(list, installation) do
+    Enum.find(list, &(&1.installation_id == installation.id))
   end
 
-  def find_preferences(user, installation) do
-    Enum.filter(user.notification_preferences, &(&1.installation_id == installation.id))
+  def matching_installation(list, installation) do
+    Enum.filter(list, &(&1.installation_id == installation.id))
   end
 end
