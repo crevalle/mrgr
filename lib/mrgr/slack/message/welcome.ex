@@ -154,8 +154,8 @@ defmodule Mrgr.Slack.Message.Welcome do
   end
 
   defp profile_link do
-    url = "#{MrgrWeb.Endpoint.url()}#{~p"/profile"}"
+    url = "#{MrgrWeb.Endpoint.url()}#{~p"/notifications"}"
 
-    build_link(url, "profile")
+    build_link(url, "notifications")
   end
 end

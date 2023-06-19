@@ -145,7 +145,7 @@ defmodule MrgrWeb.Components.Email do
     ~H"""
     <div style="padding-top: 2rem;">
       <p style="font-weight: 400; font-size: 0.75rem; line-height: 1rem;">
-        <.l href={~p"/profile"}>Update your email preferences</.l>
+        <.l href={~p"/notifications"}>Update your email preferences</.l>
       </p>
     </div>
     """

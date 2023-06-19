@@ -68,7 +68,7 @@ defmodule MrgrWeb.SlackController do
   defp slackbot_installation_source_path(%{assigns: %{current_user: user}}) do
     case user.installing_slackbot_from_profile_page do
       true ->
-        ~p"/profile"
+        ~p"/notifications"
 
       false ->
         ~p"/onboarding"

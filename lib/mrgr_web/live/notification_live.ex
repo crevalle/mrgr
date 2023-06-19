@@ -116,7 +116,7 @@ defmodule MrgrWeb.NotificationLive do
 
   # a one-way flag
   # if a user installs slack during onboarding this doesn't change,
-  # but will change the first time they come to profile page.
+  # but will change the first time they come to notifications page.
   #
   # send them back here if it's where they started
   defp set_user_installing_slackbot_redirect(socket) do

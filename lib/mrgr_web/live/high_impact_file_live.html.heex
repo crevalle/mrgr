@@ -9,7 +9,7 @@
     <div class="main-pane w-3/5">
       <div :if={is_nil(@current_user.notification_email)} class="alert alert-danger">
         You don't have an email address set up so we can't send you notifications!
-        <.l href={~p"/profile"}>Click here</.l>
+        <.l href={~p"/notifications"}>Click here</.l>
         to add one.
       </div>
 

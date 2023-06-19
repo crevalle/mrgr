@@ -78,7 +78,7 @@
               <.checkbox f={f} attr={:email} />
               <p class="text-sm text-gray-500" id="email-description">
                 Email <span class="font-semibold"><%= @current_user.notification_email %></span>
-                <.l href={~p"/profile"} class="text-xs">change</.l>
+                <.l href={~p"/notifications"} class="text-xs">change</.l>
               </p>
             </div>
 
@@ -90,7 +90,7 @@
               ) %>
               <p class="text-sm text-gray-500" id="slack-description">
                 Via Slack
-                <.l :if={@slack_unconnected} href={~p"/profile"} class="text-xs">
+                <.l :if={@slack_unconnected} href={~p"/notifications"} class="text-xs">
                   Connect Slack
                 </.l>
               </p>
