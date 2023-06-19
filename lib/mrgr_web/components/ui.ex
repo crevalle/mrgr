@@ -689,7 +689,7 @@ defmodule MrgrWeb.Components.UI do
           </div>
         <% end %>
 
-        <.nav_item route={~p"/profile"} icon="cog-6-tooth" label="Profile" . />
+        <.nav_item route={~p"/notifications"} icon="bell-alert" label="Notifications" . />
         <.nav_item route={~p"/account"} icon="banknotes" label="Account" . />
 
         <div class="py-1">

@@ -11,7 +11,7 @@ defmodule MrgrWeb.Components.Dashboard do
     <.nav_tab_list>
       <.tab_section>
         <:title>
-          Custom Dashboards
+          Custom Alerts
           <.l phx-click="add-tab">
             <.icon name="plus-circle" class="ml-2 h-5 w-5" />
           </.l>

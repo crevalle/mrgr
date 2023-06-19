@@ -1,4 +1,4 @@
-defmodule MrgrWeb.ProfileLive do
+defmodule MrgrWeb.NotificationLive do
   use MrgrWeb, :live_view
 
   on_mount MrgrWeb.Plug.Auth
