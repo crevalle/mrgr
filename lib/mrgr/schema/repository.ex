@@ -15,10 +15,6 @@ defmodule Mrgr.Schema.Repository do
 
     belongs_to(:installation, Mrgr.Schema.Installation)
 
-    belongs_to(:policy, Mrgr.Schema.RepositorySettingsPolicy,
-      foreign_key: :repository_settings_policy_id
-    )
-
     has_many(:user_visible_repositories, Mrgr.Schema.UserVisibleRepository)
     has_many(:visible_user, through: [:user_visible_repositories, :user])
 
@@ -40,7 +36,6 @@ defmodule Mrgr.Schema.Repository do
     node_id
     private
     installation_id
-    repository_settings_policy_id
   ]a
 
   def basic_changeset(schema, params) do
@@ -58,7 +53,6 @@ defmodule Mrgr.Schema.Repository do
     schema
     |> cast(params, @allowed)
     |> foreign_key_constraint(:installation_id)
-    |> foreign_key_constraint(:repository_settings_policy_id)
     |> cast_embed(:settings)
     |> cast_embed(:parent)
   end
@@ -83,9 +77,6 @@ defmodule Mrgr.Schema.Repository do
 
   def main_branch(%{data: %{"default_branch" => branch}}), do: branch
   def main_branch(_repo), do: "master"
-
-  def policy_name(%{policy: %{name: name}}), do: name
-  def policy_name(_repo), do: nil
 
   # %{
   #   "full_name" => "crevalle/node-cql-binary",

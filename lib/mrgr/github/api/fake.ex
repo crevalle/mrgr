@@ -25,10 +25,6 @@ defmodule Mrgr.Github.API.Fake do
     %{}
   end
 
-  def update_branch_protection(_repo, _params) do
-    %{}
-  end
-
   def fetch_repository_settings_graphql(_repo) do
     %{"node" => %{}}
   end
