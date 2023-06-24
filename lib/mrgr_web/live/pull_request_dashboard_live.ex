@@ -123,10 +123,12 @@ defmodule MrgrWeb.PullRequestDashboardLive do
   def select_default_tab(tabs) do
     tabs
     |> Tabs.custom_tabs()
-    |> hd()
     |> case do
-      nil -> hd(tabs)
-      first_custom_tab -> first_custom_tab
+      [] ->
+        hd(tabs)
+
+      [first | _rest] ->
+        first
     end
   end
 
