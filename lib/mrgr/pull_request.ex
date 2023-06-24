@@ -847,6 +847,7 @@ defmodule Mrgr.PullRequest do
     Schema
     |> Query.for_installation(installation_id)
     |> Query.ready_for_review()
+    |> Query.open()
     |> Query.freshly_dormant(timezone)
     |> Query.with_author()
     |> Query.with_comments()
