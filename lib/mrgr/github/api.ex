@@ -26,7 +26,6 @@ defmodule Mrgr.Github.API do
   defdelegate add_review_request(pull_request, login), to: @mod
   defdelegate update_label(label, repo, node_id), to: @mod
   defdelegate update_repo_settings(repo, params), to: @mod
-  defdelegate update_branch_protection(repo, params), to: @mod
 
   def paged_requests(page \\ []) do
     Mrgr.Schema.GithubAPIRequest

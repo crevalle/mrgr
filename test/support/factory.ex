@@ -143,16 +143,6 @@ defmodule Mrgr.Factory do
     }
   end
 
-  def build(:repository_settings_policy) do
-    %Mrgr.Schema.RepositorySettingsPolicy{
-      installation: build(:installation),
-      name: Faker.Company.bs(),
-      default: false,
-      enforce_automatically: true,
-      settings: build(:repository_settings)
-    }
-  end
-
   def build(:repository_settings) do
     %Mrgr.Schema.RepositorySettings{
       merge_commit_allowed: true,

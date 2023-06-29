@@ -1,116 +1,14 @@
 <div class="two-pane-layout">
   <div class="main-pane w-full">
-    <div class="">
-      <div class="flex justify-between mb-2">
-        <.h1>Security Policies</.h1>
-        <.l
-          :if={Mrgr.User.admin_at_installation?(@current_user)}
-          phx-click={
-            JS.push("add-policy")
-            |> show_detail()
-          }
-        >
-          Add New
-        </.l>
-      </div>
-      <%= if @policies == [] do %>
-        <div class="p-4 border border-solid rounded-md bg-blue-50 flex flex-col items-center">
-          <p>
-            <strong>None Yet!</strong>
-            Why don't you
-            <%= if Mrgr.User.admin_at_installation?(@current_user) do %>
-              <.l phx-click={
-                JS.push("add-policy")
-                |> show_detail()
-              }>
-                Add One
-              </.l>?
-            <% else %>
-              ask an admin to set one up?
-            <% end %>
-          </p>
-        </div>
-      <% else %>
-        <.table>
-          <thead class="bg-gray-100">
-            <th class="p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-              Name
-            </th>
-            <.th>Repos</.th>
-            <.th>Required Approvals</.th>
-            <.th>allowed merge types</.th>
-            <.th></.th>
-          </thead>
-          <tbody class="bg-white">
-            <tr
-              :for={policy <- @policies}
-              class={"#{selected_outline(selected?(policy, @selected_policy))}"}
-            >
-              <td class="py-4 pl-4 flex items-center text-sm font-medium text-gray-900">
-                <%= policy.name %>
-                <.policy_badges policy={policy} />
-              </td>
-              <td class="p-3 text-gray-500 text-right text-nowrap">
-                <.compliant_repos_count
-                  compliant={Mrgr.RepositorySettingsPolicy.compliant_repos(policy)}
-                  repos={repos_for_policy(@all_repos, policy)}
-                />
-
-                <.l
-                  :if={Mrgr.User.admin_at_installation?(@current_user)}
-                  phx-click={JS.push("select-policy", value: %{policy_id: policy.id})}
-                >
-                  Remediate
-                </.l>
-              </td>
-              <td class="p-3 text-center">
-                <.approving_review_count count={policy.settings.required_approving_review_count} />
-              </td>
-              <td class="p-3"><.possible_merge_badges settings={policy.settings} /></td>
-              <td class="p-3">
-                <.l
-                  :if={Mrgr.User.admin_at_installation?(@current_user)}
-                  phx-click={
-                    JS.push("edit-policy")
-                    |> show_detail()
-                  }
-                  phx-value-id={policy.id}
-                >
-                  Edit
-                </.l>
-              </td>
-            </tr>
-          </tbody>
-        </.table>
-      <% end %>
-    </div>
-
     <div class="section">
-      <%= if @selected_policy do %>
-        <div class="flex justify-between basis-1/2">
-          <.heading title={"Repositories assigned to policy #{@selected_policy.name}"} />
+      <.heading title={"All Repositories for #{ @installation.account.login }"} />
 
-          <.l
-            :if={Mrgr.User.admin_at_installation?(@current_user)}
-            phx-click={
-              JS.push("enforce-policy-to-repos", value: %{policy_id: @selected_policy.id})
-            }
-            data-confirm="This will update the settings on all the policy's repositories.  Are you sure?"
-            class="text-red-700 hover:text-red-900"
-          >
-            Enforce Policy on These Repos
-          </.l>
-        </div>
-      <% else %>
-        <.heading title={"All Repositories for #{ @installation.account.login }"} />
-      <% end %>
       <.installation_synced_at dt={@installation.repos_last_synced_at} timezone={@timezone} />
 
       <.table>
         <.th class="pl-20">Name</.th>
         <.th class="text-center">Required Approvals</.th>
         <.th class="text-center">Allowed Merge Types</.th>
-        <.th class="text-center">Policy</.th>
         <.th class="text-center">Show PRs?</.th>
         <.th>
           <div class="flex items-center flex-nowrap whitespace-nowrap">
@@ -136,18 +34,6 @@
             <.approving_review_count count={repo.settings.required_approving_review_count} />
           </td>
           <td><.possible_merge_badges settings={repo.settings} /></td>
-          <td class="pl-3 text-center">
-            <%= if Mrgr.User.admin_at_installation?(@current_user) do %>
-              <.live_component
-                module={MrgrWeb.Components.Live.EnforceRepositoryPolicy}
-                id={"enforce-repo-policy-#{repo.id}"}
-                repo={repo}
-                policies={@policies}
-              />
-            <% else %>
-              <.repo_policy_name repo={repo} />
-            <% end %>
-          </td>
           <td class="text-center">
             <.live_component
               module={MrgrWeb.Components.Live.ToggleRepositoryShowPRs}
@@ -177,15 +63,5 @@
     </div>
   </div>
 
-  <div id="detail-pane">
-    <.live_component
-      module={MrgrWeb.Components.Live.RepositorySettingsPolicyForm}
-      id="security-policy-form"
-      object={@form_object}
-      repos={@all_repos}
-      selected_repository_ids={Enum.map(repos_for_policy(@all_repos, @form_object), & &1.id)}
-      current_user={@current_user}
-      timezone={@timezone}
-    />
-  </div>
+  <div id="detail-pane"></div>
 </div>

@@ -349,15 +349,9 @@ defmodule Mrgr.Installation do
         Map.put(acc, repo.node_id, repo)
       end)
 
-    # only look it up once
-    default_policy = Mrgr.RepositorySettingsPolicy.default(installation.id)
-
     repos =
       data
-      |> Enum.map(
-        &create_or_update_repository(repos_by_node_id, installation, default_policy, &1)
-      )
-      |> Enum.map(&Mrgr.Repository.auto_enforce_policy/1)
+      |> Enum.map(&create_or_update_repository(repos_by_node_id, installation, &1))
 
     installation =
       installation
@@ -368,13 +362,12 @@ defmodule Mrgr.Installation do
   end
 
   # works on our cached list.
-  defp create_or_update_repository(repos, installation, policy, node) do
+  defp create_or_update_repository(repos, installation, node) do
     case Map.get(repos, node["id"]) do
       nil ->
         # cheat a bit
         other_params = %{
           installation_id: installation.id,
-          repository_settings_policy_id: safe_policy_id(policy),
           full_name: "#{installation.account.login}/#{node["name"]}"
         }
 
@@ -385,9 +378,6 @@ defmodule Mrgr.Installation do
         Mrgr.Repository.update_from_graphql(repo, node)
     end
   end
-
-  defp safe_policy_id(%{id: id}), do: id
-  defp safe_policy_id(_), do: nil
 
   def clear_installation_data(installation) do
     clear_pull_requests(installation)

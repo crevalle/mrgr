@@ -226,18 +226,6 @@ defmodule Mrgr.Github.API.Live do
     request!(&Tentacat.Repositories.update/4, repo.installation_id, [owner, name, params])
   end
 
-  def update_branch_protection(repo, params) do
-    {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
-    branch_name = repo.settings.default_branch_name
-
-    request!(&Tentacat.Repositories.Branches.update_protection/5, repo.installation_id, [
-      owner,
-      name,
-      branch_name,
-      params
-    ])
-  end
-
   def fetch_filtered_pulls(installation, repo, opts) do
     {owner, name} = Mrgr.Schema.Repository.owner_name(repo)
 

@@ -48,8 +48,6 @@ defmodule Mrgr.Schema.Installation do
     has_one(:account, Mrgr.Schema.Account)
     has_one(:subscription, Mrgr.Schema.StripeSubscription)
 
-    has_many(:repository_settings_policies, Mrgr.Schema.RepositorySettingsPolicy)
-
     has_many(:repositories, Mrgr.Schema.Repository)
 
     has_many(:incoming_webhooks, Mrgr.Schema.IncomingWebhook)
