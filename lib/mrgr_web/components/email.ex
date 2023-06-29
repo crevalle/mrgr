@@ -19,15 +19,25 @@ defmodule MrgrWeb.Components.Email do
     """
   end
 
+  attr :href, :string, required: true
+  attr :style, :string, default: "color: #2C746E;"
+
+  slot :inner_block, required: true
+
   def external_link(assigns) do
-    style = "color: #2C746E;"
-
-    assigns =
-      assigns
-      |> assign(:style, style)
-
     ~H"""
     <a href={@href} style={@style}><%= render_slot(@inner_block) %></a>
+    """
+  end
+
+  def github_link(assigns) do
+    ~H"""
+    <.external_link
+      href={@href}
+      style="color: white; background-color: #2C746E; padding: 0.75rem; border-radius: 0.375rem; text-decoration: none;"
+    >
+      <%= render_slot(@inner_block) %>
+    </.external_link>
     """
   end
 

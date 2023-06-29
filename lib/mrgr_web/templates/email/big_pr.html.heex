@@ -1,0 +1,35 @@
+<div>
+  <h1>Hello! 👋</h1>
+
+  <p>
+    <%= author_handle(@pull_request) %> just opened a Big Pull Request called
+    <.external_link href={Mrgr.Schema.PullRequest.external_url(@pull_request)}>
+      <%= @pull_request.title %>
+    </.external_link>
+    in the <strong><%= @pull_request.repository.name %></strong>
+    repository.  Here are the details:
+  </p>
+
+  <p>
+    Additions:
+    <span style="color: #4aa25c;"><%= number_with_delimiter(@pull_request.additions) %></span>
+    <br /> Deletions:
+    <span style="color: #ed7a74;"><%= number_with_delimiter(@pull_request.deletions) %></span>
+  </p>
+
+  <div style="padding-top: 10px; padding-bottom: 10px;">
+    <p>
+      <.github_link href={Mrgr.Schema.PullRequest.external_url(@pull_request)}>
+        View it on Github
+      </.github_link>
+    </p>
+  </div>
+
+  <div>
+    <p>Good luck ✌️</p>
+  </div>
+
+  <p>- The Mrgr Team</p>
+</div>
+
+<.update_email_preferences_link />

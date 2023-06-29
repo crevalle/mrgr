@@ -37,6 +37,8 @@ defmodule MrgrWeb.Formatter do
   def author_handle(handle) when is_bitstring(handle), do: "@#{handle}"
   def author_handle(_handle), do: "unknown"
 
+  def repo_name(%{repository: %{name: name}}), do: name
+
   def shorten_sha(sha) do
     String.slice(sha, 0..6)
   end
@@ -199,6 +201,7 @@ defmodule MrgrWeb.Formatter do
 
   def format_preference_name(@pr_controversy), do: "Controversial Pull Requests"
   def format_preference_name(@dormant_pr), do: "Dormant Pull Requests"
+  def format_preference_name(@big_pr), do: "Big Pull Requests"
 
   def format_action_state(%Mrgr.Schema.PullRequest{} = pr) do
     pr

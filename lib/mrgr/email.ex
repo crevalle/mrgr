@@ -1,5 +1,6 @@
 defmodule Mrgr.Email do
   import Swoosh.Email, except: [to: 2]
+  import MrgrWeb.Formatter, only: [repo_name: 1]
 
   @from {"Mrgr", "noreply@mrgr.io"}
 
@@ -72,6 +73,18 @@ defmodule Mrgr.Email do
     |> to(recipient)
     |> subject("PRs have gone dormant 😴")
     |> render_with_layout(MrgrWeb.Email.Renderer.dormant_pr(assigns))
+  end
+
+  def big_pr(recipient, pull_request) do
+    assigns = %{
+      pull_request: pull_request
+    }
+
+    new()
+    |> from(@from)
+    |> to(recipient)
+    |> subject("Big PR opened in #{repo_name(pull_request)} 🗂️")
+    |> render_with_layout(MrgrWeb.Email.Renderer.big_pr(assigns))
   end
 
   def pr_tab(recipient, pull_request, tab) do

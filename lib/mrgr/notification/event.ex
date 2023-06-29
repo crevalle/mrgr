@@ -3,10 +3,12 @@ defmodule Mrgr.Notification.Event do
     quote do
       @pr_controversy "pr_controversy"
       @dormant_pr "dormant_pr"
+      @big_pr "big_pr"
 
       @notification_events [
         @pr_controversy,
-        @dormant_pr
+        @dormant_pr,
+        @big_pr
       ]
     end
   end

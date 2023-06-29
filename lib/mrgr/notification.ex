@@ -55,7 +55,7 @@ defmodule Mrgr.Notification do
   end
 
   def rt_seed_event do
-    seed_new_event(@dormant_pr)
+    seed_new_event(@big_pr)
   end
 
   def seed_new_event(event, opts \\ %{}) do

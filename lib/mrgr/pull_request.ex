@@ -42,8 +42,7 @@ defmodule Mrgr.PullRequest do
         |> set_solicited_reviewers(params["requested_reviewers"])
         |> sync_github_data()
         |> reassociate_high_impact_file_rules()
-        |> notify_hif_alert_consumers()
-        |> notify_pr_tab_consumers()
+        |> send_notifications()
         |> broadcast(@pull_request_created)
         |> ok()
 
@@ -131,7 +130,7 @@ defmodule Mrgr.PullRequest do
     |> Mrgr.Repo.update!()
     |> preload_installation()
     |> preload_hif_alerts()
-    |> notify_hif_alert_consumers()
+    |> send_notifications()
     |> broadcast(@pull_request_ready_for_review)
     |> ok()
   end
@@ -511,7 +510,20 @@ defmodule Mrgr.PullRequest do
     Mrgr.Repo.preload(pull_request, :high_impact_file_rules, force: true)
   end
 
-  def notify_hif_alert_consumers(%{draft: true} = pr), do: pr
+  def send_notifications(%{draft: true} = pr), do: pr
+
+  def send_notifications(pr) do
+    pr
+    |> notify_hif_alert_consumers()
+    |> notify_pr_tab_consumers()
+    |> notify_pr_risk()
+  end
+
+  def notify_pr_risk(pull_request) do
+    Mrgr.Notification.BigPR.send_alert(pull_request)
+
+    pull_request
+  end
 
   def notify_hif_alert_consumers(pull_request) do
     Mrgr.HighImpactFileRule.send_alert(pull_request)

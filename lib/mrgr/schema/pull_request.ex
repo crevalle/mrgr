@@ -34,6 +34,7 @@ defmodule Mrgr.Schema.PullRequest do
     field(:mergeable, :string)
     field(:merge_state_status, :string)
     field(:node_id, :string)
+    field(:notified_of_big_pr, :boolean)
     field(:number, :integer)
     field(:opened_at, :utc_datetime)
     field(:raw, :map)
