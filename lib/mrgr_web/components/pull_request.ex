@@ -299,11 +299,6 @@ defmodule MrgrWeb.Components.PullRequest do
           <.icon name="arrow-top-right-on-square" class="flex-shrink-0 h-5 w-5" />
         </div>
       </.l>
-      <%= if @draft do %>
-        <span class="text-gray-400">[draft]</span>
-      <% else %>
-        <.action_state_emoji :if={@show_action_state_emoji} action_state={@action_state} />
-      <% end %>
     </div>
     """
   end
@@ -330,9 +325,9 @@ defmodule MrgrWeb.Components.PullRequest do
 
   def byline(assigns) do
     ~H"""
-    <p class="text-sm font-light text-gray-400">
-      by @<%= @author %>
-    </p>
+    <div class="flex items-center text-sm font-light text-gray-400">
+      <.avatar member={@pull_request.author} />
+    </div>
     """
   end
 

@@ -11,11 +11,8 @@
           <.title
             href={Mrgr.Schema.PullRequest.external_url(@pull_request)}
             title={@pull_request.title}
-            draft={@pull_request.draft}
-            show_action_state_emoji={@show_action_state_emoji}
-            action_state={Mrgr.PullRequest.action_state(@pull_request)}
           />
-          <.byline author={Mrgr.Schema.PullRequest.author_name(@pull_request)} />
+          <.byline pull_request={@pull_request} />
           <.line_diff additions={@pull_request.additions} deletions={@pull_request.deletions} />
         </div>
 
@@ -35,14 +32,26 @@
         <p>
           Opened <.timeago datetime={@pull_request.opened_at} uhoh={true} . />
         </p>
-        <div class="flex flex-col">
-          <.live_component
-            module={MrgrWeb.Components.Live.Sparkline}
-            id={"pull_request_#{@pull_request.id}_activity_preview"}
-            comments={@pull_request.comments}
-            commits={@pull_request.commits}
-          />
-          <.aside>Recent Activity</.aside>
+        <div class="flex items-end space-x-2">
+          <div>
+            <%= if @pull_request.draft do %>
+              <span class="text-gray-400">[draft]</span>
+            <% else %>
+              <.action_state_emoji
+                :if={@show_action_state_emoji}
+                action_state={Mrgr.PullRequest.action_state(@pull_request)}
+              />
+            <% end %>
+          </div>
+          <div class="flex flex-col">
+            <.live_component
+              module={MrgrWeb.Components.Live.Sparkline}
+              id={"pull_request_#{@pull_request.id}_activity_preview"}
+              comments={@pull_request.comments}
+              commits={@pull_request.commits}
+            />
+            <.aside>Recent Activity</.aside>
+          </div>
         </div>
       </div>
     </div>
