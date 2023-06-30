@@ -526,7 +526,7 @@ defmodule Mrgr.PullRequest do
   end
 
   def notify_hif_alert_consumers(pull_request) do
-    Mrgr.HighImpactFileRule.send_alert(pull_request)
+    Mrgr.Notification.HIF.send_alert(pull_request)
 
     pull_request
   end
@@ -760,6 +760,12 @@ defmodule Mrgr.PullRequest do
     |> Query.by_id(id)
     |> Query.with_installation()
     |> Query.with_comments()
+    |> Query.with_hifs()
+    |> Query.with_comments()
+    |> Query.with_pr_reviews()
+    |> Query.with_labels()
+    |> Query.with_author()
+    |> Query.with_solicited_reviewers()
     |> Mrgr.Repo.one()
   end
 

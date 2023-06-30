@@ -7,6 +7,32 @@ defmodule MrgrWeb.Components.PullRequest do
   alias Mrgr.Schema.PullRequest
   alias Phoenix.LiveView.JS
 
+  attr :pull_request, :map, required: true
+  attr :current_user, :map, required: true
+  attr :timezone, :string, default: "Etc/UTC"
+  attr :selected, :boolean, default: false
+  attr :members, :list, default: []
+  attr :tab_permalink, :string, default: ""
+  attr :show_action_state_emoji, :boolean, default: true
+  attr :snooze_options, :list, default: []
+
+  def card(assigns) do
+    ~H"""
+    <.live_component
+      module={MrgrWeb.Components.Live.PullRequestCard}
+      id={"pull_request_#{@pull_request.id}"}
+      pull_request={@pull_request}
+      selected={@selected}
+      members={@members}
+      tab_permalink={@tab_permalink}
+      show_action_state_emoji={@show_action_state_emoji}
+      snooze_options={@snooze_options}
+      current_user={@current_user}
+      timezone={@timezone}
+    />
+    """
+  end
+
   def hif_badge_list(%{hifs: []} = assigns) do
     ~H[]
   end

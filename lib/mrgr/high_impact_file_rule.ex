@@ -1,6 +1,4 @@
 defmodule Mrgr.HighImpactFileRule do
-  @name "hif"
-
   alias Mrgr.Schema.HighImpactFileRule, as: Schema
   alias __MODULE__.Query
 
@@ -92,55 +90,6 @@ defmodule Mrgr.HighImpactFileRule do
     hif
     |> matching_filenames(pull_request)
     |> Enum.any?()
-  end
-
-  @spec hif_consumer_is_author?(Schema.t(), Mrgr.Schema.PullRequest.t()) :: boolean()
-  def hif_consumer_is_author?(%{user_id: user_id}, %{user_id: user_id}), do: true
-  def hif_consumer_is_author?(_hif, _pr), do: false
-
-  def send_alert(%{high_impact_file_rules: []}), do: nil
-
-  def send_alert(%{high_impact_file_rules: rules} = pull_request) when is_list(rules) do
-    # each user gets one alert per pull request with all applicable rules
-    pull_request = Mrgr.Repo.preload(pull_request, :author)
-
-    rules
-    # don't send alerts to whomever opened the PR
-    |> Enum.reject(&hif_consumer_is_author?(&1, pull_request.author))
-    |> Enum.group_by(& &1.user_id)
-    |> Enum.map(&do_send_alert(&1, pull_request))
-  end
-
-  defp do_send_alert({user_id, rules}, pull_request) do
-    recipient = Mrgr.User.find_with_current_installation(user_id)
-
-    rules_by_channel =
-      rules
-      |> Enum.map(fn rule ->
-        %{rule | filenames: matching_filenames(rule, pull_request)}
-      end)
-      |> Mrgr.Notification.bucketize_preferences()
-
-    email_results = send_email_alert(rules_by_channel.email, recipient, pull_request)
-    slack_results = send_slack_alert(rules_by_channel.slack, recipient, pull_request)
-
-    %{email: email_results, slack: slack_results}
-  end
-
-  def send_email_alert([], _recipient, _pull_request), do: nil
-
-  def send_email_alert(rules, recipient, pull_request) do
-    email = Mrgr.Email.hif_alert(rules, recipient, pull_request)
-
-    Mrgr.Mailer.deliver_and_log(email, @name)
-  end
-
-  def send_slack_alert([], _recipient, _pull_request), do: nil
-
-  def send_slack_alert(rules, recipient, pull_request) do
-    message = Mrgr.Slack.Message.HIFAlert.render(pull_request, rules)
-
-    Mrgr.Slack.send_and_log(message, recipient, @name)
   end
 
   def matching_filenames(rule, pull_request) do

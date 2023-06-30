@@ -42,13 +42,13 @@ defmodule Mrgr.Notification.Dormant do
   def send_email(recipient, pull_requests) do
     email = Mrgr.Email.dormant_pr(recipient, pull_requests)
 
-    Mrgr.Mailer.deliver_and_log(email, @dormant_pr)
+    Mrgr.Mailer.deliver_and_log(email, @dormant_pr, pull_requests)
   end
 
   def send_slack_message(recipient, pull_requests) do
     message = Mrgr.Slack.Message.Dormant.render(pull_requests)
 
-    Mrgr.Slack.send_and_log(message, recipient, @dormant_pr)
+    Mrgr.Slack.send_and_log(message, recipient, @dormant_pr, pull_requests)
   end
 
   def fetch_consumers(installation_id) do

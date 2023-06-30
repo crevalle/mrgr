@@ -3,10 +3,10 @@ defmodule Mrgr.Slack do
   Wraps the Slack API
   """
 
-  def send_and_log(message, recipient, type) do
+  def send_and_log(message, recipient, type, pull_request \\ []) do
     res = send_message(message, recipient)
 
-    Mrgr.Notification.create(recipient.id, res, "slack", type)
+    Mrgr.Notification.create(recipient.id, res, "slack", type, pull_request)
 
     res
   end

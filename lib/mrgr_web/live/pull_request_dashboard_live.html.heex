@@ -36,10 +36,8 @@
           </div>
         <% else %>
           <div role="list" class="main-pane" id="pending-pull-request-list">
-            <.live_component
+            <.card
               :for={pull_request <- @selected_tab.pull_requests}
-              module={MrgrWeb.Components.Live.PullRequestCard}
-              id={"pull_request_#{pull_request.id}"}
               pull_request={pull_request}
               selected={selected?(pull_request, @detail)}
               tab_permalink={@selected_tab.permalink}

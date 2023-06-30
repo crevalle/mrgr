@@ -275,6 +275,7 @@ defmodule Mrgr.User do
 
   def send_changelog(user) do
     closed_last_week_count = Mrgr.PullRequest.closed_last_week_count(user.current_installation_id)
+    # skip linking this to pull requests
 
     user
     |> Mrgr.PullRequest.closed_this_week()

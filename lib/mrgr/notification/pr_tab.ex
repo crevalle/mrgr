@@ -32,13 +32,13 @@ defmodule Mrgr.Notification.PRTab do
   def send_email(recipient, pull_request, tab) do
     email = Mrgr.Email.pr_tab(recipient, pull_request, tab)
 
-    Mrgr.Mailer.deliver_and_log(email, name(tab))
+    Mrgr.Mailer.deliver_and_log(email, name(tab), pull_request)
   end
 
   def send_slack(recipient, pull_request, tab) do
     message = Mrgr.Slack.Message.PRTab.render(pull_request, tab)
 
-    Mrgr.Slack.send_and_log(message, recipient, name(tab))
+    Mrgr.Slack.send_and_log(message, recipient, name(tab), pull_request)
   end
 
   def name(tab) do

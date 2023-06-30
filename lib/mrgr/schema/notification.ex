@@ -10,6 +10,9 @@ defmodule Mrgr.Schema.Notification do
 
     belongs_to(:user, Mrgr.Schema.User, foreign_key: :recipient_id)
 
+    has_many(:notifications_pull_requests, Mrgr.Schema.NotificationPullRequest)
+    has_many(:pull_requests, through: [:notifications_pull_requests, :pull_request])
+
     timestamps()
   end
 

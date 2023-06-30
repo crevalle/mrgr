@@ -34,7 +34,6 @@ defmodule Mrgr.Schema.PullRequest do
     field(:mergeable, :string)
     field(:merge_state_status, :string)
     field(:node_id, :string)
-    field(:notified_of_big_pr, :boolean)
     field(:number, :integer)
     field(:opened_at, :utc_datetime)
     field(:raw, :map)
@@ -66,6 +65,9 @@ defmodule Mrgr.Schema.PullRequest do
 
     embeds_one(:merged_by, Mrgr.Github.User, on_replace: :update)
     field(:merged_at, :utc_datetime)
+
+    has_many(:notifications_pull_requests, Mrgr.Schema.NotificationPullRequest)
+    has_many(:notifications, through: [:notifications_pull_requests, :notification])
 
     has_many(:pr_labels, Mrgr.Schema.PullRequestLabel)
     has_many(:labels, through: [:pr_labels, :label])

@@ -15,8 +15,14 @@ defmodule Mrgr.Notification do
   # lists of emails and slack messages
   @type result :: %{email: list(), slack: list()}
 
-  @spec create(integer(), tuple(), String.t(), String.t()) :: Schema.t()
-  def create(recipient_id, res, channel, type) do
+  @spec create(
+          integer(),
+          tuple(),
+          String.t(),
+          String.t(),
+          Mrgr.Schema.PullRequest.t() | [Mrgr.Schema.PullRequest.t()]
+        ) :: Schema.t()
+  def create(recipient_id, res, channel, type, pull_requests) when is_list(pull_requests) do
     attrs = %{
       recipient_id: recipient_id,
       channel: channel,
@@ -25,9 +31,29 @@ defmodule Mrgr.Notification do
 
     attrs = put_error(res, attrs)
 
-    %Schema{}
-    |> Schema.changeset(attrs)
-    |> Mrgr.Repo.insert!()
+    notification =
+      %Schema{}
+      |> Schema.changeset(attrs)
+      |> Mrgr.Repo.insert!()
+
+    Enum.map(pull_requests, fn pr -> create_pr_join(notification, pr) end)
+
+    notification
+  end
+
+  def create(recipient_id, res, channel, type, pr) do
+    create(recipient_id, res, channel, type, [pr])
+  end
+
+  def create_pr_join(notification, pr) do
+    params = %{
+      notification_id: notification.id,
+      pull_request_id: pr.id
+    }
+
+    %Mrgr.Schema.NotificationPullRequest{}
+    |> Mrgr.Schema.NotificationPullRequest.changeset(params)
+    |> Mrgr.Repo.insert()
   end
 
   # for slack only - emails will always assume to go through ok
@@ -220,6 +246,7 @@ defmodule Mrgr.Notification do
   def paged_for_user(id, params \\ %{}) do
     Schema
     |> Query.for_recipient(id)
+    |> Query.with_pull_requests()
     |> Query.rev_cron()
     |> Mrgr.Repo.paginate(params)
   end
@@ -256,6 +283,13 @@ defmodule Mrgr.Notification do
         join: u in assoc(q, :user),
         join: i in assoc(u, :current_installation),
         preload: [user: {u, current_installation: i}]
+      )
+    end
+
+    def with_pull_requests(query) do
+      from(q in query,
+        left_join: pr in assoc(q, :pull_requests),
+        preload: [pull_requests: pr]
       )
     end
   end

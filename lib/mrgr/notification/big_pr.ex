@@ -22,19 +22,12 @@ defmodule Mrgr.Notification.BigPR do
     case too_big?(pull_request) do
       true ->
         pull_request
-        |> mark_notified()
         |> notify_consumers()
         |> ok()
 
       false ->
         {:error, :not_big}
     end
-  end
-
-  def mark_notified(pull_request) do
-    pull_request
-    |> Ecto.Changeset.change(%{notified_of_big_pr: true})
-    |> Mrgr.Repo.update!()
   end
 
   def notify_consumers(pull_request) do
@@ -62,12 +55,12 @@ defmodule Mrgr.Notification.BigPR do
   def send_email(recipient, pull_request) do
     email = Mrgr.Email.big_pr(recipient, pull_request)
 
-    Mrgr.Mailer.deliver_and_log(email, @big_pr)
+    Mrgr.Mailer.deliver_and_log(email, @big_pr, pull_request)
   end
 
   def send_slack(recipient, pull_request) do
     message = Mrgr.Slack.Message.BigPR.render(pull_request)
 
-    Mrgr.Slack.send_and_log(message, recipient, @big_pr)
+    Mrgr.Slack.send_and_log(message, recipient, @big_pr, pull_request)
   end
 end

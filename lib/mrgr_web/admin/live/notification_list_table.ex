@@ -18,6 +18,7 @@ defmodule MrgrWeb.Admin.Live.NotificationListTable do
               <.th>ID</.th>
               <.th>Channel</.th>
               <.th>Type</.th>
+              <.th>Pull Request IDs</.th>
               <.th>Sent</.th>
               <.th>Error</.th>
             </tr>
@@ -28,6 +29,12 @@ defmodule MrgrWeb.Admin.Live.NotificationListTable do
               <.td><%= notification.id %></.td>
               <.td><.channel_icon channel={notification.channel} /></.td>
               <.td><%= notification.type %></.td>
+              <.td>
+                <.intersperse :let={id} enum={pr_ids(notification)}>
+                  <:separator>,</:separator>
+                  <.l href={~p"/admin/pull-requests/#{id}"}><%= id %></.l>
+                </.intersperse>
+              </.td>
               <.td><%= ts(notification.inserted_at, @timezone) %></.td>
               <.td><%= notification.error %></.td>
             </.tr>
@@ -58,5 +65,10 @@ defmodule MrgrWeb.Admin.Live.NotificationListTable do
     socket
     |> assign(:page, page)
     |> noreply()
+  end
+
+  def pr_ids(%{pull_requests: pull_requests}) do
+    pull_requests
+    |> Enum.map(& &1.id)
   end
 end
