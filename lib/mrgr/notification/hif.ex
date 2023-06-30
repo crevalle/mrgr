@@ -1,21 +1,24 @@
 defmodule Mrgr.Notification.HIF do
   @name "hif"
 
-  def send_alert(%{notified_of_hifs: true}), do: {:error, :already_notified}
-  def send_alert(%{high_impact_file_rules: []}), do: {:error, :no_rules}
+  def send_alert(pull_request) do
+    with :ok <- has_rules(pull_request),
+         :ok <- Mrgr.Notification.ensure_freshness(pull_request.notifications, @name) do
+      # each user gets one alert per pull request with all applicable rules
+      pull_request =
+        pull_request
+        |> Mrgr.Repo.preload(:author)
 
-  def send_alert(%{high_impact_file_rules: rules} = pull_request) when is_list(rules) do
-    # each user gets one alert per pull request with all applicable rules
-    pull_request =
-      pull_request
-      |> Mrgr.Repo.preload(:author)
-
-    rules
-    # don't send alerts to whomever opened the PR
-    |> Enum.reject(&hif_consumer_is_author?(&1, pull_request.author))
-    |> Enum.group_by(& &1.user_id)
-    |> Enum.map(&do_send_alert(&1, pull_request))
+      pull_request.high_impact_file_rules
+      # don't send alerts to whomever opened the PR
+      |> Enum.reject(&hif_consumer_is_author?(&1, pull_request.author))
+      |> Enum.group_by(& &1.user_id)
+      |> Enum.map(&do_send_alert(&1, pull_request))
+    end
   end
+
+  def has_rules(%{high_impact_file_rules: []}), do: {:error, :no_rules}
+  def has_rules(%{high_impact_file_rules: _rules}), do: :ok
 
   defp do_send_alert({user_id, rules}, pull_request) do
     recipient = Mrgr.User.find_with_current_installation(user_id)

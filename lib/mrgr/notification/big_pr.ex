@@ -4,10 +4,13 @@ defmodule Mrgr.Notification.BigPR do
 
   @big_threshold 1000
 
-  def too_big?(pull_request) do
+  def big_enough(pull_request) do
     with false <- over_threshold?(pull_request.additions, @big_threshold),
          false <- over_threshold?(pull_request.deletions, @big_threshold) do
-      false
+      {:error, :not_big}
+    else
+      true ->
+        :ok
     end
   end
 
@@ -16,17 +19,13 @@ defmodule Mrgr.Notification.BigPR do
 
   @spec send_alert(Mrgr.Schema.PullRequest.t()) ::
           {:ok, map()} | {:error, :already_notified} | {:error, :not_big}
-  def send_alert(%{notified_of_big_pr: true}), do: {:error, :already_notified}
-
   def send_alert(pull_request) do
-    case too_big?(pull_request) do
-      true ->
-        pull_request
-        |> notify_consumers()
-        |> ok()
-
-      false ->
-        {:error, :not_big}
+    # expects previous notifications to have been loaded
+    with :ok <- Mrgr.Notification.ensure_freshness(pull_request.notifications, @big_pr),
+         :ok <- big_enough(pull_request) do
+      pull_request
+      |> notify_consumers()
+      |> ok()
     end
   end
 

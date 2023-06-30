@@ -37,7 +37,7 @@ defmodule Mrgr.PullRequest do
     |> case do
       {:ok, pull_request} ->
         pull_request
-        |> preload_installation()
+        |> preload_installation_and_hifs()
         |> sync_repo_if_first_pr()
         |> set_solicited_reviewers(params["requested_reviewers"])
         |> sync_github_data()
@@ -80,7 +80,7 @@ defmodule Mrgr.PullRequest do
          cs <- Schema.create_changeset(pull_request, payload_to_params(payload)),
          {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
       updated_pull_request
-      |> preload_installation()
+      |> preload_installation_and_hifs()
       |> sync_github_data()
       |> broadcast(@pull_request_reopened)
       |> ok()
@@ -100,7 +100,7 @@ defmodule Mrgr.PullRequest do
          cs <- Schema.edit_changeset(pull_request, payload),
          {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
       updated_pull_request
-      |> preload_installation()
+      |> preload_installation_and_hifs()
       |> broadcast(@pull_request_edited)
       |> ok()
     else
@@ -114,9 +114,10 @@ defmodule Mrgr.PullRequest do
   def synchronize(payload) do
     with {:ok, pull_request} <- Mrgr.PullRequest.Webhook.find_pull_request(payload) do
       pull_request
-      |> preload_installation()
+      |> preload_installation_and_hifs()
       |> sync_github_data()
       |> reassociate_high_impact_file_rules()
+      |> send_notifications()
       |> broadcast(@pull_request_synchronized)
       |> ok()
     else
@@ -128,7 +129,7 @@ defmodule Mrgr.PullRequest do
     pull_request
     |> Schema.most_changeset(%{draft: false})
     |> Mrgr.Repo.update!()
-    |> preload_installation()
+    |> preload_installation_and_hifs()
     |> preload_hif_alerts()
     |> send_notifications()
     |> broadcast(@pull_request_ready_for_review)
@@ -150,7 +151,7 @@ defmodule Mrgr.PullRequest do
          cs <- Schema.close_changeset(pull_request, params),
          {:ok, updated_pull_request} <- Mrgr.Repo.update(cs) do
       updated_pull_request
-      |> preload_installation()
+      |> preload_installation_and_hifs()
       |> broadcast(@pull_request_closed)
       |> ok()
     else
@@ -393,7 +394,7 @@ defmodule Mrgr.PullRequest do
         pull_request = %{pull_request | comments: [comment | pull_request.comments]}
 
         pull_request
-        |> preload_installation()
+        |> preload_installation_and_hifs()
         |> broadcast(@pull_request_comment_created)
         |> Controversy.handle()
         |> ok()
@@ -514,6 +515,7 @@ defmodule Mrgr.PullRequest do
 
   def send_notifications(pr) do
     pr
+    |> Mrgr.Repo.preload(:notifications)
     |> notify_hif_alert_consumers()
     |> notify_pr_tab_consumers()
     |> notify_pr_risk()
@@ -1062,8 +1064,8 @@ defmodule Mrgr.PullRequest do
   def ci_failed?(%{ci_status: "failure"}), do: true
   def ci_failed?(_pull_request), do: false
 
-  defp preload_installation(pull_request) do
-    Mrgr.Repo.preload(pull_request, repository: [:installation, :high_impact_file_rules])
+  defp preload_installation_and_hifs(pull_request) do
+    Mrgr.Repo.preload(pull_request, [:high_impact_file_rules, repository: [:installation]])
   end
 
   def fully_approved?(pull_request) do

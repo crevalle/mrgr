@@ -56,6 +56,22 @@ defmodule Mrgr.Notification do
     |> Mrgr.Repo.insert()
   end
 
+  def alert_type_sent?(notifications, type) do
+    notifications
+    |> Enum.filter(fn n -> n.type == type end)
+    |> Enum.any?()
+  end
+
+  def ensure_freshness(notifications, type) do
+    case alert_type_sent?(notifications, type) do
+      true ->
+        {:error, :already_notified}
+
+      false ->
+        :ok
+    end
+  end
+
   # for slack only - emails will always assume to go through ok
   def put_error({:error, reason}, attrs) do
     Map.put(attrs, :error, inspect(reason))

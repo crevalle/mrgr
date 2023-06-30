@@ -6,16 +6,26 @@ defmodule Mrgr.Notification.PRTab do
     consumers = fetch_consumers(pull_request)
 
     email =
-      Enum.map(consumers.email, fn tab ->
+      consumers.email
+      |> Enum.reject(fn tab -> already_sent?(pull_request, tab) end)
+      |> Enum.map(fn tab ->
         send_email(tab.user, pull_request, tab)
       end)
 
     slack =
-      Enum.map(consumers.slack, fn tab ->
+      consumers.slack
+      |> Enum.reject(fn tab -> already_sent?(pull_request, tab) end)
+      |> Enum.map(fn tab ->
         send_slack(tab.user, pull_request, tab)
       end)
 
     %{email: email, slack: slack}
+  end
+
+  # the PR tab notifications work differently than HIFs, etc, so we
+  # have to filter the sent ones differently
+  def already_sent?(%{notifications: notifications}, tab) do
+    Mrgr.Notification.alert_type_sent?(notifications, name(tab))
   end
 
   def fetch_consumers(pull_request) do

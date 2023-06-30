@@ -9,6 +9,9 @@ defmodule Mrgr.Notification.Dormant do
 
   We can obviously pass in a list of one pr that's gone dormant, if we want.  Just calling out here
   that the main use case will likely involve >1 PRs and users won't want a ton of alerts.
+
+  This alert may be sent multiple times on a single PR, ie, if it keeps going dormant we want
+  to know about that each time.  Just don't send it twice during a single dormancy period, plz.
   """
 
   @spec notify_consumers([Mrgr.Schema.PullRequest.t()], integer()) :: Mrgr.Notification.result()
