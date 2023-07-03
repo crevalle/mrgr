@@ -4,9 +4,25 @@ defmodule Mrgr.Notification.BigPR do
 
   @big_threshold 1000
 
+  @spec send_alert(Mrgr.Schema.PullRequest.t()) ::
+          {:ok, map()} | {:error, :already_notified} | {:error, :not_big}
+  def send_alert(pull_request) do
+    # !!! This does not really respect different users' preferences, nor does it
+    # account for "has _this specific user_ been notified".  Instead we say "was anyone notified"
+    # and "is it big enough for the account's creator."  TBD.
+    with :ok <- Mrgr.Notification.ensure_freshness(pull_request.notifications, @big_pr),
+         :ok <- big_enough(pull_request) do
+      pull_request
+      |> notify_consumers()
+      |> ok()
+    end
+  end
+
   def big_enough(pull_request) do
-    with false <- over_threshold?(pull_request.additions, @big_threshold),
-         false <- over_threshold?(pull_request.deletions, @big_threshold) do
+    %{settings: %{big_pr_threshold: threshold}} = load_creator_preference(pull_request)
+
+    with false <- over_threshold?(pull_request.additions, threshold),
+         false <- over_threshold?(pull_request.deletions, threshold) do
       {:error, :not_big}
     else
       true ->
@@ -17,16 +33,15 @@ defmodule Mrgr.Notification.BigPR do
   def over_threshold?(num, threshold) when num > threshold, do: true
   def over_threshold?(_num, _threshold), do: false
 
-  @spec send_alert(Mrgr.Schema.PullRequest.t()) ::
-          {:ok, map()} | {:error, :already_notified} | {:error, :not_big}
-  def send_alert(pull_request) do
-    # expects previous notifications to have been loaded
-    with :ok <- Mrgr.Notification.ensure_freshness(pull_request.notifications, @big_pr),
-         :ok <- big_enough(pull_request) do
-      pull_request
-      |> notify_consumers()
-      |> ok()
-    end
+  def load_creator_preference(pull_request) do
+    preferences =
+      Mrgr.Notification.fetch_preferences_at_installation(
+        pull_request.repository.installation_id,
+        @big_pr
+      )
+
+    # first one is probably the creator, there will likely be only one anyway
+    hd(preferences)
   end
 
   def notify_consumers(pull_request) do

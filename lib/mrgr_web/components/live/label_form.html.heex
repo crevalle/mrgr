@@ -17,7 +17,7 @@
       phx-target={@myself}
       class="space-y-8 divide-y divide-gray-200"
     >
-      <.input
+      <.janky_input
         type="text"
         f={f}
         field={:name}
@@ -25,7 +25,7 @@
         placeholder="eg. 'design-review', 'needs-qa'"
       />
 
-      <.input type="text" f={f} field={:description} placeholder="something fun" />
+      <.janky_input type="text" f={f} field={:description} placeholder="something fun" />
 
       <div class="sm:grid sm:grid-cols-3 sm:gap-4 sm:items-start sm:border-t sm:border-gray-200 sm:pt-5">
         <%= label(f, :color, "Color",

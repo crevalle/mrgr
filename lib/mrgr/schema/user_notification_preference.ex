@@ -12,19 +12,35 @@ defmodule Mrgr.Schema.UserNotificationPreference do
     field(:email, :boolean)
     field(:slack, :boolean)
 
+    embeds_one :settings, Settings, on_replace: :update do
+      field :big_pr_threshold, :integer
+    end
+
     belongs_to(:user, Mrgr.Schema.User)
     belongs_to(:installation, Mrgr.Schema.Installation)
 
     timestamps()
   end
 
-  def rt_backfill_for_users do
-    Mrgr.User.with_installations()
-    |> Enum.map(fn user ->
-      Enum.map(user.installations, fn installation ->
-        create_for_user_and_installation(user, installation)
-      end)
+  def rt_set_settings do
+    Mrgr.Notification.preferences_for_event(@big_pr)
+    |> Enum.map(fn preference ->
+      preference
+      |> settings_changeset(%{settings: %{big_pr_threshold: 1000}})
+      |> Mrgr.Repo.update!()
     end)
+  end
+
+  def settings_changeset(schema, params) do
+    schema
+    |> cast(params, [])
+    |> cast_embed(:settings, with: &the_settings_changeset/2)
+  end
+
+  def the_settings_changeset(schema, params \\ %{}) do
+    schema
+    |> cast(params, [:big_pr_threshold])
+    |> validate_number(:big_pr_threshold, greater_than: 0)
   end
 
   def changeset(schema, params) do

@@ -120,7 +120,7 @@ defmodule MrgrWeb.Components.Form do
     """
   end
 
-  def input(%{type: "text"} = assigns) do
+  def janky_input(%{type: "text"} = assigns) do
     # defaults
     assigns =
       assigns
@@ -157,6 +157,27 @@ defmodule MrgrWeb.Components.Form do
         <p class="mt-2 text-sm text-gray-500"><%= render_slot(@secondary) %></p>
       </div>
     </div>
+    """
+  end
+
+  attr :type, :any, default: nil
+  attr :field, :any, required: true
+  attr :class, :string, default: nil
+  attr :rest, :global, include: ~w(min)
+
+  def input(assigns) do
+    ~H"""
+    <input
+      type={@type}
+      name={@field.name}
+      id={@field.id}
+      value={@field.value}
+      class={[
+        "shadow-inner focus:ring-emerald-500 focus:border-emerald-500 border-gray 300 rounded-md",
+        @class
+      ]}
+      {@rest}
+    />
     """
   end
 end

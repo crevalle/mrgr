@@ -182,6 +182,13 @@ defmodule Mrgr.Notification do
     |> Mrgr.Repo.all()
   end
 
+  # for seeding new settings
+  def preferences_for_event(event) do
+    Preference
+    |> Query.for_event(event)
+    |> Mrgr.Repo.all()
+  end
+
   @doc "converts all email notifications to slack"
   def enable_slack_notifications(user, installation) do
     preferences =

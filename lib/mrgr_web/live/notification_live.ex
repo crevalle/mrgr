@@ -1,5 +1,6 @@
 defmodule MrgrWeb.NotificationLive do
   use MrgrWeb, :live_view
+  import MrgrWeb.Components.NotificationPreference
 
   on_mount MrgrWeb.Plug.Auth
 
@@ -101,6 +102,18 @@ defmodule MrgrWeb.NotificationLive do
 
     socket
     |> assign(:pr_tabs, tabs)
+    |> Flash.put(:info, "Updated!")
+    |> noreply()
+  end
+
+  def handle_info(
+        {:preference_updated, %Mrgr.Schema.UserNotificationPreference{} = preference},
+        socket
+      ) do
+    preferences = Mrgr.List.replace(socket.assigns.preferences, preference)
+
+    socket
+    |> assign(:preferences, preferences)
     |> Flash.put(:info, "Updated!")
     |> noreply()
   end

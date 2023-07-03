@@ -96,27 +96,22 @@
             <div class="pt-4">
               <div class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
                 <div class="grid grid-cols-3">
-                  <div class="col-span-2 py-3 px-2 bg-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                  <div class="bg-gray-100 py-3 px-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
                     PR Events
+                  </div>
+                  <div class="bg-gray-100 py-3 px-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+                    Settings
                   </div>
                   <div class="bg-gray-100 p-3 text-xs font-medium uppercase tracking-wide text-gray-500 text-center">
                     Channels
                   </div>
-
-                  <%= for preference <- @preferences do %>
-                    <div class="col-span-2 separated-grid-row">
-                      <%= format_preference_name(preference.event) %>
-                    </div>
-                    <div class="separated-grid-row">
-                      <.live_component
-                        module={MrgrWeb.Components.Live.NotificationChannelToggle}
-                        id={"preference-#{preference.id}"}
-                        obj={preference}
-                        slack_unconnected={@slack_unconnected}
-                      />
-                    </div>
-                  <% end %>
                 </div>
+
+                <.preference_row
+                  :for={preference <- @preferences}
+                  preference={preference}
+                  slack_unconnected={@slack_unconnected}
+                />
               </div>
             </div>
 
