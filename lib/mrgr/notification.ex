@@ -117,7 +117,8 @@ defmodule Mrgr.Notification do
         user_id: user_id,
         installation_id: installation_id,
         email: true,
-        slack: false
+        slack: false,
+        settings: Mrgr.Schema.UserNotificationPreference.default_settings(event)
       }
       |> Map.merge(opts)
 

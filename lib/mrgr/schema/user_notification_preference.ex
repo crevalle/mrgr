@@ -29,14 +29,14 @@ defmodule Mrgr.Schema.UserNotificationPreference do
     Mrgr.Notification.preferences_for_event(@big_pr)
     |> Enum.map(fn preference ->
       preference
-      |> settings_changeset(%{settings: %{big_pr_threshold: 1000}})
+      |> settings_changeset(%{settings: default_settings(@big_pr)})
       |> Mrgr.Repo.update!()
     end)
 
     Mrgr.Notification.preferences_for_event(@pr_controversy)
     |> Enum.map(fn preference ->
       preference
-      |> settings_changeset(%{settings: %{thread_length_threshold: 4}})
+      |> settings_changeset(%{settings: default_settings(@pr_controversy)})
       |> Mrgr.Repo.update!()
     end)
   end
@@ -57,7 +57,16 @@ defmodule Mrgr.Schema.UserNotificationPreference do
   def changeset(schema, params) do
     schema
     |> cast(params, [:user_id, :installation_id, :event, :email, :slack])
+    |> cast_embed(:settings, with: &the_settings_changeset/2)
     |> validate_inclusion(:event, @notification_events)
+  end
+
+  def default_settings(@pr_controversy) do
+    %{thread_length_threshold: 4}
+  end
+
+  def default_settings(@big_pr) do
+    %{big_pr_threshold: 1000}
   end
 
   def create_for_user_and_installation(user, installation) do
