@@ -25,6 +25,22 @@ defmodule Mrgr.Github.API.Fake do
     %{}
   end
 
+  def add_review_request(_pull_request, _login) do
+    %{}
+  end
+
+  def remove_review_request(_pull_request, _login) do
+    %{}
+  end
+
+  def check_suites_for_pr(_pull_request) do
+    %{}
+  end
+
+  def create_comment(_pull_request, _message) do
+    %{}
+  end
+
   def fetch_repository_settings_graphql(_repo) do
     %{"node" => %{}}
   end

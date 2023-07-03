@@ -5,7 +5,7 @@ defmodule Mrgr.PullRequest.Controversy do
   # already controversial, can't get any worse!
   # nb- we key off this during onboarding, make sure we handle that case
   # if/when we switch to the current "has this notification been sent" logic
-  def send_alert(%{controversial: true} = pull_request), do: {:error, :already_notified}
+  def send_alert(%{controversial: true}), do: {:error, :already_notified}
 
   def send_alert(pull_request) do
     case controversy_brewing?(pull_request) do

@@ -6,7 +6,7 @@ defmodule Mrgr.Repo.Migrations.CreatePRNotificationsJoin do
       add(:pull_request_id, references(:pull_requests, on_delete: :delete_all), null: false)
       add(:notification_id, references(:notifications, on_delete: :delete_all), null: false)
 
-      timestamps
+      timestamps()
     end
 
     create index(:notifications_pull_requests, [:pull_request_id, :notification_id], unique: true)
