@@ -1,18 +1,22 @@
 defmodule Mrgr.PullRequest.Controversy do
-  @thread_threshold 4
+  use Mrgr.Notification.Event
+  import Mrgr.Tuple
 
   # already controversial, can't get any worse!
-  def handle(%{controversial: true} = pull_request), do: pull_request
+  # nb- we key off this during onboarding, make sure we handle that case
+  # if/when we switch to the current "has this notification been sent" logic
+  def send_alert(%{controversial: true} = pull_request), do: {:error, :already_notified}
 
-  def handle(pull_request) do
+  def send_alert(pull_request) do
     case controversy_brewing?(pull_request) do
       {true, thread} ->
         pull_request
         |> set_controversy_flag()
         |> Mrgr.Notification.Controversy.notify_consumers(thread)
+        |> ok()
 
       false ->
-        pull_request
+        {:error, :non_controversial}
     end
   end
 
@@ -27,10 +31,13 @@ defmodule Mrgr.PullRequest.Controversy do
     end
   end
 
-  def controversy_brewing?(%{comments: comments}) do
+  def controversy_brewing?(%{comments: comments} = pull_request) do
+    %{settings: %{thread_length_threshold: threshold}} =
+      Mrgr.Notification.load_creator_preference(pull_request, @pr_controversy)
+
     threads = build_conversation_threads(comments)
 
-    case Enum.find(threads, &longer_than_they_should_be?/1) do
+    case Enum.find(threads, fn thread -> longer_than_they_should_be?(thread, threshold) end) do
       nil ->
         false
 
@@ -72,8 +79,8 @@ defmodule Mrgr.PullRequest.Controversy do
     build_thread(children ++ thread, responses)
   end
 
-  defp longer_than_they_should_be?(thread) do
-    Enum.count(thread) > @thread_threshold
+  defp longer_than_they_should_be?(thread, threshold) do
+    Enum.count(thread) > threshold
   end
 
   def set_controversy_flag(pull_request) do

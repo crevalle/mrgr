@@ -2,8 +2,6 @@ defmodule Mrgr.Notification.BigPR do
   use Mrgr.Notification.Event
   import Mrgr.Tuple
 
-  @big_threshold 1000
-
   @spec send_alert(Mrgr.Schema.PullRequest.t()) ::
           {:ok, map()} | {:error, :already_notified} | {:error, :not_big}
   def send_alert(pull_request) do
@@ -19,7 +17,8 @@ defmodule Mrgr.Notification.BigPR do
   end
 
   def big_enough(pull_request) do
-    %{settings: %{big_pr_threshold: threshold}} = load_creator_preference(pull_request)
+    %{settings: %{big_pr_threshold: threshold}} =
+      Mrgr.Notification.load_creator_preference(pull_request, @big_pr)
 
     with false <- over_threshold?(pull_request.additions, threshold),
          false <- over_threshold?(pull_request.deletions, threshold) do
@@ -32,17 +31,6 @@ defmodule Mrgr.Notification.BigPR do
 
   def over_threshold?(num, threshold) when num > threshold, do: true
   def over_threshold?(_num, _threshold), do: false
-
-  def load_creator_preference(pull_request) do
-    preferences =
-      Mrgr.Notification.fetch_preferences_at_installation(
-        pull_request.repository.installation_id,
-        @big_pr
-      )
-
-    # first one is probably the creator, there will likely be only one anyway
-    hd(preferences)
-  end
 
   def notify_consumers(pull_request) do
     pull_request = Mrgr.Repo.preload(pull_request, [:author, :repository])

@@ -226,6 +226,10 @@ th:last-of-type {
   pointer-events: none;
 }
 
+.notification-preference-form {
+  @apply flex space-x-4 items-center;
+}
+
 .glance-column {
   @apply flex flex-col h-48 overflow-hidden w-72;
 }

@@ -16,13 +16,15 @@ defmodule MrgrWeb.Components.Live.NotificationPreferenceRow do
   def render(assigns) do
     ~H"""
     <div class="grid grid-cols-3">
-      <div class="separated-grid-row mt-auto">
-        <%= format_preference_name(@preference.event) %>
+      <div class="separated-grid-row flex items-center">
+        <p>
+          <%= format_preference_name(@preference.event) %>
+        </p>
       </div>
       <div class="separated-grid-row">
         <.preference_form preference={@preference} changeset={@changeset} target={@myself} />
       </div>
-      <div class="separated-grid-row content-center">
+      <div class="separated-grid-row flex items-center justify-center">
         <.live_component
           module={MrgrWeb.Components.Live.NotificationChannelToggle}
           id={"preference-#{@preference.id}"}

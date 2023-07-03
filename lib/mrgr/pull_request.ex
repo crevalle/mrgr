@@ -396,7 +396,7 @@ defmodule Mrgr.PullRequest do
         pull_request
         |> preload_installation_and_hifs()
         |> broadcast(@pull_request_comment_created)
-        |> Controversy.handle()
+        |> notify_controversy()
         |> ok()
 
       error ->
@@ -535,6 +535,12 @@ defmodule Mrgr.PullRequest do
 
   def notify_pr_tab_consumers(pull_request) do
     Mrgr.Notification.PRTab.notify_consumers(pull_request)
+
+    pull_request
+  end
+
+  def notify_controversy(pull_request) do
+    Controversy.send_alert(pull_request)
 
     pull_request
   end

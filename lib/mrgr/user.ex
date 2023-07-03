@@ -225,6 +225,7 @@ defmodule Mrgr.User do
     Mrgr.Schema.UserNotificationPreference
     |> Query.where(user_id: user.id)
     |> Query.where(installation_id: user.current_installation_id)
+    |> Query.order(desc: :event)
     |> Mrgr.Repo.all()
   end
 

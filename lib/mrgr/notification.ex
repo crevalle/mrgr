@@ -182,6 +182,17 @@ defmodule Mrgr.Notification do
     |> Mrgr.Repo.all()
   end
 
+  def load_creator_preference(pull_request, event) do
+    preferences =
+      fetch_preferences_at_installation(
+        pull_request.repository.installation_id,
+        event
+      )
+
+    # first one is probably the creator, there will likely be only one anyway
+    hd(preferences)
+  end
+
   # for seeding new settings
   def preferences_for_event(event) do
     Preference

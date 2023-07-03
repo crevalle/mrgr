@@ -2,6 +2,8 @@ defmodule Mrgr.Schema.UserNotificationPreference do
   use Mrgr.Schema
   use Mrgr.Notification.Event
 
+  @settings [:big_pr_threshold, :thread_length_threshold]
+
   @moduledoc """
   One preference per user-installation-event.  Can receive an email, slack message, both, or none.
   """
@@ -14,6 +16,7 @@ defmodule Mrgr.Schema.UserNotificationPreference do
 
     embeds_one :settings, Settings, on_replace: :update do
       field :big_pr_threshold, :integer
+      field :thread_length_threshold, :integer
     end
 
     belongs_to(:user, Mrgr.Schema.User)
@@ -29,6 +32,13 @@ defmodule Mrgr.Schema.UserNotificationPreference do
       |> settings_changeset(%{settings: %{big_pr_threshold: 1000}})
       |> Mrgr.Repo.update!()
     end)
+
+    Mrgr.Notification.preferences_for_event(@pr_controversy)
+    |> Enum.map(fn preference ->
+      preference
+      |> settings_changeset(%{settings: %{thread_length_threshold: 4}})
+      |> Mrgr.Repo.update!()
+    end)
   end
 
   def settings_changeset(schema, params) do
@@ -39,8 +49,9 @@ defmodule Mrgr.Schema.UserNotificationPreference do
 
   def the_settings_changeset(schema, params \\ %{}) do
     schema
-    |> cast(params, [:big_pr_threshold])
+    |> cast(params, @settings)
     |> validate_number(:big_pr_threshold, greater_than: 0)
+    |> validate_number(:thread_length_threshold, greater_than: 0)
   end
 
   def changeset(schema, params) do
