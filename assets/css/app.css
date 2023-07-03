@@ -207,7 +207,7 @@ th:last-of-type {
 }
 
 .tab-select-button {
-  @apply text-gray-500 p-2 rounded-lg bg-gray-50 hover:bg-gray-100 hover:cursor-pointer;
+  @apply text-gray-500 p-2 rounded-lg hover:bg-gray-100 hover:cursor-pointer;
   transition: border-color 150ms ease-out;
 }
 
