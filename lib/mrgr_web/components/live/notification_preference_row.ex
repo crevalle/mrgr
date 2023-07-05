@@ -8,9 +8,15 @@ defmodule MrgrWeb.Components.Live.NotificationPreferenceRow do
     |> assign(assigns)
     |> assign(
       :changeset,
-      Mrgr.Schema.UserNotificationPreference.the_settings_changeset(assigns.preference.settings)
+      changeset(assigns.preference.settings)
     )
     |> ok()
+  end
+
+  def changeset(nil), do: nil
+
+  def changeset(settings) do
+    Mrgr.Schema.UserNotificationPreference.the_settings_changeset(settings)
   end
 
   def render(assigns) do
