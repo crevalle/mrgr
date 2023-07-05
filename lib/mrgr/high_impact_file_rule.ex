@@ -24,6 +24,7 @@ defmodule Mrgr.HighImpactFileRule do
   end
 
   @doc "gets all HIFs on the repository and returns those applicable to the PR"
+  # this clause ain't working :/. punt for now
   def for_pull_request(
         %{repository: %{high_impact_file_rules: %Ecto.Association.NotLoaded{}}} = pull_request
       ) do
