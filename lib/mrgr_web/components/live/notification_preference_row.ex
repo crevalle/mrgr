@@ -13,6 +13,7 @@ defmodule MrgrWeb.Components.Live.NotificationPreferenceRow do
     |> ok()
   end
 
+  # paranoia from database default
   def changeset(nil), do: nil
 
   def changeset(settings) do

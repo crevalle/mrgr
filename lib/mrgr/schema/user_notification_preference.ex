@@ -14,7 +14,7 @@ defmodule Mrgr.Schema.UserNotificationPreference do
     field(:email, :boolean)
     field(:slack, :boolean)
 
-    embeds_one :settings, Settings, on_replace: :update do
+    embeds_one :settings, Settings, on_replace: :delete, primary_key: false do
       field :big_pr_threshold, :integer
       field :thread_length_threshold, :integer
     end
