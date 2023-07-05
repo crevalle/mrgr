@@ -1070,7 +1070,7 @@ defmodule Mrgr.PullRequest do
   def ci_failed?(%{ci_status: "failure"}), do: true
   def ci_failed?(_pull_request), do: false
 
-  defp preload_installation_and_hifs(pull_request) do
+  def preload_installation_and_hifs(pull_request) do
     Mrgr.Repo.preload(pull_request, [:high_impact_file_rules, repository: [:installation]])
   end
 
