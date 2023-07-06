@@ -175,13 +175,13 @@
                         <.badge item={hif} />
                       </div>
 
-                      <div class="separated-grid-row">
+                      <div class="separated-grid-row flex items-center space-x-4">
                         <.live_component
                           module={MrgrWeb.Components.Live.NotificationChannelToggle}
                           id={"hif-#{hif.id}"}
                           obj={hif}
                           slack_unconnected={@slack_unconnected}
-                        />
+                        /> Edit
                       </div>
                     <% end %>
                   <% end %>

@@ -25,6 +25,13 @@ defmodule MrgrWeb.JS do
     |> JS.remove_class("show", to: "#detail-pane")
   end
 
+  # def hide_modal(js \\ %JS{}, id) do
+  # JS.hide(js,
+  # to: "##{id}",
+  # transition: toggle_out_transition()
+  # )
+  # end
+
   def show_spinner(js \\ %JS{}, id) do
     JS.show(js,
       to: "##{id}",

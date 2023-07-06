@@ -47,6 +47,12 @@ defmodule MrgrWeb.HighImpactFileLive do
     |> noreply()
   end
 
+  def handle_event("cancel-edit", _attrs, socket) do
+    socket
+    |> assign(:form, nil)
+    |> noreply()
+  end
+
   def handle_event("form-change", %{"high_impact_file_rule" => params}, socket) do
     # used to trigger updates to label preview
     form = socket.assigns.form

@@ -12,6 +12,26 @@ defmodule MrgrWeb.Components.Core do
   import Phoenix.HTML.Form
   alias Phoenix.LiveView.JS
 
+  attr :href, :string, default: "#"
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def l(assigns) do
+    ~H"""
+    <a
+      href={@href}
+      class={[
+        "link",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </a>
+    """
+  end
+
   @doc """
   Renders a modal.
 
@@ -103,6 +123,49 @@ defmodule MrgrWeb.Components.Core do
                     <%= render_slot(cancel) %>
                   </.link>
                 </div>
+              </div>
+            </.focus_wrap>
+          </div>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
+  def socks(assigns) do
+    ~H"""
+    <div id={@id} class="relative z-50">
+      <div
+        id={"#{@id}-bg"}
+        class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity"
+        aria-hidden="true"
+      />
+
+      <div class="fixed inset-0 overflow-y-auto" role="dialog" aria-modal="true" tabindex="0">
+        <div class="flex min-h-full items-center justify-center">
+          <div class="w-full max-w-3xl p-4 sm:p-6 lg:py-8">
+            <.focus_wrap
+              id={"#{@id}-container"}
+              phx-window-keydown={hide_modal(@on_cancel, @id)}
+              phx-key="escape"
+              phx-click-away={hide_modal(@on_cancel, @id)}
+              class="hidden relative rounded-2xl bg-white p-14 shadow-lg shadow-zinc-700/10 ring-1 ring-zinc-700/10 transition"
+            >
+              <div id={"#{@id}-content"}>
+                <header :if={@title != []}>
+                  <div class="flex justify-between">
+                    <h1 id={"#{@id}-title"} class="text-base font-semibold leading-6 text-gray-900">
+                      <%= render_slot(@title) %>
+                    </h1>
+                    <.l phx-click={hide_modal(@on_cancel, @id)} aria-label="close">
+                      <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
+                    </.l>
+                  </div>
+                  <p :if={@subtitle != []} class="mt-2 text-sm text-gray-500">
+                    <%= render_slot(@subtitle) %>
+                  </p>
+                </header>
+                <%= render_slot(@inner_block) %>
               </div>
             </.focus_wrap>
           </div>
@@ -487,11 +550,7 @@ defmodule MrgrWeb.Components.Core do
   def hide(js \\ %JS{}, selector) do
     JS.hide(js,
       to: selector,
-      time: 200,
-      transition:
-        {"transition-all transform ease-in duration-200",
-         "opacity-100 translate-y-0 sm:scale-100",
-         "opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"}
+      transition: transition_out()
     )
   end
 
@@ -507,13 +566,17 @@ defmodule MrgrWeb.Components.Core do
   end
 
   def hide_modal(js \\ %JS{}, id) do
+    IO.inspect(id, label: "hiding")
+
     js
-    |> JS.hide(
-      to: "##{id}-bg",
-      transition: {"transition-all transform ease-in duration-200", "opacity-100", "opacity-0"}
-    )
     |> hide("##{id}-container")
-    |> JS.hide(to: "##{id}", transition: {"block", "block", "hidden"})
+    |> hide("##{id}-bg")
+    |> hide("##{id}")
     |> JS.pop_focus()
+  end
+
+  def transition_out do
+    {"transition ease-in duration-75", "transform opacity-100 scale-100",
+     "transform opacity-0 scale-95"}
   end
 end
