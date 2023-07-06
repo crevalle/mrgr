@@ -7,12 +7,17 @@ defmodule MrgrWeb.Components.PullRequestFilter do
   def filters(assigns) do
     ~H"""
     <div class="flex flex-col mt-2 space-y-3">
-      <.aside>
-        Customize your view by filtering on Author, Label, or Repository.
-        <.l phx-click="delete-tab" data-confirm="Sure about that?">
-          delete tab
-        </.l>
-      </.aside>
+      <div class="flex flex-col space-y-1">
+        <div class="aside">
+          <p>Create a custom view of your open PRs based on Author, Label, or Repository.</p>
+          <p class="flex space-x-1">
+            <.l href={~p"/notifications#custom-alerts"} class="flex items-center space-x-1">
+              <.icon name="bell" class="h-5 w-5" /> <span>Configure alerts</span>
+            </.l>
+             <span>to receive notifications when a PR is opened on this dashboard.</span>
+          </p>
+        </div>
+      </div>
 
       <p class="font-semibold">Available Filters</p>
 

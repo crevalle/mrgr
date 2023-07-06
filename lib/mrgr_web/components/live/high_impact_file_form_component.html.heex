@@ -24,9 +24,9 @@
           <div class="flex justify-between px-4">
             <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">
               <%= if @form.action == :create do %>
-                Designate new High Impact File or Folder
+                Designate new High Impact File or Folder in <%= @form.repo.name %>
               <% else %>
-                Edit High Impact file or folder for <%= @form.repo.name %>
+                Editing the <%= @form.changeset.data.name %> alert in <%= @form.repo.name %>
               <% end %>
             </h3>
           </div>
@@ -108,10 +108,12 @@
               <div class="col-span-2 flex flex-col space-y-3 mt-1">
                 <div class="flex items-center space-x-2">
                   <.checkbox f={f} attr={:email} />
-                  <p class="text-sm text-gray-500" id="email-description">
-                    Email
-                    <span class="font-semibold"><%= @current_user.notification_email %></span>
-                    <.l href={~p"/notifications"} class="text-xs">change</.l>
+                  <p
+                    class="text-sm text-gray-500 flex items-center space-x-2"
+                    id="email-description"
+                  >
+                    <span>Via Email</span>
+                    <.email_enabled_icon />
                   </p>
                 </div>
 
