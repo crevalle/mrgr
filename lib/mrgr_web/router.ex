@@ -71,7 +71,7 @@ defmodule MrgrWeb.Router do
     pipe_through [:browser, :authenticate]
 
     live "/onboarding", OnboardingLive, :index
-    live "/notifications", NotificationLive, :show
+    live "/alerts", AlertLive, :show
     live "/account", AccountLive, :show
   end
 

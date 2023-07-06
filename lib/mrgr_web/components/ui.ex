@@ -40,7 +40,7 @@ defmodule MrgrWeb.Components.UI do
         ) %>
       </.nav_item>
 
-      <.nav_item route={~p"/notifications"} icon="bell-alert" label="Realtime Alerts" . />
+      <.nav_item route={~p"/alerts"} icon="bell-alert" label="Realtime Alerts" . />
 
       <.nav_item route={~p"/changelog"} icon="book-open" label="Changelog" . />
 

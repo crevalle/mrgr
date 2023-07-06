@@ -11,10 +11,10 @@ defmodule MrgrWeb.Components.PullRequestFilter do
         <div class="aside">
           <p>Create a custom view of your open PRs based on Author, Label, or Repository.</p>
           <p class="flex space-x-1">
-            <.l href={~p"/notifications#custom-alerts"} class="flex items-center space-x-1">
+            <.l href={~p"/alerts#custom-alerts"} class="flex items-center space-x-1">
               <.icon name="bell" class="h-5 w-5" /> <span>Configure alerts</span>
             </.l>
-             <span>to receive notifications when a PR is opened on this dashboard.</span>
+            <span>to receive notifications when a PR is opened on this dashboard.</span>
           </p>
         </div>
       </div>
