@@ -129,7 +129,7 @@
                   >
                     <span>Via Slack</span>
                     <%= if @slack_unconnected do %>
-                      <.l href={~p"/notifications"} class="text-xs">
+                      <.l href={~p"/alerts"} class="text-xs">
                         Connect Slack
                       </.l>
                     <% else %>
@@ -143,7 +143,7 @@
             <div class="bg-gray-50 px-4 py-3 flex flex-row-reverse">
               <div class="flex space-x-4 justify-end items-center">
                 <%= if @form.action == :create do %>
-                  <.l phx_click={hide_modal(@on_cancel, @id)}>Cancel</.l>
+                  <.l phx-click={hide_modal(@on_cancel, @id)}>Cancel</.l>
                 <% else %>
                   <%= link("Delete",
                     to: "#",

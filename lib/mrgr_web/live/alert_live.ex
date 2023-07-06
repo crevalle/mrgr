@@ -1,4 +1,4 @@
-defmodule MrgrWeb.NotificationLive do
+defmodule MrgrWeb.AlertLive do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
   import MrgrWeb.Components.NotificationPreference

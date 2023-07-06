@@ -188,7 +188,7 @@ defmodule MrgrWeb.OnboardingLive do
 
   def handle_event("add-more-alerts", _params, socket) do
     socket
-    |> redirect(to: ~p"/high-impact-files")
+    |> redirect(to: ~p"/alerts")
     |> noreply()
   end
 
