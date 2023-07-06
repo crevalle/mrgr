@@ -81,7 +81,6 @@ defmodule MrgrWeb.Router do
     live "/pull-requests", PullRequestDashboardLive, :index
     live "/pull-requests/:tab", PullRequestDashboardLive, :show
     live "/pull-requests/:tab/:pull_request_id/:attr", PullRequestDashboardLive, :detail
-    live "/high-impact-files", HighImpactFileLive, :index
     live "/changelog", ChangelogLive, :index
 
     live "/repositories", RepositoryListLive, :index

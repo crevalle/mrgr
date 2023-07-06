@@ -1,19 +1,83 @@
 <div class="flex flex-col space-y-4">
+  <div class="flex flex-col space-y-2">
+    <.h1>Realtime Alerts</.h1>
+
+    <p class="text-sm text-gray-500">
+      Get notified of important situations as they're happening.  Configure your alert preferences for High Impact Files, Pull Request events, and more.
+    </p>
+  </div>
+
   <div class="two-pane-layout">
+    <.fixed_sidebar>
+      <.l href="#preferences" class="tab-select-button">
+        Preferences
+      </.l>
+      <.l href="#situations" class="tab-select-button">
+        PR Situations
+      </.l>
+      <.l href="#custom-alerts" class="tab-select-button">
+        Custom Alerts
+      </.l>
+      <.l href="#hifs" class="tab-select-button">
+        High Impact Files
+      </.l>
+    </.fixed_sidebar>
+
     <div class="main-pane">
-      <div class="flex flex-col space-y-2">
-        <.h3>Your Profile</.h3>
-
-        <div class="white-box">
+      <.white_box_section id="preferences">
+        <div class="flex flex-col space-y-4">
           <div class="grid grid-cols-3 gap-4 items-start">
-            <div class="font-medium">Name</div>
-            <div class="col-span-2"><%= @current_user.name %></div>
+            <div class="flex flex-col">
+              <p class="font-medium">Notification Email Address</p>
+            </div>
+            <div class="col-span-2 flex flex-col">
+              <%= if @changeset do %>
+                <.form :let={f} for={@changeset} phx-submit="save">
+                  <div class="flex flex-col">
+                    <div class="flex items-center space-x-1">
+                      <%= text_input(f, :notification_email,
+                        placeholder: "you@company_email.com",
+                        class: "w-full text-sm font-medium rounded-md text-gray-700 mt-px pt-2"
+                      ) %>
+                      <.button
+                        type="submit"
+                        phx-disable-with="Saving..."
+                        class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+                      >
+                        Save
+                      </.button>
+                    </div>
+                    <.error form={f} attr={:notification_email} />
+                  </div>
+                </.form>
+              <% else %>
+                <div class="flex items-center space-x-4">
+                  <p>
+                    <%= @current_user.notification_email %>
+                    <.l phx-click="edit" class="text-xs">change</.l>
+                  </p>
+                  <p :if={is_nil(@current_user.notification_email)} class="text-red-800 text-sm">
+                    * Required for HIF alerts and weekly changelog emails.
+                  </p>
+                </div>
+              <% end %>
+            </div>
 
-            <div class="font-medium">Organization</div>
-            <div class="col-span-2"><%= account_name(@current_user) %></div>
-
-            <div class="font-medium">Handle</div>
-            <div class="col-span-2"><%= @current_user.nickname %></div>
+            <div class="pt-3">
+              <div class="flex flex-col">
+                <p class="font-medium">Connect Slack</p>
+                <p class="text-gray-500 text-xs">
+                  Install our Slackbot to receive notifications in your Slack account.  We don't read any Slack messages.
+                </p>
+              </div>
+            </div>
+            <div class="col-span-2 flex flex-col">
+              <%= if @slack_unconnected do %>
+                <.slack_button user_id={@current_user.id} />
+              <% else %>
+                <.slack_connected />
+              <% end %>
+            </div>
 
             <div class="flex flex-col">
               <p class="font-medium">Send Weekly Changelog Email</p>
@@ -31,166 +95,90 @@
             </div>
           </div>
         </div>
-      </div>
+      </.white_box_section>
 
-      <div class="flex flex-col space-y-2">
-        <.h3>Notification Preferences</.h3>
-        <div class="white-box">
-          <div class="flex flex-col space-y-4">
-            <div class="grid grid-cols-3 gap-4 items-start">
-              <div class="flex flex-col">
-                <p class="font-medium">Notification Email Address</p>
-                <p class="text-gray-500 text-xs">
-                  High Impact File Alerts and notification emails for this organization will go to this address.
-                </p>
-              </div>
-              <div class="col-span-2 flex flex-col">
-                <%= if @changeset do %>
-                  <.form :let={f} for={@changeset} phx-submit="save">
-                    <div class="flex flex-col">
-                      <div class="flex items-center space-x-1">
-                        <%= text_input(f, :notification_email,
-                          placeholder: "you@company_email.com",
-                          class: "w-full text-sm font-medium rounded-md text-gray-700 mt-px pt-2"
-                        ) %>
-                        <.button
-                          type="submit"
-                          phx-disable-with="Saving..."
-                          class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
-                        >
-                          Save
-                        </.button>
-                      </div>
-                      <.error form={f} attr={:notification_email} />
-                    </div>
-                  </.form>
-                <% else %>
-                  <div class="flex items-center space-x-4">
-                    <p>
-                      <%= @current_user.notification_email %>
-                      <.l phx-click="edit">Edit</.l>
-                    </p>
-                    <p :if={is_nil(@current_user.notification_email)} class="text-red-800 text-sm">
-                      * Required for HIF alerts and weekly changelog emails.
-                    </p>
-                  </div>
-                <% end %>
-              </div>
-              <div class="font-medium pt-3">
-                <div class="flex flex-col">
-                  <p class="font-medium">Connect Slack</p>
-                  <p class="text-gray-500 text-xs">
-                    Install our Slackbot to receive notifications in your Slack account.  We don't read any Slack messages.
-                  </p>
-                </div>
-              </div>
-              <div class="col-span-2 flex flex-col">
-                <%= if @slack_unconnected do %>
-                  <.slack_button user_id={@current_user.id} />
-                <% else %>
-                  <.slack_connected />
-                <% end %>
-              </div>
+      <.white_box_section id="situations">
+        <:heading>Pull Request Situations</:heading>
+        <:description>
+          Find out immediately when a pull request situation develops.  The sooner you look into it, the better.
+        </:description>
+        <div class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+          <div class="grid grid-cols-3">
+            <div class="bg-gray-100 py-3 px-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              Situations
+            </div>
+            <div class="bg-gray-100 py-3 px-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              Settings
+            </div>
+            <div class="bg-gray-100 p-3 text-xs font-medium uppercase tracking-wide text-gray-500 text-center">
+              Channels
+            </div>
+          </div>
+
+          <.preference_row
+            :for={preference <- @preferences}
+            preference={preference}
+            slack_unconnected={@slack_unconnected}
+          />
+        </div>
+      </.white_box_section>
+
+      <.white_box_section id="custom-alerts">
+        <:heading>Custom Dashboard Alerts</:heading>
+        <:description>
+          Receive notifications whenever a PR is opened that matches one of your custom dashboards.
+        </:description>
+        <div class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+          <div class="grid grid-cols-3">
+            <div class="col-span-2 py-3 px-2 bg-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+              Dashboard Name
+            </div>
+            <div class="bg-gray-100 p-3 text-xs font-medium uppercase tracking-wide text-gray-500 text-center">
+              Channels
             </div>
 
-            <div class="pt-4">
-              <div class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
-                <div class="grid grid-cols-3">
-                  <div class="bg-gray-100 py-3 px-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                    PR Events
-                  </div>
-                  <div class="bg-gray-100 py-3 px-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                    Settings
-                  </div>
-                  <div class="bg-gray-100 p-3 text-xs font-medium uppercase tracking-wide text-gray-500 text-center">
-                    Channels
-                  </div>
-                </div>
-
-                <.preference_row
-                  :for={preference <- @preferences}
-                  preference={preference}
+            <%= for tab <- @pr_tabs do %>
+              <div class="col-span-2 separated-grid-row">
+                <%= tab.title %>
+              </div>
+              <div class="separated-grid-row">
+                <.live_component
+                  module={MrgrWeb.Components.Live.NotificationChannelToggle}
+                  id={"tab-#{tab.id}"}
+                  obj={tab}
                   slack_unconnected={@slack_unconnected}
                 />
               </div>
-            </div>
-
-            <div class="pt-4">
-              <div class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
-                <div class="grid grid-cols-3">
-                  <div class="col-span-2 py-3 px-2 bg-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                    Custom Alerts
-                  </div>
-                  <div class="bg-gray-100 p-3 text-xs font-medium uppercase tracking-wide text-gray-500 text-center">
-                    Channels
-                  </div>
-
-                  <%= for tab <- @pr_tabs do %>
-                    <div class="col-span-2 separated-grid-row">
-                      <%= tab.title %>
-                    </div>
-                    <div class="separated-grid-row">
-                      <.live_component
-                        module={MrgrWeb.Components.Live.NotificationChannelToggle}
-                        id={"tab-#{tab.id}"}
-                        obj={tab}
-                        slack_unconnected={@slack_unconnected}
-                      />
-                    </div>
-                  <% end %>
-                </div>
-              </div>
-            </div>
-
-            <div class="pt-4">
-              <div class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
-                <div class="grid grid-cols-3">
-                  <div class="bg-gray-100 py-3 px-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                    High Impact File Alerts
-                  </div>
-                  <div class="bg-gray-100 p-3 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
-                    Badge
-                  </div>
-                  <div class="bg-gray-100 p-3 text-xs font-medium uppercase tracking-wide text-gray-500 text-center">
-                    Channels
-                  </div>
-
-                  <%= for {repo, hifs} <- @hifs_by_repo do %>
-                    <div
-                      class="col-span-3 border-t border-gray-300 bg-stone-50 font-semibold"
-                      id={"repo-#{repo.id}"}
-                    >
-                      <div class="rounded-lg p-2 flex items-center">
-                        <span class="pr-2"><%= repo.name %></span>
-                        <.language_icon language={repo.language} />
-                      </div>
-                    </div>
-
-                    <%= for hif <- hifs do %>
-                      <div class="separated-grid-row">
-                        <.hif_pattern pattern={hif.pattern} />
-                      </div>
-
-                      <div class="separated-grid-row">
-                        <.badge item={hif} />
-                      </div>
-
-                      <div class="separated-grid-row flex items-center space-x-4">
-                        <.live_component
-                          module={MrgrWeb.Components.Live.NotificationChannelToggle}
-                          id={"hif-#{hif.id}"}
-                          obj={hif}
-                          slack_unconnected={@slack_unconnected}
-                        /> Edit
-                      </div>
-                    <% end %>
-                  <% end %>
-                </div>
-              </div>
-            </div>
+            <% end %>
           </div>
         </div>
-      </div>
+      </.white_box_section>
+
+      <.white_box_section id="hifs">
+        <:heading>High Impact File Alerts</:heading>
+        <:description>
+          Designate Files and Folders as High Impact to get alerted when a PR that affects them is opened.  Each repo has its own list of High Impact Files.
+        </:description>
+        <div class="flex flex-col space-y-8">
+          <.live_component
+            :for={repo <- @repos}
+            module={MrgrWeb.Components.Live.HighImpactFileComponent}
+            id={"repo_#{repo.id}"}
+            repo={repo}
+            timezone={@timezone}
+            slack_unconnected={@slack_unconnected}
+          />
+        </div>
+        <.live_component
+          :if={@hif_form}
+          module={MrgrWeb.Components.Live.HighImpactFileFormComponent}
+          id="hif-form"
+          form={@hif_form}
+          on_cancel={JS.push("cancel-edit")}
+          slack_unconnected={@slack_unconnected}
+          timezone={@timezone}
+        />
+      </.white_box_section>
     </div>
   </div>
 </div>

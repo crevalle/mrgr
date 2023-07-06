@@ -12,7 +12,7 @@ defmodule MrgrWeb.Components.Dashboard do
     <.nav_tab_list>
       <.tab_section>
         <:title>
-          Custom Alerts
+          Custom Dashboards
           <.l phx-click="add-tab">
             <.icon name="plus-circle" class="ml-2 h-5 w-5" />
           </.l>
@@ -180,7 +180,12 @@ defmodule MrgrWeb.Components.Dashboard do
   def tab_heading(assigns) do
     ~H"""
     <div class="white-box green-border">
-      <.h2><%= @tab.title %></.h2>
+      <div class="flex items-center justify-between">
+        <.h2><%= @tab.title %></.h2>
+        <.l phx-click="delete-tab" class="text-sm" data-confirm="Sure about that?">
+          delete
+        </.l>
+      </div>
       <.tab_subtitle tab={@tab} />
 
       <MrgrWeb.Components.PullRequestFilter.filters

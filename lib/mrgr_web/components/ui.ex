@@ -42,8 +42,6 @@ defmodule MrgrWeb.Components.UI do
 
       <.nav_item route={~p"/notifications"} icon="bell-alert" label="Realtime Alerts" . />
 
-      <.nav_item route={~p"/high-impact-files"} icon="megaphone" label="High Impact Files" . />
-
       <.nav_item route={~p"/changelog"} icon="book-open" label="Changelog" . />
 
       <p
@@ -96,7 +94,7 @@ defmodule MrgrWeb.Components.UI do
 
   def h1(assigns) do
     ~H"""
-    <h1 class="text-xl font-semibold text-gray-900">
+    <h1 class="text-3xl font-semibold text-gray-900">
       <%= render_slot(@inner_block) %>
     </h1>
     """
@@ -810,6 +808,31 @@ defmodule MrgrWeb.Components.UI do
       <%= img_tag("/images/Slack-mark-RGB.png", class: "w-4 h-4 toggle") %>
       <p>Slack Connected</p>
       <.icon name="check-circle" type="solid" class="text-green-600 h-5 w-5" />
+    </div>
+    """
+  end
+
+  attr :id, :string, default: nil
+  slot :inner_block, required: true
+  slot :heading
+  slot :description
+
+  def white_box_section(assigns) do
+    ~H"""
+    <div id={@id} class="white-box flex flex-col space-y-6">
+      <div :if={@heading != []}>
+        <.h3><%= render_slot(@heading) %></.h3>
+        <p :if={@description != []} class="aside"><%= render_slot(@description) %></p>
+      </div>
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
+  def fixed_sidebar(assigns) do
+    ~H"""
+    <div class="h-screen sticky top-0 flex flex-col space-y-4 w-64">
+      <%= render_slot(@inner_block) %>
     </div>
     """
   end
