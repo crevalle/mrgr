@@ -3,7 +3,6 @@ defmodule MrgrWeb.Components.Form do
 
   import Phoenix.HTML.Form
   import MrgrWeb.Components.Core
-  import MrgrWeb.Components.UI
   alias Phoenix.LiveView.JS
 
   def error(assigns) do

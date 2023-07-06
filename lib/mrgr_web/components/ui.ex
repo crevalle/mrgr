@@ -6,26 +6,6 @@ defmodule MrgrWeb.Components.UI do
 
   alias Phoenix.LiveView.JS
 
-  attr :href, :string, default: "#"
-  attr :class, :string, default: nil
-  attr :rest, :global
-  slot :inner_block, required: true
-
-  def l(assigns) do
-    ~H"""
-    <a
-      href={@href}
-      class={[
-        "link",
-        @class
-      ]}
-      {@rest}
-    >
-      <%= render_slot(@inner_block) %>
-    </a>
-    """
-  end
-
   attr :close, :string, default: "close-detail"
 
   slot :title, required: true
@@ -60,19 +40,11 @@ defmodule MrgrWeb.Components.UI do
         ) %>
       </.nav_item>
 
+      <.nav_item route={~p"/notifications"} icon="bell-alert" label="Realtime Alerts" . />
+
       <.nav_item route={~p"/high-impact-files"} icon="megaphone" label="High Impact Files" . />
 
       <.nav_item route={~p"/changelog"} icon="book-open" label="Changelog" . />
-
-      <a
-        href={~p"/repositories"}
-        class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center space-x-2 px-2 py-2 text-sm font-medium rounded-md"
-      >
-        <%= img_tag("/images/repository-32.png", class: "opacity-40 h-6 w-6") %>
-        <span>Repositories</span>
-      </a>
-
-      <.nav_item route={Routes.label_list_path(MrgrWeb.Endpoint, :index)} icon="tag" label="Labels" . />
 
       <p
         :if={Mrgr.Installation.trial_period?(@current_user.current_installation)}
@@ -308,6 +280,14 @@ defmodule MrgrWeb.Components.UI do
 
     ~H"""
     <button phx-click={hide_detail(@phx_click)} colors="outline-none">
+      <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
+    </button>
+    """
+  end
+
+  def close_modal(assigns) do
+    ~H"""
+    <button phx-click={@action} colors="outline-none">
       <.icon name="x-circle" class="text-teal-700 hover:text-teal-500 mr-1 h-5 w-5" />
     </button>
     """
@@ -626,72 +606,25 @@ defmodule MrgrWeb.Components.UI do
         aria-labelledby="user-menu-button"
         tabindex="-1"
       >
-        <%= if @admin do %>
-          <div class="py-1">
-            <div class="flex justify-center">
-              <p class="text-gray-600">🍣 ADMIN 🍣</p>
-            </div>
-            <.nav_item
-              route={Routes.oban_dashboard_path(MrgrWeb.Endpoint, :home)}
-              icon="circle-stack"
-              label="Oban Background Jobs"
-              .
-            />
+        <.admin_nav_menu :if={@admin} />
 
-            <.nav_item
-              route={Routes.admin_github_api_request_path(MrgrWeb.Endpoint, :index)}
-              icon="cloud-arrow-up"
-              label="Github API Requests"
-              .
-            />
+        <div>
+          <a
+            href={~p"/repositories"}
+            class="text-gray-600 hover:text-gray-900 hover:bg-gray-50 group flex items-center space-x-2 px-2 py-2 text-sm font-medium rounded-md"
+          >
+            <%= img_tag("/images/repository-32.png", class: "opacity-40 h-6 w-6") %>
+            <span class="pl-1">Repositories</span>
+          </a>
 
-            <.nav_item
-              route={Routes.admin_incoming_webhook_path(MrgrWeb.Endpoint, :index)}
-              icon="phone-arrow-down-left"
-              label="Incoming Webhooks"
-              .
-            />
-
-            <.nav_item
-              route={Routes.admin_stripe_webhook_path(MrgrWeb.Endpoint, :index)}
-              icon="currency-dollar"
-              label="Stripe Webhooks"
-              .
-            />
-
-            <.nav_item
-              route={Routes.admin_installation_path(MrgrWeb.Endpoint, :index)}
-              icon="globe-alt"
-              label="Installations"
-              .
-            />
-
-            <.nav_item
-              route={Routes.admin_subscription_path(MrgrWeb.Endpoint, :index)}
-              icon="newspaper"
-              label="Subscriptions"
-              .
-            />
-
-            <.nav_item
-              route={Routes.admin_user_path(MrgrWeb.Endpoint, :index)}
-              icon="users"
-              label="Users"
-              .
-            />
-
-            <.nav_item
-              route={Routes.admin_waiting_list_signup_path(MrgrWeb.Endpoint, :index)}
-              icon="sparkles"
-              label="Waiting List Signups"
-              .
-            />
-          </div>
-        <% end %>
-
-        <.nav_item route={~p"/notifications"} icon="bell-alert" label="Notifications" . />
-        <.nav_item route={~p"/account"} icon="banknotes" label="Account" . />
-
+          <.nav_item
+            route={Routes.label_list_path(MrgrWeb.Endpoint, :index)}
+            icon="tag"
+            label="Labels"
+            .
+          />
+          <.nav_item route={~p"/account"} icon="banknotes" label="Account" . />
+        </div>
         <div class="py-1">
           <.nav_item
             route={Routes.auth_path(MrgrWeb.Endpoint, :delete)}
@@ -702,6 +635,71 @@ defmodule MrgrWeb.Components.UI do
           />
         </div>
       </div>
+    </div>
+    """
+  end
+
+  def admin_nav_menu(assigns) do
+    ~H"""
+    <div class="py-1">
+      <div class="flex justify-center">
+        <p class="text-gray-600">🍣 ADMIN 🍣</p>
+      </div>
+      <.nav_item
+        route={Routes.oban_dashboard_path(MrgrWeb.Endpoint, :home)}
+        icon="circle-stack"
+        label="Oban Background Jobs"
+        .
+      />
+
+      <.nav_item
+        route={Routes.admin_github_api_request_path(MrgrWeb.Endpoint, :index)}
+        icon="cloud-arrow-up"
+        label="Github API Requests"
+        .
+      />
+
+      <.nav_item
+        route={Routes.admin_incoming_webhook_path(MrgrWeb.Endpoint, :index)}
+        icon="phone-arrow-down-left"
+        label="Incoming Webhooks"
+        .
+      />
+
+      <.nav_item
+        route={Routes.admin_stripe_webhook_path(MrgrWeb.Endpoint, :index)}
+        icon="currency-dollar"
+        label="Stripe Webhooks"
+        .
+      />
+
+      <.nav_item
+        route={Routes.admin_installation_path(MrgrWeb.Endpoint, :index)}
+        icon="globe-alt"
+        label="Installations"
+        .
+      />
+
+      <.nav_item
+        route={Routes.admin_subscription_path(MrgrWeb.Endpoint, :index)}
+        icon="newspaper"
+        label="Subscriptions"
+        .
+      />
+
+      <.nav_item
+        route={Routes.admin_user_path(MrgrWeb.Endpoint, :index)}
+        icon="users"
+        label="Users"
+        .
+      />
+
+      <.nav_item
+        route={Routes.admin_waiting_list_signup_path(MrgrWeb.Endpoint, :index)}
+        icon="sparkles"
+        label="Waiting List Signups"
+        .
+      />
     </div>
     """
   end

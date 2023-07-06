@@ -1,6 +1,7 @@
 defmodule MrgrWeb.Components.PullRequestFilter do
   use MrgrWeb, :component
 
+  import MrgrWeb.Components.Core
   import MrgrWeb.Components.UI
 
   def filters(assigns) do

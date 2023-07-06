@@ -1,6 +1,7 @@
 defmodule MrgrWeb.Components.Changelog do
   use MrgrWeb, :component
 
+  import MrgrWeb.Components.Core
   import MrgrWeb.Components.UI
   import MrgrWeb.Components.PullRequest, only: [line_diff: 1, changed_file: 1]
 

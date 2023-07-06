@@ -22,16 +22,16 @@
         slack_unconnected={@slack_unconnected}
       />
     </div>
-    <div id="detail-pane">
-      <.live_component
-        :if={@form}
-        module={MrgrWeb.Components.Live.HighImpactFileFormComponent}
-        id="fca_form"
-        form={@form}
-        current_user={@current_user}
-        slack_unconnected={@slack_unconnected}
-        timezone={@timezone}
-      />
-    </div>
+
+    <.live_component
+      :if={@form}
+      module={MrgrWeb.Components.Live.HighImpactFileFormComponent}
+      id="fca_form"
+      form={@form}
+      on_cancel={JS.push("cancel-edit")}
+      current_user={@current_user}
+      slack_unconnected={@slack_unconnected}
+      timezone={@timezone}
+    />
   </div>
 </div>
