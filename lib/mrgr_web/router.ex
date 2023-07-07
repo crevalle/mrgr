@@ -84,7 +84,6 @@ defmodule MrgrWeb.Router do
     live "/changelog", ChangelogLive, :index
 
     live "/repositories", RepositoryListLive, :index
-    live "/labels", LabelListLive, :index
   end
 
   scope "/", MrgrWeb.Live do

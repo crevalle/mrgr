@@ -48,39 +48,6 @@ defmodule Mrgr.Label do
     |> Mrgr.Repo.all()
   end
 
-  @spec create_from_form(map) :: {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
-  def create_from_form(params) do
-    %Schema{}
-    |> Schema.create_changeset(params)
-    |> Mrgr.Repo.insert()
-    |> case do
-      {:ok, label} ->
-        Mrgr.PubSub.broadcast_to_installation(label, @label_created)
-        push_to_all_repos_async(label)
-        {:ok, label}
-
-      error ->
-        error
-    end
-  end
-
-  @spec update_from_form(Schema.t(), map) :: {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
-  def update_from_form(schema, params) do
-    schema
-    |> Schema.changeset(params)
-    |> Mrgr.Repo.update()
-    |> case do
-      {:ok, label} ->
-        Mrgr.PubSub.broadcast_to_installation(label, @label_updated)
-        label = update_repo_associations(label, params["label_repositories"])
-        push_to_all_repos_async(label)
-        {:ok, label}
-
-      error ->
-        error
-    end
-  end
-
   @spec update_from_webhook(Mrgr.Schema.LabelRepository.t(), map, map) ::
           {:ok, Schema.t()} | {:error, Ecto.Changeset.t()}
   def update_from_webhook(lr, params, changes) do
@@ -126,75 +93,6 @@ defmodule Mrgr.Label do
     create_for_repo(params, repo)
   end
 
-  @spec update_repo_associations(Schema.t(), list() | nil) :: Schema.t()
-  def update_repo_associations(label, repository_ids) when is_list(repository_ids) do
-    new_ids = Enum.map(repository_ids, fn id -> id["repository_id"] end) |> MapSet.new()
-
-    # here we go
-    # iterate through current association.  if its repo is present in the new id list, stash that id
-    # if it is absent from the new list, it is to be deleted
-    #
-    # take the difference of our new id list with our stashed ids.  the remainder is the new associations
-    # that need creating
-    retained_associations =
-      label.label_repositories
-      |> Enum.reduce([], fn lr, acc ->
-        case MapSet.member?(new_ids, lr.repository_id) do
-          true ->
-            [lr | acc]
-
-          false ->
-            delete_repo_association_async(lr)
-            acc
-        end
-      end)
-
-    retained_repository_ids = MapSet.new(Enum.map(retained_associations, & &1.repository_id))
-
-    ids_to_add = MapSet.difference(new_ids, retained_repository_ids)
-
-    new_associations =
-      Enum.map(ids_to_add, fn repository_id ->
-        lr = associate_with_repo(label.id, repository_id)
-
-        %{label_repository_id: lr.id}
-        |> Mrgr.Worker.PushLabel.new()
-        |> Oban.insert()
-
-        lr
-      end)
-
-    %{label | label_repositories: retained_associations ++ new_associations}
-  end
-
-  def update_repo_associations(label, _ids), do: label
-
-  def delete_repo_association_async(lr) do
-    %{label_repository_id: lr.id}
-    |> Mrgr.Worker.DeleteLabel.new()
-    |> Oban.insert()
-  end
-
-  def delete_remote_association(%{node_id: nil} = lr) do
-    lr
-  end
-
-  def delete_remote_association(lr) do
-    Mrgr.Github.API.delete_label_from_repo(lr.node_id, lr.repository)
-    lr
-  end
-
-  def delete_async(label) do
-    %{id: label.id}
-    |> Mrgr.Worker.DeleteLabel.new()
-    |> Oban.insert()
-  end
-
-  def delete_remotely(label) do
-    Enum.map(label.label_repositories, &delete_remote_association/1)
-    delete_locally(label)
-  end
-
   # will choke on excessive label_repositories
   def delete_locally(label) do
     Enum.map(label.label_repositories, &Mrgr.Repo.delete/1)
@@ -214,40 +112,6 @@ defmodule Mrgr.Label do
         delete_locally(label)
     end
   end
-
-  def push_to_all_repos_async(label) do
-    %{id: label.id}
-    |> Mrgr.Worker.PushLabel.new()
-    |> Oban.insert()
-  end
-
-  def push_to_all_repos(label) do
-    lrs =
-      Enum.map(label.label_repositories, fn lr ->
-        push_label_to_repo(label, lr)
-      end)
-
-    %{label | label_repositories: lrs}
-  end
-
-  def push_label_to_repo(label, %{node_id: nil} = lr) do
-    response = Mrgr.Github.API.create_label(label, lr.repository)
-
-    store_node_id(lr, response)
-  end
-
-  def push_label_to_repo(label, lr) do
-    Mrgr.Github.API.update_label(label, lr.repository, lr.node_id)
-    lr
-  end
-
-  defp store_node_id(label_repository, %{"createLabel" => %{"label" => %{"id" => node_id}}}) do
-    label_repository
-    |> Ecto.Changeset.change(%{node_id: node_id})
-    |> Mrgr.Repo.update!()
-  end
-
-  defp store_node_id(label_repository, _bum_response), do: label_repository
 
   def find_or_create_for_repo(params, repo) do
     case find_by_name_for_repo(params["name"], repo) do

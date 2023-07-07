@@ -614,13 +614,6 @@ defmodule MrgrWeb.Components.UI do
             <%= img_tag("/images/repository-32.png", class: "opacity-40 h-6 w-6") %>
             <span class="pl-1">Repositories</span>
           </a>
-
-          <.nav_item
-            route={Routes.label_list_path(MrgrWeb.Endpoint, :index)}
-            icon="tag"
-            label="Labels"
-            .
-          />
           <.nav_item route={~p"/account"} icon="banknotes" label="Account" . />
         </div>
         <div class="py-1">

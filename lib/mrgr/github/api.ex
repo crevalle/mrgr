@@ -17,14 +17,11 @@ defmodule Mrgr.Github.API do
   defdelegate fetch_repository(installation, repository), to: @mod
   defdelegate fetch_all_repository_data(installation, opts \\ %{}), to: @mod
   defdelegate fetch_light_pr_data(pull_request), to: @mod
-  defdelegate delete_label_from_repo(node_id, repository), to: @mod
   defdelegate get_new_installation_token(installation), to: @mod
   defdelegate head_commit(pull_request, installation), to: @mod
   defdelegate check_suites_for_pr(pull_request), to: @mod
-  defdelegate create_label(label, repo), to: @mod
   defdelegate remove_review_request(pull_request, login), to: @mod
   defdelegate add_review_request(pull_request, login), to: @mod
-  defdelegate update_label(label, repo, node_id), to: @mod
   defdelegate update_repo_settings(repo, params), to: @mod
 
   def paged_requests(page \\ []) do
