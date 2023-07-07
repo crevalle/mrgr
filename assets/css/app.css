@@ -178,6 +178,10 @@ h5 {
   border-style: solid;
 }
 
+.hif-column-header {
+  @apply py-2 text-xs font-light uppercase text-gray-400;
+}
+
 .th {
   @apply bg-gray-100 text-gray-500 text-xs font-medium uppercase tracking-wide;
 }
