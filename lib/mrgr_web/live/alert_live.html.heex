@@ -27,40 +27,9 @@
       <.white_box_section id="preferences">
         <div class="flex flex-col space-y-4">
           <div class="grid grid-cols-3 gap-4 items-start">
-            <div class="flex flex-col">
-              <p class="font-medium">Notification Email Address</p>
-            </div>
+            <p class="font-medium">Notification Email Address</p>
             <div class="col-span-2 flex flex-col">
-              <%= if @changeset do %>
-                <.form :let={f} for={@changeset} phx-submit="save">
-                  <div class="flex flex-col">
-                    <div class="flex items-center space-x-1">
-                      <%= text_input(f, :notification_email,
-                        placeholder: "you@company_email.com",
-                        class: "w-full text-sm font-medium rounded-md text-gray-700 mt-px pt-2"
-                      ) %>
-                      <.button
-                        type="submit"
-                        phx-disable-with="Saving..."
-                        class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
-                      >
-                        Save
-                      </.button>
-                    </div>
-                    <.error form={f} attr={:notification_email} />
-                  </div>
-                </.form>
-              <% else %>
-                <div class="flex items-center space-x-4">
-                  <p>
-                    <%= @current_user.notification_email %>
-                    <.l phx-click="edit" class="text-xs">change</.l>
-                  </p>
-                  <p :if={is_nil(@current_user.notification_email)} class="text-red-800 text-sm">
-                    * Required for HIF alerts and weekly changelog emails.
-                  </p>
-                </div>
-              <% end %>
+              <.notification_email_form current_user={@current_user} changeset={@changeset} />
             </div>
 
             <div class="pt-3">
@@ -102,15 +71,15 @@
         <:description>
           Find out immediately when a pull request situation develops.  The sooner you look into it, the better.
         </:description>
-        <div class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+        <.rounded_box>
           <div class="grid grid-cols-3">
-            <div class="bg-gray-100 py-3 px-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div class="th py-3 px-2 text-left rounded-tl-lg">
               Situations
             </div>
-            <div class="bg-gray-100 py-3 px-2 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div class="th py-3 px-2 text-left">
               Settings
             </div>
-            <div class="bg-gray-100 p-3 text-xs font-medium uppercase tracking-wide text-gray-500 text-center">
+            <div class="th p-3 text-center rounded-tr-lg">
               Channels
             </div>
           </div>
@@ -120,7 +89,7 @@
             preference={preference}
             slack_unconnected={@slack_unconnected}
           />
-        </div>
+        </.rounded_box>
       </.white_box_section>
 
       <.white_box_section id="custom-alerts">
@@ -128,12 +97,12 @@
         <:description>
           Receive notifications whenever a PR is opened that matches one of your custom dashboards.
         </:description>
-        <div class="min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg">
+        <.rounded_box>
           <div class="grid grid-cols-3">
-            <div class="col-span-2 py-3 px-2 bg-gray-100 text-left text-xs font-medium uppercase tracking-wide text-gray-500">
+            <div class="th col-span-2 py-3 px-2 text-left rounded-tl-lg">
               Dashboard Name
             </div>
-            <div class="bg-gray-100 p-3 text-xs font-medium uppercase tracking-wide text-gray-500 text-center">
+            <div class="th p-3 text-center rounded-tr-lg">
               Channels
             </div>
 
@@ -151,7 +120,7 @@
               </div>
             <% end %>
           </div>
-        </div>
+        </.rounded_box>
       </.white_box_section>
 
       <.white_box_section id="hifs">
@@ -160,14 +129,7 @@
           Designate Files and Folders as High Impact to get alerted when a PR that affects them is opened.  Each repo has its own list of High Impact Files.
         </:description>
         <div class="flex flex-col space-y-8">
-          <.live_component
-            :for={repo <- @repos}
-            module={MrgrWeb.Components.Live.HighImpactFileComponent}
-            id={"repo_#{repo.id}"}
-            repo={repo}
-            timezone={@timezone}
-            slack_unconnected={@slack_unconnected}
-          />
+          <.hif_for_repo :for={repo <- @repos} repo={repo} slack_unconnected={@slack_unconnected} />
         </div>
         <.live_component
           :if={@hif_form}
