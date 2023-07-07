@@ -179,4 +179,41 @@ defmodule MrgrWeb.Components.Form do
     />
     """
   end
+
+  def notification_email_form(%{changeset: nil} = assigns) do
+    ~H"""
+    <div class="flex items-center space-x-4">
+      <p>
+        <%= @current_user.notification_email %>
+        <.l phx-click="edit" class="text-xs">change</.l>
+      </p>
+      <p :if={is_nil(@current_user.notification_email)} class="text-red-800 text-sm">
+        * Required for HIF alerts and weekly changelog emails.
+      </p>
+    </div>
+    """
+  end
+
+  def notification_email_form(assigns) do
+    ~H"""
+    <.form :let={f} for={@changeset} phx-submit="save">
+      <div class="flex flex-col">
+        <div class="flex items-center space-x-1">
+          <%= text_input(f, :notification_email,
+            placeholder: "you@company_email.com",
+            class: "w-full text-sm font-medium rounded-md text-gray-700 mt-px pt-2"
+          ) %>
+          <.button
+            type="submit"
+            phx-disable-with="Saving..."
+            class="bg-teal-700 hover:bg-teal-600 focus:ring-teal-500"
+          >
+            Save
+          </.button>
+        </div>
+        <.error form={f} attr={:notification_email} />
+      </div>
+    </.form>
+    """
+  end
 end

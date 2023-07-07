@@ -829,6 +829,24 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  attr :class, :string, default: nil
+  attr :rest, :global
+  slot :inner_block, required: true
+
+  def rounded_box(assigns) do
+    ~H"""
+    <div
+      class={[
+        "min-w-full shadow ring-1 ring-black ring-opacity-5 rounded-lg",
+        @class
+      ]}
+      {@rest}
+    >
+      <%= render_slot(@inner_block) %>
+    </div>
+    """
+  end
+
   def fixed_sidebar(assigns) do
     ~H"""
     <div class="h-screen sticky top-0 flex flex-col space-y-4 w-64">

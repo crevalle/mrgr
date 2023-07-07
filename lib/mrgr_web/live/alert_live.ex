@@ -1,6 +1,8 @@
 defmodule MrgrWeb.AlertLive do
   use MrgrWeb, :live_view
   use Mrgr.PubSub.Event
+
+  import MrgrWeb.Components.HIF
   import MrgrWeb.Components.NotificationPreference
 
   on_mount MrgrWeb.Plug.Auth
