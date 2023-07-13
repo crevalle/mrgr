@@ -992,7 +992,10 @@ defmodule MrgrWeb.PullRequestDashboardLive do
     end
 
     def contains_pr?(%{pull_requests: prs}, pr) when is_list(prs) do
-      Mrgr.List.member?(prs, pr)
+      case Mrgr.List.find(prs, pr) do
+        nil -> false
+        _item -> true
+      end
     end
   end
 end

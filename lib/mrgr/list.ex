@@ -3,7 +3,7 @@ defmodule Mrgr.List do
   List Utils
   """
 
-  @spec find(list(), map() | String.t() | integer()) :: any() | nil
+  @spec find([map()], map() | String.t() | integer()) :: any() | nil
   def find(list, %{id: id}) do
     find(list, id)
   end
@@ -14,13 +14,6 @@ defmodule Mrgr.List do
 
   def find(list, id) do
     Enum.find(list, fn i -> i.id == id end)
-  end
-
-  def member?(list, item) do
-    case find(list, item) do
-      nil -> false
-      _item -> true
-    end
   end
 
   # n^n alert!

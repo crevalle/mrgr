@@ -89,7 +89,7 @@ defmodule Mrgr.PRTab do
   def matches_repositories?(tab, pr) do
     tab_repository_ids = Enum.map(tab.repositories, & &1.id)
 
-    Mrgr.List.member?(tab_repository_ids, pr.repository_id)
+    Enum.member?(tab_repository_ids, pr.repository_id)
   end
 
   def matches_draft_status?(%{draft_status: status}, %{draft: true})
