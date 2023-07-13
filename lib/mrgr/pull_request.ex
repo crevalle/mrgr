@@ -316,7 +316,7 @@ defmodule Mrgr.PullRequest do
 
     %Mrgr.Schema.PullRequestReviewer{}
     |> Mrgr.Schema.PullRequestReviewer.changeset(params)
-    |> Mrgr.Repo.insert!()
+    |> Mrgr.Repo.insert()
 
     pull_request
     |> put_activity!()
