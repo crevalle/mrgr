@@ -88,7 +88,14 @@ defmodule Mrgr.User do
           |> welcome_back(params)
           |> set_tokens(params)
 
-        {:ok, user, :returning}
+        # someone signs up but doesn't complete onboarding
+        case user.current_installation do
+          nil ->
+            {:ok, user, :new}
+
+          _installation ->
+            {:ok, user, :returning}
+        end
 
       nil ->
         case create(params) do
