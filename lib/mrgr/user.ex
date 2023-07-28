@@ -339,30 +339,30 @@ defmodule Mrgr.User do
 
     def with_current_installation(query) do
       from(q in query,
-        join: c in assoc(q, :current_installation),
-        join: a in assoc(c, :account),
+        left_join: c in assoc(q, :current_installation),
+        left_join: a in assoc(c, :account),
         preload: [current_installation: {c, account: a}]
       )
     end
 
     def with_installations(query) do
       from(q in query,
-        join: i in assoc(q, :installations),
-        join: a in assoc(i, :account),
+        left_join: i in assoc(q, :installations),
+        left_join: a in assoc(i, :account),
         preload: [installations: {i, account: a}]
       )
     end
 
     def with_notification_preferences(query) do
       from(q in query,
-        join: p in assoc(q, :notification_preferences),
+        left_join: p in assoc(q, :notification_preferences),
         preload: [notification_preferences: p]
       )
     end
 
     def with_notification_addresses(query) do
       from(q in query,
-        join: p in assoc(q, :notification_addresses),
+        left_join: p in assoc(q, :notification_addresses),
         preload: [notification_addresses: p]
       )
     end
