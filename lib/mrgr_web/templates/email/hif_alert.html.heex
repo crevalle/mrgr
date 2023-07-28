@@ -6,7 +6,7 @@
     repository was triggered in
     <.l href={~p"/pull-requests/hifs/#{@pull_request.id}/files-changed"}>
       <%= @pull_request.title %>
-    </.l>, opened by @<%= @pull_request.author.login %>.  Here are the affected files:
+    </.l>, opened by <%= author_handle(@pull_request) %>.  Here are the affected files:
   </p>
 
   <ul>

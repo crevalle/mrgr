@@ -2,8 +2,14 @@ defmodule Mrgr.Notification.HIF do
   @name "hif"
 
   def send_alert(pull_request) do
-    with :ok <- has_rules(pull_request),
-         :ok <- Mrgr.Notification.ensure_freshness(pull_request.notifications, @name) do
+    case Mrgr.Notification.ensure_freshness(pull_request.notifications, @name) do
+      :ok -> send_alert!(pull_request)
+      already_sent -> already_sent
+    end
+  end
+
+  def send_alert!(pull_request) do
+    with :ok <- has_rules(pull_request) do
       # each user gets one alert per pull request with all applicable rules
       pull_request =
         pull_request
