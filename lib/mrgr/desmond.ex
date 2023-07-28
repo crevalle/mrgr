@@ -3,7 +3,7 @@ defmodule Mrgr.Desmond do
   # as the recipient so don't have a user to pull an id off of
 
   def someone_signed_up(params, user) do
-    count = Mrgr.Repo.aggregate(Mrgr.Schema.Userl, :count)
+    count = Mrgr.Repo.aggregate(Mrgr.Schema.User, :count)
 
     params
     |> Mrgr.Email.hey_desmond_another_user(count, user)
