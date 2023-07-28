@@ -40,7 +40,7 @@ defmodule Mrgr.User do
   def find_full(id) do
     Schema
     |> Query.by_id(id)
-    |> Query.with_current_installation()
+    |> Query.with_or_without_current_installation()
     |> Query.with_installations()
     |> Query.with_member()
     |> Query.with_notification_preferences()
@@ -346,8 +346,8 @@ defmodule Mrgr.User do
 
     def with_current_installation(query) do
       from(q in query,
-        left_join: c in assoc(q, :current_installation),
-        left_join: a in assoc(c, :account),
+        join: c in assoc(q, :current_installation),
+        join: a in assoc(c, :account),
         preload: [current_installation: {c, account: a}]
       )
     end
