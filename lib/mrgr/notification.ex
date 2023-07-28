@@ -127,6 +127,13 @@ defmodule Mrgr.Notification do
     |> Mrgr.Repo.insert()
   end
 
+  def delete_all_for_installation(installation) do
+    Preference
+    |> Query.for_installation(installation.id)
+    |> Mrgr.Repo.all()
+    |> Enum.map(&Mrgr.Repo.delete/1)
+  end
+
   @doc """
   returns the users at a PR's installation who've set at least one channel for this event
   """

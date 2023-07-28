@@ -137,8 +137,7 @@ defmodule Mrgr.Installation do
     with {:ok, i} <- onboard_members(i),
          {:ok, i} <- onboard_teams(i),
          {:ok, i} <- onboard_repos(i),
-         {:ok, i} <- onboard_prs(i),
-         {:ok, i} <- final_onboarding(i) do
+         {:ok, i} <- onboard_prs(i) do
       i
       |> State.onboarding_complete!()
       |> broadcast(@installation_onboarding_progressed)
@@ -151,6 +150,7 @@ defmodule Mrgr.Installation do
       |> State.onboarding_members!()
       |> broadcast(@installation_onboarding_progressed)
       |> create_members()
+      |> create_user_defaults()
       |> ok()
     rescue
       e ->
@@ -199,7 +199,8 @@ defmodule Mrgr.Installation do
   end
 
   def onboarding_failed!(installation, exception, trace, step) do
-    str = Exception.format_stacktrace(trace)
+    str = "#{Exception.message(exception)}\n\n#{Exception.format_stacktrace(trace)}"
+
     Appsignal.set_error(exception, trace)
 
     installation
@@ -210,11 +211,11 @@ defmodule Mrgr.Installation do
     {:error, step}
   end
 
-  def final_onboarding(installation) do
+  def create_user_defaults(installation) do
     Mrgr.PRTab.create_defaults_for_new_installation(installation)
     Mrgr.Notification.create_default_preferences_for_installation(installation)
 
-    {:ok, installation}
+    installation
   end
 
   defdelegate subscribed?(i), to: SubscriptionState
@@ -384,6 +385,8 @@ defmodule Mrgr.Installation do
     Mrgr.Repository.delete_all_for_installation(installation)
     Mrgr.Team.delete_all_for_installation(installation)
     Mrgr.Member.delete_all_for_installation(installation)
+    Mrgr.Notification.delete_all_for_installation(installation)
+    Mrgr.PRTab.delete_all_for_installation(installation)
 
     installation
   end

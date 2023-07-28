@@ -69,6 +69,10 @@ defmodule Mrgr.Schema.UserNotificationPreference do
     %{big_pr_threshold: 1000}
   end
 
+  def default_settings(_) do
+    %{}
+  end
+
   def create_for_user_and_installation(user, installation) do
     params = %{
       user_id: user.id,

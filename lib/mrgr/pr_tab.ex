@@ -125,6 +125,13 @@ defmodule Mrgr.PRTab do
     Mrgr.Repo.delete(tab)
   end
 
+  def delete_all_for_installation(installation) do
+    Schema
+    |> Query.for_installation(installation.id)
+    |> Mrgr.Repo.all()
+    |> Enum.map(&delete/1)
+  end
+
   def draft_statuses do
     [
       %{

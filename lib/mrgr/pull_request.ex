@@ -52,16 +52,25 @@ defmodule Mrgr.PullRequest do
   end
 
   def create_for_onboarding(data) do
+    repo = data["repository"]
+
+    data =
+      data
+      |> Map.delete("repository")
+      |> Map.put("repository_id", repo.id)
+
     pull_request =
       %Schema{}
       |> Schema.create_changeset(data)
       |> Mrgr.Repo.insert!()
       |> set_solicited_reviewers(data["requested_reviewers"])
 
+    pull_request = %{pull_request | repository: repo}
+
     # add the labels
     data["labels"]["nodes"]
     |> Mrgr.Github.Label.from_graphql()
-    |> Enum.map(fn label -> do_add_label(pull_request, label, data["installation_id"]) end)
+    |> Enum.map(fn label -> do_add_label(pull_request, label, repo.installation_id) end)
 
     # create the comments
     Enum.map(data["comments"]["nodes"], fn node ->

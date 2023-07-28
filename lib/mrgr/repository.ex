@@ -24,6 +24,7 @@ defmodule Mrgr.Repository do
     %Schema{}
     |> Schema.changeset(params)
     |> Mrgr.Repo.insert!()
+    |> update_labels_from_graphql(node)
     |> generate_default_high_impact_file_rules()
     |> make_visible_to_all_users()
   end
@@ -255,7 +256,6 @@ defmodule Mrgr.Repository do
         pull_requests =
           repo
           |> create_pull_requests_from_data(pr_data)
-          |> Enum.map(fn pr -> %{pr | repository: repo} end)
           |> Enum.map(&Mrgr.PullRequest.create_rest_of_world/1)
           |> Enum.map(&Mrgr.HighImpactFileRule.reset(repo, &1))
 
@@ -292,11 +292,7 @@ defmodule Mrgr.Repository do
   # will blow up if you try to do a duplicate
   def create_pull_requests_from_data(repo, data) do
     data
-    |> Enum.map(fn params ->
-      params
-      |> Map.put("repository_id", repo.id)
-      |> Map.put("installation_id", repo.installation_id)
-    end)
+    |> Enum.map(fn params -> Map.put(params, "repository", repo) end)
     |> Enum.map(&Mrgr.PullRequest.create_for_onboarding/1)
   end
 
