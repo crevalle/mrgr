@@ -9,16 +9,16 @@ defmodule MrgrWeb.Live.AnalyticsBox do
       <p class="italic text-sm text-gray-500 mr-4">12 week analytics</p>
       <div class="flex flex-col items-end mr-8">
         <div class="flex">
-          <%= @closed_pr_sparkline %>
-          <span class="ml-2"><%= closed_this_week(@bucket) %></span>
+          <%= generate_closed_pr_sparkline(@sparkline_data) %>
+          <span class="ml-2"><%= closed_this_week(@sparkline_data) %></span>
         </div>
         <p class="text-sm text-gray-500">Closed PRs</p>
       </div>
 
       <div class="flex flex-col items-end">
         <div class="flex">
-          <%= @time_open_sparkline %>
-          <span class="ml-2"><.to_days hours={@time_open_this_week} /></span>
+          <%= generate_time_open_sparkline(@sparkline_data) %>
+          <span class="ml-2"><.to_days hours={time_open_this_week(@sparkline_data)} /></span>
         </div>
         <p class="text-sm text-gray-500">Average Time To Close</p>
       </div>
@@ -42,47 +42,58 @@ defmodule MrgrWeb.Live.AnalyticsBox do
         DasBucket.new()
         |> DasBucket.fill(closed_prs)
 
+      sparkline_data = DasBucket.to_sparkline_data(bucket)
+
       socket
       |> assign(:installation_id, installation_id)
       |> assign(:bucket, bucket)
       |> assign(:first_week, twelve_weeks_ago)
-      |> assign(:closed_pr_sparkline, generate_closed_pr_sparkline(bucket))
-      |> assign(:time_open_sparkline, generate_time_open_sparkline(bucket))
-      |> assign(:time_open_this_week, time_open_this_week(bucket))
+      |> assign(:sparkline_data, sparkline_data)
       |> ok()
     else
       ok(socket)
     end
   end
 
-  def closed_this_week(bucket) do
-    bucket
-    |> DasBucket.to_sparkline_data()
+  def closed_this_week(sparkline_data) do
+    sparkline_data
     |> hd()
     |> Map.get(:count)
   end
 
-  def generate_closed_pr_sparkline(bucket) do
-    bucket
-    |> DasBucket.to_sparkline_data()
+  def generate_closed_pr_sparkline(sparkline_data) do
+    sparkline_data
     |> Enum.map(fn %{count: count} -> count end)
     |> draw_sparkline()
-
-    # [
-    # %{count: 2, time_open: -768},
-    # %{count: 2, time_open: -1104},
   end
 
-  def generate_time_open_sparkline(bucket) do
-    bucket
-    |> DasBucket.to_sparkline_data()
+  def dummy_data do
+    [
+      %{count: 3, time_open: 768},
+      %{count: 4, time_open: 1000},
+      %{count: 3, time_open: 950},
+      %{count: 5, time_open: 950},
+      %{count: 5, time_open: 980},
+      %{count: 6, time_open: 650},
+      %{count: 4, time_open: 700},
+      %{count: 3, time_open: 725},
+      %{count: 5, time_open: 675},
+      %{count: 7, time_open: 680},
+      %{count: 6, time_open: 650},
+      %{count: 7, time_open: 640},
+      %{count: 8, time_open: 630}
+    ]
+  end
+
+  def generate_time_open_sparkline(sparkline_data) do
+    sparkline_data
     |> Enum.map(&average_time_open/1)
     |> draw_sparkline()
   end
 
   defp draw_sparkline(data) do
-    line = "#2d30f6"
-    fill = "#cfddfc"
+    line = "#b28a2b"
+    fill = "#ebc97a"
 
     data
     |> Contex.Sparkline.new()
@@ -90,9 +101,8 @@ defmodule MrgrWeb.Live.AnalyticsBox do
     |> Contex.Sparkline.draw()
   end
 
-  def time_open_this_week(bucket) do
-    bucket
-    |> DasBucket.to_sparkline_data()
+  def time_open_this_week(sparkline_data) do
+    sparkline_data
     |> hd()
     |> average_time_open()
   end
