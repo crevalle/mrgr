@@ -182,7 +182,12 @@ defmodule MrgrWeb.Components.Dashboard do
     <div class="white-box green-border">
       <div class="flex items-center justify-between">
         <.h2><%= @tab.title %></.h2>
-        <.l phx-click="delete-tab" class="text-sm" data-confirm="Sure about that?">
+        <.l
+          :if={custom_tab?(@tab)}
+          phx-click="delete-tab"
+          class="text-sm"
+          data-confirm="Sure about that?"
+        >
           delete
         </.l>
       </div>
