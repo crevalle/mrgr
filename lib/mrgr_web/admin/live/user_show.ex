@@ -115,7 +115,7 @@ defmodule MrgrWeb.Admin.Live.UserShow do
       <div class="mt-8 bg-white overflow-hidden shadow rounded-lg">
         <%= live_render(@socket, MrgrWeb.Admin.Live.NotificationListTable,
           id: "notification-list-table",
-          session: %{"id" => @current_user.id}
+          session: %{"id" => @user.id}
         ) %>
       </div>
 
