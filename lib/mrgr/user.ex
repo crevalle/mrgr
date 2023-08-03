@@ -346,8 +346,8 @@ defmodule Mrgr.User do
 
     def with_current_installation(query) do
       from(q in query,
-        join: c in assoc(q, :current_installation),
-        join: a in assoc(c, :account),
+        left_join: c in assoc(q, :current_installation),
+        left_join: a in assoc(c, :account),
         preload: [current_installation: {c, account: a}]
       )
     end
