@@ -521,6 +521,14 @@ defmodule MrgrWeb.Components.UI do
     """
   end
 
+  def avatar(%{member: nil} = assigns) do
+    ~H"""
+    <div class="text-gray-400 italic">
+      unknown
+    </div>
+    """
+  end
+
   def avatar(assigns) do
     ~H"""
     <div class="flex items-center">
