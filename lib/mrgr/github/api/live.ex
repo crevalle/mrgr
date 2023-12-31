@@ -5,6 +5,17 @@ defmodule Mrgr.Github.API.Live do
 
   import Mrgr.Github.API.Utils
 
+  def delete_installation(installation) do
+    client = Tentacat.Client.new(%{jwt: Mrgr.Github.JwtToken.signed_jwt()})
+
+    request!(
+      &Tentacat.App.Installations.uninstall/2,
+      installation,
+      client,
+      [installation.external_id]
+    )
+  end
+
   def get_new_installation_token(installation) do
     client = Tentacat.Client.new(%{jwt: Mrgr.Github.JwtToken.signed_jwt()})
 
