@@ -1,19 +1,23 @@
 # Mrgr
 
-To start your Phoenix server:
+Mrgr is a utility to track open pull requests.  And much more!  Not only does the sophisticated dashboard show custom views based on label, team member, or repo, but also you can ditch the dashboard entirely and get sweet notifications whenever Something Interesting happens!  That way you don't have to check _yet another_ dashboard.
 
-  * Install dependencies with `mix deps.get`
-  * Create and migrate your database with `mix ecto.setup`
-  * Start Phoenix endpoint with `mix phx.server` or inside IEx with `iex -S mix phx.server`
+Current notification triggers include: 
 
-Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
+* PR has gone dormant
+* Controversy is brewing on a PR (lots of comments)
+* A specific engineer has opened a PR
+* ...and more!
 
-Ready to run in production? Please [check our deployment guides](https://hexdocs.pm/phoenix/deployment.html).
+## What do I do with this?
 
-## Learn more
+Whatever you want.  This project was originally a commercial application but is now fully open source.  Perhaps you may find it useful to see how Elixir, Phoenix, and LiveView are used in a production application.
 
-  * Official website: https://www.phoenixframework.org/
-  * Guides: https://hexdocs.pm/phoenix/overview.html
-  * Docs: https://hexdocs.pm/phoenix
-  * Forum: https://elixirforum.com/c/phoenix-forum
-  * Source: https://github.com/phoenixframework/phoenix
+## License
+
+Do Whatever You Want With This Code But I Am Not Responsible For It Or Its Quality In Any Way :).  Use at your own risk!
+
+## Questions
+
+I love questions.  Email me at desmond at crevalle.io
+
